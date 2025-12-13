@@ -1,0 +1,21 @@
+Match,Date,Team,Opponent,Team_Over_1.5,Team_Under_1.5,Team_Over_3.5,Team_Under_3.5,Opponent_Concedes_Over_1.5,Opponent_Concedes_Under_1.5,Opponent_Concedes_Over_3.5,Opponent_Concedes_Under_3.5
+Liverpool v Everton,Sat 20 Sep 21:30,Liverpool,Everton,1.44,2.62,5.00,1.16,1.44,2.62,5.00,1.16
+Liverpool v Everton,Sat 20 Sep 21:30,Everton,Liverpool,4.00,1.22,41.00,1.004,4.00,1.22,41.00,1.004
+Brighton v Tottenham,Sun 21 Sep 00:00,Brighton,Spurs,1.80,1.90,8.00,1.083,1.80,1.90,8.00,1.083
+Brighton v Tottenham,Sun 21 Sep 00:00,Spurs,Brighton,2.37,1.53,15.00,1.03,2.37,1.53,15.00,1.03
+Burnley v Nottm Forest,Sun 21 Sep 00:00,Burnley,Nott'm Forest,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015
+Burnley v Nottm Forest,Sun 21 Sep 00:00,Nott'm Forest,Burnley,2.10,1.66,13.00,1.04,2.10,1.66,13.00,1.04
+West Ham v Crystal Palace,Sun 21 Sep 00:00,West Ham,Crystal Palace,2.62,1.44,19.00,1.02,2.62,1.44,19.00,1.02
+West Ham v Crystal Palace,Sun 21 Sep 00:00,Crystal Palace,West Ham,2.37,1.53,15.00,1.03,2.37,1.53,15.00,1.03
+Wolverhampton v Leeds,Sun 21 Sep 00:00,Wolves,Leeds,2.37,1.53,17.00,1.025,2.37,1.53,17.00,1.025
+Wolverhampton v Leeds,Sun 21 Sep 00:00,Leeds,Wolves,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015
+Man Utd v Chelsea,Sun 21 Sep 02:30,Man Utd,Chelsea,2.10,1.66,13.00,1.04,2.10,1.66,13.00,1.04
+Man Utd v Chelsea,Sun 21 Sep 02:30,Chelsea,Man Utd,2.00,1.72,11.00,1.05,2.00,1.72,11.00,1.05
+Fulham v Brentford,Sun 21 Sep 05:00,Fulham,Brentford,1.83,1.83,10.00,1.062,1.83,1.83,10.00,1.062
+Fulham v Brentford,Sun 21 Sep 05:00,Brentford,Fulham,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015
+Bournemouth v Newcastle,Sun 21 Sep 23:00,Bournemouth,Newcastle,2.20,1.61,13.00,1.04,2.20,1.61,13.00,1.04
+Bournemouth v Newcastle,Sun 21 Sep 23:00,Newcastle,Bournemouth,2.25,1.57,15.00,1.03,2.25,1.57,15.00,1.03
+Sunderland v Aston Villa,Sun 21 Sep 23:00,Sunderland,Aston Villa,3.25,1.33,26.00,1.01,3.25,1.33,26.00,1.01
+Sunderland v Aston Villa,Sun 21 Sep 23:00,Aston Villa,Sunderland,1.90,1.80,10.00,1.062,1.90,1.80,10.00,1.062
+Arsenal v Man City,Mon 22 Sep 01:30,Arsenal,Man City,1.83,1.83,10.00,1.062,1.83,1.83,10.00,1.062
+Arsenal v Man City,Mon 22 Sep 01:30,Man City,Arsenal,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015

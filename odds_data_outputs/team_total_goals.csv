@@ -1,0 +1,21 @@
+Match,Date,Team,Opponent,Team_Over_1.5,Team_Under_1.5,Team_Over_3.5,Team_Under_3.5,Opponent_Concedes_Over_1.5,Opponent_Concedes_Under_1.5,Opponent_Concedes_Over_3.5,Opponent_Concedes_Under_3.5
+Liverpool v Bournemouth,Fri 15 Aug 21:00,Liverpool,Bournemouth,1.28,3.50,3.25,1.33,1.28,3.50,3.25,1.33
+Liverpool v Bournemouth,Fri 15 Aug 21:00,Bournemouth,Liverpool,3.50,1.28,29.00,1.006,3.50,1.28,29.00,1.006
+Aston Villa v Newcastle,Sat 16 Aug 13:30,Aston Villa,Newcastle,1.83,1.83,10.00,1.062,1.83,1.83,10.00,1.062
+Aston Villa v Newcastle,Sat 16 Aug 13:30,Newcastle,Aston Villa,2.20,1.61,15.00,1.03,2.20,1.61,15.00,1.03
+Brighton v Fulham,Sat 16 Aug 16:00,Brighton,Fulham,1.80,1.90,9.00,1.071,1.80,1.90,9.00,1.071
+Brighton v Fulham,Sat 16 Aug 16:00,Fulham,Brighton,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015
+Sunderland v West Ham,Sat 16 Aug 16:00,Sunderland,West Ham,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015
+Sunderland v West Ham,Sat 16 Aug 16:00,West Ham,Sunderland,2.10,1.66,13.00,1.04,2.10,1.66,13.00,1.04
+Tottenham v Burnley,Sat 16 Aug 16:00,Tottenham,Burnley,1.50,2.50,5.00,1.16,1.50,2.50,5.00,1.16
+Tottenham v Burnley,Sat 16 Aug 16:00,Burnley,Tottenham,5.00,1.16,51.00,1.002,5.00,1.16,51.00,1.002
+Wolverhampton v Man City,Sat 16 Aug 18:30,Wolverhampton,Man City,4.00,1.22,41.00,1.004,4.00,1.22,41.00,1.004
+Wolverhampton v Man City,Sat 16 Aug 18:30,Man City,Wolverhampton,1.50,2.50,5.00,1.16,1.50,2.50,5.00,1.16
+Chelsea v Crystal Palace,Sun 17 Aug 15:00,Chelsea,Crystal Palace,1.57,2.25,6.00,1.12,1.57,2.25,6.00,1.12
+Chelsea v Crystal Palace,Sun 17 Aug 15:00,Crystal Palace,Chelsea,3.25,1.33,26.00,1.01,3.25,1.33,26.00,1.01
+Nottm Forest v Brentford,Sun 17 Aug 15:00,Nottm Forest,Brentford,2.20,1.61,13.00,1.04,2.20,1.61,13.00,1.04
+Nottm Forest v Brentford,Sun 17 Aug 15:00,Brentford,Nottm Forest,3.00,1.36,23.00,1.012,3.00,1.36,23.00,1.012
+Man Utd v Arsenal,Sun 17 Aug 17:30,Man Utd,Arsenal,3.00,1.36,23.00,1.012,3.00,1.36,23.00,1.012
+Man Utd v Arsenal,Sun 17 Aug 17:30,Arsenal,Man Utd,1.83,1.83,10.00,1.062,1.83,1.83,10.00,1.062
+Leeds v Everton,Mon 18 Aug 21:00,Leeds,Everton,2.25,1.57,15.00,1.03,2.25,1.57,15.00,1.03
+Leeds v Everton,Mon 18 Aug 21:00,Everton,Leeds,2.75,1.40,21.00,1.015,2.75,1.40,21.00,1.015
