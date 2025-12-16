@@ -107,6 +107,8 @@ def normalise_player_name(name):
         "Emile Smith-Rowe": "Emile Smith Rowe",
         "Joseph Gomez": "Joe Gomez",
         "Joseph Willock": "Joe Willock",
+        "Lindelof": "Victor Lindelof",
+        "Murillo dos Santos": "Murillo",
     }
 
     # Return mapped name if exists, otherwise return original
