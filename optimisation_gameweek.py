@@ -1,6 +1,5 @@
 import pandas as pd
 import pulp
-import numpy as np
 
 
 def load_current_team(excel_file, sheet_name='GW Teams'):
@@ -176,15 +175,168 @@ def display_current_team_analysis(current_team_df, analysis, num_fixtures, weigh
             print(f"  - {player}")
 
 
+def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, bench_weights, gk_bench_weights):
+    """
+    Calculate the optimal baseline score for the current squad by running a mini-optimizer.
+    This simulates dynamic lineup selection across fixtures without any transfers.
+
+    Parameters:
+    - bench_weights: array of bench weights for each fixture (e.g., [0.3, 0.3, 0.25, 0.2, 0.15, 0.1])
+    - gk_bench_weights: array of GK bench weights for each fixture
+
+    Returns: (total_weighted_points, total_starting_xi_points, f1_squad_total, f1_starting_xi_total)
+    """
+    # Create a mini optimization problem for just lineup selection
+    prob = pulp.LpProblem("Baseline_Lineup_Optimization", pulp.LpMaximize)
+
+    # Decision variables - only for current squad players
+    # Weekly starting XI
+    starting_vars = {}
+    for fixture in fixtures:
+        starting_vars[fixture] = {}
+        for i in current_team_indices:
+            starting_vars[fixture][i] = pulp.LpVariable(f"base_start_{fixture}_{i}", cat='Binary')
+
+    # Weekly captains
+    captain_vars = {}
+    for fixture in fixtures:
+        captain_vars[fixture] = {}
+        for i in current_team_indices:
+            captain_vars[fixture][i] = pulp.LpVariable(f"base_cap_{fixture}_{i}", cat='Binary')
+
+    # Bench players
+    bench_vars = {}
+    for fixture in fixtures:
+        bench_vars[fixture] = {}
+        for i in current_team_indices:
+            bench_vars[fixture][i] = pulp.LpVariable(f"base_bench_{fixture}_{i}", cat='Binary')
+
+    # Objective: maximize weighted points
+    objective_terms = []
+    for i, fixture in enumerate(fixtures):
+        fixture_col = f'{fixture} XP'
+        weight = weights[i]
+        bench_weight = bench_weights[i]
+        gk_bench_weight = gk_bench_weights[i]
+
+        for player_idx in current_team_indices:
+            # Starting points
+            objective_terms.append(df.loc[player_idx, fixture_col] * weight * starting_vars[fixture][player_idx])
+            # Captain bonus
+            objective_terms.append(df.loc[player_idx, fixture_col] * weight * captain_vars[fixture][player_idx])
+            # Bench value
+            is_gk = df.loc[player_idx, 'Position'] == 'GK'
+            current_bench_weight = gk_bench_weight if is_gk else bench_weight
+            objective_terms.append(
+                df.loc[player_idx, fixture_col] * weight * current_bench_weight * bench_vars[fixture][player_idx])
+
+    prob += pulp.lpSum(objective_terms)
+
+    # Constraints
+    starting_position_requirements = {'GK': 1, 'DEF': 3, 'MID': 2, 'FWD': 1}
+
+    for fixture in fixtures:
+        # Exactly 11 starters
+        prob += pulp.lpSum([starting_vars[fixture][i] for i in current_team_indices]) == 11
+
+        # Position requirements (minimum)
+        for position, min_count in starting_position_requirements.items():
+            position_players = [i for i in current_team_indices if df.loc[i, 'Position'] == position]
+            prob += pulp.lpSum([starting_vars[fixture][i] for i in position_players]) >= min_count
+
+        # Maximum position constraints
+        gk_players = [i for i in current_team_indices if df.loc[i, 'Position'] == 'GK']
+        def_players = [i for i in current_team_indices if df.loc[i, 'Position'] == 'DEF']
+        mid_players = [i for i in current_team_indices if df.loc[i, 'Position'] == 'MID']
+        fwd_players = [i for i in current_team_indices if df.loc[i, 'Position'] == 'FWD']
+
+        prob += pulp.lpSum([starting_vars[fixture][i] for i in gk_players]) <= 1
+        prob += pulp.lpSum([starting_vars[fixture][i] for i in def_players]) <= 5
+        prob += pulp.lpSum([starting_vars[fixture][i] for i in mid_players]) <= 5
+        prob += pulp.lpSum([starting_vars[fixture][i] for i in fwd_players]) <= 3
+
+        # Exactly 1 captain
+        prob += pulp.lpSum([captain_vars[fixture][i] for i in current_team_indices]) == 1
+
+        # Captain must be a starter
+        for i in current_team_indices:
+            prob += captain_vars[fixture][i] <= starting_vars[fixture][i]
+
+        # Exactly 4 bench players
+        prob += pulp.lpSum([bench_vars[fixture][i] for i in current_team_indices]) == 4
+
+        # Bench logic
+        for i in current_team_indices:
+            prob += bench_vars[fixture][i] <= (1 - starting_vars[fixture][i])
+            prob += bench_vars[fixture][i] >= 1 - starting_vars[fixture][i] - 0
+
+    # Solve
+    prob.solve(pulp.PULP_CBC_CMD(msg=0))
+
+    if prob.status != pulp.LpStatusOptimal:
+        print("Warning: Baseline optimizer failed, using simple calculation")
+        return None
+
+    # Extract results
+    total_starting_points = 0
+    total_captain_points = 0
+    total_bench_points = 0
+
+    f1_starting = 0
+    f1_captain = 0
+    f1_bench = 0
+
+    for i, fixture in enumerate(fixtures):
+        fixture_col = f'{fixture} XP'
+        weight = weights[i]
+        bench_weight = bench_weights[i]
+        gk_bench_weight = gk_bench_weights[i]
+
+        for player_idx in current_team_indices:
+            if starting_vars[fixture][player_idx].varValue == 1:
+                total_starting_points += df.loc[player_idx, fixture_col] * weight
+                if i == 0:  # F1
+                    f1_starting += df.loc[player_idx, fixture_col]
+
+            if captain_vars[fixture][player_idx].varValue == 1:
+                total_captain_points += df.loc[player_idx, fixture_col] * weight
+                if i == 0:  # F1
+                    f1_captain += df.loc[player_idx, fixture_col]
+
+            if bench_vars[fixture][player_idx].varValue == 1:
+                is_gk = df.loc[player_idx, 'Position'] == 'GK'
+                current_bench_weight = gk_bench_weight if is_gk else bench_weight
+                total_bench_points += df.loc[player_idx, fixture_col] * weight * current_bench_weight
+                if i == 0:  # F1
+                    f1_bench += df.loc[player_idx, fixture_col] * current_bench_weight
+
+    total_squad_weighted = total_starting_points + total_captain_points + total_bench_points
+    total_starting_xi_weighted = total_starting_points + total_captain_points
+
+    f1_squad_total = f1_starting + f1_captain + f1_bench
+    f1_starting_xi_total = f1_starting + f1_captain
+
+    return total_squad_weighted, total_starting_xi_weighted, f1_squad_total, f1_starting_xi_total
+
+
 def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, num_fixtures=5,
                              fixture_weights=None, players_sheet='Players',
-                             additional_budget=0.0, bench_weight=0.1, gk_bench_weight=0.1,
+                             additional_budget=0.0, bench_weights=None, gk_bench_weights=None,
                              force_transfer_out=None, num_solutions=3, max_defensive_players_per_team=3):
     # Set default weights
     if fixture_weights is None:
         fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4]
 
+    # Set default bench weights (arrays)
+    if bench_weights is None:
+        bench_weights = [0.25, 0.25, 0.20, 0.15, 0.10, 0.05]
+
+    if gk_bench_weights is None:
+        gk_bench_weights = [0.10, 0.10, 0.08, 0.06, 0.04, 0.02]
+
     weights = fixture_weights[:num_fixtures]
+    bench_weights = bench_weights[:num_fixtures]
+    gk_bench_weights = gk_bench_weights[:num_fixtures]
 
     # Handle forced transfers
     if force_transfer_out is None:
@@ -194,8 +346,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     print(f"Finding top {num_solutions} transfer combinations")
     print(f"Using fixture weights: {[f'{w:.2f}' for w in weights]}")
     print(f"Additional budget available: £{additional_budget:.1f}m")
-    print(f"Outfielder bench weight: {bench_weight:.2f}")
-    print(f"GK bench weight: {gk_bench_weight:.2f}")
+    print(f"Outfielder bench weights: {[f'{w:.2f}' for w in bench_weights]}")
+    print(f"GK bench weights: {[f'{w:.2f}' for w in gk_bench_weights]}")
     print(f"Max defensive players (GK+DEF) per team: {max_defensive_players_per_team}")
     if force_transfer_out:
         print(f"Forced transfers out: {force_transfer_out}")
@@ -318,6 +470,9 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         for i, fixture in enumerate(fixtures):
             fixture_col = f'{fixture} XP'
             weight = weights[i]
+            bench_weight = bench_weights[i]
+            gk_bench_weight = gk_bench_weights[i]
+
             for player_idx in df.index:
                 # Weighted points from starting players
                 objective_terms.append(df.loc[player_idx, fixture_col] * weight * starting_vars[fixture][player_idx])
@@ -533,6 +688,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         for i, fixture in enumerate(fixtures):
             fixture_col = f'{fixture} XP'
             weight = weights[i]
+            bench_weight = bench_weights[i]
+            gk_bench_weight = gk_bench_weights[i]
 
             # Starting points
             for player_idx in starting_lineups[fixture]:
@@ -554,49 +711,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # Calculate starting XI points without bench
         starting_xi_points = total_starting_points + total_captain_points
 
-        num_transfers = len(transfers_out)
-
-        # Calculate current team starting XI points properly
-        # We need to calculate what the current team (players staying) would score
-        # This should match how we calculated current_points in analyze_current_team
-
-        # Get the current team players (those not being transferred out)
-        current_staying_indices = [idx for idx in current_team_indices if idx not in transfers_out]
-
-        # Sort current team by weighted XP and simulate optimal lineup
-        current_team_xp = []
-        for idx in current_team_indices:
-            current_team_xp.append({
-                'idx': idx,
-                'weighted_xp': df.loc[idx, 'Weighted_Total_XP'],
-                'position': df.loc[idx, 'Position']
-            })
-
-        # Sort by points (descending)
-        current_team_xp.sort(key=lambda x: x['weighted_xp'], reverse=True)
-
-        # Estimate starting XI (top 11 by points as rough approximation)
-        # This is not perfect as it doesn't consider position constraints, but it's reasonable
-        current_starting_weighted_base = sum([p['weighted_xp'] for p in current_team_xp[:11]])
-        # Add captain bonus for current team (best player would be captained)
-        current_captain_bonus_weighted = current_team_xp[0]['weighted_xp'] if len(current_team_xp) > 0 else 0
-        current_starting_weighted = current_starting_weighted_base + current_captain_bonus_weighted
-
-        # Calculate bench weighted points using position-aware weights
-        current_bench_weighted = 0
-        for p in current_team_xp[11:]:
-            is_gk = p['position'] == 'GK'
-            current_bench_weight = gk_bench_weight if is_gk else bench_weight
-            current_bench_weighted += p['weighted_xp'] * current_bench_weight
-
-        # Total with bench weight - THIS is what we should compare final_points against
-        current_total_with_bench_weight = current_starting_weighted + current_bench_weighted
-
-        # Fix the improvements to use the correct baseline
-        points_improvement = final_points - current_total_with_bench_weight
-        starting_xi_improvement = starting_xi_points - current_starting_weighted
-
-        # Calculate F1 (next gameweek) improvement separately
+        # Calculate F1 (next gameweek) points from optimizer's solution
         f1_fixture = fixtures[0]
         f1_starting_points = 0
         f1_captain_points = 0
@@ -611,41 +726,118 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
 
         for player_idx in bench_players[f1_fixture]:
             is_gk = df.loc[player_idx, 'Position'] == 'GK'
-            current_bench_weight = gk_bench_weight if is_gk else bench_weight
+            current_bench_weight = gk_bench_weights[0] if is_gk else bench_weights[0]
             f1_bench_points += df.loc[player_idx, 'F1 XP'] * current_bench_weight
 
         f1_starting_xi_points = f1_starting_points + f1_captain_points
         f1_total_points = f1_starting_xi_points + f1_bench_points
 
-        # Calculate current team F1 points
-        current_f1_values = []
-        for idx in current_team_indices:  # ✓ Use original current team
-            current_f1_values.append({
-                'idx': idx,
-                'f1_xp': df.loc[idx, 'F1 XP'],
-                'position': df.loc[idx, 'Position']
-            })
+        num_transfers = len(transfers_out)
 
-        # Sort by F1 XP
-        current_f1_values.sort(key=lambda x: x['f1_xp'], reverse=True)
+        # Calculate optimised baseline using mini-optimizer
+        # This properly simulates dynamic lineup selection across fixtures
+        baseline_result = calculate_optimised_baseline(
+            df, current_team_indices, fixtures, weights, bench_weights, gk_bench_weights
+        )
 
-        # Top 11 start, rest on bench
-        current_f1_starting_xi_base = sum([p['f1_xp'] for p in current_f1_values[:11]])
-        # Add captain bonus (best player gets captained)
-        current_f1_captain_bonus = current_f1_values[0]['f1_xp'] if len(current_f1_values) > 0 else 0
-        current_f1_starting_xi = current_f1_starting_xi_base + current_f1_captain_bonus
+        if baseline_result is None:
+            # Fallback to fixture-by-fixture optimization if mini-optimizer fails
+            print("Warning: Using fallback baseline calculation")
+            from collections import defaultdict
 
-        # Calculate bench with position-aware weights
-        current_f1_bench = 0
-        for p in current_f1_values[11:]:
-            is_gk = p['position'] == 'GK'
-            current_bench_weight = gk_bench_weight if is_gk else bench_weight
-            current_f1_bench += p['f1_xp'] * current_bench_weight
+            # Calculate baseline by optimizing each fixture separately
+            total_weighted_baseline = 0
+            total_starting_baseline = 0
+            f1_squad_baseline = 0
+            f1_starting_baseline = 0
 
-        current_f1_squad_total = current_f1_starting_xi + current_f1_bench
+            for fix_idx, fixture in enumerate(fixtures):
+                fixture_col = f'{fixture} XP'
+                weight = weights[fix_idx]
+                bench_weight = bench_weights[fix_idx]
+                gk_bench_weight = gk_bench_weights[fix_idx]
+
+                # Get all current team players with their fixture XP
+                current_team_xp = []
+                for idx in current_team_indices:
+                    current_team_xp.append({
+                        'idx': idx,
+                        'xp': df.loc[idx, fixture_col],
+                        'position': df.loc[idx, 'Position']
+                    })
+
+                # Group by position
+                position_groups = defaultdict(list)
+                for p in current_team_xp:
+                    position_groups[p['position']].append(p)
+
+                # Sort each position by XP for this fixture
+                for pos in position_groups:
+                    position_groups[pos].sort(key=lambda x: x['xp'], reverse=True)
+
+                # Select starting XI: 1 GK, 3-5 DEF, 2-5 MID, 1-3 FWD
+                starting_xi = []
+                starting_xi.extend(position_groups['GK'][:1])  # 1 GK
+                starting_xi.extend(position_groups['DEF'][:3])  # 3 DEF min
+                starting_xi.extend(position_groups['MID'][:2])  # 2 MID min
+                starting_xi.extend(position_groups['FWD'][:1])  # 1 FWD min
+
+                # Fill remaining 4 spots
+                remaining = []
+                remaining.extend(position_groups['DEF'][3:5])  # up to 2 more DEF
+                remaining.extend(position_groups['MID'][2:5])  # up to 3 more MID
+                remaining.extend(position_groups['FWD'][1:3])  # up to 2 more FWD
+                remaining.sort(key=lambda x: x['xp'], reverse=True)
+                starting_xi.extend(remaining[:4])
+
+                # Calculate points for this fixture
+                starting_points = sum([p['xp'] for p in starting_xi])
+
+                # Captain = best player
+                all_sorted = sorted(current_team_xp, key=lambda x: x['xp'], reverse=True)
+                captain_bonus = all_sorted[0]['xp'] if len(all_sorted) > 0 else 0
+
+                # Bench
+                bench_players = [p for p in current_team_xp if p not in starting_xi]
+                bench_points = 0
+                for p in bench_players:
+                    is_gk = p['position'] == 'GK'
+                    current_bench_weight = gk_bench_weight if is_gk else bench_weight
+                    bench_points += p['xp'] * current_bench_weight
+
+                # Add to totals (weighted)
+                fixture_starting_total = starting_points + captain_bonus
+                fixture_squad_total = fixture_starting_total + bench_points
+
+                total_starting_baseline += fixture_starting_total * weight
+                total_weighted_baseline += fixture_squad_total * weight
+
+                # Save F1 specifically
+                if fix_idx == 0:
+                    f1_starting_baseline = fixture_starting_total
+                    f1_squad_baseline = fixture_squad_total
+
+            current_total_with_bench_weight = total_weighted_baseline
+            current_starting_weighted = total_starting_baseline
+            current_f1_squad_total = f1_squad_baseline
+            current_f1_starting_xi = f1_starting_baseline
+        else:
+            # Use optimised baseline results
+            current_total_with_bench_weight, current_starting_weighted, current_f1_squad_total, current_f1_starting_xi = baseline_result
+
+        # Calculate improvements
+        points_improvement = final_points - current_total_with_bench_weight
+        starting_xi_improvement = starting_xi_points - current_starting_weighted
 
         f1_squad_improvement = f1_total_points - current_f1_squad_total
         f1_starting_improvement = f1_starting_xi_points - current_f1_starting_xi
+
+        # Fix: For 0 transfers, improvements should be 0
+        if num_transfers == 0:
+            points_improvement = 0.0
+            starting_xi_improvement = 0.0
+            f1_squad_improvement = 0.0
+            f1_starting_improvement = 0.0
 
         # Store F1 breakdown for display
         f1_breakdown = {
@@ -670,7 +862,6 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             'total_captain_points': total_captain_points,
             'total_bench_points': total_bench_points,
             'current_points': current_total_with_bench_weight,
-            # Use the corrected value that includes captain bonus and bench weight
             'current_starting_weighted': current_starting_weighted,
             'current_total_with_bench_weight': current_total_with_bench_weight,
             'points_improvement': points_improvement,
@@ -687,8 +878,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             'weights': weights,
             'additional_budget': additional_budget,
             'fixtures': fixtures,
-            'bench_weight': bench_weight,
-            'gk_bench_weight': gk_bench_weight,
+            'bench_weights': bench_weights,
+            'gk_bench_weights': gk_bench_weights,
             'forced_transfers_out': force_transfer_out,
             'forced_out_indices': forced_out_indices,
             'max_defensive_players_per_team': max_defensive_players_per_team
@@ -731,7 +922,7 @@ def display_f1_starting_xi_comparison(solution, df, current_team_indices, transf
     starting_lineup_indices = solution['starting_lineups'][f1_fixture]
     captain_idx = solution['captains'].get(f1_fixture)
 
-    print(f"\n  NEW Starting XI (optimized):")
+    print(f"\n  NEW Starting XI (optimised):")
     new_xi_total = 0
     new_xi_players = []
     for idx in starting_lineup_indices:
@@ -761,7 +952,7 @@ def display_f1_starting_xi_comparison(solution, df, current_team_indices, transf
     print("  " + "-" * 76)
 
 
-def analyse_transfer_frequency(all_solutions):
+def analyse_transfer_frequency(all_solutions, fixtures, weights):
     transfers_in_count = {}
     transfers_out_count = {}
 
@@ -770,12 +961,18 @@ def analyse_transfer_frequency(all_solutions):
         for _, player in solution['transfers_out'].iterrows():
             player_name = player['Player Name']
             if player_name not in transfers_out_count:
+                # Calculate weighted expected points
+                weighted_xp = 0
+                for i, fixture in enumerate(fixtures):
+                    weighted_xp += player[f'{fixture} XP'] * weights[i]
+
                 transfers_out_count[player_name] = {
                     'count': 0,
                     'team': player['Team'],
                     'cost': player['Cost'],
                     'position': player['Position'],
-                    'f1_xp': player['F1 XP']
+                    'f1_xp': player['F1 XP'],
+                    'weighted_xp': weighted_xp
                 }
             transfers_out_count[player_name]['count'] += 1
 
@@ -783,12 +980,18 @@ def analyse_transfer_frequency(all_solutions):
         for _, player in solution['transfers_in'].iterrows():
             player_name = player['Player Name']
             if player_name not in transfers_in_count:
+                # Calculate weighted expected points
+                weighted_xp = 0
+                for i, fixture in enumerate(fixtures):
+                    weighted_xp += player[f'{fixture} XP'] * weights[i]
+
                 transfers_in_count[player_name] = {
                     'count': 0,
                     'team': player['Team'],
                     'cost': player['Cost'],
                     'position': player['Position'],
-                    'f1_xp': player['F1 XP']
+                    'f1_xp': player['F1 XP'],
+                    'weighted_xp': weighted_xp
                 }
             transfers_in_count[player_name]['count'] += 1
 
@@ -806,16 +1009,17 @@ def analyse_transfer_frequency(all_solutions):
 def display_transfer_frequency(frequency_analysis, min_frequency=2):
     total_solutions = frequency_analysis['total_solutions']
 
-    print("\n" + "=" * 100)
+    print("\n" + "=" * 110)
     print("TRANSFER FREQUENCY ANALYSIS")
-    print("=" * 100)
-    print(f"Based on {total_solutions} optimized solutions\n")
+    print("=" * 110)
+    print(f"Based on {total_solutions} optimised solutions\n")
 
     # Most commonly transferred OUT
     print("MOST COMMONLY TRANSFERRED OUT:")
-    print("-" * 100)
-    print(f"{'Player':<30} {'Team':<12} {'Pos':<5} {'Cost':<8} {'F1 XP':<8} {'Frequency':<12} {'%':<8}")
-    print("-" * 100)
+    print("-" * 110)
+    print(
+        f"{'Player':<30} {'Team':<12} {'Pos':<5} {'Cost':<8} {'F1 XP':<8} {'Total XP':<10} {'Frequency':<12} {'%':<8}")
+    print("-" * 110)
 
     has_common_out = False
     for player_name, data in frequency_analysis['transfers_out']:
@@ -824,6 +1028,7 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
             frequency_pct = (data['count'] / total_solutions) * 100
             print(f"{player_name:<30} {data['team']:<12} {data['position']:<5} "
                   f"£{data['cost']:.1f}m{'':<3} {data['f1_xp']:.1f}{'':<6} "
+                  f"{data['weighted_xp']:.1f}{'':<8} "
                   f"{data['count']}/{total_solutions}{'':<6} {frequency_pct:.0f}%")
 
     if not has_common_out:
@@ -831,9 +1036,10 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
 
     # Most commonly transferred IN
     print("\n\nMOST COMMONLY TRANSFERRED IN:")
-    print("-" * 100)
-    print(f"{'Player':<30} {'Team':<12} {'Pos':<5} {'Cost':<8} {'F1 XP':<8} {'Frequency':<12} {'%':<8}")
-    print("-" * 100)
+    print("-" * 110)
+    print(
+        f"{'Player':<30} {'Team':<12} {'Pos':<5} {'Cost':<8} {'F1 XP':<8} {'Total XP':<10} {'Frequency':<12} {'%':<8}")
+    print("-" * 110)
 
     has_common_in = False
     for player_name, data in frequency_analysis['transfers_in']:
@@ -842,6 +1048,7 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
             frequency_pct = (data['count'] / total_solutions) * 100
             print(f"{player_name:<30} {data['team']:<12} {data['position']:<5} "
                   f"£{data['cost']:.1f}m{'':<3} {data['f1_xp']:.1f}{'':<6} "
+                  f"{data['weighted_xp']:.1f}{'':<8} "
                   f"{data['count']}/{total_solutions}{'':<6} {frequency_pct:.0f}%")
 
     if not has_common_in:
@@ -849,9 +1056,8 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
 
     # Key insights
     print("\n\nKEY INSIGHTS:")
-    print("-" * 100)
+    print("-" * 110)
 
-    # Find "consensus" transfers (appearing in >50% of solutions)
     consensus_out = [name for name, data in frequency_analysis['transfers_out']
                      if data['count'] / total_solutions > 0.5]
     consensus_in = [name for name, data in frequency_analysis['transfers_in']
@@ -866,24 +1072,6 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
         print(f"Consensus transfers IN (>50%): {', '.join(consensus_in)}")
     else:
         print("No consensus transfers in (none appear in >50% of solutions)")
-
-    # Find most flexible positions
-    print(f"\nMost variable positions:")
-    out_positions = {}
-    in_positions = {}
-
-    for player_name, data in frequency_analysis['transfers_out']:
-        pos = data['position']
-        out_positions[pos] = out_positions.get(pos, 0) + 1
-
-    for player_name, data in frequency_analysis['transfers_in']:
-        pos = data['position']
-        in_positions[pos] = in_positions.get(pos, 0) + 1
-
-    print(
-        f"  Most players transferred out by position: {max(out_positions, key=out_positions.get) if out_positions else 'N/A'}")
-    print(
-        f"  Most players transferred in by position: {max(in_positions, key=in_positions.get) if in_positions else 'N/A'}")
 
 
 def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_detailed_f1=False,
@@ -915,13 +1103,15 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
             print(f"  Transfers Out:")
             for _, player in solution['transfers_out'].iterrows():
                 print(
-                    f"    - {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, F1: {player['F1 XP']:.1f} pts)")
+                    f"    - {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, "
+                    f"F1: {player['F1 XP']:.1f} pts, Total: {player['Weighted_Total_XP']:.1f} pts)")
 
         if len(solution['transfers_in']) > 0:
             print(f"  Transfers In:")
             for _, player in solution['transfers_in'].iterrows():
                 print(
-                    f"    + {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, F1: {player['F1 XP']:.1f} pts)")
+                    f"    + {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, "
+                    f"F1: {player['F1 XP']:.1f} pts, Total: {player['Weighted_Total_XP']:.1f} pts)")
 
         # Show F1 breakdown if requested
         if show_f1_breakdown and 'f1_breakdown' in solution:
@@ -1047,7 +1237,7 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
 
 def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_transfers=2, num_fixtures=5,
                                   fixture_weights=None, show_current_analysis=True,
-                                  additional_budget=0.0, bench_weight=0.1, gk_bench_weight=0.0,
+                                  additional_budget=0.0, bench_weights=None, gk_bench_weights=None,
                                   force_transfer_out=None, num_solutions_display=3,
                                   show_all_details=False, show_detailed_f1=False,
                                   compute_solutions=20, show_frequency_analysis=True,
@@ -1056,7 +1246,15 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
     if fixture_weights is None:
         fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4]
 
+    if bench_weights is None:
+        bench_weights = [0.25, 0.25, 0.20, 0.15, 0.10, 0.05]
+
+    if gk_bench_weights is None:
+        gk_bench_weights = [0.10, 0.10, 0.08, 0.06, 0.04, 0.02]
+
     weights = fixture_weights[:num_fixtures]
+    bench_weights_used = bench_weights[:num_fixtures]
+    gk_bench_weights_used = gk_bench_weights[:num_fixtures]
 
     print(f"FPL MULTI-TRANSFER OPTIMISER")
     print(f"Max Transfers: {max_transfers}")
@@ -1064,8 +1262,8 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
     print(f"Computing {compute_solutions} solutions, displaying top {num_solutions_display}")
     print(f"Weights: {[f'{w:.2f}' for w in weights]}")
     print(f"Additional Budget: £{additional_budget:.1f}m")
-    print(f"Outfielder Bench Weight: {bench_weight:.2f}")
-    print(f"GK Bench Weight: {gk_bench_weight:.2f}")
+    print(f"Outfielder Bench Weights: {[f'{w:.2f}' for w in bench_weights_used]}")
+    print(f"GK Bench Weights: {[f'{w:.2f}' for w in gk_bench_weights_used]}")
     print(f"Max Defensive Players (GK+DEF) per Team: {max_defensive_players_per_team}")
 
     try:
@@ -1099,8 +1297,8 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
         # Compute more solutions than we display for better frequency analysis
         all_solutions = optimise_transfers_multi(
             excel_file, current_team_names, max_transfers, num_fixtures,
-            fixture_weights, 'Players', additional_budget, bench_weight,
-            gk_bench_weight, force_transfer_out, compute_solutions, max_defensive_players_per_team
+            fixture_weights, 'Players', additional_budget, bench_weights_used,
+            gk_bench_weights_used, force_transfer_out, compute_solutions, max_defensive_players_per_team
         )
 
         if not all_solutions:
@@ -1109,7 +1307,9 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
 
         # Show frequency analysis if requested
         if show_frequency_analysis and len(all_solutions) > 1:
-            frequency_analysis = analyse_transfer_frequency(all_solutions)
+            fixtures = all_solutions[0]['fixtures']
+            weights = all_solutions[0]['weights']
+            frequency_analysis = analyse_transfer_frequency(all_solutions, fixtures, weights)
             display_transfer_frequency(frequency_analysis, min_frequency)
 
         # Display summary of top N solutions only
@@ -1144,20 +1344,16 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
 if __name__ == "__main__":
     result = main_multi_transfer_optimiser(
         excel_file="Fantasy Premier League.xlsx",
-        max_transfers=5,
+        max_transfers=2,
         num_fixtures=6,
-        fixture_weights=[1.0, 0.9, 0.8, 0.75, 0.7, 0.65],
-        # fixture_weights=[1.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+        fixture_weights=[1.0, 0.90, 0.80, 0.75, 0.70, 0.65],
         show_current_analysis=False,
-        additional_budget=0.3,
-        bench_weight=0.5,
-        gk_bench_weight=0.25,
-        # bench_weight=0.00000001,
-        # gk_bench_weight=0.00000001,
-        compute_solutions=10,
-        num_solutions_display=3,
+        additional_budget=1.5,
+        bench_weights=[1, 0.3, 0.3, 0.3, 0.3, 0.3],
+        gk_bench_weights=[1, 0.2, 0.2, 0.2, 0.2, 0.2],
+        compute_solutions=20,
+        num_solutions_display=10,
         show_all_details=False,
         show_detailed_f1=False,
         max_defensive_players_per_team=2,
-        # force_transfer_out=["Estevao"],
     )

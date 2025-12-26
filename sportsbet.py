@@ -763,7 +763,7 @@ class ComprehensiveSportsbetScraper:
                 elif filename in ['sportsbet_team_goals_odds_f2.csv', 'sportsbet_clean_sheet_odds_f2.csv']:
                     df = df.tail(20)
 
-                df.to_csv(filename, index=False)
+                df.to_csv(f"sportsbet/{filename}", index=False)
                 files_saved.append(f"{filename} ({len(df)} rows)")
 
                 self.populate_excel_columns('Fantasy Premier League.xlsx', filename, df)
