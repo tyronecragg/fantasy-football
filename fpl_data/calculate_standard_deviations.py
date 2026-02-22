@@ -3,8 +3,7 @@ import numpy as np
 import os
 import glob
 
-# Set this to the path of your cloned FPL-Core-Insights repo
-REPO_PATH = os.path.join("FPL-Core-Insights")
+REPO_PATH = "FPL-Core-Insights"
 SEASON = "2025-2026"
 TOURNAMENT = "Premier League"
 
@@ -27,17 +26,17 @@ def load_all_gameweeks():
     for gw_dir in gw_dirs:
         gw_name = os.path.basename(gw_dir)
 
-        match_stats_path = os.path.join(gw_dir, "playermatchstats.csv")
+        match_stats_path = os.path.join(gw_dir, "player_gameweek_stats.csv")
         players_path = os.path.join(gw_dir, "players.csv")
 
         if not os.path.exists(match_stats_path):
-            print(f"  Skipping {gw_name}: no playermatchstats.csv")
+            print(f"  Skipping {gw_name}: no player_gameweek_stats.csv")
             continue
 
         try:
-            ms = pd.read_csv(match_stats_path)
-            ms["gameweek"] = gw_name
-            all_match_stats.append(ms)
+            match_stats = pd.read_csv(match_stats_path)
+            match_stats["gameweek"] = gw_name
+            all_match_stats.append(match_stats)
 
             # Use the latest players.csv for position data
             if os.path.exists(players_path):
@@ -56,34 +55,23 @@ def load_all_gameweeks():
     return combined, players_df
 
 
-def calculate_defensive_contribution(df, position):
-    if position == "Defender":
-        return df["clearances"] + df["blocks"] + df["interceptions"] + df["tackles"]
-    elif position == "Midfielder":
-        return df["clearances"] + df["blocks"] + df["interceptions"] + df["tackles"] + df["recoveries"]
-    else:
-        raise ValueError(f"Unexpected position: {position}")
-
-
 def analyse_position(match_stats, players_df, position):
     # Get player IDs for this position
     pos_players = players_df[players_df["position"] == position]["player_id"]
 
     # Filter to this position
-    df = match_stats[match_stats["player_id"].isin(pos_players)].copy()
+    df = match_stats[match_stats["id"].isin(pos_players)].copy()
     print(f"\n{'=' * 60}")
     print(f"Position: {position}")
     print(f"{'=' * 60}")
     print(f"Total player-match observations: {len(df)}")
 
     # Filter to players who played 90 minutes
-    df_90 = df[df["minutes_played"] == 90].copy()
+    df_90 = df[df["minutes"] == 90].copy()
     print(f"Observations with exactly 90 minutes played: {len(df_90)}")
 
     # Check for required columns
-    required_cols = ["clearances", "blocks", "interceptions", "tackles"]
-    if position == "MID":
-        required_cols.append("recoveries")
+    required_cols = ["defensive_contribution"]
 
     missing_cols = [c for c in required_cols if c not in df_90.columns]
     if missing_cols:
@@ -98,22 +86,16 @@ def analyse_position(match_stats, players_df, position):
         print("No valid observations!")
         return None
 
-    # Calculate raw defensive contribution total
-    df_90["def_contribution_raw"] = calculate_defensive_contribution(df_90, position)
-
-    # Per 90 (already filtered to 90 min, so this is just the raw value)
-    df_90["def_contribution_per90"] = df_90["def_contribution_raw"]  # already per 90
-
     # Calculate statistics
-    mean_val = df_90["def_contribution_per90"].mean()
-    sd_val = df_90["def_contribution_per90"].std(ddof=1)  # sample SD
-    median_val = df_90["def_contribution_per90"].median()
+    mean_val = df_90["defensive_contribution"].mean()
+    sd_val = df_90["defensive_contribution"].std(ddof=1)  # sample SD
+    median_val = df_90["defensive_contribution"].median()
     n_obs = len(df_90)
-    n_players = df_90["player_id"].nunique()
+    n_players = df_90["id"].nunique()
 
     # Threshold for FPL points
     threshold = 10 if position == "Defender" else 12
-    pct_above = (df_90["def_contribution_per90"] >= threshold).mean() * 100
+    pct_above = (df_90["defensive_contribution"] >= threshold).mean() * 100
 
     print(f"\nResults (per 90 minutes):")
     print(f"  Unique players:     {n_players}")
@@ -121,40 +103,26 @@ def analyse_position(match_stats, players_df, position):
     print(f"  Mean:               {mean_val:.2f}")
     print(f"  Median:             {median_val:.2f}")
     print(f"  Std Dev:            {sd_val:.2f}")
-    print(f"  Min:                {df_90['def_contribution_per90'].min():.0f}")
-    print(f"  Max:                {df_90['def_contribution_per90'].max():.0f}")
+    print(f"  Min:                {df_90['defensive_contribution'].min():.0f}")
+    print(f"  Max:                {df_90['defensive_contribution'].max():.0f}")
     print(f"  % >= {threshold} (FPL pts):  {pct_above:.1f}%")
 
     # Show distribution
     print(f"\n  Distribution:")
     for pct in [10, 25, 50, 75, 90]:
-        val = np.percentile(df_90["def_contribution_per90"], pct)
+        val = np.percentile(df_90["defensive_contribution"], pct)
         print(f"    {pct}th percentile:  {val:.1f}")
 
     # Top players by average
     player_avg = (
-        df_90.groupby("player_id")
+        df_90.groupby("id")
         .agg(
-            mean_dc=("def_contribution_per90", "mean"),
-            sd_dc=("def_contribution_per90", "std"),
-            n_matches=("def_contribution_per90", "count"),
+            mean_dc=("defensive_contribution", "mean"),
+            sd_dc=("defensive_contribution", "std"),
+            n_matches=("defensive_contribution", "count"),
         )
         .sort_values("mean_dc", ascending=False)
     )
-
-    # Merge player names
-    player_avg = player_avg.merge(
-        players_df[["player_id", "web_name"]],
-        left_index=True,
-        right_on="player_id",
-        how="left"
-    )
-
-    print(f"\n  Top 10 players by mean defensive contribution (min 3 matches):")
-    top = player_avg[player_avg["n_matches"] >= 3].head(10)
-    for _, row in top.iterrows():
-        sd_str = f"{row['sd_dc']:.1f}" if pd.notna(row['sd_dc']) else "N/A"
-        print(f"    {row['web_name']:20s}  mean={row['mean_dc']:.1f}  sd={sd_str}  n={int(row['n_matches'])}")
 
     return {
         "position": position,

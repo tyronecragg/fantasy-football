@@ -1059,19 +1059,19 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
     print("-" * 110)
 
     consensus_out = [name for name, data in frequency_analysis['transfers_out']
-                     if data['count'] / total_solutions > 0.5]
+                     if data['count'] / total_solutions > 0.2]
     consensus_in = [name for name, data in frequency_analysis['transfers_in']
-                    if data['count'] / total_solutions > 0.5]
+                    if data['count'] / total_solutions > 0.2]
 
     if consensus_out:
-        print(f"Consensus transfers OUT (>50%): {', '.join(consensus_out)}")
+        print(f"Consensus transfers OUT (>20%): {', '.join(consensus_out)}")
     else:
-        print("No consensus transfers out (none appear in >50% of solutions)")
+        print("No consensus transfers out (none appear in >20% of solutions)")
 
     if consensus_in:
-        print(f"Consensus transfers IN (>50%): {', '.join(consensus_in)}")
+        print(f"Consensus transfers IN (>20%): {', '.join(consensus_in)}")
     else:
-        print("No consensus transfers in (none appear in >50% of solutions)")
+        print("No consensus transfers in (none appear in >20% of solutions)")
 
 
 def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_detailed_f1=False,
@@ -1091,6 +1091,8 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
         f1_starting_sign = "+" if solution['f1_starting_improvement'] >= 0 else ""
 
         print(f"\nOPTION {solution['solution_number']}:")
+        print(
+            f"  Total Starting Points: {solution['total_starting_points']:.2f} pts")
         print(
             f"  Total Squad Improvement (with Bench): {squad_improvement_sign}{solution['points_improvement']:.2f} pts")
         print(
@@ -1344,16 +1346,19 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
 if __name__ == "__main__":
     result = main_multi_transfer_optimiser(
         excel_file="Fantasy Premier League.xlsx",
-        max_transfers=2,
+        max_transfers=0,
         num_fixtures=6,
         fixture_weights=[1.0, 0.90, 0.80, 0.75, 0.70, 0.65],
         show_current_analysis=False,
-        additional_budget=1.5,
-        bench_weights=[1, 0.3, 0.3, 0.3, 0.3, 0.3],
-        gk_bench_weights=[1, 0.2, 0.2, 0.2, 0.2, 0.2],
-        compute_solutions=20,
-        num_solutions_display=10,
+        additional_budget=0.6,
+        bench_weights=[0.2]*6,
+        gk_bench_weights=[0.2]*6,
+        # bench_weights=[0.00001]*6,
+        # gk_bench_weights=[0.00001]*6,
+        compute_solutions=1,
+        num_solutions_display=1,
         show_all_details=False,
         show_detailed_f1=False,
         max_defensive_players_per_team=2,
+        # force_transfer_out=[""],
     )

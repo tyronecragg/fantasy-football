@@ -101,7 +101,6 @@ def normalise_player_name(name):
         "Murillo": "Murillo dos Santos",
         "Gabriel": "Gabriel Magalhaes",
         "Amadou Mvom Onana": "Amadou Onana",
-        "Murillo": "Murillo dos Santos",
         "Reinildo": "Reinildo Mandava",
         "Pape Sarr": "Pape Matar Sarr",
         "Emile Smith-Rowe": "Emile Smith Rowe",
@@ -109,6 +108,12 @@ def normalise_player_name(name):
         "Joseph Willock": "Joe Willock",
         "Lindelof": "Victor Lindelof",
         "Murillo dos Santos": "Murillo",
+        "Oliver Scarles": "Ollie Scarles",
+        "Carlos Alcaraz": "Charly Alcaraz",
+        "Jesus": "Gabriel Jesus",
+        "Martinelli": "Gabriel Martinelli",
+        "Eli Kroupi": "Junior Kroupi",
+        "David Datro Fofana": "Wesley Fofana",
     }
 
     # Return mapped name if exists, otherwise return original
@@ -282,15 +287,6 @@ def main():
     teams_data = get_team_lineups()
 
     if teams_data:
-        # Display sample data
-        print("\nSample of extracted data:")
-        for i, player in enumerate(teams_data[:10]):  # Show first 10 players
-            print(f"{player['Player']}, {player['Team']}")
-
-        if len(teams_data) > 10:
-            print("...")
-
-        # Save to CSV
         save(teams_data)
 
         # Summary by team

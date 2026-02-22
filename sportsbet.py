@@ -1,3 +1,4 @@
+import sys
 import json
 import time
 import requests
@@ -619,28 +620,34 @@ class ComprehensiveSportsbetScraper:
             markets_data = self.get_match_markets(match['match_id'])
 
             if markets_data:
-                # Extract all types of odds
                 win_draw_win = self.extract_win_draw_win_odds(markets_data, match)
-                goalscorer_odds = self.extract_goalscorer_odds(markets_data, match)
-                assist_odds = self.extract_assist_odds(markets_data, match)
-                team_goals_odds = self.extract_team_goals_odds(markets_data, match)
-                clean_sheet_odds = self.extract_clean_sheet_odds(markets_data, match)
-                booking_odds = self.extract_to_be_booked_odds(markets_data, match)
-                two_goals_odds = self.extract_two_or_more_goals_odds(markets_data, match)
-                two_assists_odds = self.extract_two_or_more_assists_odds(markets_data, match)
-                goalkeeper_saves_odds = self.extract_goalkeeper_saves_odds(markets_data, match)
-
-                # Add to main lists
                 all_win_draw_win.extend(win_draw_win)
-                all_goalscorer_odds.extend(goalscorer_odds)
-                all_assist_odds.extend(assist_odds)
+                team_goals_odds = self.extract_team_goals_odds(markets_data, match)
                 all_team_goals_odds.extend(team_goals_odds)
+                clean_sheet_odds = self.extract_clean_sheet_odds(markets_data, match)
                 all_clean_sheet_odds.extend(clean_sheet_odds)
-                all_booking_odds.extend(booking_odds)
-                all_two_goals_odds.extend(two_goals_odds)
-                all_two_assists_odds.extend(two_assists_odds)
+                goalkeeper_saves_odds = self.extract_goalkeeper_saves_odds(markets_data, match)
                 all_goalkeeper_saves_odds.extend(goalkeeper_saves_odds)
 
+                if i <= 10:
+                    goalscorer_odds = self.extract_goalscorer_odds(markets_data, match)
+                    all_goalscorer_odds.extend(goalscorer_odds)
+                    assist_odds = self.extract_assist_odds(markets_data, match)
+                    all_assist_odds.extend(assist_odds)
+                    two_goals_odds = self.extract_two_or_more_goals_odds(markets_data, match)
+                    all_two_goals_odds.extend(two_goals_odds)
+                    two_assists_odds = self.extract_two_or_more_assists_odds(markets_data, match)
+                    all_two_assists_odds.extend(two_assists_odds)
+                    booking_odds = self.extract_to_be_booked_odds(markets_data, match)
+                    all_booking_odds.extend(booking_odds)
+                else:
+                    goalscorer_odds = []
+                    assist_odds = []
+                    two_goals_odds = []
+                    two_assists_odds = []
+                    booking_odds = []
+
+                # Add to main lists
                 print(f"  Found: {len(win_draw_win)} WDW, {len(goalscorer_odds)} goalscorer, "
                       f"{len(assist_odds)} assist, {len(team_goals_odds)} team goals, "
                       f"{len(clean_sheet_odds)} clean sheet, {len(booking_odds)} booking, "
@@ -710,7 +717,7 @@ class ComprehensiveSportsbetScraper:
             for col_idx in range(num_cols):
                 excel_col = get_column_letter(col_idx + 1)  # A=1, B=2, etc.
                 # Clear the entire column by deleting all values from start_row to max_row
-                for row in range(start_row, worksheet.max_row + 1):
+                for row in range(start_row, worksheet.max_row + 200):
                     worksheet[f'{excel_col}{row}'].value = None
 
             # Insert new data
@@ -787,7 +794,6 @@ def main():
     print("-" * 80)
 
     # Option to discover markets first
-    import sys
     if len(sys.argv) > 1 and sys.argv[1] == "discover":
         print("Running in discovery mode to find market IDs...")
         scraper.scrape_all_odds(discover_mode=True)
@@ -810,7 +816,6 @@ def main():
     scraper.save(all_data)
 
     print("\nFiles saved successfully!")
-    print("\nTo discover available markets, run: python script.py discover")
 
 
 if __name__ == "__main__":
