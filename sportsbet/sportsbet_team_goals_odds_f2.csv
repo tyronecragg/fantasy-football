@@ -1,21 +1,21 @@
 Match,Date,Team,Opponent,Team_Over_1.5,Team_Under_1.5,Team_Over_3.5,Team_Under_3.5,Opponent_Concedes_Over_1.5,Opponent_Concedes_Under_1.5,Opponent_Concedes_Over_3.5,Opponent_Concedes_Under_3.5
-Wolves v Aston Villa,1772222400,Wolves,Aston Villa,3.02,1.32,28.0,1.01,3.02,1.32,28.0,1.01
-Wolves v Aston Villa,1772222400,Aston Villa,Wolves,1.79,1.92,8.8,1.04,1.79,1.92,8.8,1.04
-Bournemouth v Sunderland,1772281800,Bournemouth,Sunderland,1.81,1.89,8.7,1.04,1.81,1.89,8.7,1.04
-Bournemouth v Sunderland,1772281800,Sunderland,Bournemouth,3.24,1.28,32.0,1.001,3.24,1.28,32.0,1.001
-Newcastle v Everton,1772290800,Newcastle,Everton,1.74,1.97,8.2,1.05,1.74,1.97,8.2,1.05
-Newcastle v Everton,1772290800,Everton,Newcastle,3.26,1.28,34.0,1.001,3.26,1.28,34.0,1.001
-Liverpool v West Ham,1772290800,Liverpool,West Ham,1.28,3.26,3.76,1.22,1.28,3.26,3.76,1.22
-Liverpool v West Ham,1772290800,West Ham,Liverpool,3.6,1.24,34.0,1.001,3.6,1.24,34.0,1.001
-Burnley v Brentford,1772290800,Burnley,Brentford,3.22,1.29,32.0,1.001,3.22,1.29,32.0,1.001
-Burnley v Brentford,1772290800,Brentford,Burnley,1.79,1.91,8.8,1.04,1.79,1.91,8.8,1.04
-Leeds v Man City,1772299800,Leeds,Man City,3.34,1.27,34.0,1.001,3.34,1.27,34.0,1.001
-Leeds v Man City,1772299800,Man City,Leeds,1.53,2.34,6.05,1.09,1.53,2.34,6.05,1.09
-Fulham v Spurs,1772373600,Fulham,Spurs,2.04,1.69,11.8,1.03,2.04,1.69,11.8,1.03
-Fulham v Spurs,1772373600,Spurs,Fulham,2.44,1.48,18.25,1.01,2.44,1.48,18.25,1.01
-Brighton v Nott'm Forest,1772373600,Brighton,Nott'm Forest,1.99,1.73,11.1,1.03,1.99,1.73,11.1,1.03
-Brighton v Nott'm Forest,1772373600,Nott'm Forest,Brighton,2.69,1.4,21.0,1.01,2.69,1.4,21.0,1.01
-Man Utd v Crystal Palace,1772373600,Man Utd,Crystal Palace,1.59,2.21,6.55,1.08,1.59,2.21,6.55,1.08
-Man Utd v Crystal Palace,1772373600,Crystal Palace,Man Utd,3.44,1.26,34.0,1.001,3.44,1.26,34.0,1.001
-Arsenal v Chelsea,1772382600,Arsenal,Chelsea,1.67,2.07,7.5,1.06,1.67,2.07,7.5,1.06
-Arsenal v Chelsea,1772382600,Chelsea,Arsenal,3.54,1.24,34.0,1.001,3.54,1.24,34.0,1.001
+Brighton v Man Utd,1779634800,Brighton,Man Utd,1.52,2.35,6.2,1.09,1.52,2.35,6.2,1.09
+Brighton v Man Utd,1779634800,Man Utd,Brighton,2.36,1.51,17.0,1.01,2.36,1.51,17.0,1.01
+Burnley v Wolves,1779634800,Burnley,Wolves,2.02,1.7,12.0,1.03,2.02,1.7,12.0,1.03
+Burnley v Wolves,1779634800,Wolves,Burnley,2.27,1.56,15.75,1.02,2.27,1.56,15.75,1.02
+Man City v Aston Villa,1779634800,Man City,Aston Villa,1.17,4.3,2.84,1.37,1.17,4.3,2.84,1.37
+Man City v Aston Villa,1779634800,Aston Villa,Man City,3.06,1.32,28.0,1.01,3.06,1.32,28.0,1.01
+Fulham v Newcastle,1779634800,Fulham,Newcastle,2.15,1.62,13.5,1.02,2.15,1.62,13.5,1.02
+Fulham v Newcastle,1779634800,Newcastle,Fulham,1.88,1.81,10.1,1.04,1.88,1.81,10.1,1.04
+Sunderland v Chelsea,1779634800,Sunderland,Chelsea,2.68,1.41,20.5,1.01,2.68,1.41,20.5,1.01
+Sunderland v Chelsea,1779634800,Chelsea,Sunderland,1.85,1.85,9.6,1.04,1.85,1.85,9.6,1.04
+Crystal Palace v Arsenal,1779634800,Crystal Palace,Arsenal,2.85,1.36,26.0,1.01,2.85,1.36,26.0,1.01
+Crystal Palace v Arsenal,1779634800,Arsenal,Crystal Palace,1.67,2.07,7.8,1.06,1.67,2.07,7.8,1.06
+Liverpool v Brentford,1779634800,Liverpool,Brentford,1.54,2.31,6.3,1.08,1.54,2.31,6.3,1.08
+Liverpool v Brentford,1779634800,Brentford,Liverpool,2.32,1.53,16.75,1.01,2.32,1.53,16.75,1.01
+Nott'm Forest v Bournemouth,1779634800,Nott'm Forest,Bournemouth,2.38,1.51,17.5,1.01,2.38,1.51,17.5,1.01
+Nott'm Forest v Bournemouth,1779634800,Bournemouth,Nott'm Forest,1.7,2.02,8.1,1.05,1.7,2.02,8.1,1.05
+Spurs v Everton,1779634800,Spurs,Everton,1.81,1.89,9.3,1.04,1.81,1.89,9.3,1.04
+Spurs v Everton,1779634800,Everton,Spurs,2.85,1.36,26.0,1.01,2.85,1.36,26.0,1.01
+West Ham v Leeds,1779634800,West Ham,Leeds,1.65,2.09,7.4,1.06,1.65,2.09,7.4,1.06
+West Ham v Leeds,1779634800,Leeds,West Ham,2.96,1.34,28.0,1.01,2.96,1.34,28.0,1.01

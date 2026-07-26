@@ -1,12 +1,63 @@
+import os
+
 import pandas as pd
 import pulp
+
+
+def load_sheet(source, sheet_name='Players'):
+    """Load a data table from the legacy Excel workbook or the fpl_pipeline CSVs.
+
+    Pass the workbook path (.xlsx) to read the named sheet, or the pipeline's master
+    players CSV (outputs/13_players_master.csv). With a CSV source, the 'GW Teams'
+    sheet is read from inputs/gw_teams.csv in the repo root.
+    """
+    source = str(source)
+    if source.lower().endswith('.csv'):
+        if sheet_name == 'GW Teams':
+            root = os.path.dirname(os.path.dirname(os.path.abspath(source)))
+            return pd.read_csv(os.path.join(root, 'inputs', 'gw_teams.csv'))
+        return pd.read_csv(source)
+    return pd.read_excel(source, sheet_name=sheet_name)
+
+DGW_TEAMS = {}
+DGW_EXTRA = True
+DGW_EXTRA_FACTOR = 1
+
+
+def apply_dgw_adjustment(df, dgw_teams=DGW_TEAMS, dgw_extra=DGW_EXTRA, dgw_extra_factor=DGW_EXTRA_FACTOR):
+    """
+    For players whose team is in dgw_teams:
+      - F1 XP := F1 XP + F2 XP
+      - F2 XP := 0
+    Modifies df in place and also returns it for convenience.
+    Safe to call even if 'F2 XP' isn't present.
+    """
+    if 'F1 XP' not in df.columns or 'F2 XP' not in df.columns:
+        return df
+    if 'Team' not in df.columns:
+        return df
+
+    mask = df['Team'].isin(dgw_teams)
+    if mask.any():
+        if dgw_extra:
+            df.loc[mask, 'F1 XP'] = df.loc[mask, 'F1 XP']*(1+dgw_extra_factor)
+        else:
+            df.loc[mask, 'F1 XP'] = df.loc[mask, 'F1 XP'] + df.loc[mask, 'F2 XP']
+            df.loc[mask, 'F2 XP'] = 0
+
+        affected = df.loc[mask, 'Player Name'].tolist() if 'Player Name' in df.columns else []
+        print(f"[DGW adjustment] Applied to {len(affected)} players from {sorted(dgw_teams)}")
+    return df
+# ============================================================
+# END TEMPORARY BLOCK
+# ============================================================
 
 
 def load_current_team(excel_file, sheet_name='GW Teams'):
     print("Loading current team from GW Teams sheet...")
 
     # Read the GW Teams sheet
-    df_teams = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df_teams = load_sheet(excel_file, sheet_name)
 
     # Find the rightmost column with data (current gameweek)
     last_col_idx = df_teams.shape[1] - 1
@@ -37,8 +88,9 @@ def calculate_current_team_value(excel_file, current_team_names, players_sheet='
     - player_values: Dict of player names to their values
     """
     # Load player data
-    df = pd.read_excel(excel_file, sheet_name=players_sheet)
+    df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
+    apply_dgw_adjustment(df)  # TEMPORARY
 
     total_value = 0
     player_values = {}
@@ -76,8 +128,9 @@ def analyse_current_team(excel_file, current_team_names, num_fixtures=6, fixture
     weights = fixture_weights[:num_fixtures]
 
     # Load player data
-    df = pd.read_excel(excel_file, sheet_name=players_sheet)
+    df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
+    apply_dgw_adjustment(df)  # TEMPORARY
 
     # Define fixture columns
     all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP']
@@ -325,7 +378,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                              force_transfer_out=None, num_solutions=3, max_defensive_players_per_team=3):
     # Set default weights
     if fixture_weights is None:
-        fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4]
+        fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4, 0.25]
 
     # Set default bench weights (arrays)
     if bench_weights is None:
@@ -353,8 +406,9 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         print(f"Forced transfers out: {force_transfer_out}")
 
     # Load player data
-    df = pd.read_excel(excel_file, sheet_name=players_sheet)
+    df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
+    apply_dgw_adjustment(df)  # TEMPORARY
 
     # Define fixture columns and fixtures
     fixtures = [f'F{i + 1}' for i in range(num_fixtures)]
@@ -1237,7 +1291,7 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
     print(f"  Bench Points: {total_bench_value:.2f}")
 
 
-def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_transfers=2, num_fixtures=5,
+def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", max_transfers=2, num_fixtures=5,
                                   fixture_weights=None, show_current_analysis=True,
                                   additional_budget=0.0, bench_weights=None, gk_bench_weights=None,
                                   force_transfer_out=None, num_solutions_display=3,
@@ -1283,8 +1337,9 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
             display_current_team_analysis(current_team_df, analysis, num_fixtures, weights)
 
         # Load player data for detailed display
-        df = pd.read_excel(excel_file, sheet_name='Players')
+        df = load_sheet(excel_file, 'Players')
         df.columns = df.columns.str.strip()
+        apply_dgw_adjustment(df)  # TEMPORARY
 
         # Get current team indices
         current_team_indices = []
@@ -1345,14 +1400,16 @@ def main_multi_transfer_optimiser(excel_file="Fantasy Premier League.xlsx", max_
 
 if __name__ == "__main__":
     result = main_multi_transfer_optimiser(
-        excel_file="Fantasy Premier League.xlsx",
-        max_transfers=0,
-        num_fixtures=6,
+        excel_file="outputs/13_players_master.csv",
+        max_transfers=1,
+        num_fixtures=1,
         fixture_weights=[1.0, 0.90, 0.80, 0.75, 0.70, 0.65],
         show_current_analysis=False,
-        additional_budget=0.6,
+        additional_budget=0.8,
         bench_weights=[0.2]*6,
         gk_bench_weights=[0.2]*6,
+        # bench_weights=[1, 0.2, 0.2, 0.2, 0.2, 0.2],
+        # gk_bench_weights=[1, 0.2, 0.2, 0.2, 0.2, 0.2],
         # bench_weights=[0.00001]*6,
         # gk_bench_weights=[0.00001]*6,
         compute_solutions=1,
@@ -1360,5 +1417,5 @@ if __name__ == "__main__":
         show_all_details=False,
         show_detailed_f1=False,
         max_defensive_players_per_team=2,
-        # force_transfer_out=[""],
+        # force_transfer_out=["Rodrigo Muniz"],
     )

@@ -5,8 +5,10 @@ import requests
 import pandas as pd
 from typing import List, Dict
 from datetime import datetime
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
+
+from fpl_pipeline.names import team_map
+
+TEAM_MAP = team_map()
 
 
 class ComprehensiveSportsbetScraper:
@@ -55,15 +57,8 @@ class ComprehensiveSportsbetScraper:
                     participant1 = event.get('participant1')
                     participant2 = event.get('participant2')
 
-                    if participant1 == 'Tottenham':
-                        participant1 = 'Spurs'
-                    if participant2 == 'Tottenham':
-                        participant2 = 'Spurs'
-
-                    if participant1 == 'Nottm Forest':
-                        participant1 = "Nott'm Forest"
-                    if participant2 == 'Nottm Forest':
-                        participant2 = "Nott'm Forest"
+                    participant1 = TEAM_MAP.get(participant1, participant1)
+                    participant2 = TEAM_MAP.get(participant2, participant2)
 
                     matches.append({
                         'match_id': event['id'],
@@ -151,11 +146,7 @@ class ComprehensiveSportsbetScraper:
                     odds = selection.get('price', {}).get('winPrice')
 
                     # Normalize selection name for comparison
-                    selection_name_normalized = selection_name
-                    if selection_name == "Tottenham":
-                        selection_name_normalized = "Spurs"
-                    if selection_name == "Nottm Forest":
-                        selection_name_normalized = "Nott'm Forest"
+                    selection_name_normalized = TEAM_MAP.get(selection_name, selection_name)
 
                     # Now compare using normalized names
                     if match_info.get('participant1', '').lower() in selection_name_normalized.lower():
@@ -171,6 +162,7 @@ class ComprehensiveSportsbetScraper:
                         'away_team': match_info.get('participant2'),
                         'home_win_odds': home_win,
                         'away_win_odds': away_win,
+                        'draw_odds': draw,
                     })
                 break
 
@@ -663,79 +655,6 @@ class ComprehensiveSportsbetScraper:
                 all_clean_sheet_odds, all_booking_odds, all_two_goals_odds, all_two_assists_odds,
                 all_goalkeeper_saves_odds)
 
-    def populate_excel_columns(self, excel_file, filename, dataframe, start_row=2, include_headers=True):
-        """
-        Populate Excel columns starting from A with dataframe data and optionally headers.
-
-        Parameters:
-        - excel_file: path to Excel file
-        - sheet_name: name of the worksheet
-        - dataframe: pandas DataFrame with data to insert
-        - start_row: row number to start inserting data (default: 2)
-        - include_headers: whether to write column names to row 1 (default: True)
-        """
-
-        sheet_name = ''
-
-        if filename == 'sportsbet_win_draw_win_odds.csv':
-            sheet_name = 'Fixture Odds'
-        elif filename == 'sportsbet_goalscorer_odds.csv':
-            sheet_name = 'Score'
-        elif filename == 'sportsbet_assist_odds.csv':
-            sheet_name = 'Assist'
-        elif filename == 'sportsbet_team_goals_odds.csv':
-            sheet_name = 'Team Total Goals'
-        elif filename == 'sportsbet_team_goals_odds_f2.csv':
-            sheet_name = 'F2 Team Total Goals'
-        elif filename == 'sportsbet_clean_sheet_odds.csv':
-            sheet_name = 'Clean Sheet'
-        elif filename == 'sportsbet_clean_sheet_odds_f2.csv':
-            sheet_name = 'F2 Clean Sheet'
-        elif filename == 'sportsbet_booking_odds.csv':
-            sheet_name = 'Yellow Card'
-        elif filename == 'sportsbet_two_goals_odds.csv':
-            sheet_name = 'Score 2+'
-        elif filename == 'sportsbet_two_assists_odds.csv':
-            sheet_name = 'Assist 2+'
-        elif filename == 'sportsbet_goalkeeper_saves_odds.csv':
-            sheet_name = 'Goalkeeper Saves'
-
-        if sheet_name != '':
-
-            workbook = load_workbook(excel_file)
-            worksheet = workbook[sheet_name]
-
-            num_cols = len(dataframe.columns)
-
-            # Add headers if requested
-            if include_headers:
-                for col_idx, col_name in enumerate(dataframe.columns):
-                    excel_col = get_column_letter(col_idx + 1)
-                    worksheet[f'{excel_col}1'].value = col_name
-
-            # Clear existing data in the data range
-            for col_idx in range(num_cols):
-                excel_col = get_column_letter(col_idx + 1)  # A=1, B=2, etc.
-                # Clear the entire column by deleting all values from start_row to max_row
-                for row in range(start_row, worksheet.max_row + 200):
-                    worksheet[f'{excel_col}{row}'].value = None
-
-            # Insert new data
-            for row_idx, (_, row_data) in enumerate(dataframe.iterrows(), start=start_row):
-                for col_idx, col_name in enumerate(dataframe.columns):
-                    excel_col = get_column_letter(col_idx + 1)
-                    value = row_data[col_name]
-
-                    # Handle NaN values
-                    if pd.isna(value):
-                        worksheet[f'{excel_col}{row_idx}'].value = None
-                    else:
-                        worksheet[f'{excel_col}{row_idx}'].value = value
-
-            workbook.save(excel_file)
-
-            print(f"Successfully updated columns A-{get_column_letter(num_cols)} ({num_cols} columns, {len(dataframe)} rows) in {sheet_name}")
-
     def save(self, all_data: tuple):
         """
         Save all odds data to CSV files
@@ -768,12 +687,14 @@ class ComprehensiveSportsbetScraper:
                 if filename in ['sportsbet_team_goals_odds.csv', 'sportsbet_clean_sheet_odds.csv']:
                     df = df.head(20)
                 elif filename in ['sportsbet_team_goals_odds_f2.csv', 'sportsbet_clean_sheet_odds_f2.csv']:
-                    df = df.tail(20)
+                    # Rows 20-39 are the second gameweek's team-rows. When only one
+                    # gameweek is listed (20 rows), this is empty — tail(20) would
+                    # silently duplicate the first gameweek's odds into the F2 files.
+                    df = df.iloc[20:40]
 
                 df.to_csv(f"sportsbet/{filename}", index=False)
                 files_saved.append(f"{filename} ({len(df)} rows)")
 
-                self.populate_excel_columns('Fantasy Premier League.xlsx', filename, df)
 
 
         print("\nFiles saved:")

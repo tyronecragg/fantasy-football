@@ -3,8 +3,12 @@ import csv
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
+
+from fpl_pipeline.names import player_map
+
+NAME_MAPPINGS = player_map()
+INPUTS_CSV = "inputs/starting_lineups.csv"
+PROB_COLUMNS = ["F1", "F2", "F3", "F4", "F5", "F6"]
 
 
 def convert_special_characters(text):
@@ -73,51 +77,9 @@ def normalise_player_name(name):
 
     name = convert_special_characters(name)
 
-    name_mappings = {
-        "David Raya Martin": "David Raya",
-        "Matthew Cash": "Matty Cash",
-        "Dorde Petrovic": "Djordje Petrovic",
-        "Ezri Konsa Ngoyo": "Ezri Konsa",
-        "Tosin": "Tosin Adarabioyo",
-        "Alisson": "Alisson Becker",
-        "Toti": "Toti Gomes",
-        "Jan-Paul van Hecke": "Jan Paul van Hecke",
-        "Ehor Yarmolyuk": "Yehor Yarmoliuk",
-        "Nico Oâ€™Reilly": "Nico O'Reilly",
-        "Morato": "Felipe Rodrigues da Silva",
-        "Danny Ballard": "Dan Ballard",
-        "Ladislav Krejci II": "Ladislav Krejci",
-        "Thiago": "Igor Thiago",
-        "Dalot": "Diogo Dalot",
-        "Hugo Bueno": "Santiago Bueno",
-        "Yeremi Pino": "Yeremy Pino",
-        "Vitaliy Mykolenko": "Vitalii Mykolenko",
-        "Joshua King": "Josh King",
-        "Valentino Livramento": "Tino Livramento",
-        "Max Kilman": "Maximilian Kilman",
-        "El Hadji Diouf": "El Hadji Malick Diouf",
-        "Lamar Bogarde": "Lamare Bogarde",
-        "Garnacho": "Alejandro Garnacho",
-        "Murillo": "Murillo dos Santos",
-        "Gabriel": "Gabriel Magalhaes",
-        "Amadou Mvom Onana": "Amadou Onana",
-        "Reinildo": "Reinildo Mandava",
-        "Pape Sarr": "Pape Matar Sarr",
-        "Emile Smith-Rowe": "Emile Smith Rowe",
-        "Joseph Gomez": "Joe Gomez",
-        "Joseph Willock": "Joe Willock",
-        "Lindelof": "Victor Lindelof",
-        "Murillo dos Santos": "Murillo",
-        "Oliver Scarles": "Ollie Scarles",
-        "Carlos Alcaraz": "Charly Alcaraz",
-        "Jesus": "Gabriel Jesus",
-        "Martinelli": "Gabriel Martinelli",
-        "Eli Kroupi": "Junior Kroupi",
-        "David Datro Fofana": "Wesley Fofana",
-    }
-
+    # All renames live in inputs/name_mappings.csv (see fpl_pipeline.names)
     # Return mapped name if exists, otherwise return original
-    return name_mappings.get(name, name)
+    return NAME_MAPPINGS.get(name, name)
 
 
 def extract_full_name(title_text):
@@ -208,51 +170,30 @@ def get_team_lineups():
         return []
 
 
-def populate_excel_columns(excel_file, sheet_name, dataframe, start_row=2, include_headers=True):
-    """
-    Populate Excel columns starting from A with dataframe data and optionally headers.
+def update_inputs_csv(dataframe, inputs_csv=INPUTS_CSV):
+    """Replace the predicted-lineup roster in inputs/starting_lineups.csv while
+    preserving the manually entered start probabilities (F1-F6) for players that are
+    still in the scrape. New players get blank probabilities to fill in; players no
+    longer predicted to start are dropped."""
+    new = dataframe.rename(columns={'Player': 'Player', 'Team': 'Team'}).copy()
+    try:
+        existing = pd.read_csv(inputs_csv)
+    except FileNotFoundError:
+        existing = pd.DataFrame(columns=['Player', 'Team'] + PROB_COLUMNS)
 
-    Parameters:
-    - excel_file: path to Excel file
-    - sheet_name: name of the worksheet
-    - dataframe: pandas DataFrame with data to insert
-    - start_row: row number to start inserting data (default: 2)
-    - include_headers: whether to write column names to row 1 (default: True)
-    """
+    probs = existing.drop_duplicates(subset='Player').set_index('Player')
+    for col in PROB_COLUMNS:
+        new[col] = new['Player'].map(probs[col]) if col in probs.columns else pd.NA
 
-    workbook = load_workbook(excel_file)
-    worksheet = workbook[sheet_name]
+    new.to_csv(inputs_csv, index=False)
 
-    num_cols = len(dataframe.columns)
-
-    # Add headers if requested
-    if include_headers:
-        for col_idx, col_name in enumerate(dataframe.columns):
-            excel_col = get_column_letter(col_idx + 1)
-            worksheet[f'{excel_col}1'].value = col_name
-
-    # Clear existing data in the data range
-    for col_idx in range(num_cols):
-        excel_col = get_column_letter(col_idx + 1)  # A=1, B=2, etc.
-        # Clear the entire column by deleting all values from start_row to max_row
-        for row in range(start_row, worksheet.max_row + 1):
-            worksheet[f'{excel_col}{row}'].value = None
-
-    # Insert new data
-    for row_idx, (_, row_data) in enumerate(dataframe.iterrows(), start=start_row):
-        for col_idx, col_name in enumerate(dataframe.columns):
-            excel_col = get_column_letter(col_idx + 1)
-            value = row_data[col_name]
-
-            # Handle NaN values
-            if pd.isna(value):
-                worksheet[f'{excel_col}{row_idx}'].value = None
-            else:
-                worksheet[f'{excel_col}{row_idx}'].value = value
-
-    workbook.save(excel_file)
-
-    print(f"Successfully updated columns A-{get_column_letter(num_cols)} ({num_cols} columns, {len(dataframe)} rows) in {sheet_name}")
+    added = sorted(set(new['Player']) - set(existing.get('Player', [])))
+    dropped = sorted(set(existing.get('Player', [])) - set(new['Player']))
+    blank = int(new[PROB_COLUMNS].isna().all(axis=1).sum())
+    print(f"Updated {inputs_csv}: {len(new)} players "
+          f"({len(added)} new, {len(dropped)} dropped, {blank} need start probabilities)")
+    if added:
+        print(f"  New players needing start probabilities: {', '.join(added)}")
 
 
 def save(teams_data, filename="starting_lineups/data.csv"):
@@ -272,7 +213,7 @@ def save(teams_data, filename="starting_lineups/data.csv"):
             writer.writerow(row)
 
     df = pd.DataFrame(teams_data, columns=column_names)
-    populate_excel_columns('Fantasy Premier League.xlsx', 'Starting Lineups', df)
+    update_inputs_csv(df)
 
     print(f"Data saved to {filename}")
     print(f"Total players extracted: {len(teams_data)}")

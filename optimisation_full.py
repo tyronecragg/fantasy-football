@@ -1,6 +1,20 @@
+import os
+
 import pandas as pd
 import pulp
 import numpy as np
+
+
+def load_sheet(source, sheet_name='Players'):
+    """Load a data table from the legacy Excel workbook or the fpl_pipeline CSVs.
+
+    Pass the workbook path (.xlsx) to read the named sheet, or the pipeline's master
+    players CSV (outputs/13_players_master.csv).
+    """
+    source = str(source)
+    if source.lower().endswith('.csv'):
+        return pd.read_csv(source)
+    return pd.read_excel(source, sheet_name=sheet_name)
 
 
 def optimise_fpl_team_with_weekly_lineups_and_bench_value(excel_file, num_fixtures=6, sheet_name='Players',
@@ -29,7 +43,7 @@ def optimise_fpl_team_with_weekly_lineups_and_bench_value(excel_file, num_fixtur
 
     # Load data from Excel
     print("Loading data from Excel...")
-    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df = load_sheet(excel_file, sheet_name)
 
     print("Data length before XP filtering:", len(df))
 
@@ -493,7 +507,7 @@ def find_multiple_optimal_teams_weighted_with_bench(excel_file, num_fixtures=5, 
     print(f"Using bench weight: {bench_weight}")
 
     # Load data first to get player info
-    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df = load_sheet(excel_file, sheet_name)
     df = df[df['Total XP'] > 0]
     df.columns = df.columns.str.strip()
 
@@ -634,7 +648,7 @@ def optimise_with_starting_exclusions_weighted_with_bench(excel_file, num_fixtur
 
     weights = fixture_weights[:num_fixtures]
 
-    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df = load_sheet(excel_file, sheet_name)
     df = df[df['Total XP'] > 0]
     df.columns = df.columns.str.strip()
 
@@ -868,7 +882,7 @@ def optimise_with_squad_exclusions_weighted_with_bench(excel_file, num_fixtures,
 
     weights = fixture_weights[:num_fixtures]
 
-    df = pd.read_excel(excel_file, sheet_name=sheet_name)
+    df = load_sheet(excel_file, sheet_name)
     df = df[df['Total XP'] > 0]
     df.columns = df.columns.str.strip()
 
@@ -1248,9 +1262,8 @@ def display_specific_team_weighted_with_bench(team_info, num_fixtures):
 
 def main_weighted_with_bench_value(num_fixtures=5, fixture_weights=None, bench_weight=0.1,
                                    find_multiple=False, num_teams=10, diversity_method='starting_players',
-                                   points_tolerance=1.0, total_squad_cost=100.0):
-
-    excel_file = "Fantasy Premier League.xlsx"
+                                   points_tolerance=1.0, total_squad_cost=100.0,
+                                   excel_file="outputs/13_players_master.csv"):
 
     # Set default weights if not provided
     if fixture_weights is None:
