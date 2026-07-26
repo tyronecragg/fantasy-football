@@ -1,5 +1,4 @@
 import re
-import csv
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -196,23 +195,13 @@ def update_inputs_csv(dataframe, inputs_csv=INPUTS_CSV):
         print(f"  New players needing start probabilities: {', '.join(added)}")
 
 
-def save(teams_data, filename="starting_lineups/data.csv"):
-    """
-    Save the teams data to CSV file
-    """
+def save(teams_data):
+    """Update inputs/starting_lineups.csv from the scraped predicted lineups."""
     if not teams_data:
         print("No data to save")
         return
 
-    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        column_names = ['Player', 'Team']
-        writer = csv.DictWriter(csvfile, fieldnames=column_names)
-
-        writer.writeheader()
-        for row in teams_data:
-            writer.writerow(row)
-
-    df = pd.DataFrame(teams_data, columns=column_names)
+    df = pd.DataFrame(teams_data, columns=['Player', 'Team'])
     update_inputs_csv(df)
 
     print(f"Data saved to {filename}")

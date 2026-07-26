@@ -99,10 +99,12 @@ behaviour on a synthetic single-gameweek state, history upsert semantics, refit
 round-trip (predictions, not raw coefficients — the feature sets are collinear), and the
 full workbook parity check.
 
-## Retired
+## Retired (deleted; recoverable from git history)
 
 - `extract_fpl_data.py`, `extract_defensive_contributions.py` — ported into `fpl_pipeline/ingest.py`
 - `fpl_data/player_name_changes.csv` — merged into `inputs/name_mappings.csv`
 - All openpyxl workbook writes in `sportsbet.py` / `starting_lineups.py`
-- The modelling scripts (`modelling/`, `strength_modelling/`) remain as historical
-  reference; `tools/refit_coefficients.py` replaces their paste-data-in, copy-coefficients-out workflow
+- `modelling/` and `strength_modelling/` — `tools/refit_coefficients.py` replaces their
+  paste-data-in, copy-coefficients-out workflow
+- `odds_data_outputs/`, `starting_lineups/data.csv`, old workbook copies — dead pipeline
+  leftovers; `outputs/` and `.idea/` untracked (regenerable / IDE config)
