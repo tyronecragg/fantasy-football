@@ -49,6 +49,48 @@ from . import model
 from .io_utils import vlookup
 
 
+def normalize_start_probs(lineups, target=11.0):
+    """Coherence invariant: each team's start probabilities sum to exactly 11 per
+    fixture. Applied at CONSUMPTION (improved-mode builds and odds synthesis) — the
+    stored starting_lineups.csv keeps raw beliefs so declarations like 'Kinský 1.0'
+    are never degraded by repeated re-normalization.
+
+    Over 11: the excess is squeezed out of uncertain players only (certainty = 1.0
+    survives; if 11+ players are certain, everyone scales — a contradiction).
+    Under 11: water-filled up with individual probabilities capped at 1.0."""
+    lineups = lineups.copy()
+    prob_cols = [c for c in lineups.columns if c.startswith("F") and c[1:].isdigit()]
+    for team, idx in lineups.groupby("Team").groups.items():
+        for col in prob_cols:
+            p = lineups.loc[idx, col].astype(float).clip(0.0, 1.0)
+            total = p.sum()
+            if total <= 0:
+                continue
+            if total >= target:
+                certain = p >= 0.999
+                reducible = p[~certain].sum()
+                need = target - p[certain].sum()
+                if need >= 0 and reducible > 0:
+                    p.loc[~certain] *= need / reducible
+                else:
+                    p = p * (target / total)
+            else:
+                capped = pd.Series(False, index=p.index)
+                for _ in range(20):
+                    free = ~capped
+                    free_sum = p[free].sum()
+                    if free_sum <= 0:
+                        break
+                    p.loc[free] *= (target - p[capped].sum()) / free_sum
+                    newly = free & (p >= 1.0)
+                    if not newly.any():
+                        break
+                    p.loc[newly] = 1.0
+                    capped |= newly
+            lineups.loc[idx, col] = p
+    return lineups
+
+
 def _dc_table(dc_stats, params_row):
     """Defensive Contribution sheet equivalent: probability of hitting the DC threshold,
     falling back to the position average for players with under 4 full matches."""
@@ -66,6 +108,8 @@ def _season_lookup(master, keys, season):
 
 def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params,
           improved=True):
+    if improved:
+        lineups = normalize_start_probs(lineups)
     m = pd.DataFrame({
         "Player Name": roster["name"],
         "Position": roster["position"].astype(str),

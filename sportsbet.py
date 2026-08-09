@@ -587,7 +587,7 @@ class ComprehensiveSportsbetScraper:
 
         if not matches:
             print("No matches found")
-            return tuple([[] for _ in range(10)])
+            return tuple([[] for _ in range(9)])
 
         # Discovery mode to find market IDs
         if discover_mode:

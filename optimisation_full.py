@@ -1337,10 +1337,10 @@ def main_weighted_with_bench_value(num_fixtures=5, fixture_weights=None, bench_w
 
 
 if __name__ == "__main__":
-    fixture_weights = [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    fixture_weights = [1.0, 0.9, 0.8, 0.7, 0.6, 0.5]
 
     print("=== SINGLE TEAM OPTIMISATION ===")
-    result = main_weighted_with_bench_value(num_fixtures=6, fixture_weights=fixture_weights, bench_weight=0.05,
+    result = main_weighted_with_bench_value(num_fixtures=6, fixture_weights=fixture_weights, bench_weight=0.25,
                                             total_squad_cost=100)
 
     # print("\n\n=== MULTIPLE TEAMS OPTIMISATION ===")

@@ -16,32 +16,52 @@ coefficients_workbook.json.
 import os
 import sys
 
-from . import history, ingest, markets, model, players, team_model
+from . import config, history, ingest, markets, model, players, reconcile, team_model
 from .io_utils import reset_counter, snapshot
 
 
 def run(parity_mode=False, gameweek=None):
-    reset_counter()
+    reset_counter(subdir="parity" if parity_mode else None)
     improved = not parity_mode
 
+    live_data_dir = config.FPL_DATA_DIR
     if parity_mode:
-        print("Running in parity mode (workbook-exact, improvements disabled)")
+        print(f"Running in parity mode (workbook-exact, improvements disabled, "
+              f"season pinned to {config.PARITY_SEASON})")
+        config.FPL_DATA_DIR = os.path.join(
+            config.ROOT, "fpl_data", "FPL-Core-Insights", "data", config.PARITY_SEASON)
         if os.path.exists(model.WORKBOOK_COEFFICIENTS_JSON):
             print("  using workbook-extracted coefficients (coefficients_workbook.json)")
             model.load_coefficients(model.WORKBOOK_COEFFICIENTS_JSON)
     else:
         model.load_coefficients()
 
-    print("Loading sources...")
-    inputs = ingest.load_inputs()
-    sportsbet = ingest.load_sportsbet()
+    try:
+        return _run(parity_mode, gameweek, improved)
+    finally:
+        config.FPL_DATA_DIR = live_data_dir
 
-    roster = snapshot(ingest.load_fpl_players(), "fpl_players")
-    dc_stats = ingest.load_defensive_contributions()
+
+def _run(parity_mode, gameweek, improved):
+    print("Loading sources...")
+    if parity_mode:
+        inputs = ingest.load_inputs(config.PARITY_INPUTS_DIR)
+        sportsbet = ingest.load_sportsbet(config.PARITY_SPORTSBET_DIR)
+    else:
+        inputs = ingest.load_inputs()
+        sportsbet = ingest.load_sportsbet()
+
+    if parity_mode:
+        # The workbook's own frozen roster/DC data: upstream FPL data rewrites history
+        roster = snapshot(ingest.load_fpl_players_workbook(), "fpl_players")
+        dc_stats = ingest.load_defensive_contributions_workbook()
+    else:
+        roster = snapshot(ingest.load_fpl_players(), "fpl_players")
+        dc_stats = ingest.load_defensive_contributions()
     snapshot(dc_stats["DEF"], "dc_stats_def")
     snapshot(dc_stats["MID"], "dc_stats_mid")
 
-    season = snapshot(team_model.season_probs(inputs), "season_probs")
+    season = snapshot(team_model.season_probs(inputs, workbook_quirks=parity_mode), "season_probs")
     teamview = snapshot(team_model.team_fixture_view(inputs, sportsbet, draw_aware=improved),
                         "team_fixture_view")
 
@@ -49,11 +69,19 @@ def run(parity_mode=False, gameweek=None):
     for key in ("score1", "score2", "assist", "yellow", "clean_sheet", "concede", "gk_saves"):
         snapshot(mkts[key], f"market_{key}")
 
+    # The master must stay snapshot #13 — the optimisers read outputs/13_players_master.csv
+    # by name, so variable-count stages (reconciliation) come after it.
     master = snapshot(
         players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
                       inputs["fallback_factors"], dc_stats, inputs["dc_params"],
                       improved=improved),
         "players_master")
+
+    if improved:
+        rec = reconcile.report(roster, inputs["starting_lineups"], mkts)
+        reconcile.print_summary(rec)
+        if not rec.empty:
+            snapshot(rec, "name_reconciliation")
 
     # Archive updates are destructive (same-gameweek reruns replace rows), so they only
     # happen with an explicit --gw. Inference is a suggestion, never acted on: the FPL

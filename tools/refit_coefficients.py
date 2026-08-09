@@ -63,7 +63,7 @@ def fit_baselines(report, path=None):
     hist = pd.read_csv(path or PLAYER_HISTORY)
     hist = hist.loc[:, ~hist.columns.str.startswith("Unnamed")]
     for col in hist.columns:
-        if col not in ("Player Name", "Position", "Team", "F1 Opponent", "F1 Venue"):
+        if col not in ("Season", "Player Name", "Position", "Team", "F1 Opponent", "F1 Venue"):
             hist[col] = pd.to_numeric(hist[col], errors="coerce")
 
     feats = model._features(hist["F1 Win"], hist["F1 Opponent Win"],
@@ -86,8 +86,9 @@ def fit_baselines(report, path=None):
 def _fixture_perspectives():
     """Each historical fixture yields two training rows (home and away perspective)."""
     hist = pd.read_csv(FIXTURE_HISTORY)
-    for col in hist.columns[2:]:
-        hist[col] = pd.to_numeric(hist[col], errors="coerce")
+    for col in hist.columns:
+        if col not in ("Season", "home_team", "away_team"):
+            hist[col] = pd.to_numeric(hist[col], errors="coerce")
 
     def side(prefix, opp_prefix, home):
         return pd.DataFrame({

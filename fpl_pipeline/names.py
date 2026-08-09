@@ -16,9 +16,11 @@ _cache = {}
 
 
 def _mappings(path=None):
+    from .io_utils import read_csv_tolerant
+
     path = path or NAME_MAPPINGS_CSV
     if path not in _cache:
-        df = pd.read_csv(path)
+        df = read_csv_tolerant(path)
         _cache[path] = {
             kind: dict(zip(sub["name"], sub["name_cleaned"]))
             for kind, sub in df.groupby("type")

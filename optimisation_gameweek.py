@@ -1,7 +1,18 @@
 import os
+import sys
 
 import pandas as pd
 import pulp
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from fpl_pipeline.prices import apply_sell_prices  # noqa: E402
+
+
+def _purchase_csv(source):
+    source = str(source)
+    root = (os.path.dirname(os.path.dirname(os.path.abspath(source)))
+            if source.lower().endswith('.csv') else os.path.dirname(os.path.abspath(source)) or '.')
+    return os.path.join(root, 'inputs', 'purchase_prices.csv')
 
 
 def load_sheet(source, sheet_name='Players'):
@@ -91,6 +102,7 @@ def calculate_current_team_value(excel_file, current_team_names, players_sheet='
     df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
     apply_dgw_adjustment(df)  # TEMPORARY
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
 
     total_value = 0
     player_values = {}
@@ -131,6 +143,7 @@ def analyse_current_team(excel_file, current_team_names, num_fixtures=6, fixture
     df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
     apply_dgw_adjustment(df)  # TEMPORARY
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
 
     # Define fixture columns
     all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP']
@@ -409,6 +422,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
     apply_dgw_adjustment(df)  # TEMPORARY
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
 
     # Define fixture columns and fixtures
     fixtures = [f'F{i + 1}' for i in range(num_fixtures)]
@@ -1340,6 +1354,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
         df = load_sheet(excel_file, 'Players')
         df.columns = df.columns.str.strip()
         apply_dgw_adjustment(df)  # TEMPORARY
+        apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
 
         # Get current team indices
         current_team_indices = []
@@ -1401,13 +1416,13 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 if __name__ == "__main__":
     result = main_multi_transfer_optimiser(
         excel_file="outputs/13_players_master.csv",
-        max_transfers=1,
-        num_fixtures=1,
-        fixture_weights=[1.0, 0.90, 0.80, 0.75, 0.70, 0.65],
+        max_transfers=15,
+        num_fixtures=6,
+        fixture_weights=[1.0, 0.9, 0.8, 0.7, 0.6, 0.5],
         show_current_analysis=False,
-        additional_budget=0.8,
-        bench_weights=[0.2]*6,
-        gk_bench_weights=[0.2]*6,
+        additional_budget=0.0,
+        bench_weights=[0.25]*6,
+        gk_bench_weights=[0.1]*6,
         # bench_weights=[1, 0.2, 0.2, 0.2, 0.2, 0.2],
         # gk_bench_weights=[1, 0.2, 0.2, 0.2, 0.2, 0.2],
         # bench_weights=[0.00001]*6,

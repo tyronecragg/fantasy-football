@@ -1,0 +1,3 @@
+position,threshold,sd,average_dc90
+DEF,10,4.27,0.44
+MID,12,4.2,0.26

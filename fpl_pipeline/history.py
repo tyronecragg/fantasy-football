@@ -38,37 +38,43 @@ def infer_gameweek():
     return gw if 1 <= gw <= 38 else None
 
 
-def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV):
-    """Upsert this gameweek's F1 block into the player history archive."""
-    hist = pd.read_csv(path)
+def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV, season=None):
+    """Upsert this gameweek's F1 block into the player history archive, keyed by
+    (Season, Gameweek) so gameweek numbers can recur across seasons."""
+    season = season or config.SEASON
+    hist = pd.read_csv(path, low_memory=False)
     hist = hist.loc[:, ~hist.columns.str.startswith("Unnamed")]  # legacy sheet padding
 
-    snapshot_cols = [c for c in hist.columns if c != "Gameweek"]
+    snapshot_cols = [c for c in hist.columns if c not in ("Season", "Gameweek")]
     missing = [c for c in snapshot_cols if c not in master.columns]
     if missing:
         raise ValueError(f"master is missing history columns: {missing}")
 
     snapshot = master[snapshot_cols].copy()
     snapshot.insert(0, "Gameweek", gameweek)
+    snapshot.insert(0, "Season", season)
 
     existing_gw = pd.to_numeric(hist["Gameweek"], errors="coerce")
-    replaced = int((existing_gw == gameweek).sum())
-    hist = pd.concat([hist[existing_gw != gameweek], snapshot], ignore_index=True)
+    same = (hist["Season"] == season) & (existing_gw == gameweek)
+    replaced = int(same.sum())
+    hist = pd.concat([hist[~same], snapshot], ignore_index=True)
     hist.to_csv(path, index=False)
 
     action = f"replaced {replaced} rows" if replaced else "appended"
-    print(f"  history: GW{gameweek} player snapshot ({len(snapshot)} rows, {action}) -> {os.path.basename(path)}")
+    print(f"  history: {season} GW{gameweek} player snapshot ({len(snapshot)} rows, {action}) -> {os.path.basename(path)}")
     return hist
 
 
-def update_fixture_history(wdw, season, path=FIXTURE_HISTORY_CSV):
+def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=None):
     """Upsert the upcoming gameweek's fixtures (first 10 scraped matches) with their
-    match odds and both teams' season odds, keyed by (home_team, away_team)."""
+    match odds and both teams' season odds, keyed by (Season, home_team, away_team)."""
+    season = season or config.SEASON
     hist = pd.read_csv(path)
-    season_idx = season.set_index("team")
+    season_idx = season_probs.set_index("team")
 
     f1 = wdw.iloc[:10]
     rows = pd.DataFrame({
+        "Season": season,
         "home_team": f1.iloc[:, 0].values,
         "away_team": f1.iloc[:, 1].values,
         "home_win_odds": f1.iloc[:, 2].values,
@@ -80,7 +86,7 @@ def update_fixture_history(wdw, season, path=FIXTURE_HISTORY_CSV):
         rows[f"{side}_relegation_odds"] = teams.map(season_idx["relegation_odds"]).values
         rows[f"{side}_top_6_odds"] = teams.map(season_idx["top6_odds"]).values
 
-    key_cols = ["home_team", "away_team"]
+    key_cols = ["Season", "home_team", "away_team"]
     new_keys = set(map(tuple, rows[key_cols].values))
     is_replaced = hist[key_cols].apply(tuple, axis=1).isin(new_keys)
     hist = pd.concat([hist[~is_replaced], rows[hist.columns]], ignore_index=True)

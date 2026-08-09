@@ -9,12 +9,13 @@ from .markets import implied
 from .names import apply_team_names
 
 
-def season_probs(inputs):
-    """Replicates the Overall Odds sheet.
+def season_probs(inputs, workbook_quirks=False):
+    """Replicates the Overall Odds sheet: average each row's bookmaker odds, with 0
+    mapped to a 'no market' sentinel (5001 title/top6, 2001 relegation).
 
-    Average each row's bookmaker odds; 0 -> 'no market' sentinel (5001 title/top6,
-    2001 relegation); Man City's relegation odds are taken from the team in sheet row 6
-    ($B$6 quirk); Wolverhampton's 0 relegation odds mean 'already relegated' -> 1.
+    workbook_quirks=True (parity mode only) additionally applies two 2025-26-specific
+    hacks baked into the sheet: Man City's relegation odds taken from the team in sheet
+    row 6 ($B$6), and Wolverhampton's 0 relegation odds meaning 'already relegated' -> 1.
     """
     title, releg, top6 = inputs["title_odds"], inputs["relegation_odds"], inputs["top6_odds"]
 
@@ -24,14 +25,19 @@ def season_probs(inputs):
     title_avg, releg_avg, top6_avg = averages(title), averages(releg), averages(top6)
 
     teams_raw = title["Team"]                     # Overall Odds row order = Title Odds order
-    row6_team = teams_raw.iloc[4]                 # $B$6: 5th data row
 
     title_odds = title_avg.reindex(teams_raw)
     title_odds = title_odds.mask(title_odds == 0, config.SENTINEL_TITLE_TOP6)
 
     r = releg_avg.reindex(teams_raw)
-    releg_odds = r.mask(r == 0, np.where(teams_raw == "Wolverhampton", 1.0, config.SENTINEL_RELEGATION))
-    releg_odds = releg_odds.mask((teams_raw == "Man City").values, releg_avg.get(row6_team, np.nan))
+    if workbook_quirks:
+        row6_team = teams_raw.iloc[4]             # $B$6: 5th data row
+        releg_odds = r.mask(r == 0, np.where(teams_raw == "Wolverhampton", 1.0,
+                                             config.SENTINEL_RELEGATION))
+        releg_odds = releg_odds.mask((teams_raw == "Man City").values,
+                                     releg_avg.get(row6_team, np.nan))
+    else:
+        releg_odds = r.mask(r == 0, config.SENTINEL_RELEGATION)
 
     top6_odds = top6_avg.reindex(teams_raw)
     top6_odds = top6_odds.mask(top6_odds == 0, config.SENTINEL_TITLE_TOP6)

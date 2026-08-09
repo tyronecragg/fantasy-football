@@ -1,0 +1,11 @@
+home_team,away_team,home_odds,draw_odds,away_odds,home_line,home_over,home_under,away_line,away_over,away_under
+Arsenal,Coventry City,1.18,7.20,16.00,2.5,1.93,1.81,0.5,2.26,1.59
+Hull City,Man Utd,7.20,4.70,1.43,0.5,1.75,2.00,1.5,1.55,2.36
+Everton,Crystal Palace,2.15,3.45,3.40,1.5,2.05,1.72,1.5,2.75,1.41
+Nott'm Forest,Leeds,2.25,3.40,3.20,1.5,2.13,1.67,1.5,2.70,1.44
+Ipswich Town,Sunderland,2.70,3.35,2.60,1.5,2.47,1.50,1.5,2.40,1.53
+Brentford,Spurs,2.31,3.65,2.90,1.5,1.93,1.81,1.5,2.20,1.62
+Man City,Bournemouth,1.47,5.00,5.80,2.5,2.14,1.66,0.5,1.42,2.75
+Brighton,Aston Villa,2.30,3.65,2.90,1.5,1.89,1.85,1.5,2.17,1.64
+Newcastle,Liverpool,2.90,3.85,2.23,1.5,2.05,1.72,1.5,1.77,1.98
+Fulham,Chelsea,3.10,3.65,2.20,1.5,2.29,1.58,1.5,1.87,1.87

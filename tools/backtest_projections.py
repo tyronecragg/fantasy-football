@@ -51,6 +51,8 @@ def load_archive():
     df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
     for col in NUMERIC:
         df[col] = pd.to_numeric(df[col], errors="coerce")
+    if "Season" not in df.columns:
+        df["Season"] = "unknown"
     return df
 
 
@@ -62,6 +64,14 @@ def team_probs_by_gw(archive):
 
 
 def build_pairs(archive):
+    """Forecast-vs-actual pairs, built within each season (gameweek numbers recur)."""
+    out = []
+    for _, season_archive in archive.groupby("Season"):
+        out.extend(_build_season_pairs(season_archive))
+    return pd.concat(out, ignore_index=True)
+
+
+def _build_season_pairs(archive):
     gws = sorted(archive["Gameweek"].dropna().unique())
     team_probs = team_probs_by_gw(archive)
     out = []
@@ -131,7 +141,7 @@ def build_pairs(archive):
                 })
                 out.append(rows[rows["actual"].notna() & rows["persistence"].notna()])
 
-    return pd.concat(out, ignore_index=True)
+    return out
 
 
 def _metrics(pred, actual):

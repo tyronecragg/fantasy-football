@@ -1,11 +1,21 @@
-home_team,away_team,home_win_odds,away_win_odds
-Brighton,Man Utd,1.8,3.8
-Burnley,Wolves,2.3,2.87
-Man City,Aston Villa,1.28,9.0
-Fulham,Newcastle,2.8,2.3
-Sunderland,Chelsea,3.5,2.0
-Crystal Palace,Arsenal,4.2,1.8
-Liverpool,Brentford,1.83,3.75
-Nott'm Forest,Bournemouth,3.4,2.0
-Spurs,Everton,1.9,4.0
-West Ham,Leeds,1.75,4.2
+home_team,away_team,home_win_odds,away_win_odds,draw_odds
+Arsenal,Coventry City,1.18,16.0,7.2
+Hull City,Man Utd,7.2,1.43,4.7
+Everton,Crystal Palace,2.15,3.4,3.45
+Nott'm Forest,Leeds,2.25,3.2,3.4
+Ipswich Town,Sunderland,2.7,2.6,3.35
+Brentford,Spurs,2.31,2.9,3.65
+Man City,Bournemouth,1.47,5.8,5.0
+Brighton,Aston Villa,2.3,2.9,3.65
+Newcastle,Liverpool,2.9,2.23,3.85
+Fulham,Chelsea,3.1,2.2,3.65
+Crystal Palace,Man City,3.53,1.97,4.2
+Liverpool,Nott'm Forest,1.58,5.29,4.85
+Bournemouth,Everton,2.21,3.16,3.84
+Coventry City,Hull City,2.08,3.53,3.77
+Spurs,Newcastle,1.96,3.62,4.09
+Chelsea,Brighton,1.75,4.28,4.42
+Leeds,Brentford,2.28,3.03,3.82
+Sunderland,Fulham,2.32,2.98,3.8
+Man Utd,Ipswich Town,1.38,7.47,5.79
+Aston Villa,Arsenal,3.16,2.11,4.18
