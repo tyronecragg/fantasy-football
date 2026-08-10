@@ -142,6 +142,12 @@ def load_sportsbet(base_dir=None):
             for key, fname in SPORTSBET_FILES.items()}
 
 
+# Optional inputs: absent file -> empty frame with these columns (no error)
+OPTIONAL_INPUT_FILES = {
+    "season_odds_corrections": ("season_odds_corrections.csv",
+                                ["market", "Team", "corrected_odds", "reason"]),
+}
+
 INPUT_FILES = {
     "title_odds": "title_odds.csv",
     "relegation_odds": "relegation_odds.csv",
@@ -157,5 +163,9 @@ INPUT_FILES = {
 
 def load_inputs(base_dir=None):
     base_dir = base_dir or config.INPUTS_DIR
-    return {key: read_csv_tolerant(os.path.join(base_dir, fname))
-            for key, fname in INPUT_FILES.items()}
+    out = {key: read_csv_tolerant(os.path.join(base_dir, fname))
+           for key, fname in INPUT_FILES.items()}
+    for key, (fname, columns) in OPTIONAL_INPUT_FILES.items():
+        path = os.path.join(base_dir, fname)
+        out[key] = read_csv_tolerant(path) if os.path.exists(path) else pd.DataFrame(columns=columns)
+    return out

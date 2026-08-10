@@ -73,3 +73,20 @@ def test_fallback_factors_only_overwrite_with_real_values(tmp_path):
     assert out.loc["A", history.FACTOR_COLUMNS[1]] == 1.0   # NaN does NOT overwrite
     assert out.loc["B", history.FACTOR_COLUMNS[0]] == 2.0   # absent player untouched
     assert out.loc["C", history.FACTOR_COLUMNS[0]] == 4.0   # new player appended
+
+
+def test_season_weekly_factors(tmp_path):
+    path = str(tmp_path / "hist.csv")
+    rows = []
+    for gw, prob in ((16, 0.6), (17, 0.5), (18, 0.66)):
+        rows.append({"Season": "2025-2026", "Gameweek": gw, "Player Name": "A",
+                     "Position": "FWD", "F1 Venue": "H", "F1 Win": 0.5,
+                     "F1 Opponent Win": 0.3, "F1 Score 1+": prob})
+    rows.append({"Season": "2024-2025", "Gameweek": 16, "Player Name": "A",
+                 "Position": "FWD", "F1 Venue": "H", "F1 Win": 0.5,
+                 "F1 Opponent Win": 0.3, "F1 Score 1+": 0.99})  # other season: excluded
+    pd.DataFrame(rows).to_csv(path, index=False)
+
+    out = history.season_weekly_factors("score1", season="2025-2026", path=path)
+    assert set(out) == {"A"} and len(out["A"]) == 3
+    assert history.season_weekly_factors("score1", season="2026-2027", path=path) == {}

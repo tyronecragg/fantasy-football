@@ -96,6 +96,33 @@ def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=N
     return hist
 
 
+def season_weekly_factors(stat="score1", season=None, path=PLAYER_HISTORY_CSV):
+    """Per-player arrays of this season's weekly odds factors for `stat`, from the
+    archive. Feeds the trailing-median factor (factor experiment 2026-08: median
+    improved score-projection holdout MAE ~5%; assists were WORSE with median, so
+    only score uses this). Empty dict early in a season — behaviour then reduces to
+    the single-week factor."""
+    from . import model
+
+    season = season or config.SEASON
+    if not os.path.exists(path):
+        return {}
+    hist = pd.read_csv(path, low_memory=False)
+    hist = hist[hist["Season"] == season]
+    if hist.empty:
+        return {}
+    prob_col = {"score1": "F1 Score 1+", "assist": "F1 Assist",
+                "yellow": "F1 Yellow Card", "clean_sheet": "F1 Clean Sheet",
+                "concede2": "F1 Concede 2+ Goals", "concede4": "F1 Concede 4+ Goals",
+                "saves3": "F1 3+ Saves", "saves6": "F1 6+ Saves"}[stat]
+    for c in ("F1 Win", "F1 Opponent Win", prob_col):
+        hist[c] = pd.to_numeric(hist[c], errors="coerce")
+    f = hist[prob_col] / model.baseline(stat, hist["F1 Win"], hist["F1 Opponent Win"],
+                                        hist["Position"], hist["F1 Venue"] == "H")
+    frame = pd.DataFrame({"player": hist["Player Name"], "factor": f}).dropna()
+    return {p: g["factor"].to_numpy() for p, g in frame.groupby("player")}
+
+
 def refresh_fallback_factors(master, path=FALLBACK_FACTORS_CSV):
     """Update stored per-player factors from the latest run. Only players with F1 odds
     contribute, and only their non-NaN factors overwrite existing values, so a player

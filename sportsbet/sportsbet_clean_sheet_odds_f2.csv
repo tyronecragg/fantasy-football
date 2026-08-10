@@ -1,5 +1,5 @@
 match_name,date,team_name,clean_sheet_yes,clean_sheet_no
-Crystal Palace v Man City,1788030000,Crystal Palace,4.62,1.2
+Crystal Palace v Man City,1788030000,Crystal Palace,4.76,1.19
 Liverpool v Nott'm Forest,1788030000,Liverpool,2.44,1.56
 Bournemouth v Everton,1788030000,Bournemouth,3.15,1.36
 Coventry City v Hull City,1788030000,Coventry City,3.03,1.39
@@ -9,7 +9,7 @@ Leeds v Brentford,1788030000,Leeds,3.22,1.35
 Sunderland v Fulham,1788030000,Sunderland,3.25,1.35
 Man Utd v Ipswich Town,1788030000,Man Utd,2.17,1.7
 Aston Villa v Arsenal,1788030000,Aston Villa,4.19,1.23
-Man City v Crystal Palace,1788030000,Man City,2.85,1.43
+Man City v Crystal Palace,1788030000,Man City,2.8,1.44
 Nott'm Forest v Liverpool,1788030000,Nott'm Forest,6.41,1.12
 Everton v Bournemouth,1788030000,Everton,4.11,1.24
 Hull City v Coventry City,1788030000,Hull City,4.53,1.21

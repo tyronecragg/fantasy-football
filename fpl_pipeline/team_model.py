@@ -24,6 +24,19 @@ def season_probs(inputs, workbook_quirks=False):
 
     title_avg, releg_avg, top6_avg = averages(title), averages(releg), averages(top6)
 
+    # Season-odds corrections (improved mode): override market odds that don't reflect
+    # footballing strength — e.g. Man City's relegation odds pricing points-deduction
+    # legal risk. The successor to the workbook's $B$6 hack, but explicit and reasoned.
+    corrections = inputs.get("season_odds_corrections")
+    if not workbook_quirks and corrections is not None and len(corrections):
+        by_market = {"title": title_avg, "relegation": releg_avg, "top6": top6_avg}
+        for _, c in corrections.iterrows():
+            series = by_market.get(str(c["market"]).lower())
+            if series is not None and c["Team"] in series.index:
+                print(f"  season-odds correction: {c['Team']} {c['market']} "
+                      f"{series[c['Team']]:.0f} -> {c['corrected_odds']:.0f} ({c['reason'][:60]}...)")
+                series[c["Team"]] = float(c["corrected_odds"])
+
     teams_raw = title["Team"]                     # Overall Odds row order = Title Odds order
 
     title_odds = title_avg.reindex(teams_raw)

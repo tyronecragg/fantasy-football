@@ -44,3 +44,15 @@ def test_season_probs_shape_and_cleanup(inputs):
     assert set(apply_team_names(season["team_raw"])) == set(season["team"])
     valid = season["title"].notna()
     assert np.allclose(season.loc[valid, "title"], 1 / season.loc[valid, "title_odds"] / 1.08)
+
+
+def test_season_odds_corrections_applied_in_improved_mode_only(inputs):
+    corrected = dict(inputs)
+    corrected["season_odds_corrections"] = pd.DataFrame([
+        {"market": "relegation", "Team": "Man City", "corrected_odds": 750.0, "reason": "test"}])
+
+    improved = team_model.season_probs(corrected).set_index("team")
+    assert abs(improved.loc["Man City", "relegation_odds"] - 750.0) < 1e-9
+
+    parity = team_model.season_probs(corrected, workbook_quirks=True).set_index("team")
+    assert parity.loc["Man City", "relegation_odds"] != 750.0  # quirks mode ignores corrections

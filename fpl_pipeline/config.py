@@ -41,6 +41,14 @@ TOTAL_XP_WEIGHTS = [1.0, 0.85, 0.7, 0.7, 0.7, 0.7]
 # absent here backtested best at w=1.0 (pure model) and are not blended.
 PROJECTION_BLEND = {"score1": 0.70, "assist": 0.85, "saves3": 0.85}
 
+# Stats whose live factor is the trailing MEDIAN of this season's weekly factors
+# (factor experiment 2026-08: median beat single-week on holdout for all of these —
+# yellow by 14%, concede2 7%, score1/saves3 5%, clean_sheet 4%, concede4/saves6
+# confirmed; ASSIST was consistently WORSE with median in both splits — role changes
+# outpace smoothing — so it stays single-week).
+MEDIAN_FACTOR_STATS = ("score1", "yellow", "clean_sheet", "concede2", "concede4",
+                       "saves3", "saves6")
+
 POSITION_MAP = {
     "Goalkeeper": "GK",
     "Defender": "DEF",

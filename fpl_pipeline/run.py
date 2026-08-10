@@ -20,7 +20,23 @@ from . import config, history, ingest, markets, model, players, reconcile, team_
 from .io_utils import reset_counter, snapshot
 
 
-def run(parity_mode=False, gameweek=None):
+def guard_synthetic_archive(gameweek, force=False):
+    """Refuse --gw archive recording while the player odds are pre-season placeholders.
+
+    tools/build_preseason_data.py drops sportsbet/SYNTHETIC_NOTE.txt when it writes
+    synthetic odds; sportsbet.py removes it after a real player-market scrape. Archiving
+    synthetic odds would poison the trailing-median factors, so it needs --force-archive.
+    """
+    note = os.path.join(config.SPORTSBET_DIR, "SYNTHETIC_NOTE.txt")
+    if gameweek and os.path.exists(note) and not force:
+        raise SystemExit(
+            f"Refusing to record GW{gameweek} archives: {note} says the player odds are "
+            f"synthetic pre-season placeholders. Run sportsbet.py for real odds first, "
+            f"or pass --force-archive if you really mean it.")
+
+
+def run(parity_mode=False, gameweek=None, force_archive=False):
+    guard_synthetic_archive(gameweek, force_archive)
     reset_counter(subdir="parity" if parity_mode else None)
     improved = not parity_mode
 
@@ -71,10 +87,18 @@ def _run(parity_mode, gameweek, improved):
 
     # The master must stay snapshot #13 — the optimisers read outputs/13_players_master.csv
     # by name, so variable-count stages (reconciliation) come after it.
+    factor_history = None
+    if improved:
+        factor_history = {stat: h for stat in config.MEDIAN_FACTOR_STATS
+                          if (h := history.season_weekly_factors(stat))}
+        if factor_history:
+            print(f"  trailing-median factors active for {len(factor_history)} stats "
+                  f"({len(next(iter(factor_history.values())))} players with archive weeks)")
+
     master = snapshot(
         players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
                       inputs["fallback_factors"], dc_stats, inputs["dc_params"],
-                      improved=improved),
+                      improved=improved, factor_history=factor_history),
         "players_master")
 
     if improved:
@@ -111,7 +135,8 @@ def _parse_gw(argv):
 
 if __name__ == "__main__":
     parity = "--validate" in sys.argv
-    master = run(parity_mode=parity, gameweek=_parse_gw(sys.argv))
+    master = run(parity_mode=parity, gameweek=_parse_gw(sys.argv),
+                 force_archive="--force-archive" in sys.argv)
     if parity:
         from . import validate
         validate.run(master)

@@ -63,15 +63,19 @@ def team_probs_by_gw(archive):
     return {gw: sub.set_index("Team") for gw, sub in t.groupby("Gameweek")}
 
 
-def build_pairs(archive):
-    """Forecast-vs-actual pairs, built within each season (gameweek numbers recur)."""
+def build_pairs(archive, factor_overrides=None):
+    """Forecast-vs-actual pairs, built within each season (gameweek numbers recur).
+
+    factor_overrides: optional {stat: {(player, gameweek): factor}} — replaces the
+    default single-week odds/baseline factor where a value exists (used by
+    tools/factor_experiment.py to evaluate alternative factor constructions)."""
     out = []
     for _, season_archive in archive.groupby("Season"):
-        out.extend(_build_season_pairs(season_archive))
+        out.extend(_build_season_pairs(season_archive, factor_overrides))
     return pd.concat(out, ignore_index=True)
 
 
-def _build_season_pairs(archive):
+def _build_season_pairs(archive, factor_overrides=None):
     gws = sorted(archive["Gameweek"].dropna().unique())
     team_probs = team_probs_by_gw(archive)
     out = []
@@ -117,6 +121,10 @@ def _build_season_pairs(archive):
                 actual = pair[f"{col}_n"]
                 factor = prob_m / model.baseline(stat, pair["F1 Win_m"],
                                                  pair["F1 Opponent Win_m"], pos, home_m)
+                if factor_overrides and stat in factor_overrides:
+                    fmap = factor_overrides[stat]
+                    override = pair["Player Name"].map(lambda p: fmap.get((p, m), np.nan))
+                    factor = override.where(override.notna(), factor)
 
                 pred = (factor * model.baseline(stat, win_hat, opp_hat, pos, home_n)).clip(0, 1)
                 oracle = (factor * model.baseline(stat, pair["F1 Win_n"],

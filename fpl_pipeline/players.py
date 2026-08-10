@@ -26,12 +26,15 @@ Improved mode (build(..., improved=True); parity mode = improved=False is workbo
    on P(score 1+) (model.poisson_score2/3) instead of the workbook's step ladders —
    which include an exact `p == 0.3` float-equality branch. F1 Score 2+ stays pure
    odds; F1 Score 3+ (no market exists) uses the same smooth curve.
-8. F2 score uses the generic factor x baseline instead of the workbook's
+8. F7/F8 fixture projections: same machinery as F3-F6, extending the optimiser's
+   horizon to eight gameweeks (start probabilities reuse the F6 belief; Total XP
+   remains the workbook's 6-fixture blend).
+9. F2 score uses the generic factor x baseline instead of the workbook's
    Coefficients-sheet score model. Backtested (tools/backtest_projections.py): the
    sheet model's MAE is 0.063 even given the fixture's actual odds, vs 0.019 for the
    generic machinery — the factor is calibrated against the full baseline, so
    multiplying it into a different model family breaks its scale.
-9. Persistence blend: modelled F2-F6 score/assist/saves probabilities are blended with
+10. Persistence blend: modelled F2-F6 score/assist/saves probabilities are blended with
    the player's current F1 odds-implied probability at backtested weights
    (config.PROJECTION_BLEND). Other stats backtested best as pure model.
 """
@@ -107,7 +110,7 @@ def _season_lookup(master, keys, season):
 
 
 def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params,
-          improved=True):
+          improved=True, factor_history=None):
     if improved:
         lineups = normalize_start_probs(lineups)
     m = pd.DataFrame({
@@ -144,10 +147,12 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     # Season probabilities (Overall Odds)
     m["Title"], m["Relegation"], m["Top 6"] = _season_lookup(m, team, season)
 
-    # Start probabilities: Starting Lineups cols C:H, missing player -> 0
+    # Start probabilities: Starting Lineups cols C:H, missing player -> 0.
+    # Beliefs only extend six fixtures out; F7/F8 (improved mode) reuse the F6 belief.
     lineup_cols = list(lineups.columns)
-    for k in range(1, 7):
-        m[f"_start{k}"] = vlookup(name, lineups, lineup_cols[0], lineup_cols[1 + k]).fillna(0.0)
+    for k in range(1, 9):
+        m[f"_start{k}"] = vlookup(name, lineups, lineup_cols[0],
+                                  lineup_cols[1 + min(k, 6)]).fillna(0.0)
 
     # Defensive contribution probabilities (position-gated, 0 for other positions)
     prm = dc_params.set_index("position")
@@ -192,13 +197,25 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         ("F1 3+ Saves Factor", "F1 3+ Saves", "saves3", 6),
         ("F1 6+ Saves Factor", "F1 6+ Saves", "saves6", 7),
     ]
+    def _median_with_history(stat, computed):
+        """Trailing-median factor: this season's archived weekly factors + the current
+        week (backtested better than single-week for every stat except assist)."""
+        hist = (factor_history or {}).get(stat)
+        if not (improved and hist):
+            return computed
+        return pd.Series(
+            [np.median(np.append(hist[p], c)) if (p in hist and np.isfinite(c)) else c
+             for p, c in zip(name, computed)], index=computed.index)
+
     for col, prob_col, stat, fb_idx in factor_specs:
         computed = m[prob_col] / model.baseline(stat, m["F1 Win"], m["F1 Opponent Win"], pos, home1)
+        computed = _median_with_history(stat, computed)
         fb = vlookup(name, fallback, fb_cols[0], fb_cols[fb_idx])
         m[col] = computed.where(have_odds, fb)
 
-    m["Clean Sheet Factor"] = m["F1 Clean Sheet"] / model.baseline(
-        "clean_sheet", m["F1 Win"], m["F1 Opponent Win"], pos, home1)
+    m["Clean Sheet Factor"] = _median_with_history(
+        "clean_sheet", m["F1 Clean Sheet"] / model.baseline(
+            "clean_sheet", m["F1 Win"], m["F1 Opponent Win"], pos, home1))
 
     def xp_block(prefix, start, stats):
         pre = model.xp_pre(pos, start, stats)
@@ -284,8 +301,11 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         "dc_def": m["F2 Defensive Contribution - DEF"], "dc_mid": m["F2 Defensive Contribution - MID"],
     })
 
-    # ---- F3..F6: fully model-driven ----
-    for k in range(3, 7):
+    # ---- F3..F6 (parity) / F3..F8 (improved): fully model-driven ----
+    # F7/F8 exist only in improved mode: the workbook never computed them, and the
+    # fixture data (opponents/venues through F8) has always been available. They give
+    # the transfer optimiser a two-month horizon; Total XP stays the 6-fixture blend.
+    for k in range(3, 9 if improved else 7):
         p = f"F{k}"
         m[f"{p} Start"] = m[f"_start{k}"]
         m[f"{p} Opponent"] = vlookup(team, teamview, "team", f"f{k}_opponent")

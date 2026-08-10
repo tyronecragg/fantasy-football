@@ -123,3 +123,26 @@ def test_parity_mode_uses_ladders(gw1_inputs, sportsbet, roster, dc_stats):
     got = mp["F3 Score 2+"]
     expected = model.ladder_score2(mp["F3 Score 1+"])
     pd.testing.assert_series_equal(got, expected, check_names=False)
+
+
+def test_trailing_median_score_factor(gw1_inputs, sportsbet, roster, dc_stats):
+    from fpl_pipeline import markets as mk, team_model as tm, players as pl
+    season = tm.season_probs(gw1_inputs)
+    tv = tm.team_fixture_view(gw1_inputs, sportsbet, draw_aware=True)
+    mkts = mk.build_all(sportsbet, gw1_inputs, dedup_f2=True)
+
+    base = pl.build(roster, season, tv, mkts, gw1_inputs["starting_lineups"],
+                    gw1_inputs["fallback_factors"], dc_stats, gw1_inputs["dc_params"],
+                    improved=True)
+    current = base.set_index("Player Name").loc["Erling Haaland", "Score 1+ Factor"]
+
+    hist = {"score1": {"Erling Haaland": np.array([current + 1.0, current + 2.0])}}
+    blended = pl.build(roster, season, tv, mkts, gw1_inputs["starting_lineups"],
+                       gw1_inputs["fallback_factors"], dc_stats, gw1_inputs["dc_params"],
+                       improved=True, factor_history=hist)
+    got = blended.set_index("Player Name").loc["Erling Haaland", "Score 1+ Factor"]
+    assert abs(got - (current + 1.0)) < 1e-9   # median of [c+1, c+2, c]
+    # players without history keep the single-week factor
+    other = "Bukayo Saka"
+    assert abs(blended.set_index("Player Name").loc[other, "Score 1+ Factor"]
+               - base.set_index("Player Name").loc[other, "Score 1+ Factor"]) < 1e-9

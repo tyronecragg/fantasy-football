@@ -11,14 +11,41 @@ The workbook itself is retired — kept only as a frozen reference for parity va
 
 The whole loop, in order (N = the upcoming gameweek):
 
+One-command version (recommended) — `weekly_update.py` runs the steps below with
+preflights (Excel file locks, Sportsbet VPN check) and pauses between phases for
+the lineup curation:
+
+```
+python weekly_update.py                       # phase 1: FPL data + odds + FFS staging
+                                              #   ... curate lineups with Claude ...
+python weekly_update.py --resume --gw N       # phase 2: fixtures + projections + optimiser
+```
+
+Or step by step:
+
 ```
 git -C fpl_data/FPL-Core-Insights pull        # 1. latest FPL data (players, prices, stats)
 python sportsbet.py                           # 2. scrape match + player odds
-python starting_lineups.py                    # 3. scrape predicted lineups (keeps your prob edits)
+python starting_lineups.py                    # 3. stage FFS predicted lineups (prints diff vs curated)
+                                              # 3b. curate start probabilities with Claude (see below)
 python tools/build_fixtures.py --gw N         # 4. regenerate the F1-F8 fixture window
 python -m fpl_pipeline.run --gw N             # 5. build projections + record archives
 env\Scripts\python optimisation_gameweek.py   # 6. transfer advice (PuLP, needs the venv)
 ```
+
+Archive safety: while `sportsbet/SYNTHETIC_NOTE.txt` exists (pre-season placeholder
+player odds), `--gw` archive recording refuses to run — `sportsbet.py` removes the
+note automatically after a real player-market scrape, or override deliberately with
+`--force-archive`.
+
+Step 3b: the FFS scrape only **stages** its output — predicted XIs to
+`inputs/ffs_predicted_lineups.csv` (with a printed diff vs the curated lineups, accent-folded
+so only real disagreements show) and the per-team write-ups (next match, out/doubts with FFS
+percentages, bans, latest-news paragraphs) to `inputs/ffs_team_news.md`. It never overwrites
+the curated file. The curated `starting_lineups.csv` (graded probabilities, the pipeline's
+actual input) is maintained weekly in conversation with Claude, who folds together the FFS
+predictions, the staged write-ups, wider team news, and your feedback files. FFS is a signal,
+not an authority.
 
 Steps 1–5 use plain Python; only step 6 needs the repo virtualenv. Re-running step 5 for
 the same gameweek replaces that week's archive rows, so it's safe to iterate. Omit
@@ -32,9 +59,12 @@ Around the commands:
   re-run); the history lines confirm what was recorded.
 - **When there's team news**, before step 5: add injuries/suspensions/sales to
   `inputs/unavailable_players.csv` (and remove recovered players), adjust
-  `inputs/lineup_overrides.csv` for start-probability judgement calls, and/or edit the
-  F1–F6 probabilities in `inputs/starting_lineups.csv` directly. Editing any input CSV
-  in Excel is fine — the loaders repair Excel's ANSI re-saves automatically.
+  `inputs/lineup_overrides.csv` for start-probability judgement calls, then apply them
+  with `python tools/build_preseason_data.py --lineups-only` (patches the lineups and
+  touches nothing else — safe after real odds are scraped; the tool's full mode would
+  overwrite real odds with synthetic ones). Or edit the F1–F6 probabilities in
+  `inputs/starting_lineups.csv` directly. Editing any input CSV in Excel is fine —
+  the loaders repair Excel's ANSI re-saves automatically.
 - **After making your transfers**, record the new squad in the `GW{N}` column of
   `inputs/gw_teams.csv` — that's what the next week's transfer optimiser starts from —
   and add each new signing to `inputs/purchase_prices.csv` at the price you paid
@@ -57,12 +87,15 @@ Around the commands:
 | `fixtures.csv` | `tools/build_fixtures.py --gw N` | F1–F8 window; hand-edit after generating for postponements/DGWs |
 | `title_odds.csv`, `relegation_odds.csv`, `top6_odds.csv` | you, occasionally | one row per team, paste odds into `book_*` columns; blanks ignored, filled columns averaged |
 | `gw1_match_odds.csv` | pre-season only | pasted 1X2 + total-goals lines; obsolete once `sportsbet.py` works |
-| `starting_lineups.csv` | **curated** (Claude + your feedback), patched by the pre-season tool; in-season `starting_lineups.py` refreshes the roster | XIs are picked with judgement, not the algorithm; teams may carry >11 rows with graded probabilities. `tools/build_preseason_data.py --rebuild-lineups` regenerates algorithmically (discards curation) |
+| `starting_lineups.csv` | **curated** (Claude, weekly: FFS staging + news + your feedback) | the pipeline's actual start-prob input; graded probabilities, teams may carry >11 rows; never overwritten by scrapers. `--rebuild-lineups` regenerates algorithmically (discards curation) |
+| `ffs_predicted_lineups.csv` | `starting_lineups.py` | staged FFS predicted XIs — curation input only, nothing reads it directly |
+| `ffs_team_news.md` | `starting_lineups.py` | staged FFS write-ups (outs, graded doubts, bans, news paragraphs) — weekly curation reading, nothing reads it directly |
 | `lineup_overrides.csv` | you | `Player,start_prob,replaces` — judgement calls applied after XI selection (pre-season tool) |
 | `unavailable_players.csv` | you | `Player,reason` — excluded before XI selection (pre-season tool) |
 | `gw_teams.csv` | you, weekly | your squad per gameweek; rightmost filled column = current team |
 | `name_mappings.csv` | you, from reconciliation suggestions | `type,name,name_cleaned`; single source for all renames |
 | `purchase_prices.csv` | you/Claude, on every transfer | what you paid per squad player; drives FPL sell prices (rise banked at half, falls in full) — the transfer optimiser values owned players at sell price, not market |
+| `season_odds_corrections.csv` | you/Claude, rarely (optional) | `market,Team,corrected_odds,reason` — overrides market season odds that don't reflect footballing strength (e.g. Man City relegation odds pricing points-deduction legal risk); improved mode only |
 | `dc_params.csv` | you, once a season | DC threshold SD / average per position |
 | `fallback_factors.csv` | pipeline (`--gw` runs / pre-season tool) | never edit; per-player factors on the current coefficient scale |
 | `historical_player_data.csv`, `historical_fixture_odds.csv` | pipeline (`--gw` runs) | season-keyed training archives; never edit |
@@ -125,6 +158,7 @@ Documented with rationale in `fpl_pipeline/players.py`; all are disabled in pari
 | Poisson score curves | Smooth P(score 2+/3+) from P(score 1+) instead of step ladders (which had an exact `p == 0.3` branch) |
 | Generic F2 score model | The workbook's Coefficients-sheet F2 score formula mixed model families (factor calibrated on one model, applied to another): backtested MAE 0.063 even with perfect odds vs 0.019 for the generic factor × baseline now used |
 | Persistence blend | Modelled F2–F6 score/assist/saves probabilities blended with the player's current F1 odds-implied probability at backtested weights (`config.PROJECTION_BLEND`: 0.70/0.85/0.85) — ~10% error reduction on score projections |
+| F7–F8 horizon | Two extra fully-modelled fixtures (the fixture data always went to F8) so the optimisers can plan two months out with `num_fixtures=8`; decay the tail harder (e.g. …0.5, 0.35, 0.25). Start probabilities reuse the F6 belief; Total XP stays the 6-fixture blend |
 
 ### Projection quality (backtested)
 

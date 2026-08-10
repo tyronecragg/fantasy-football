@@ -470,8 +470,16 @@ def patch_lineups(roster):
     return lineups
 
 
-def main(rebuild_lineups=False):
+def main(rebuild_lineups=False, lineups_only=False):
     roster = ingest.load_fpl_players()
+
+    if lineups_only:
+        # In-season safe mode: apply unavailable_players/lineup_overrides to the
+        # lineups and STOP — never touches the odds files (which hold real scraped
+        # markets once the season is running).
+        patch_lineups(roster)
+        return
+
     inputs = ingest.load_inputs()
     season = team_model.season_probs(inputs)
 
@@ -490,4 +498,5 @@ def main(rebuild_lineups=False):
 
 
 if __name__ == "__main__":
-    main(rebuild_lineups="--rebuild-lineups" in sys.argv)
+    main(rebuild_lineups="--rebuild-lineups" in sys.argv,
+         lineups_only="--lineups-only" in sys.argv)

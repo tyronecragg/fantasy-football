@@ -22,8 +22,8 @@ def optimise_fpl_team_with_weekly_lineups_and_bench_value(excel_file, num_fixtur
                                                           total_squad_cost=100.0):
 
     # Validate num_fixtures parameter
-    if not isinstance(num_fixtures, int) or num_fixtures < 1 or num_fixtures > 6:
-        print("Error: num_fixtures must be an integer between 1 and 6")
+    if not isinstance(num_fixtures, int) or num_fixtures < 1 or num_fixtures > 8:
+        print("Error: num_fixtures must be an integer between 1 and 8")
         return None, None, None, None, None, None
 
     # Set default fixture weights if not provided
@@ -55,7 +55,7 @@ def optimise_fpl_team_with_weekly_lineups_and_bench_value(excel_file, num_fixtur
     df.columns = df.columns.str.strip()
 
     # Define fixture columns based on num_fixtures parameter
-    all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP']
+    all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP', 'F7 XP', 'F8 XP']
     fixture_columns = all_fixture_columns[:num_fixtures]
     fixtures = [f'F{i + 1}' for i in range(num_fixtures)]
 
@@ -653,11 +653,11 @@ def optimise_with_starting_exclusions_weighted_with_bench(excel_file, num_fixtur
     df.columns = df.columns.str.strip()
 
     # Validate num_fixtures parameter
-    if not isinstance(num_fixtures, int) or num_fixtures < 1 or num_fixtures > 6:
+    if not isinstance(num_fixtures, int) or num_fixtures < 1 or num_fixtures > 8:
         return None, None, None, None, None, None, None, None, None, None, None, None
 
     # Define fixture columns
-    all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP']
+    all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP', 'F7 XP', 'F8 XP']
     fixture_columns = all_fixture_columns[:num_fixtures]
     fixtures = [f'F{i + 1}' for i in range(num_fixtures)]
 
@@ -887,11 +887,11 @@ def optimise_with_squad_exclusions_weighted_with_bench(excel_file, num_fixtures,
     df.columns = df.columns.str.strip()
 
     # Validate num_fixtures parameter
-    if not isinstance(num_fixtures, int) or num_fixtures < 1 or num_fixtures > 6:
+    if not isinstance(num_fixtures, int) or num_fixtures < 1 or num_fixtures > 8:
         return None, None, None, None, None, None, None, None, None, None, None, None
 
     # Define fixture columns
-    all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP']
+    all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP', 'F7 XP', 'F8 XP']
     fixture_columns = all_fixture_columns[:num_fixtures]
     fixtures = [f'F{i + 1}' for i in range(num_fixtures)]
 

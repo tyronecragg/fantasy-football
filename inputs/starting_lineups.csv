@@ -1,244 +1,308 @@
 Player,Team,F1,F2,F3,F4,F5,F6
 David Raya,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Gabriel Martinelli,Arsenal,0.75,0.75,0.75,0.75,0.75,0.75
-Cristhian Mosquera,Arsenal,0.75,0.75,0.75,0.75,0.75,0.75
-Viktor Gyokeres,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Eberechi Eze,Arsenal,0.5,0.5,0.5,0.5,0.5,0.5
-Martin Zubimendi,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Martin Odegaard,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Declan Rice,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Riccardo Calafiori,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Piero Hincapie,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
 Gabriel Magalhaes,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Bukayo Saka,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
-Pau Torres,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Joao Gomes,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Emiliano Martinez,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Ezri Konsa,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Ian Maatsen,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Alejandro Garnacho,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Emiliano Buendia,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-John McGinn,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
+Viktor Gyokeres,Arsenal,1.0,1.0,1.0,1.0,1.0,1.0
+Martin Odegaard,Arsenal,0.95,0.95,0.95,0.95,0.95,0.95
+Declan Rice,Arsenal,0.9,0.9,0.9,0.9,0.9,0.9
+Riccardo Calafiori,Arsenal,0.9,0.9,0.9,0.9,0.9,0.9
+Piero Hincapie,Arsenal,0.85,0.85,0.85,0.85,0.85,0.85
+Cristhian Mosquera,Arsenal,0.85,0.85,0.85,0.85,0.85,0.85
+Bruno Guimaraes,Arsenal,0.85,0.85,0.85,0.85,0.85,0.85
+Martin Zubimendi,Arsenal,0.7,0.7,0.7,0.7,0.7,0.7
+Gabriel Martinelli,Arsenal,0.7,0.7,0.7,0.7,0.7,0.7
+Bukayo Saka,Arsenal,0.5,0.8,0.95,0.95,0.95,0.95
+Eberechi Eze,Arsenal,0.5,0.5,0.5,0.5,0.5,0.5
+Christos Tzolis,Arsenal,0.5,0.5,0.5,0.5,0.5,0.5
+Kai Havertz,Arsenal,0.4,0.4,0.4,0.4,0.4,0.4
+Myles Lewis-Skelly,Arsenal,0.4,0.4,0.4,0.4,0.4,0.4
+Max Dowman,Arsenal,0.3,0.3,0.3,0.3,0.3,0.3
+Ethan Nwaneri,Arsenal,0.3,0.3,0.3,0.3,0.3,0.3
 Ollie Watkins,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Johan Manzambi,Aston Villa,0.85,0.85,0.85,0.85,0.85,0.85
+Joao Gomes,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
+John McGinn,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
+Ian Maatsen,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
+Emiliano Martinez,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
+Pau Torres,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
+Ezri Konsa,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
 Matty Cash,Aston Villa,1.0,1.0,1.0,1.0,1.0,1.0
-Adrien Truffert,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Tyler Adams,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Alex Scott,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Bafode Diakite,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
+Johan Manzambi,Aston Villa,0.85,0.85,0.85,0.85,0.85,0.85
+Emiliano Buendia,Aston Villa,0.85,0.85,0.85,0.85,0.85,0.85
+Alejandro Garnacho,Aston Villa,0.8,0.8,0.8,0.8,0.8,0.8
+Ross Barkley,Aston Villa,0.6,0.6,0.6,0.6,0.6,0.6
+Boubacar Kamara,Aston Villa,0.35,0.35,0.35,0.35,0.35,0.35
+Evanilson,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
+James Hill,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
+Marcus Tavernier,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
 Rayan,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
 Djordje Petrovic,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-James Hill,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Evanilson,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Adam Smith,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Marcus Tavernier,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Junior Kroupi,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
-Kristoffer Ajer,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Caoimhin Kelleher,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Nathan Collins,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Sepp van den Berg,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Jaidon Anthony,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Igor Thiago,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Dango Ouattara,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Mathias Jensen,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Mikkel Damsgaard,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Kevin Schade,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
+Alex Scott,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
+Tyler Adams,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
+Adrien Truffert,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0
+Bafode Diakite,Bournemouth,0.8,0.8,0.8,0.8,0.8,0.8
+Adam Smith,Bournemouth,0.75,0.75,0.75,0.75,0.75,0.75
+Junior Kroupi,Bournemouth,0.7,0.7,0.7,0.7,0.7,0.7
+António João Pereira de Albuquerque Tavares da Silva,Bournemouth,0.6,0.6,0.6,0.6,0.6,0.6
+Justin Kluivert,Bournemouth,0.6,0.6,0.6,0.6,0.6,0.6
+Juanlu Sánchez,Bournemouth,0.55,0.55,0.55,0.55,0.55,0.55
 Michael Kayode,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
-Pascal Gross,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Lewis Dunk,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Kaoru Mitoma,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Pascal Struijk,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Ferdi Kadioglu,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Yankuba Minteh,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Georginio Rutter,Brighton,0.6,0.6,0.6,0.6,0.6,0.6
-Jack Hinshelwood,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Luka Vušković,Brighton,0.8,0.8,0.8,0.8,0.8,0.8
+Kevin Schade,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
+Dango Ouattara,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
+Igor Thiago,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
+Nathan Collins,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
+Caoimhin Kelleher,Brentford,1.0,1.0,1.0,1.0,1.0,1.0
+Mathias Jensen,Brentford,0.85,0.85,0.85,0.85,0.85,0.85
+Kristoffer Ajer,Brentford,0.85,0.85,0.85,0.85,0.85,0.85
+Mikkel Damsgaard,Brentford,0.8,0.8,0.8,0.8,0.8,0.8
+Sepp van den Berg,Brentford,0.8,0.8,0.8,0.8,0.8,0.8
+Jaidon Anthony,Brentford,0.7,0.7,0.7,0.7,0.7,0.7
+Mamadou Sangaré,Brentford,0.6,0.6,0.6,0.6,0.6,0.6
+Keane Lewis-Potter,Brentford,0.55,0.55,0.55,0.55,0.55,0.55
+Yehor Yarmoliuk,Brentford,0.5,0.5,0.5,0.5,0.5,0.5
+Vitaly Janelt,Brentford,0.35,0.35,0.35,0.35,0.35,0.35
 Bart Verbruggen,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
+Jack Hinshelwood,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
+Yankuba Minteh,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
+Ferdi Kadioglu,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
+Lewis Dunk,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
+Pascal Gross,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
+Carlos Baleba,Brighton,0.9,0.9,0.9,0.9,0.9,0.9
+Luka Vušković,Brighton,0.8,0.8,0.8,0.8,0.8,0.8
+Pascal Struijk,Brighton,0.8,0.8,0.8,0.8,0.8,0.8
+Georginio Rutter,Brighton,0.75,0.75,0.75,0.75,0.75,0.75
+Yasin Ayari,Brighton,0.6,0.6,0.6,0.6,0.6,0.6
+Maxim De Cuyper,Brighton,0.55,0.55,0.55,0.55,0.55,0.55
+Diego Gomez,Brighton,0.5,0.5,0.5,0.5,0.5,0.5
 Charalampos Kostoulas,Brighton,0.45,0.45,0.45,0.45,0.45,0.45
-Yasin Ayari,Brighton,1.0,1.0,1.0,1.0,1.0,1.0
-Cole Palmer,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Pedro Neto,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Joao Pedro,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Reece James,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Trevoh Chalobah,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Enzo Fernandez,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Robert Sanchez,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Wesley Fofana,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
+Kaoru Mitoma,Brighton,0.25,0.7,0.9,0.9,0.9,0.9
 Moises Caicedo,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
+Robert Sanchez,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
+Joao Pedro,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
+Cole Palmer,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
 Maxence Lacroix,Chelsea,0.95,0.95,0.95,0.95,0.95,0.95
+Pedro Neto,Chelsea,0.9,0.9,0.9,0.9,0.9,0.9
+Enzo Fernandez,Chelsea,0.85,0.85,0.85,0.85,0.85,0.85
+Reece James,Chelsea,0.8,0.8,0.8,0.8,0.8,0.8
 Marco Palestra,Chelsea,0.75,0.75,0.75,0.75,0.75,0.75
-Morgan Rogers,Chelsea,1.0,1.0,1.0,1.0,1.0,1.0
-Brandon Thomas-Asante,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Tatsuhiro Sakamoto,Coventry City,0.55,0.55,0.55,0.55,0.55,0.55
-Ephron Mason-Clark,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Matt Grimes,Coventry City,0.55,0.55,0.55,0.55,0.55,0.55
-Frank Onyeka,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Ben Wilson,Coventry City,0.5,0.5,0.5,0.5,0.5,0.5
+Trevoh Chalobah,Chelsea,0.7,0.7,0.7,0.7,0.7,0.7
+Levi Samuels Colwill,Chelsea,0.6,0.6,0.6,0.6,0.6,0.6
+Jorrel Hato,Chelsea,0.55,0.55,0.55,0.55,0.55,0.55
+Morgan Rogers,Chelsea,0.5,0.8,0.9,0.9,0.9,0.9
+Roméo Lavia,Chelsea,0.5,0.5,0.5,0.5,0.5,0.5
+Jamie Gittens,Chelsea,0.5,0.5,0.5,0.5,0.5,0.5
+Wesley Fofana,Chelsea,0.0,0.6,0.7,0.7,0.7,0.7
 Jack Rudoni,Coventry City,0.95,0.95,0.95,0.95,0.95,0.95
-Josh Eccles,Coventry City,0.45,0.45,0.45,0.45,0.45,0.45
-Carl Rushworth,Coventry City,0.65,0.65,0.65,0.65,0.65,0.65
-Jake Bidwell,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Haji Wright,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Loum Tchaouna,Coventry City,0.95,0.95,0.95,0.95,0.95,0.95
-Bobby Thomas,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Ellis Simms,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
 Aurèle Amenda,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
-Dean Henderson,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
-Brennan Johnson,Crystal Palace,0.8,0.8,0.8,0.8,0.8,0.8
-Jaydee Canvot,Crystal Palace,0.75,0.75,0.75,0.75,0.75,0.75
-Daniel Munoz,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
-Adam Wharton,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
-Jean-Philippe Mateta,Crystal Palace,0.8,0.8,0.8,0.8,0.8,0.8
+Bobby Thomas,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
+Haji Wright,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
+Frank Onyeka,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
+Ephron Mason-Clark,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
+Carl Rushworth,Coventry City,0.85,0.85,0.85,0.85,0.85,0.85
+Tatsuhiro Sakamoto,Coventry City,0.8,0.8,0.8,0.8,0.8,0.8
+Matt Grimes,Coventry City,0.8,0.8,0.8,0.8,0.8,0.8
+Milan van Ewijk,Coventry City,0.7,0.7,0.7,0.7,0.7,0.7
+Jay Dasilva,Coventry City,0.6,0.6,0.6,0.6,0.6,0.6
+Victor Torp,Coventry City,0.6,0.6,0.6,0.6,0.6,0.6
+Loum Tchaouna,Coventry City,0.55,0.55,0.55,0.55,0.55,0.55
+Jake Bidwell,Coventry City,0.5,0.5,0.5,0.5,0.5,0.5
+Ellis Simms,Coventry City,0.45,0.45,0.45,0.45,0.45,0.45
+Brandon Thomas-Asante,Coventry City,0.45,0.45,0.45,0.45,0.45,0.45
+Josh Eccles,Coventry City,0.25,0.25,0.25,0.25,0.25,0.25
+Ben Wilson,Coventry City,0.15,0.15,0.15,0.15,0.15,0.15
 Chris Richards,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
+Tyrick Mitchell,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
+Daniel Munoz,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
+Dean Henderson,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
+Adam Wharton,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
 Ismaila Sarr,Crystal Palace,0.8,0.8,0.8,0.8,0.8,0.8
+Brennan Johnson,Crystal Palace,0.8,0.8,0.8,0.8,0.8,0.8
+Jean-Philippe Mateta,Crystal Palace,0.8,0.8,0.8,0.8,0.8,0.8
 Daichi Kamada,Crystal Palace,0.75,0.75,0.75,0.75,0.75,0.75
 Oscar Mingueza,Crystal Palace,0.75,0.75,0.75,0.75,0.75,0.75
-Tyrick Mitchell,Crystal Palace,0.95,0.95,0.95,0.95,0.95,0.95
+Jaydee Canvot,Crystal Palace,0.75,0.75,0.75,0.75,0.75,0.75
+Chadi Riad,Crystal Palace,0.6,0.6,0.6,0.6,0.6,0.6
 Jorgen Strand Larsen,Crystal Palace,0.5,0.5,0.5,0.5,0.5,0.5
-Iliman Ndiaye,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Michael Keane,Everton,0.55,0.55,0.55,0.55,0.55,0.55
-Thierno Barry,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Dwight McNeil,Everton,0.7,0.7,0.7,0.7,0.7,0.7
-Jarrad Branthwaite,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Tim Iroegbunam,Everton,0.5,0.5,0.5,0.5,0.5,0.5
-James Tarkowski,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+Eddie Nketiah,Crystal Palace,0.4,0.4,0.4,0.4,0.4,0.4
+Matheus França de Oliveira,Crystal Palace,0.35,0.35,0.35,0.35,0.35,0.35
 Kiernan Dewsbury-Hall,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Vitalii Mykolenko,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Jordan Pickford,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Christian Norgaard,Everton,0.7,0.7,0.7,0.7,0.7,0.7
-Hayden Hackney,Everton,0.8,0.8,0.8,0.8,0.8,0.8
 Jake O'Brien,Everton,1.0,1.0,1.0,1.0,1.0,1.0
-Sander Berge,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
-Kevin,Fulham,0.7,0.7,0.7,0.7,0.7,0.7
-Calvin Bassey,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
-Emile Smith Rowe,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
-Bernd Leno,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
-Rodrigo Muniz,Fulham,0.65,0.65,0.65,0.65,0.65,0.65
-Kenny Tete,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
-Josh King,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
+Jordan Pickford,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+Vitalii Mykolenko,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+James Tarkowski,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+Thierno Barry,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+Iliman Ndiaye,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+Jarrad Branthwaite,Everton,1.0,1.0,1.0,1.0,1.0,1.0
+Hayden Hackney,Everton,0.8,0.8,0.8,0.8,0.8,0.8
+Tim Iroegbunam,Everton,0.65,0.65,0.65,0.65,0.65,0.65
+Christian Norgaard,Everton,0.6,0.6,0.6,0.6,0.6,0.6
+Dwight McNeil,Everton,0.6,0.6,0.6,0.6,0.6,0.6
+Merlin Röhl,Everton,0.6,0.6,0.6,0.6,0.6,0.6
+Michael Keane,Everton,0.45,0.45,0.45,0.45,0.45,0.45
 Alex Iwobi,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
-Ryan Sessegnon,Fulham,0.85,0.85,0.85,0.85,0.85,0.85
 Antonee Robinson,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
+Kenny Tete,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
+Calvin Bassey,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
+Bernd Leno,Fulham,1.0,1.0,1.0,1.0,1.0,1.0
+Emile Smith Rowe,Fulham,0.9,0.9,0.9,0.9,0.9,0.9
+Kevin,Fulham,0.8,0.8,0.8,0.8,0.8,0.8
+Sander Berge,Fulham,0.8,0.8,0.8,0.8,0.8,0.8
+Rodrigo Muniz,Fulham,0.75,0.75,0.75,0.75,0.75,0.75
+Josh King,Fulham,0.7,0.7,0.7,0.7,0.7,0.7
 Timothy Castagne,Fulham,0.7,0.7,0.7,0.7,0.7,0.7
-Gonzalo García,Fulham,0.5,0.5,0.5,0.5,0.5,0.5
-David Akintola,Hull City,0.55,0.55,0.55,0.55,0.55,0.55
-Óscar Zambrano,Hull City,0.55,0.55,0.55,0.55,0.55,0.55
-Abu Kamara,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Mohamed Belloumi,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Jack Butland,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Cody Drameh,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Matt Targett,Hull City,0.75,0.75,0.75,0.75,0.75,0.75
-Oli McBurnie,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Regan Slater,Hull City,0.45,0.45,0.45,0.45,0.45,0.45
-Abdülkadir Ömür,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Charlie Hughes,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-John Egan,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Hidemasa Morita,Hull City,0.9,0.9,0.9,0.9,0.9,0.9
+Ryan Sessegnon,Fulham,0.7,0.7,0.7,0.7,0.7,0.7
+Jorge Cuenca,Fulham,0.6,0.6,0.6,0.6,0.6,0.6
+Sasa Lukic,Fulham,0.6,0.6,0.6,0.6,0.6,0.6
+Oscar Bobb,Fulham,0.5,0.5,0.5,0.5,0.5,0.5
+Gonzalo García,Fulham,0.4,0.4,0.4,0.4,0.4,0.4
+Jack Butland,Hull City,0.9,0.9,0.9,0.9,0.9,0.9
 Liam Millar,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
-Marcelino Núñez,Ipswich Town,0.55,0.55,0.55,0.55,0.55,0.55
-Cédric Kipré,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-Chuba Akpom,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-Jack Clarke,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
+John Egan,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
+Abdülkadir Ömür,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
+Oli McBurnie,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
+Mohamed Belloumi,Hull City,0.85,0.85,0.85,0.85,0.85,0.85
+Regan Slater,Hull City,0.7,0.7,0.7,0.7,0.7,0.7
+Lewie Coyle,Hull City,0.7,0.7,0.7,0.7,0.7,0.7
+Semi Ajayi,Hull City,0.7,0.7,0.7,0.7,0.7,0.7
+Ryan Giles,Hull City,0.7,0.7,0.7,0.7,0.7,0.7
+Hidemasa Morita,Hull City,0.6,0.6,0.6,0.6,0.6,0.6
+Charlie Hughes,Hull City,0.6,0.6,0.6,0.6,0.6,0.6
+Abu Kamara,Hull City,0.6,0.6,0.6,0.6,0.6,0.6
+Matt Crooks,Hull City,0.6,0.6,0.6,0.6,0.6,0.6
+Matt Targett,Hull City,0.5,0.5,0.5,0.5,0.5,0.5
+Cody Drameh,Hull City,0.5,0.5,0.5,0.5,0.5,0.5
+Óscar Zambrano,Hull City,0.35,0.35,0.35,0.35,0.35,0.35
+David Akintola,Hull City,0.3,0.3,0.3,0.3,0.3,0.3
 Daizen Maeda,Ipswich Town,0.95,0.95,0.95,0.95,0.95,0.95
-Chiedozie Ogbene,Ipswich Town,0.45,0.45,0.45,0.45,0.45,0.45
-Azor Matusiwa,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-Emersonn Correia da Silva,Ipswich Town,0.65,0.65,0.65,0.65,0.65,0.65
-Issa Diop,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-Christian Walton,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-Ben Johnson,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-Jaden Philogene,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
 Abdul Fatawu,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
 Dara O'Shea,Ipswich Town,0.85,0.85,0.85,0.85,0.85,0.85
-James Trafford,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Brenden Aaronson,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Dominic Calvert-Lewin,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Jayden Bogle,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Anton Stach,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Gabriel Gudmundsson,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
+Marcelino Núñez,Ipswich Town,0.75,0.75,0.75,0.75,0.75,0.75
+Kjell Scherpen,Ipswich Town,0.75,0.75,0.75,0.75,0.75,0.75
+Emersonn Correia da Silva,Ipswich Town,0.7,0.7,0.7,0.7,0.7,0.7
+Darnell Furlong,Ipswich Town,0.7,0.7,0.7,0.7,0.7,0.7
+Jacob Greaves,Ipswich Town,0.7,0.7,0.7,0.7,0.7,0.7
+Leif Davis,Ipswich Town,0.7,0.7,0.7,0.7,0.7,0.7
+Florentino,Ipswich Town,0.65,0.65,0.65,0.65,0.65,0.65
+Jaden Philogene,Ipswich Town,0.6,0.6,0.6,0.6,0.6,0.6
+Anis Mehmeti,Ipswich Town,0.55,0.55,0.55,0.55,0.55,0.55
+Jack Clarke,Ipswich Town,0.5,0.5,0.5,0.5,0.5,0.5
+Azor Matusiwa,Ipswich Town,0.45,0.45,0.45,0.45,0.45,0.45
+Ben Johnson,Ipswich Town,0.45,0.45,0.45,0.45,0.45,0.45
+Issa Diop,Ipswich Town,0.45,0.45,0.45,0.45,0.45,0.45
+Cédric Kipré,Ipswich Town,0.4,0.4,0.4,0.4,0.4,0.4
+Chuba Akpom,Ipswich Town,0.4,0.4,0.4,0.4,0.4,0.4
+Chiedozie Ogbene,Ipswich Town,0.3,0.3,0.3,0.3,0.3,0.3
+Christian Walton,Ipswich Town,0.25,0.25,0.25,0.25,0.25,0.25
 Ethan Ampadu,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Tarik Muharemović,Leeds,0.8,0.8,0.8,0.8,0.8,0.8
-Noah Okafor,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
+James Trafford,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
+Jayden Bogle,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
+Dominic Calvert-Lewin,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
+Anton Stach,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
 Joe Rodon,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Harry Wilson,Leeds,1.0,1.0,1.0,1.0,1.0,1.0
-Florian Wirtz,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Ryan Gravenberch,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Jeremie Frimpong,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Cody Gakpo,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Jeremy Jacquet,Liverpool,0.75,0.75,0.75,0.75,0.75,0.75
-Alexis Mac Allister,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Harry Wilson,Leeds,0.9,0.9,0.9,0.9,0.9,0.9
+Tarik Muharemović,Leeds,0.8,0.8,0.8,0.8,0.8,0.8
+Gabriel Gudmundsson,Leeds,0.7,0.7,0.7,0.7,0.7,0.7
+Jaka Bijol,Leeds,0.7,0.7,0.7,0.7,0.7,0.7
+Ao Tanaka,Leeds,0.6,0.6,0.6,0.6,0.6,0.6
+Noah Okafor,Leeds,0.55,0.55,0.55,0.55,0.55,0.55
+Brenden Aaronson,Leeds,0.55,0.55,0.55,0.55,0.55,0.55
+James Justin,Leeds,0.4,0.4,0.4,0.4,0.4,0.4
 Milos Kerkez,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Virgil van Dijk,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Alisson Becker,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Alexander Isak,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
 Dominik Szoboszlai,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
-Phil Foden,Man City,0.85,0.85,0.85,0.85,0.85,0.85
-Nico O'Reilly,Man City,1.0,1.0,1.0,1.0,1.0,1.0
-Elliot Anderson,Man City,1.0,1.0,1.0,1.0,1.0,1.0
-Erling Haaland,Man City,1.0,1.0,1.0,1.0,1.0,1.0
-Jeremy Doku,Man City,0.75,0.75,0.75,0.75,0.75,0.75
-Marc Guehi,Man City,1.0,1.0,1.0,1.0,1.0,1.0
-Rodri,Man City,0.75,0.75,0.75,0.75,0.75,0.75
+Alexander Isak,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Alisson Becker,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Virgil van Dijk,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Ryan Gravenberch,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Florian Wirtz,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Cody Gakpo,Liverpool,1.0,1.0,1.0,1.0,1.0,1.0
+Jeremie Frimpong,Liverpool,0.85,0.85,0.85,0.85,0.85,0.85
+Alexis Mac Allister,Liverpool,0.8,0.8,0.8,0.8,0.8,0.8
+Jeremy Jacquet,Liverpool,0.8,0.8,0.8,0.8,0.8,0.8
+Rio Ngumoha,Liverpool,0.5,0.5,0.5,0.5,0.5,0.5
+Victor Munoz,Liverpool,0.4,0.4,0.4,0.4,0.4,0.4
 Antoine Semenyo,Man City,1.0,1.0,1.0,1.0,1.0,1.0
 Gianluigi Donnarumma,Man City,1.0,1.0,1.0,1.0,1.0,1.0
-Matheus Nunes,Man City,1.0,1.0,1.0,1.0,1.0,1.0
-Rayan Cherki,Man City,0.7,0.7,0.7,0.7,0.7,0.7
-Ruben Dias,Man City,0.85,0.85,0.85,0.85,0.85,0.85
-Senne Lammens,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Bruno Fernandes,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Matheus Cunha,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Diogo Dalot,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Benjamin Sesko,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Harry Maguire,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Youri Tielemans,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Leny Yoro,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Luke Shaw,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Amad Diallo,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Erling Haaland,Man City,1.0,1.0,1.0,1.0,1.0,1.0
+Elliot Anderson,Man City,0.9,0.9,0.9,0.9,0.9,0.9
+Matheus Nunes,Man City,0.85,0.85,0.85,0.85,0.85,0.85
+Phil Foden,Man City,0.85,0.85,0.85,0.85,0.85,0.85
+Jeremy Doku,Man City,0.8,0.8,0.8,0.8,0.8,0.8
+Josko Gvardiol,Man City,0.8,0.8,0.8,0.8,0.8,0.8
+Rodri,Man City,0.75,0.75,0.75,0.75,0.75,0.75
+Marc Guehi,Man City,0.75,0.75,0.75,0.75,0.75,0.75
+Rayan Ait Nouri,Man City,0.7,0.7,0.7,0.7,0.7,0.7
+Nico O'Reilly,Man City,0.55,0.55,0.55,0.55,0.55,0.55
+Abduqodir Khusanov,Man City,0.55,0.55,0.55,0.55,0.55,0.55
+Ruben Dias,Man City,0.5,0.5,0.5,0.5,0.5,0.5
+Mateo Kovačić,Man City,0.45,0.45,0.45,0.45,0.45,0.45
+Rayan Cherki,Man City,0.4,0.4,0.4,0.4,0.4,0.4
 Bryan Mbeumo,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
-Aladji Bamba,Newcastle,0.5,0.5,0.5,0.5,0.5,0.5
-Lewis Hall,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
-Harvey Barnes,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
-Nick Pope,Newcastle,1.0,1.0,1.0,1.0,1.0,1.0
-Bazoumana Touré,Newcastle,0.75,0.75,0.75,0.75,0.75,0.75
+Amad Diallo,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Luke Shaw,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Leny Yoro,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Harry Maguire,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Diogo Dalot,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Matheus Cunha,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Bruno Fernandes,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Senne Lammens,Man Utd,1.0,1.0,1.0,1.0,1.0,1.0
+Youri Tielemans,Man Utd,0.7,0.7,0.7,0.7,0.7,0.7
+Benjamin Sesko,Man Utd,0.7,0.7,0.7,0.7,0.7,0.7
+Andrey Santos,Man Utd,0.6,0.6,0.6,0.6,0.6,0.6
+Mason Mount,Man Utd,0.45,0.45,0.45,0.45,0.45,0.45
+Joshua Zirkzee,Man Utd,0.35,0.35,0.35,0.35,0.35,0.35
 Malick Thiaw,Newcastle,1.0,1.0,1.0,1.0,1.0,1.0
-Lewis Miley,Newcastle,0.6,0.6,0.6,0.6,0.6,0.6
-Dan Burn,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
-Joelinton,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
 Sven Botman,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
-Nick Woltemade,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
-Jacob Murphy,Newcastle,0.65,0.65,0.65,0.65,0.65,0.65
-Dan Ndoye,Nott'm Forest,0.8,0.8,0.8,0.8,0.8,0.8
-Xaver Schlager,Nott'm Forest,0.8,0.8,0.8,0.8,0.8,0.8
-Matz Sels,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
-Chris Wood,Nott'm Forest,0.55,0.55,0.55,0.55,0.55,0.55
-Callum Hudson-Odoi,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
-Felipe Rodrigues da Silva,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
-Morgan Gibbs-White,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
-Omari Hutchinson,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
-Igor Jesus,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
-Nikola Milenkovic,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
-Ola Aina,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
+Joelinton,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
+Harvey Barnes,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
+Lewis Hall,Newcastle,0.95,0.95,0.95,0.95,0.95,0.95
+Dan Burn,Newcastle,0.75,0.75,0.75,0.75,0.75,0.75
+Lewis Miley,Newcastle,0.7,0.7,0.7,0.7,0.7,0.7
+Bazoumana Touré,Newcastle,0.7,0.7,0.7,0.7,0.7,0.7
+Yoane Wissa,Newcastle,0.7,0.6,0.55,0.55,0.55,0.55
+Nick Pope,Newcastle,0.6,0.6,0.6,0.6,0.6,0.6
+Jacob Ramsey,Newcastle,0.6,0.6,0.6,0.6,0.6,0.6
+Nick Woltemade,Newcastle,0.55,0.85,0.95,0.95,0.95,0.95
+Jacob Murphy,Newcastle,0.55,0.55,0.55,0.55,0.55,0.55
+Aladji Bamba,Newcastle,0.4,0.4,0.4,0.4,0.4,0.4
+William Osula,Newcastle,0.35,0.2,0.15,0.15,0.15,0.15
+Lukás Hornícek,Newcastle,0.35,0.35,0.35,0.35,0.35,0.35
 Neco Williams,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
-Marcos Senesi,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Mathys Tel,Spurs,0.35,0.35,0.35,0.35,0.35,0.35
-Andrew Robertson,Spurs,0.8,0.8,0.8,0.8,0.8,0.8
-Pedro Porro,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Mateus Fernandes,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Antonín Kinský,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
+Nikola Milenkovic,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
+Morgan Gibbs-White,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
+Matz Sels,Nott'm Forest,1.0,1.0,1.0,1.0,1.0,1.0
+Ola Aina,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
+Igor Jesus,Nott'm Forest,0.95,0.95,0.95,0.95,0.95,0.95
+Omari Hutchinson,Nott'm Forest,0.8,0.8,0.8,0.8,0.8,0.8
+Felipe Rodrigues da Silva,Nott'm Forest,0.7,0.7,0.7,0.7,0.7,0.7
+Xaver Schlager,Nott'm Forest,0.6,0.6,0.6,0.6,0.6,0.6
+Dan Ndoye,Nott'm Forest,0.6,0.6,0.6,0.6,0.6,0.6
+Callum Hudson-Odoi,Nott'm Forest,0.6,0.6,0.6,0.6,0.6,0.6
+Chris Wood,Nott'm Forest,0.6,0.6,0.6,0.6,0.6,0.6
+Jair Paula da Cunha Filho,Nott'm Forest,0.6,0.6,0.6,0.6,0.6,0.6
+Nicolas Dominguez,Nott'm Forest,0.6,0.6,0.6,0.6,0.6,0.6
+Ibrahim Sangare,Nott'm Forest,0.55,0.55,0.55,0.55,0.55,0.55
 Sandro Tonali,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Xavi Simons,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Richarlison,Spurs,0.35,0.35,0.35,0.35,0.35,0.35
-Jan Paul van Hecke,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Micky van de Ven,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Dominic Solanke,Spurs,0.65,0.65,0.65,0.65,0.65,0.65
 Mohammed Kudus,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
-Enzo Le Fee,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Nordi Mukiele,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Granit Xhaka,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Brian Brobbey,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Thomas Meunier,Sunderland,0.8,0.8,0.8,0.8,0.8,0.8
-Robin Roefs,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Noah Sadiki,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Micky van de Ven,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
+Mateus Fernandes,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
+Pedro Porro,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
+Antonín Kinský,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
+Jan Paul van Hecke,Spurs,1.0,1.0,1.0,1.0,1.0,1.0
+Andrew Robertson,Spurs,0.8,0.8,0.8,0.8,0.8,0.8
+Dominic Solanke,Spurs,0.65,0.65,0.65,0.65,0.65,0.65
+Marcos Senesi,Spurs,0.6,0.6,0.6,0.6,0.6,0.6
+Conor Gallagher,Spurs,0.6,0.6,0.6,0.6,0.6,0.6
+Mathys Tel,Spurs,0.55,0.55,0.55,0.55,0.55,0.55
+Richarlison,Spurs,0.35,0.35,0.35,0.35,0.35,0.35
+Xavi Simons,Spurs,0.0,0.4,0.8,0.8,0.8,0.8
 Trai Hume,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Omar Alderete,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Robin Roefs,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Nordi Mukiele,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Brian Brobbey,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Enzo Le Fee,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
 Dan Ballard,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
-Chemsdine Talbi,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Granit Xhaka,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Noah Sadiki,Sunderland,1.0,1.0,1.0,1.0,1.0,1.0
+Thomas Meunier,Sunderland,0.8,0.8,0.8,0.8,0.8,0.8
+Chemsdine Talbi,Sunderland,0.8,0.8,0.8,0.8,0.8,0.8
+Omar Alderete,Sunderland,0.75,0.95,0.95,0.95,0.95,0.95
+Reinildo Mandava,Sunderland,0.45,0.45,0.45,0.45,0.45,0.45
+Nilson Angulo,Sunderland,0.45,0.45,0.45,0.45,0.45,0.45

@@ -1,3 +1,4 @@
+import os
 import sys
 import json
 import time
@@ -704,6 +705,8 @@ class ComprehensiveSportsbetScraper:
         if not files_saved:
             print("No data to save")
 
+        return files_saved
+
 
 def main():
     """
@@ -734,7 +737,14 @@ def main():
         print(f"Total {name} odds collected: {len(data)}")
 
     # Save to CSV files
-    scraper.save(all_data)
+    files_saved = scraper.save(all_data)
+
+    # A real scrape of the player markets supersedes the pre-season placeholders,
+    # which unblocks --gw archive recording (see fpl_pipeline/run.py guard).
+    note = os.path.join("sportsbet", "SYNTHETIC_NOTE.txt")
+    if files_saved and any("goalscorer" in f for f in files_saved) and os.path.exists(note):
+        os.remove(note)
+        print("Removed SYNTHETIC_NOTE.txt - player odds are real again, --gw archives unblocked.")
 
     print("\nFiles saved successfully!")
 
