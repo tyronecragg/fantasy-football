@@ -64,6 +64,82 @@ def apply_dgw_adjustment(df, dgw_teams=DGW_TEAMS, dgw_extra=DGW_EXTRA, dgw_extra
 # ============================================================
 
 
+def _unavailable_csv(source):
+    source = str(source)
+    root = (os.path.dirname(os.path.dirname(os.path.abspath(source)))
+            if source.lower().endswith('.csv') else os.path.dirname(os.path.abspath(source)) or '.')
+    return os.path.join(root, 'inputs', 'unavailable_players.csv')
+
+
+def departed_players(source):
+    """Names of players who have permanently LEFT the league, read from
+    inputs/unavailable_players.csv (reason contains 'left' or 'permanent'). Unlike injuries
+    or in-progress 'being sold' notes — which stay selectable — these cannot be picked at
+    all. 'GW1 hold' sale risks (a player deliberately kept for now) are NOT matched.
+    """
+    path = _unavailable_csv(source)
+    if not os.path.exists(path):
+        return set()
+    u = pd.read_csv(path)
+    if 'reason' not in u.columns or 'Player' not in u.columns:
+        return set()
+    gone = u['reason'].astype(str).str.contains(r'left|permanent', case=False, na=False)
+    return {n.strip() for n in u.loc[gone, 'Player'].astype(str)}
+
+
+def drop_departed(df, current_team_names, departed):
+    """Remove permanently-departed players from the candidate pool — except any the manager
+    still owns, which must remain so they can be transferred out."""
+    owned = {n.strip() for n in current_team_names}
+    names = df['Player Name'].astype(str).str.strip()
+    gone = names.isin(departed) & ~names.isin(owned)
+    if gone.any():
+        print(f"  Excluded {int(gone.sum())} departed player(s): "
+              + ", ".join(sorted(df.loc[gone, 'Player Name'])))
+    return df[~gone]
+
+
+GENERIC_TEAM = "(any)"   # sentinel team for collapsed fillers; exempt from per-team caps
+
+
+def collapse_fungible_bench(df, current_team_names, fixture_columns):
+    """A non-playing bench filler is a fungible commodity: among players at one position who
+    are projected to score ~0 across the WHOLE horizon, only price matters, so the optimiser
+    is indifferent between them and the solution enumerator burns near-optimal solutions
+    swapping one warm body for another (observed: 25 'distinct' squads differing only in a
+    £4.0m 0-XP keeper).
+
+    Per position, keep every player the manager already owns (selling one is a real,
+    budget-relevant call) and collapse the rest of the 0-XP crowd to a SINGLE cheapest
+    representative, relabelled generically ('Any £4.0m 0-XP DEF'). The optimum is unchanged:
+    the cheapest 0-XP filler was always what it wanted, and for outfield slots the optimiser
+    prefers a cheap PLAYING player anyway (bench points), so real cheap options remain to
+    keep every squad feasible. Only the degeneracy goes. A player with 0 XP now but real XP
+    later (injury ramp) has max fixture XP > 0 and is never collapsed. Returns (df, {pos: name}).
+    """
+    owned = {n.strip() for n in current_team_names}
+    never_plays = df[fixture_columns].max(axis=1) < 0.05
+    owned_mask = df['Player Name'].astype(str).str.strip().isin(owned)
+    pos_norm = df['Position'].astype(str).str.upper().replace({'GKP': 'GK'})
+    generics = {}
+    df = df.copy()
+    drop = []
+    for pos in ('GK', 'DEF', 'MID', 'FWD'):
+        pool = df.index[(pos_norm == pos) & never_plays & ~owned_mask]
+        if len(pool) > 1:
+            rep = df.loc[pool].sort_values('Cost').index[0]
+            name = f"Any £{df.loc[rep, 'Cost']:.1f}m 0-XP {pos}"
+            df.loc[rep, 'Player Name'] = name
+            df.loc[rep, 'Team'] = GENERIC_TEAM   # no committed team - exempt from per-team caps
+            generics[pos] = name
+            drop.extend(i for i in pool if i != rep)
+    if drop:
+        df = df.drop(index=drop)
+        print("  Collapsed interchangeable 0-XP bench fillers to one option per position "
+              f"({', '.join(generics.values())}); dropped {len(drop)} redundant duplicates")
+    return df, generics
+
+
 def load_current_team(excel_file, sheet_name='GW Teams'):
     print("Loading current team from GW Teams sheet...")
 
@@ -244,6 +320,40 @@ def display_current_team_analysis(current_team_df, analysis, num_fixtures, weigh
 # Outfield bench priced by sub order: slot 1 is the autosub workhorse (~25-30% of
 # weeks), slot 2 covers double absences (~5%), slot 3 almost never comes on.
 BENCH_SLOT_WEIGHTS = (0.30, 0.10, 0.05)
+
+# --- Fixture weights are TWO separate discounts, kept apart because they have
+# different causes, different evidence, and change on different schedules. ---
+#
+# 1. OWNERSHIP ("can I still fix it?"). A bad F6 fixture is recoverable with a
+#    transfer; a bad F1 is not. So far fixtures are worth less regardless of how well
+#    we forecast them. Decays at the squad churn rate: ~1.2 transfers/week over 15
+#    players = 8%/gameweek, i.e. 0.92 ** (k - 1). Roughly constant across a season.
+OWNERSHIP_WEIGHTS = (1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558)
+
+# 2. RELIABILITY ("how much do we trust the projection?"). MEASURED from the backtest
+#    archive as skill vs a positional-mean baseline (tools/backtest_projections.py,
+#    horizon k -> F(k+1)): F2 0.468, F3 0.339, F4 0.318, F5 0.277, F6 0.274, then flat
+#    because everything from F3 on shares one static team model. Normalised to F2 and
+#    scaled by F2_VS_F1 below. The steep F2 -> F3 step is real: that is where the input
+#    changes from market odds to model projection, so the curve is a CLIFF, not a ramp.
+#    CAVEATS: the archive starts ~GW12, so these describe the mid-season regime only -
+#    August outright markets are more diffuse and are not represented yet. F7/F8 are
+#    extrapolated from the flat tail. F2's level rests on F2_VS_F1, an assumption, not a
+#    measurement: if F2 usually has real odds scraped, raise it toward 1.0.
+F2_VS_F1 = 0.85
+RELIABILITY_WEIGHTS = (1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472)
+
+
+def combine_fixture_weights(ownership=None, reliability=None, num_fixtures=8):
+    """Multiply the two discounts into the single weight vector the optimiser uses,
+    normalised so F1 = 1.0. Pass either component to explore it in isolation."""
+    own = list(ownership or OWNERSHIP_WEIGHTS)[:num_fixtures]
+    rel = list(reliability or RELIABILITY_WEIGHTS)[:num_fixtures]
+    if len(own) < num_fixtures or len(rel) < num_fixtures:
+        raise ValueError(f"need {num_fixtures} ownership and reliability weights "
+                         f"(got {len(own)} and {len(rel)})")
+    combined = [o * r for o, r in zip(own, rel)]
+    return [w / combined[0] for w in combined]
 
 
 def _normalise_slot_weights(spec, num_fixtures):
@@ -492,6 +602,13 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         weight = weights[i]
         df['Weighted_Total_XP'] += df[fixture_col] * weight
 
+    # Clean the pool before optimising: drop players who have permanently left, and collapse
+    # the interchangeable non-playing backup keepers to one generic option so near-optimal
+    # solutions differ in choices that actually matter rather than in the bench-GK warm body.
+    df = drop_departed(df, current_team_names, departed_players(excel_file))
+    df, generic_slots = collapse_fungible_bench(df, current_team_names, fixture_columns)
+    df = df.reset_index(drop=True)
+
     # Identify current team players in database
     current_team_indices = []
     current_team_cost = 0
@@ -626,8 +743,9 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             position_players = df[df['Position'] == position].index
             prob += pulp.lpSum([squad_vars[i] for i in position_players]) == required_count
 
-        # Constraint 3: Maximum 3 players per team
-        unique_teams = df['Team'].unique()
+        # Constraint 3: Maximum 3 players per team. Generic 0-XP fillers carry no committed
+        # team (you would pick a real filler from whichever team has room), so exempt them.
+        unique_teams = [t for t in df['Team'].unique() if t != GENERIC_TEAM]
         for team in unique_teams:
             team_players = df[df['Team'] == team].index
             prob += pulp.lpSum([squad_vars[i] for i in team_players]) <= 3
@@ -736,6 +854,12 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         for prev_combination in excluded_transfer_combinations:
             out_indices = prev_combination['out']
             in_indices = prev_combination['in']
+
+            # A 0-transfer solution has no combination to ban - force at least one
+            # transfer instead, so later solutions surface the next-best alternatives
+            if not out_indices and not in_indices:
+                prob += pulp.lpSum([transfer_out_vars[i] for i in current_team_indices]) >= 1
+                continue
 
             # This combination cannot be used again
             # Sum of all matching transfer_out and transfer_in must be < total transfers
@@ -1072,6 +1196,129 @@ def display_f1_starting_xi_comparison(solution, df, current_team_indices, transf
     print("  " + "-" * 76)
 
 
+def load_ownership():
+    """Global FPL ownership % per player, keyed by our canonical names.
+
+    Not in the master (it is not a projection input), so it is read straight from the FPL
+    snapshot. Best-effort: an empty mapping just leaves the column blank rather than
+    breaking a transfer run.
+    """
+    try:
+        from fpl_pipeline import config, names
+        path = os.path.join(config.FPL_DATA_DIR, "playerstats.csv")
+        keep = {"id", "gw", "first_name", "second_name", "selected_by_percent"}
+        d = pd.read_csv(path, usecols=lambda c: c in keep)
+        if "gw" in d.columns:
+            d = d.sort_values("gw").drop_duplicates(subset="id", keep="last")
+        full = names.apply_player_names(d["first_name"] + " " + d["second_name"])
+        return dict(zip(full, d["selected_by_percent"]))
+    except Exception as exc:
+        print(f"  (ownership unavailable: {exc})")
+        return {}
+
+
+def display_role_frequency(solution, df, fixtures):
+    """For ONE solution: across the fixture horizon, how many gameweeks each player
+    spends starting / 1st sub / 2nd sub / 3rd sub (backup GK shown separately).
+
+    Bench sub order follows the optimiser's own convention in bench_points_for_fixture:
+    among benched outfielders, the highest projected XP for that fixture is the 1st sub
+    (most likely to actually earn points via an auto-substitution), and so on. So a player
+    who is "1st sub" in 5 of 8 gameweeks is the squad's most valuable non-guaranteed body.
+    """
+    n = len(fixtures)
+    roles = {}   # name -> [starts, sub1, sub2, sub3, gk_bench]
+    meta = {}
+    for _, p in solution['final_squad'].iterrows():
+        roles[p['Player Name']] = [0, 0, 0, 0, 0]
+        meta[p['Player Name']] = (p['Position'], p['Team'], p['Cost'])
+    idx_name = dict(zip(df.index, df['Player Name']))
+
+    for fx in fixtures:
+        starters = set(solution['starting_lineups'].get(fx, []))
+        bench = solution['bench_players'].get(fx, [])
+        for i in starters:
+            nm = idx_name.get(i)
+            if nm in roles:
+                roles[nm][0] += 1
+        gk_bench = [i for i in bench if df.loc[i, 'Position'] == 'GK']
+        out_bench = sorted((i for i in bench if df.loc[i, 'Position'] != 'GK'),
+                           key=lambda i: df.loc[i, f'{fx} XP'], reverse=True)
+        for slot, i in enumerate(out_bench[:3]):
+            nm = idx_name.get(i)
+            if nm in roles:
+                roles[nm][slot + 1] += 1
+        for i in gk_bench:
+            nm = idx_name.get(i)
+            if nm in roles:
+                roles[nm][4] += 1
+
+    print(f"\n  ROLE ACROSS {n} FIXTURES (of {n} gameweeks, how many as each role)")
+    print(f"  {'Player':<26}{'Pos':<5}{'Team':<12}{'Start':>6}{'Sub1':>6}{'Sub2':>6}"
+          f"{'Sub3':>6}{'GKbn':>6}")
+    order = {'GK': 0, 'DEF': 1, 'MID': 2, 'FWD': 3}
+    for nm in sorted(roles, key=lambda k: (order.get(meta[k][0], 9), -roles[k][0])):
+        pos, team, cost = meta[nm]
+        st, s1, s2, s3, gb = roles[nm]
+        cells = "".join(f"{v:>6}" if v else f"{'-':>6}" for v in (st, s1, s2, s3, gb))
+        print(f"  {nm:<26}{pos:<5}{team:<12}{cells}")
+
+
+def display_squad_frequency(all_solutions, fixtures, weights, current_team_names=None):
+    """Every player appearing in ANY near-optimal squad, by position, with how often.
+
+    The transfer-frequency view answers "what should I change?"; this answers "who is in
+    the squad regardless?". A player in 20/20 solutions is one the optimiser will not give
+    up whatever else it does — worth more confidence than a 3/20 player who only appears
+    when some other pick goes a particular way.
+    """
+    n = len(all_solutions)
+    if n < 2:
+        return
+
+    seen, owned = {}, set(current_team_names or [])
+    for solution in all_solutions:
+        for _, p in solution['final_squad'].iterrows():
+            name = p['Player Name']
+            if name not in seen:
+                seen[name] = {'count': 0, 'team': p['Team'], 'cost': p['Cost'],
+                              'position': p['Position'], 'f1_xp': p['F1 XP'],
+                              'weighted_xp': sum(p[f'{f} XP'] * w for f, w in zip(fixtures, weights))}
+            seen[name]['count'] += 1
+
+    ownership = load_ownership()
+
+    print("\n" + "=" * 118)
+    print(f"SQUAD SELECTION FREQUENCY — across {n} near-optimal solutions")
+    print("=" * 118)
+    print(f"{'Player':<28} {'Team':<12} {'Cost':<7} {'F1 XP':<8} {'Wtd XP':<9} "
+          f"{'Picked':<10} {'%':<6} {'Mine':<6} {'FPL own%':<9}")
+
+    for position in ('GK', 'DEF', 'MID', 'FWD'):
+        rows = sorted(((k, v) for k, v in seen.items() if v['position'] == position),
+                      key=lambda kv: (-kv[1]['count'], -kv[1]['weighted_xp']))
+        if not rows:
+            continue
+        print(f"\n{position} ({len(rows)} distinct players across the pool)")
+        print("-" * 118)
+        for name, d in rows:
+            picked = f"{d['count']}/{n}"
+            pct = d['count'] / n * 100
+            own = ownership.get(name)
+            own_str = f"{own:.1f}%" if own is not None else "?"
+            print(f"{name:<28} {d['team']:<12} £{d['cost']:<6.1f} {d['f1_xp']:<8.2f} "
+                  f"{d['weighted_xp']:<9.2f} {picked:<10} "
+                  f"{pct:<5.0f}% {'yes' if name in owned else '':<6} {own_str:<9}")
+
+    locks = sorted(k for k, v in seen.items() if v['count'] == n)
+    marginal = sorted((k for k, v in seen.items() if v['count'] <= max(1, n // 5)),
+                      key=lambda k: seen[k]['position'])
+    print("\n" + "-" * 110)
+    print(f"In EVERY solution ({len(locks)}): {', '.join(locks) if locks else 'none'}")
+    if marginal:
+        print(f"Marginal, in <=20% ({len(marginal)}): {', '.join(marginal)}")
+
+
 def analyse_transfer_frequency(all_solutions, fixtures, weights):
     transfers_in_count = {}
     transfers_out_count = {}
@@ -1192,6 +1439,70 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
         print(f"Consensus transfers IN (>20%): {', '.join(consensus_in)}")
     else:
         print("No consensus transfers in (none appear in >20% of solutions)")
+
+
+def horizon_bands(solution, df):
+    """Raw (unweighted) XI and bench XP, split into near / mid / far fixture bands.
+
+    Deliberately UNWEIGHTED, unlike the optimiser's objective: this answers "what does
+    this squad actually score, and when?", so the bands are comparable across solutions
+    and readable as points. The weighted figure remains 'Total Starting Points' above.
+
+    XI includes the captain bonus (it is real return). Bench is the plain sum of the four
+    subs, i.e. what a Bench Boost on that fixture would be worth.
+    """
+    fixtures = solution['fixtures']
+    bands = [("F1", [fixtures[0]]),
+             ("F2-F5", fixtures[1:5]),
+             (f"F6-F{len(fixtures)}", fixtures[5:])]
+    rows = []
+    for label, block in bands:
+        if not block:
+            continue
+        xi = bench = 0.0
+        for f in block:
+            col = f"{f} XP"
+            xi += sum(df.loc[i, col] for i in solution['starting_lineups'][f])
+            cap = solution['captains'].get(f)
+            if cap is not None:
+                xi += df.loc[cap, col]
+            bench += sum(df.loc[i, col] for i in solution['bench_players'][f])
+        rows.append((label, xi, bench))
+    rows.append(("TOTAL", sum(r[1] for r in rows), sum(r[2] for r in rows)))
+    return rows
+
+
+def display_horizon_table(all_solutions, df):
+    """One row per computed solution, XI and bench XP split by fixture band.
+
+    Covers EVERY solution in the pool, not just the few displayed in detail — the whole
+    point of a compact table is that the also-rans are cheap to show, and a solution
+    ranked 9th on the weighted objective may still have the shape you want (a strong
+    opening gameweek, say, or a bench worth boosting).
+    """
+    if not all_solutions or df is None:
+        return
+    labels = [lab for lab, _, _ in horizon_bands(all_solutions[0], df)]
+
+    print("\n" + "=" * 112)
+    print(f"XP BY HORIZON — all {len(all_solutions)} computed solutions, raw and unweighted")
+    print("=" * 112)
+    head = f"{'Opt':>4}{'Tr':>4}{'Bank':>7}"
+    for lab in labels:
+        head += f"{lab + ' XI':>11}{lab + ' Bn':>10}"
+    print(head + f"{'Weighted':>11}")
+    print("-" * 112)
+
+    for s in all_solutions:
+        row = f"{s['solution_number']:>4}{s['num_transfers']:>4}{s['budget_remaining']:>6.1f}m"
+        for _, xi, bench in horizon_bands(s, df):
+            row += f"{xi:>11.2f}{bench:>10.2f}"
+        print(row + f"{s['total_starting_points']:>11.2f}")
+
+    print("-" * 112)
+    print("  XI includes the captain bonus; Bench is the plain sum of all four subs, so the")
+    print("  bench column doubles as what a Bench Boost on that band would be worth.")
+    print("  'Weighted' is the optimiser's actual objective — the ranking column.")
 
 
 def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_detailed_f1=False,
@@ -1379,10 +1690,17 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   force_transfer_out=None, num_solutions_display=3,
                                   show_all_details=False, show_detailed_f1=False,
                                   compute_solutions=20, show_frequency_analysis=True,
-                                  min_frequency=2, max_defensive_players_per_team=3):
-    # Set default weights
+                                  min_frequency=2, max_defensive_players_per_team=3,
+                                  ownership_weights=None, reliability_weights=None):
+    # Fixture weights come from the two components unless one is passed explicitly
+    # (an explicit fixture_weights still wins, so old call sites keep working).
+    derived = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures)
     if fixture_weights is None:
-        fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4]
+        fixture_weights = derived
+        print(f"Fixture weights derived from ownership x reliability:")
+        print(f"  ownership   {[f'{w:.2f}' for w in (ownership_weights or OWNERSHIP_WEIGHTS)[:num_fixtures]]}")
+        print(f"  reliability {[f'{w:.2f}' for w in (reliability_weights or RELIABILITY_WEIGHTS)[:num_fixtures]]}")
+        print(f"  combined    {[f'{w:.2f}' for w in derived]}")
 
     if bench_slot_weights is None:
         bench_slot_weights = BENCH_SLOT_WEIGHTS
@@ -1450,12 +1768,22 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             weights = all_solutions[0]['weights']
             frequency_analysis = analyse_transfer_frequency(all_solutions, fixtures, weights)
             display_transfer_frequency(frequency_analysis, min_frequency)
+            display_squad_frequency(all_solutions, fixtures, weights, current_team_names)
 
         # Display summary of top N solutions only
+        # Horizon table covers the whole pool; the detailed summaries below are capped
+        display_horizon_table(all_solutions, df)
+
         solutions_to_display = all_solutions[:num_solutions_display]
         display_multi_solution_summary(solutions_to_display, show_f1_breakdown=True,
                                        show_detailed_f1=show_detailed_f1,
                                        df=df, current_team_indices=current_team_indices)
+
+        for sol in solutions_to_display:
+            print("\n" + "=" * 78)
+            print(f"OPTION {sol['solution_number']} — per-player role over the horizon")
+            print("=" * 78)
+            display_role_frequency(sol, df, sol['fixtures'])
 
         # Display details for solutions if requested
         if show_all_details:
@@ -1480,24 +1808,27 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
         return None
 
 
+result = main_multi_transfer_optimiser(
+    excel_file="outputs/13_players_master.csv",
+    max_transfers=15,
+    num_fixtures=8,
+    # How fast the squad churns / how fixable a bad far fixture is - independent of forecast quality
+    ownership_weights=[1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558],
+    # How much the projection is trusted - re-measure from the backtest as the archive grows
+    reliability_weights=[1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472],
+    show_current_analysis=False,
+    additional_budget=0.0,
+    bench_slot_weights=(0.16, 0.02, 0.01),   # sub order 1/2/3, applied every fixture
+    # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*7,
+    gk_bench_weights=[0.01]*8,
+    # gk_bench_weights=[1.0] + [0.05]*7,
+    max_defensive_players_per_team=2,
+    compute_solutions=20,
+    num_solutions_display=20,
+    show_all_details=False,
+    show_detailed_f1=False,
+    # force_transfer_out=["Rodrigo Muniz"],
+)
+
 if __name__ == "__main__":
-    result = main_multi_transfer_optimiser(
-        excel_file="outputs/13_players_master.csv",
-        max_transfers=15,
-        num_fixtures=8,
-        fixture_weights=[1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3],
-        show_current_analysis=False,
-        additional_budget=0.0,
-        bench_slot_weights=(0.30, 0.10, 0.05),   # sub order 1/2/3, applied every fixture; (0.35, 0.15, 0.05) = softer
-        gk_bench_weights=[0.05]*8,
-        # Per-fixture triples also work. Bench Boost in GW1 (remember the GK too):
-        # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*7,
-        # gk_bench_weights=[1.0] + [0.05]*7,
-        # bench_slot_weights=(0.00001,)*3,       # pure "money on the pitch" fodder build
-        compute_solutions=1,
-        num_solutions_display=1,
-        show_all_details=False,
-        show_detailed_f1=False,
-        max_defensive_players_per_team=2,
-        # force_transfer_out=["Rodrigo Muniz"],
-    )
+    pass

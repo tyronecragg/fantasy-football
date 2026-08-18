@@ -13,6 +13,7 @@ import unicodedata
 from difflib import get_close_matches
 
 import pandas as pd
+from fpl_pipeline import names
 
 PLAYER_MARKETS = ("score1", "score2", "assist", "yellow")
 TEAM_MARKETS = ("clean_sheet", "concede", "gk_saves", "f2_clean_sheet", "f2_concede")
@@ -28,33 +29,81 @@ def _is_combo_market(name):
     return " or " in low or " and " in low or " & " in low
 
 
-def _suggest(name, roster_names, norm_map):
+def _forenames_compatible(a, b):
+    """Guard the surname rule against same-surname DIFFERENT players.
+
+    A unique surname match is not enough on its own: it once proposed
+    "Jair Cunha -> Matheus Cunha", a Forest defender onto a Man Utd forward, which would
+    have piped one player's goal and assist odds into another's projection with no error
+    and no visible symptom. Require the forenames to be plausibly the same person —
+    identical, one a shortening of the other (Nico/Nicolas), or a shared stem
+    (Andy/Andrew) — so genuine variants still resolve while collisions are refused.
+    """
+    fa, fb = a.split()[0] if a.split() else "", b.split()[0] if b.split() else ""
+    if not fa or not fb:
+        return False
+    return fa == fb or fa.startswith(fb) or fb.startswith(fa) or fa[:3] == fb[:3]
+
+
+def _suggest(name, roster_names, norm_map, team_of=None, allowed=None):
     """Best-effort roster match for an unmatched name: accent/case fold, then unique
     surname, then fuzzy. Returns (suggestion, how) or (None, None)."""
     n = _norm(name)
     if n in norm_map:
         return norm_map[n], "accent/case"
+    # Restrict to players in the fixture this name was priced in, when we know it
+    pool = roster_names
+    if allowed and team_of:
+        pool = [r for r in roster_names if team_of.get(r) in allowed] or roster_names
     last = n.split()[-1] if n.split() else ""
     if last:
-        surname_hits = [r for r in roster_names if _norm(r).split()[-1] == last]
-        if len(surname_hits) == 1:
-            return surname_hits[0], "surname"
-    fuzzy = get_close_matches(name, roster_names, n=1, cutoff=0.8)
+        surname_hits = [r for r in pool if _norm(r).split()[-1] == last]
+        if len(surname_hits) == 1 and _forenames_compatible(n, _norm(surname_hits[0])):
+            return surname_hits[0], "surname" + ("+team" if pool is not roster_names else "")
+    fuzzy = get_close_matches(name, pool, n=1, cutoff=0.8)
     if fuzzy:
-        return fuzzy[0], "fuzzy"
+        return fuzzy[0], "fuzzy" + ("+team" if pool is not roster_names else "")
     return None, None
 
 
-def report(roster, lineups, mkts):
+def _fixture_teams(sportsbet, team_names):
+    """player -> the teams that appear in the fixtures they are priced in.
+
+    Raw odds carry `match_id` as "Arsenal vs. Coventry City", so a priced player must
+    belong to one of those two sides. That constrains a surname match to the fixture the
+    odds came from, which is a far tighter filter than name shape alone.
+    """
+    out = {}
+    for df in (sportsbet or {}).values():
+        if df is None or getattr(df, "empty", True):
+            continue
+        if "player_name" not in df.columns or "match_id" not in df.columns:
+            continue
+        for player, match in zip(df["player_name"], df["match_id"]):
+            sides = set()
+            for sep in (" vs. ", " vs ", " v "):
+                if sep in str(match):
+                    sides = {s.strip() for s in str(match).split(sep, 1)}
+                    break
+            if sides:
+                out.setdefault(player, set()).update(
+                    names.apply_team_names(pd.Series(sorted(sides))))
+    return out
+
+
+def report(roster, lineups, mkts, sportsbet=None):
     """Reconciliation rows: (source, name, issue, suggestion, how). Empty = all clean."""
     roster_names = list(roster["name"])
     roster_set = set(roster_names)
     norm_map = {_norm(n): n for n in roster_names}
     roster_teams = set(roster["team"])
+    team_of = dict(zip(roster["name"], roster["team"]))
+    in_fixture = _fixture_teams(sportsbet, roster_teams)
     rows = []
 
     def add(source, name, issue):
-        suggestion, how = _suggest(name, roster_names, norm_map)
+        suggestion, how = _suggest(name, roster_names, norm_map,
+                                   team_of=team_of, allowed=in_fixture.get(name))
         rows.append({"source": source, "name": name, "issue": issue,
                      "suggestion": suggestion, "how": how})
 

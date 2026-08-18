@@ -21,6 +21,31 @@ PARITY_SPORTSBET_DIR = os.path.join(ROOT, "parity_reference", "sportsbet")
 
 # Bookmaker margin divisors (odds -> probability = 1/odds/margin)
 MARGIN_PLAYER = 1.05   # player & team match markets
+
+# Longshot calibration for PLAYER attacking markets (goalscorer / 2+ goals / assists).
+# A flat MARGIN_PLAYER cannot be right: the total load on Betway's goalscorer market
+# measures ~3.5x (tools/margin_goals.py) while the favourite's price is already near fair,
+# so the load sits on the longshots. Measured against outcomes (tools/calibration.py,
+# 2025-26 GW16-29, minutes>=60) the pipeline's own probabilities came out:
+#     25-35% -> 27.3% actual (1.08x)     8-12% -> 4.2% (2.38x)
+#     18-25% -> 18.7%        (1.14x)      5-8%  -> 2.8% (2.42x)
+#     12-18% -> 10.3%        (1.46x)      2-5%  -> 0.8% (5.23x)
+# Favourites are calibrated; longshots are overstated 2.4-5x. Knots are (probability,
+# multiplier), interpolated in log-probability space and clamped monotone so ranking is
+# preserved. Set to None to disable.
+#
+# PROVISIONAL — see the "Longshot calibration" section of README.md for what is still
+# outstanding before this should be trusted for anything but experimentation.
+LONGSHOT_FLOOR = 0.15        # never shrink below this; a fitted 0.00 would say "impossible"
+LONGSHOT_CALIBRATION = [
+    (0.04, 0.20),
+    (0.065, 0.41),
+    (0.10, 0.42),
+    (0.15, 0.68),
+    (0.21, 0.88),
+    (0.29, 0.93),
+    (0.42, 0.96),
+]
 MARGIN_WDW = 1.03      # win-draw-win
 MARGIN_SEASON = 1.08   # title / relegation / top-6
 

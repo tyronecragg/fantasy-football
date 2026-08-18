@@ -105,12 +105,11 @@ def _fixture_perspectives():
     return pd.concat([side("home", "away", 1), side("away", "home", 0)], ignore_index=True)
 
 
-def fit_win_models(report):
-    rows = _fixture_perspectives()
+def _win_features(rows):
+    """win_pred_f3plus's design matrix — shared by the refit and its holdout check."""
     sd = (rows["title"] + rows["top6"] - rows["releg"]) - \
          (rows["opp_title"] + rows["opp_top6"] - rows["opp_releg"])
-
-    win_feats = {
+    return {
         "const": np.ones(len(rows)), "strength_diff": sd, "home": rows["home"],
         "top6_share": rows["top6"] / (rows["top6"] + rows["opp_top6"] + 0.01),
         "title_diff": rows["title"] - rows["opp_title"],
@@ -118,6 +117,11 @@ def fit_win_models(report):
         "opp_top6": rows["opp_top6"], "title": rows["title"],
         "strength_diff_sq": sd ** 2, "abs_strength_diff": sd.abs(),
     }
+
+
+def fit_win_models(report):
+    rows = _fixture_perspectives()
+    win_feats = _win_features(rows)
     win_fit = ols(win_feats, list(model.COEFS["win_pred_f3plus"].keys()), rows["win"])
 
     opp_feats = {
@@ -232,7 +236,54 @@ def projection_holdout_check(holdout_gws=4, tolerance=0.05):
     return not degraded
 
 
-def main(write=False, force=False):
+def win_pred_holdout_check(holdout_frac=0.3, tolerance=0.0):
+    """Guardrail for the win_pred_f3plus refit specifically.
+
+    projection_holdout_check only swaps model.BASELINES, so it says nothing about the
+    win model. This one fits the win-pred on the earliest `1 - holdout_frac` of the
+    fixture archive and compares held-out MAE against the coefficients currently in
+    coefficients.json. Chronological split, never random: the archive is a time series
+    and a shuffled split would leak later gameweeks into training.
+
+    Returns True only if the candidate beats the incumbent on BOTH splits.
+
+    CAVEAT worth remembering: the archive begins mid-season (the workbook only started
+    recording around GW12), so this measures the regime where title/relegation markets
+    are already half-resolved. August is more diffuse and is NOT represented yet. Re-run
+    once this season contributes early-gameweek rows.
+    """
+    rows = _fixture_perspectives()
+    names = list(model.COEFS["win_pred_f3plus"].keys())
+    X = pd.DataFrame(_win_features(rows))[names]
+    y = rows["win"]
+    good = X.notna().all(axis=1) & y.notna() & np.isfinite(X).all(axis=1)
+    X, y = X[good].reset_index(drop=True), y[good].reset_index(drop=True)
+
+    n = len(X)
+    cut = int(n * (1 - holdout_frac))
+    if n < 60:
+        print(f"win_pred holdout check SKIPPED: only {n} usable fixture rows")
+        return False
+
+    beta, *_ = np.linalg.lstsq(X.iloc[:cut].values, y.iloc[:cut].values, rcond=None)
+    candidate = pd.Series(X.values @ beta)
+    incumbent = pd.Series(X.values @ np.array(list(model.COEFS["win_pred_f3plus"].values())))
+
+    print(f"\nwin_pred holdout check (chronological, fit on first {cut} of {n} fixtures):")
+    ok = True
+    for label, sl in (("train", slice(0, cut)), ("holdout", slice(cut, n))):
+        cur = (incumbent[sl] - y[sl]).abs().mean()
+        cand = (candidate[sl] - y[sl]).abs().mean()
+        change = (cand - cur) / cur
+        flag = "ok" if change <= tolerance else "WORSE"
+        print(f"  {label:<8} current {cur:.4f}  refit {cand:.4f}  {change:+.1%}  {flag}")
+        ok = ok and change <= tolerance
+    if not ok:
+        print("  win_pred refit does not beat the incumbent on both splits")
+    return ok
+
+
+def main(write=False, force=False, only=None):
     report = []
     baselines = fit_baselines(report)
     win_pred, match_odds, = fit_win_models(report)
@@ -260,8 +311,20 @@ def main(write=False, force=False):
                   for a, b in zip(baselines[stat].values(), model.BASELINES[stat].values()))
     print(f"\n{changed} baseline coefficients changed vs current file")
 
+    if only:
+        # Adopt one model without dragging the rest along. The 2025-26 baseline refit
+        # degraded projections 100-225%, so "refit everything at once" is not a default.
+        kept = json.load(open(config.COEFFICIENTS_JSON, encoding="utf-8"))
+        if only == "win_pred":
+            kept["win_pred_f3plus"] = new["win_pred_f3plus"]
+        else:
+            raise SystemExit(f"unknown --only target: {only}")
+        new = kept
+        print(f"\nSelective refit: writing {only} only, every other coefficient unchanged")
+
     if write:
-        if not projection_holdout_check() and not force:
+        gate = win_pred_holdout_check() if only == "win_pred" else projection_holdout_check()
+        if not gate and not force:
             print("\nNOT WRITTEN: the holdout check failed. Rerun with --force to override "
                   "(you probably shouldn't).")
             return new
@@ -278,4 +341,5 @@ def main(write=False, force=False):
 
 
 if __name__ == "__main__":
-    main(write="--write" in sys.argv, force="--force" in sys.argv)
+    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
+    main(write="--write" in sys.argv, force="--force" in sys.argv, only=only)

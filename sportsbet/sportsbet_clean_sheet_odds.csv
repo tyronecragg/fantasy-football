@@ -1,21 +1,19 @@
 match_name,date,team_name,clean_sheet_yes,clean_sheet_no
-Arsenal v Coventry City,1787425200,Arsenal,1.62,2.31
-Hull City v Man Utd,1787425200,Hull City,7.29,1.1
-Everton v Crystal Palace,1787425200,Everton,3.18,1.36
-Nott'm Forest v Leeds,1787425200,Nott'm Forest,3.26,1.35
-Ipswich Town v Sunderland,1787425200,Ipswich Town,3.66,1.29
-Brentford v Spurs,1787425200,Brentford,4.05,1.25
-Man City v Bournemouth,1787425200,Man City,2.8,1.44
-Brighton v Aston Villa,1787425200,Brighton,4.12,1.24
-Newcastle v Liverpool,1787425200,Newcastle,5.59,1.15
-Fulham v Chelsea,1787425200,Fulham,5.1,1.17
-Coventry City v Arsenal,1787425200,Coventry City,12.95,1.03
-Man Utd v Hull City,1787425200,Man Utd,2.04,1.79
-Crystal Palace v Everton,1787425200,Crystal Palace,4.45,1.21
-Leeds v Nott'm Forest,1787425200,Leeds,4.23,1.23
-Sunderland v Ipswich Town,1787425200,Sunderland,3.54,1.3
-Spurs v Brentford,1787425200,Spurs,4.85,1.19
-Bournemouth v Man City,1787425200,Bournemouth,10.77,1.04
-Aston Villa v Brighton,1787425200,Aston Villa,5.02,1.18
-Liverpool v Newcastle,1787425200,Liverpool,4.45,1.21
-Chelsea v Fulham,1787425200,Chelsea,3.86,1.26
+Arsenal vs. Coventry City,2026-08-21T19:00:00,Arsenal,1.6,2.2
+Arsenal vs. Coventry City,2026-08-21T19:00:00,Coventry City,8.2,1.04
+Hull City vs. Manchester United,2026-08-22T11:30:00,Hull City,6.2,1.09
+Hull City vs. Manchester United,2026-08-22T11:30:00,Man Utd,2.02,1.71
+Everton FC vs. Crystal Palace,2026-08-22T14:00:00,Everton,2.85,1.38
+Everton FC vs. Crystal Palace,2026-08-22T14:00:00,Crystal Palace,3.8,1.22
+Ipswich Town vs. Sunderland AFC,2026-08-22T14:00:00,Ipswich Town,3.3,1.29
+Ipswich Town vs. Sunderland AFC,2026-08-22T14:00:00,Sunderland,3.2,1.3
+Nottingham Forest vs. Leeds United,2026-08-22T14:00:00,Leeds,3.6,1.25
+Brentford FC vs. Tottenham Hotspur,2026-08-22T16:30:00,Brentford,3.65,1.24
+Brighton vs. Aston Villa,2026-08-23T13:00:00,Brighton,3.5,1.26
+Brighton vs. Aston Villa,2026-08-23T13:00:00,Aston Villa,4.2,1.19
+Manchester City vs. AFC Bournemouth,2026-08-23T13:00:00,Man City,2.6,1.45
+Manchester City vs. AFC Bournemouth,2026-08-23T13:00:00,Bournemouth,7.0,1.07
+Newcastle United vs. Liverpool FC,2026-08-23T15:30:00,Newcastle,5.4,1.12
+Newcastle United vs. Liverpool FC,2026-08-23T15:30:00,Liverpool,3.45,1.27
+Fulham FC vs. Chelsea,2026-08-24T19:00:00,Fulham,4.8,1.15
+Fulham FC vs. Chelsea,2026-08-24T19:00:00,Chelsea,3.1,1.32

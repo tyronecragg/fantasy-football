@@ -1,0 +1,121 @@
+Season,Team,rating,source
+2021-2022,Man City,0.73193,matches
+2021-2022,Liverpool,0.664141,matches
+2021-2022,Chelsea,0.599137,matches
+2021-2022,Man Utd,0.500756,matches
+2021-2022,Arsenal,0.476714,matches
+2021-2022,Spurs,0.460561,matches
+2021-2022,West Ham,0.389507,matches
+2021-2022,Aston Villa,0.347527,matches
+2021-2022,Brighton,0.343287,matches
+2021-2022,Leicester,0.341091,matches
+2021-2022,Southampton,0.312357,matches
+2021-2022,Leeds,0.310082,matches
+2021-2022,Everton,0.307005,matches
+2021-2022,Wolves,0.299038,matches
+2021-2022,Crystal Palace,0.298615,matches
+2021-2022,Brentford,0.277879,matches
+2021-2022,Newcastle,0.264809,matches
+2021-2022,Burnley,0.243226,matches
+2021-2022,Watford,0.212071,matches
+2021-2022,Norwich,0.184765,matches
+2022-2023,Man City,0.698623,matches
+2022-2023,Liverpool,0.583889,matches
+2022-2023,Arsenal,0.571154,matches
+2022-2023,Man Utd,0.496022,matches
+2022-2023,Chelsea,0.477565,matches
+2022-2023,Newcastle,0.468715,matches
+2022-2023,Brighton,0.449673,matches
+2022-2023,Spurs,0.443951,matches
+2022-2023,Aston Villa,0.347694,matches
+2022-2023,West Ham,0.333591,matches
+2022-2023,Brentford,0.322076,matches
+2022-2023,Leicester,0.300202,matches
+2022-2023,Leeds,0.293922,matches
+2022-2023,Crystal Palace,0.291274,matches
+2022-2023,Wolves,0.287927,matches
+2022-2023,Fulham,0.273529,matches
+2022-2023,Everton,0.268489,matches
+2022-2023,Southampton,0.233469,matches
+2022-2023,Nott'm Forest,0.214931,matches
+2022-2023,Bournemouth,0.210226,matches
+2023-2024,Man City,0.710923,matches
+2023-2024,Arsenal,0.647939,matches
+2023-2024,Liverpool,0.62418,matches
+2023-2024,Chelsea,0.485364,matches
+2023-2024,Spurs,0.467173,matches
+2023-2024,Newcastle,0.45274,matches
+2023-2024,Man Utd,0.432748,matches
+2023-2024,Aston Villa,0.424925,matches
+2023-2024,Brighton,0.411257,matches
+2023-2024,Brentford,0.33403,matches
+2023-2024,Bournemouth,0.331111,matches
+2023-2024,West Ham,0.328356,matches
+2023-2024,Everton,0.326919,matches
+2023-2024,Fulham,0.315596,matches
+2023-2024,Crystal Palace,0.307948,matches
+2023-2024,Wolves,0.281128,matches
+2023-2024,Nott'm Forest,0.267943,matches
+2023-2024,Burnley,0.231908,matches
+2023-2024,Luton,0.200027,matches
+2023-2024,Sheffield Utd,0.161322,matches
+2024-2025,Liverpool,0.637596,matches
+2024-2025,Man City,0.604691,matches
+2024-2025,Arsenal,0.601823,matches
+2024-2025,Chelsea,0.525377,matches
+2024-2025,Newcastle,0.477034,matches
+2024-2025,Aston Villa,0.43036,matches
+2024-2025,Brighton,0.410703,matches
+2024-2025,Man Utd,0.395667,matches
+2024-2025,Spurs,0.385653,matches
+2024-2025,Bournemouth,0.383428,matches
+2024-2025,Fulham,0.354895,matches
+2024-2025,Nott'm Forest,0.344952,matches
+2024-2025,Crystal Palace,0.338983,matches
+2024-2025,Brentford,0.335664,matches
+2024-2025,West Ham,0.296025,matches
+2024-2025,Everton,0.281609,matches
+2024-2025,Wolves,0.277691,matches
+2024-2025,Ipswich Town,0.205372,matches
+2024-2025,Leicester,0.197581,matches
+2024-2025,Southampton,0.184229,matches
+2025-2026,Arsenal,0.619253,matches
+2025-2026,Man City,0.606697,matches
+2025-2026,Liverpool,0.539127,matches
+2025-2026,Chelsea,0.474688,matches
+2025-2026,Man Utd,0.451818,matches
+2025-2026,Newcastle,0.429295,matches
+2025-2026,Brighton,0.403469,matches
+2025-2026,Aston Villa,0.397182,matches
+2025-2026,Bournemouth,0.360855,matches
+2025-2026,Spurs,0.35321,matches
+2025-2026,Brentford,0.349807,matches
+2025-2026,Crystal Palace,0.33632,matches
+2025-2026,Fulham,0.328262,matches
+2025-2026,Nott'm Forest,0.324912,matches
+2025-2026,Everton,0.320739,matches
+2025-2026,Leeds,0.305855,matches
+2025-2026,West Ham,0.275481,matches
+2025-2026,Sunderland,0.25374,matches
+2025-2026,Wolves,0.207984,matches
+2025-2026,Burnley,0.177383,matches
+2026-2027,Coventry City,0.213035,promoted-substitute
+2026-2027,Hull City,0.213035,promoted-substitute
+2026-2027,Ipswich Town,0.213035,promoted-substitute
+2026-2027,Arsenal,0.619253,carried-forward
+2026-2027,Aston Villa,0.397182,carried-forward
+2026-2027,Bournemouth,0.360855,carried-forward
+2026-2027,Brentford,0.349807,carried-forward
+2026-2027,Brighton,0.403469,carried-forward
+2026-2027,Chelsea,0.474688,carried-forward
+2026-2027,Crystal Palace,0.33632,carried-forward
+2026-2027,Everton,0.320739,carried-forward
+2026-2027,Fulham,0.328262,carried-forward
+2026-2027,Leeds,0.305855,carried-forward
+2026-2027,Liverpool,0.539127,carried-forward
+2026-2027,Man City,0.606697,carried-forward
+2026-2027,Man Utd,0.451818,carried-forward
+2026-2027,Newcastle,0.429295,carried-forward
+2026-2027,Nott'm Forest,0.324912,carried-forward
+2026-2027,Spurs,0.35321,carried-forward
+2026-2027,Sunderland,0.25374,carried-forward

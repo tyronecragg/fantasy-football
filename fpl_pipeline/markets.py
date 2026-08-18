@@ -25,11 +25,38 @@ def two_sided(over, under):
     return out.where(np.isfinite(out))
 
 
-def player_market(df):
-    """Goalscorer / 2+ goals / assist CSVs: player_name, match_id, odds_decimal."""
+def longshot_calibrate(prob, enabled=True):
+    """Shrink over-stated long prices toward their observed frequency.
+
+    MARGIN_PLAYER removes a flat 5% at every price. Measured against outcomes that is about
+    right above ~18% and far too little below it — a 5-8% projection happened 2.8% of the
+    time. Applied here, at the point odds become probabilities, because that is the stage
+    the calibration was measured on; the scraped CSVs stay raw so a different curve can be
+    fitted later.
+
+    Interpolates in LOG probability because the distortion grows multiplicatively as the
+    price lengthens, and floors the multiplier so no player is declared impossible.
+    """
+    knots = getattr(config, "LONGSHOT_CALIBRATION", None)
+    if not enabled or not knots:
+        return prob
+    xs = np.log([k[0] for k in knots])
+    ys = np.maximum([k[1] for k in knots], getattr(config, "LONGSHOT_FLOOR", 0.15))
+    p = pd.to_numeric(prob, errors="coerce")
+    mult = np.interp(np.log(p.clip(lower=1e-6)), xs, ys)
+    return (p * mult).clip(0, 1).where(p.notna())
+
+
+def player_market(df, calibrate=False):
+    """Goalscorer / 2+ goals / assist CSVs: player_name, match_id, odds_decimal.
+
+    `calibrate` is improved-mode only. Parity mode must reproduce the workbook exactly, and
+    the workbook applied a flat margin, so the longshot correction is a deliberate
+    divergence and stays off there.
+    """
     return pd.DataFrame({
         "player": df.iloc[:, 0],
-        "prob": implied(df.iloc[:, 2], config.MARGIN_PLAYER),
+        "prob": longshot_calibrate(implied(df.iloc[:, 2], config.MARGIN_PLAYER), calibrate),
     })
 
 
@@ -90,15 +117,17 @@ def _without_f1_duplicate(f1_raw, f2_raw, label):
     return f2_raw
 
 
-def build_all(sportsbet, inputs, dedup_f2=True):
+def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None):
+    # calibration rides with improved mode unless told otherwise
+    calibrate = dedup_f2 if calibrate is None else calibrate
     f2_cs, f2_tg = sportsbet["f2_clean_sheet"], sportsbet["f2_team_goals"]
     if dedup_f2:
         f2_cs = _without_f1_duplicate(sportsbet["clean_sheet"], f2_cs, "clean-sheet")
         f2_tg = _without_f1_duplicate(sportsbet["team_goals"], f2_tg, "team-goals")
     return {
-        "score1": player_market(sportsbet["score1"]),
-        "score2": player_market(sportsbet["score2"]),
-        "assist": player_market(sportsbet["assist"]),
+        "score1": player_market(sportsbet["score1"], calibrate),
+        "score2": player_market(sportsbet["score2"], calibrate),
+        "assist": player_market(sportsbet["assist"], calibrate),
         "yellow": yellow_market(sportsbet["yellow"]),
         "clean_sheet": clean_sheet_market(sportsbet["clean_sheet"]),
         "concede": concede_market(sportsbet["team_goals"]),

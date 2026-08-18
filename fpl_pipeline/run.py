@@ -21,22 +21,30 @@ from .io_utils import reset_counter, snapshot
 
 
 def guard_synthetic_archive(gameweek, force=False):
-    """Refuse --gw archive recording while the player odds are pre-season placeholders.
+    """Decide what may be archived while the player odds are pre-season placeholders.
 
     tools/build_preseason_data.py drops sportsbet/SYNTHETIC_NOTE.txt when it writes
-    synthetic odds; sportsbet.py removes it after a real player-market scrape. Archiving
-    synthetic odds would poison the trailing-median factors, so it needs --force-archive.
+    synthetic odds; sportsbet.py removes it after a real player-market scrape.
+
+    Returns "all" | "fixtures_only" | "none". The two archives carry different risk:
+    synthetic PLAYER odds would poison the trailing-median factors, so player history is
+    withheld. MATCH odds can be real while player markets are still closed (they were
+    for GW1 2026-27, pasted by hand), and they are unbackfillable, so fixture history is
+    still recorded - losing a gameweek of real match odds is the worse mistake.
     """
     note = os.path.join(config.SPORTSBET_DIR, "SYNTHETIC_NOTE.txt")
-    if gameweek and os.path.exists(note) and not force:
-        raise SystemExit(
-            f"Refusing to record GW{gameweek} archives: {note} says the player odds are "
-            f"synthetic pre-season placeholders. Run sportsbet.py for real odds first, "
-            f"or pass --force-archive if you really mean it.")
+    if not gameweek:
+        return "none"
+    if not os.path.exists(note) or force:
+        return "all"
+    print(f"  {os.path.basename(note)} present: player odds are synthetic placeholders.\n"
+          f"  Archiving MATCH odds only (unbackfillable); player history withheld so the\n"
+          f"  trailing-median factors stay clean. Use --force-archive to record both.")
+    return "fixtures_only"
 
 
 def run(parity_mode=False, gameweek=None, force_archive=False):
-    guard_synthetic_archive(gameweek, force_archive)
+    archive_mode = guard_synthetic_archive(gameweek, force_archive)
     reset_counter(subdir="parity" if parity_mode else None)
     improved = not parity_mode
 
@@ -53,12 +61,12 @@ def run(parity_mode=False, gameweek=None, force_archive=False):
         model.load_coefficients()
 
     try:
-        return _run(parity_mode, gameweek, improved)
+        return _run(parity_mode, gameweek, improved, archive_mode)
     finally:
         config.FPL_DATA_DIR = live_data_dir
 
 
-def _run(parity_mode, gameweek, improved):
+def _run(parity_mode, gameweek, improved, archive_mode="none"):
     print("Loading sources...")
     if parity_mode:
         inputs = ingest.load_inputs(config.PARITY_INPUTS_DIR)
@@ -102,7 +110,7 @@ def _run(parity_mode, gameweek, improved):
         "players_master")
 
     if improved:
-        rec = reconcile.report(roster, inputs["starting_lineups"], mkts)
+        rec = reconcile.report(roster, inputs["starting_lineups"], mkts, sportsbet)
         reconcile.print_summary(rec)
         if not rec.empty:
             snapshot(rec, "name_reconciliation")
@@ -113,9 +121,12 @@ def _run(parity_mode, gameweek, improved):
     if improved:
         if gameweek:
             print(f"Updating historical archives for GW{gameweek}...")
-            history.update_player_history(master, gameweek)
-            history.update_fixture_history(sportsbet["wdw"], season)
-            history.refresh_fallback_factors(master)
+            # Match odds are archived whenever we have them - they cannot be backfilled.
+            history.update_fixture_history(sportsbet["wdw"], season, gameweek=gameweek,
+                                           sportsbet=sportsbet)
+            if archive_mode == "all":
+                history.update_player_history(master, gameweek)
+                history.refresh_fallback_factors(master)
         else:
             guess = history.infer_gameweek()
             hint = f" (FPL data suggests GW{guess})" if guess else ""

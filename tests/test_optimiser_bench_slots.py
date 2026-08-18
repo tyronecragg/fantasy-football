@@ -58,3 +58,21 @@ def test_baseline_lp_matches_hand_computed_slot_pricing():
     assert starting_xi == pytest.approx(42.1 + 5.0)
     assert total == pytest.approx(47.1 + 0.8 * 0.30 + 0.5 * 0.10 + 0.4 * 0.05 + 1.0 * 0.10)
     assert f1_total == pytest.approx(total)  # single fixture at weight 1.0
+
+
+def test_fixture_weights_combine_ownership_and_reliability():
+    import optimisation_gameweek as og
+
+    w = og.combine_fixture_weights()
+    assert w[0] == 1.0                                  # normalised to F1
+    assert all(a >= b for a, b in zip(w, w[1:]))        # monotonically decreasing
+    assert w[1] - w[2] > w[2] - w[3]                    # F2->F3 cliff, not a linear ramp
+
+    # each component is usable in isolation, and both default to 8 fixtures
+    assert og.combine_fixture_weights(reliability=[1] * 8) == pytest.approx(
+        list(og.OWNERSHIP_WEIGHTS))
+    assert og.combine_fixture_weights(ownership=[1] * 8) == pytest.approx(
+        list(og.RELIABILITY_WEIGHTS))
+    assert len(og.combine_fixture_weights(num_fixtures=6)) == 6
+    with pytest.raises(ValueError, match="need 8"):
+        og.combine_fixture_weights(ownership=[1.0, 0.9])

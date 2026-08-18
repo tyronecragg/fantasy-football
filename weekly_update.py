@@ -109,6 +109,8 @@ def phase1(argv):
                 report("Sportsbet freshness", False, "odds files were NOT refreshed - check the scrape output")
 
     step("Stage FFS lineups + team news", PY + [os.path.join(ROOT, "starting_lineups.py")], fatal=False)
+    step("Injury cross-check vs FPL flags", PY + [os.path.join(ROOT, "tools", "injury_check.py")],
+         fatal=False)
 
     print(f"\n{'=' * 70}")
     print("PAUSED FOR CURATION")

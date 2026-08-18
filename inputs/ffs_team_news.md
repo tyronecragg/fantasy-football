@@ -1,115 +1,133 @@
-# FFS Team News — staged 2026-08-10
+# FFS Team News — staged 2026-08-18
 
 *Curation context only — nothing in the pipeline reads this file.*
 
 ## Arsenal
 - **Next match:** Coventry City (H)
-- **Predicted XI:** David Raya, Ben White, Cristhian Mosquera, Gabriel Magalhaes, Riccardo Calafiori, Martin Odegaard, Myles Lewis-Skelly, Kai Havertz, Max Dowman, Viktor Gyokeres, Christos Tzolis
-- *Last Updated Sat 8th Aug*
+- **Out:** Saliba, Jurriën Timber
+- **Predicted XI:** David Raya, Ben White, Cristhian Mosquera, Gabriel Magalhaes, Riccardo Calafiori, Martin Odegaard, Myles Lewis-Skelly, Declan Rice, Noni Madueke, Kai Havertz, Christos Tzolis
+- *Last Updated Tue 18th Aug*
 
 ## Aston Villa
 - **Next match:** Brighton and Hove Albion (A)
 - **Out:** Mvom Onana
-- **Predicted XI:** Emiliano Martinez, Matty Cash, Ezri Konsa, Pau Torres, Ian Maatsen, Joao Gomes, Boubacar Kamara, John McGinn, Ross Barkley, Emiliano Buendia, Ollie Watkins
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Abraham (75%), João Gomes (25%), Madjo (25%), Manzambi (50%)
+- **Predicted XI:** Marco Bizot, Matty Cash, Victor Lindelof, Pau Torres, Ian Maatsen, Ross Barkley, Boubacar Kamara, John McGinn, Emiliano Buendia, Alejandro Garnacho, Ollie Watkins
+- *Last Updated Tue 18th Aug*
 
 ## Bournemouth
 - **Next match:** Manchester City (A)
+- **Out:** Adli, Araujo, Kroupi, Milosavljevic
 - **Banned:** Christie
-- **Predicted XI:** Djordje Petrovic, Adam Smith, James Hill, Antonio Silva, Adrien Truffert, Tyler Adams, Alex Scott, Marcus Tavernier, Justin Kluivert, Rayan, Evanilson
-- *Last Updated Tue 4th Aug*
+- **Predicted XI:** Djordje Petrovic, Adam Smith, James Hill, António João Pereira de Albuquerque Tavares da Silva, Adrien Truffert, Lewis Cook, Alex Scott, Rayan, Justin Kluivert, Marcus Tavernier, Evanilson
+- *Last Updated Mon 17th Aug*
 
 ## Brentford
 - **Next match:** Tottenham Hotspur (H)
-- **Doubts:** Carvalho (25%), Milambo (25%)
-- **Predicted XI:** Caoimhin Kelleher, Michael Kayode, Kristoffer Ajer, Nathan Collins, Keane Lewis-Potter, Yehor Yarmoliuk, Vitaly Janelt, Dango Ouattara, Mathias Jensen, Kevin Schade, Igor Thiago
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Milambo (25%), van den Berg (25%)
+- **Predicted XI:** Caoimhin Kelleher, Michael Kayode, Kristoffer Ajer, Nathan Collins, Keane Lewis-Potter, Mamadou Sangaré, Vitaly Janelt, Dango Ouattara, Mathias Jensen, Kevin Schade, Igor Thiago
+- *Last Updated Tue 11th Aug*
 
 ## Brighton and Hove Albion
 - **Next match:** Aston Villa (H)
-- **Doubts:** Mitoma (25%), Tzimas (25%)
-- **Predicted XI:** Bart Verbruggen, Ferdi Kadioglu, Luka Vuskovic, Lewis Dunk, Maxim De Cuyper, Carlos Baleba, Pascal Gross, Diego Gomez, Jack Hinshelwood, Yankuba Minteh, Georginio Rutter
-- *Last Updated Tue 4th Aug*
+- **Out:** Minteh
+- **Doubts:** Baleba (25%), Ferguson (25%), Mitoma (25%), Tzimas (25%)
+- **Predicted XI:** Bart Verbruggen, Mats Wieffer, Luka Vušković, Olivier Boscagli, Ferdi Kadioglu, Yasin Ayari, Pascal Gross, Diego Gomez, Jack Hinshelwood, Maxim De Cuyper, Georginio Rutter
+- *Last Updated Mon 17th Aug*
 
 ## Chelsea
 - **Next match:** Fulham (A)
-- **Banned:** Fofana, Mudryk
-- **Predicted XI:** Robert Sanchez, Marco Palestra, Maxence Lacroix, Levi Colwill, Jorrel Hato, Romeo Lavia, Moises Caicedo, Pedro Neto, Cole Palmer, Jamie Gittens, Joao Pedro
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Anselmino (25%), Emegha (25%)
+- **Banned:** Fofana
+- **Predicted XI:** Robert Sanchez, Reece James, Maxence Lacroix, Levi Samuels Colwill, Pedro Neto, Roméo Lavia, Moises Caicedo, Marco Palestra, Cole Palmer, Joao Pedro, Morgan Rogers
+- *Last Updated Mon 17th Aug*
 
 ## Coventry City
 - **Next match:** Arsenal (A)
-- **Predicted XI:** Carl Rushworth, Milan van Ewijk, Bobby Thomas, Aurele Amenda, Jay da Silva, Matt Grimes, Frank Onyeka, Tatsuhiro Sakamoto, Victor Torp, Ephron Mason-Clark, Haji Wright
-- *Last Updated Wed 5th Aug*
+- **Doubts:** Mason-Clark (75%), Onyeka (75%), Wright (50%)
+- **Predicted XI:** Carl Rushworth, Milan van Ewijk, Bobby Thomas, Aurèle Amenda, Jay da Silva, Caleb Yirenkyi, Matt Grimes, Frank Onyeka, Loum Tchaouna, Ellis Simms, Brandon Thomas-Asante
+- *Last Updated Fri 14th Aug*
 
 ## Crystal Palace
 - **Next match:** Everton (A)
-- **Predicted XI:** Dean Henderson, Jaydee Canvot, Chris Richards, Chadi Riad, Daniel Munoz, Daichi Kamada, Adam Wharton, Tyrick Mitchell, Ismaila Sarr, Brennan Johnson, Jorgen Strand Larsen
-- *Last Updated Sat 8th Aug*
+- **Predicted XI:** Dean Henderson, Jaydee Canvot, Chris Richards, Chadi Riad, Oscar Mingueza, Daichi Kamada, Adam Wharton, Tyrick Mitchell, Ismaila Sarr, Dwight McNeil, Jorgen Strand Larsen
+- *Last Updated Mon 17th Aug*
 
 ## Everton
 - **Next match:** Crystal Palace (H)
-- **Predicted XI:** Jordan Pickford, Jake O'Brien, James Tarkowski, Jarrad Branthwaite, Vitalii Mykolenko, Hayden Hackney, Tim Iroegbunam, Merlin Rohl, Kiernan Dewsbury-Hall, Iliman Ndiaye, Thierno Barry
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Garner (50%), Iroegbunam (25%)
+- **Predicted XI:** Jordan Pickford, Jake O'Brien, James Tarkowski, Jarrad Branthwaite, Vitalii Mykolenko, Hayden Hackney, Harrison Armstrong, Merlin Röhl, Kiernan Dewsbury-Hall, Iliman Ndiaye, Thierno Barry
+- *Last Updated Mon 17th Aug*
 
 ## Fulham
 - **Next match:** Chelsea (H)
+- **Out:** Cairney
 - **Banned:** Andersen
-- **Predicted XI:** Bernd Leno, Kenny Tete, Jorge Cuenca, Calvin Bassey, Antonee Robinson, Sasa Lukic, Alex Iwobi, Oscar Bobb, Emile Smith Rowe, Kevin, Rodrigo Muniz
-- *Last Updated Tue 4th Aug*
+- **Predicted XI:** Bernd Leno, Timothy Castagne, Jorge Cuenca, Calvin Bassey, Antonee Robinson, Sander Berge, Alex Iwobi, Oscar Bobb, Josh King, César Palacios, Gonzalo García
+- *Last Updated Mon 17th Aug*
 
 ## Hull City
 - **Next match:** Manchester United (H)
-- **Predicted XI:** Jack Butland, Lewie Coyle, John Egan, Semi Ajayi, Ryan John Giles, Regan Slater, Matt Crooks, Mohamed Belloumi, Abdulkadir Omur, Liam Millar, Oliver McBurnie
-- *Last Updated Tue 4th Aug*
+- **Out:** Butland, Gelhardt, Gyabi, Hughes, Matazo, Morita
+- **Doubts:** Drameh (75%), Jacob (50%), Zambrano (50%)
+- **Predicted XI:** Konstantinos Tzolakis, Lewie Coyle, Semi Ajayi, Nobel Mendy, Ryan John Giles, Regan Slater, Matt Crooks, Mohamed Belloumi, Jens Hjertø-Dahl, Elliot Stroud, Oliver McBurnie
+- *Last Updated Mon 17th Aug*
 
 ## Ipswich Town
 - **Next match:** Sunderland (H)
-- **Predicted XI:** Kjell Scherpen, Darnell Furlong, Dara O'Shea, Jacob Greaves, Leif Davis, Marcelino Nunez, Cameron Humphreys, Fatawu, Anis Mehmeti, Daizen Maeda, Emersonn
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Fatawu (75%), Matusiwa (50%), Taylor (50%)
+- **Predicted XI:** Kjell Scherpen, Dara O'Shea, Issa Diop, Jacob Greaves, Leif Davis, Marcelino Núñez, Sasa Lukic, Fatawu, Sindre Egeli, Daizen Maeda, Emersonn
+- *Last Updated Mon 17th Aug*
 
 ## Leeds United
 - **Next match:** Nottingham Forest (A)
-- **Predicted XI:** Lucas Perri, Joe Rodon, Jaka Bijol, Tarik Muharemovic, Jayden Bogle, Ethan Ampadu, Ao Tanaka, James Justin, Harry Wilson, Dominic Calvert-Lewin, Anton Stach
-- *Last Updated Tue 4th Aug*
+- **Out:** Gudmundsson
+- **Doubts:** Gnonto (25%), Gruev (25%)
+- **Predicted XI:** James Trafford, Joe Rodon, Jaka Bijol, Tarik Muharemović, Jayden Bogle, Ethan Ampadu, Anton Stach, James Justin, Harry Wilson, Dominic Calvert-Lewin, Brenden Aaronson
+- *Last Updated Mon 17th Aug*
 
 ## Liverpool
 - **Next match:** Newcastle United (A)
-- **Out:** Ekitiké
-- **Doubts:** Bradley (25%), Leoni (50%)
+- **Out:** Bradley, Ekitiké, Gomez, Leoni
+- **Doubts:** Jones (75%)
 - **Predicted XI:** Alisson Becker, Jeremie Frimpong, Jeremy Jacquet, Virgil van Dijk, Milos Kerkez, Ryan Gravenberch, Dominik Szoboszlai, Rio Ngumoha, Florian Wirtz, Cody Gakpo, Alexander Isak
 - *Last Updated Tue 4th Aug*
 
 ## Manchester City
 - **Next match:** Bournemouth (H)
-- **Predicted XI:** Gianluigi Donnarumma, Matheus Nunes, Abdukodir Khusanov, Josko Gvardiol, Rayan Ait Nouri, Mateo Kovacic, Elliot Anderson, Antoine Semenyo, Phil Foden, Jeremy Doku, Erling Haaland
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Rodri (25%), Matheus Nunes (75%)
+- **Predicted XI:** Gianluigi Donnarumma, Abdukodir Khusanov, Ruben Dias, Josko Gvardiol, Nico O'Reilly, Elliot Anderson, Mateo Kovačić, Antoine Semenyo, Phil Foden, Jeremy Doku, Erling Haaland
+- *Last Updated Tue 18th Aug*
 
 ## Manchester United
 - **Next match:** Hull City (A)
-- **Out:** de Ligt, Ugarte
-- **Predicted XI:** Senne Lammens, Diogo Dalot, Leny Yoro, Harry Maguire, Luke Shaw, Mason Mount, Andrey Santos, Amad Diallo, Bruno Fernandes, Matheus Cunha, Bryan Mbeumo
-- *Last Updated Tue 4th Aug*
-
-rrrrrrrrrr
+- **Out:** Ugarte
+- **Doubts:** Darlow (50%), de Ligt (25%), Heaton (25%), Mount (75%), Sesko (25%)
+- **Predicted XI:** Senne Lammens, Diogo Dalot, Harry Maguire, Ayden Heaven, Luke Shaw, Youri Tielemans, Andrey Santos, Amad Diallo, Bruno Fernandes, Patrick Dorgu, Bryan Mbeumo
+- *Last Updated Mon 17th Aug*
 
 ## Newcastle United
 - **Next match:** Liverpool (H)
-- **Predicted XI:** Nick Pope, Lewis Miley, Malick Thiaw, Sven Botman, Lewis Hall, Bruno Guimaraes, Joelinton, Anthony Elanga, Jacob Ramsey, Harvey Barnes, William Osula
-- *Last Updated Tue 4th Aug*
+- **Out:** Joelinton
+- **Doubts:** Livramento (75%), Willock (75%)
+- **Predicted XI:** Lukas Hornicek, Amar Dedic, Malick Thiaw, Sven Botman, Lewis Hall, Jacob Ramsey, Aladji Bamba, Anthony Elanga, Yoane Wissa, Harvey Barnes, William Osula
+- *Last Updated Tue 18th Aug*
 
 ## Nottingham Forest
 - **Next match:** Leeds United (H)
-- **Predicted XI:** Matz Sels, Jair, Nikola Milenkovic, Murillo dos Santos, Ola Aina, Nicolas Dominguez, Ibrahim Sangare, Neco Williams, Morgan Gibbs-White, Igor Jesus, Chris Wood
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Savona (25%)
+- **Predicted XI:** Matz Sels, Ousmane Diomande, Nikola Milenkovic, Murillo dos Santos, Ola Aina, Xaver Schlager, Ibrahim Sangare, Neco Williams, Dan Ndoye, Morgan Gibbs-White, Igor Jesus
+- *Last Updated Mon 17th Aug*
 
 ## Sunderland
 - **Next match:** Ipswich Town (A)
-- **Predicted XI:** Robin Roefs, Nordi Mukiele, Dan Ballard, Omar Alderete, Reinildo Mandava, Granit Xhaka, Noah Sadiki, Trai Hume, Enzo Le Fee, Nilson Angulo, Brian Brobbey
-- *Last Updated Tue 21st Jul*
+- **Doubts:** Meunier (75%)
+- **Predicted XI:** Robin Roefs, Thomas Meunier, Luke O'Nien, Dan Ballard, Reinildo Mandava, Granit Xhaka, Noah Sadiki, Trai Hume, Enzo Le Fee, Nilson Angulo, Brian Brobbey
+- *Last Updated Mon 17th Aug*
 
 ## Tottenham Hotspur
 - **Next match:** Brentford (A)
 - **Out:** Odobert, Simons
-- **Predicted XI:** Antonin Kinsky, Pedro Porro, Jan Paul van Hecke, Micky van de Ven, Andrew Robertson, Sandro Tonali, Mateus Fernandes, Mohammed Kudus, Conor Gallagher, Mathys Tel, Dominic Solanke
-- *Last Updated Tue 4th Aug*
+- **Doubts:** Kudus (25%), Kulusevski (25%)
+- **Predicted XI:** Antonin Kinsky, Archie Gray, Jan Paul van Hecke, Marcos Senesi, Andrew Robertson, Sandro Tonali, Mateus Fernandes, Mikey Moore, Conor Gallagher, Mathys Tel, Richarlison
+- *Last Updated Mon 17th Aug*

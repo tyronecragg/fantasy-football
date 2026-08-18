@@ -65,9 +65,20 @@ def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV, season=None
     return hist
 
 
-def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=None):
+def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=None,
+                           gameweek=None, sportsbet=None):
     """Upsert the upcoming gameweek's fixtures (first 10 scraped matches) with their
-    match odds and both teams' season odds, keyed by (Season, home_team, away_team)."""
+    match odds and both teams' season odds, keyed by (Season, home_team, away_team).
+
+    Records more than the pipeline currently consumes, because odds are unbackfillable:
+      - draw odds, so the 1X2 book can be de-margined properly later (win-only prices
+        force an assumed overround, which biases any fitted target);
+      - the Gameweek, so a row is dated - "state at M vs odds at N" work needs it;
+      - per-team clean-sheet and over-1.5/over-3.5 team-goal odds, which together pin
+        each side's implied goal expectation (lambda) - the quantity the clean sheet,
+        concede and team-goal markets all ultimately want.
+    See task #19: none of this can be reconstructed after the gameweek passes.
+    """
     season = season or config.SEASON
     hist = pd.read_csv(path)
     season_idx = season_probs.set_index("team")
@@ -75,16 +86,37 @@ def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=N
     f1 = wdw.iloc[:10]
     rows = pd.DataFrame({
         "Season": season,
+        "Gameweek": gameweek,
         "home_team": f1.iloc[:, 0].values,
         "away_team": f1.iloc[:, 1].values,
         "home_win_odds": f1.iloc[:, 2].values,
         "away_win_odds": f1.iloc[:, 3].values,
+        "draw_odds": f1["draw_odds"].values if "draw_odds" in f1.columns else pd.NA,
     })
+
+    # Per-team markets are keyed by team name within the same gameweek's scrape
+    cs = tg = None
+    if sportsbet is not None:
+        cs = sportsbet.get("clean_sheet")
+        tg = sportsbet.get("team_goals")
+        cs = cs.drop_duplicates(subset="team_name").set_index("team_name") if cs is not None else None
+        tg = tg.drop_duplicates(subset="Team").set_index("Team") if tg is not None else None
+
     for side in ("home", "away"):
         teams = rows[f"{side}_team"]
         rows[f"{side}_title_odds"] = teams.map(season_idx["title_odds"]).values
         rows[f"{side}_relegation_odds"] = teams.map(season_idx["relegation_odds"]).values
         rows[f"{side}_top_6_odds"] = teams.map(season_idx["top6_odds"]).values
+        rows[f"{side}_clean_sheet_odds"] = (
+            teams.map(cs["clean_sheet_yes"]).values if cs is not None else pd.NA)
+        for line in ("1.5", "3.5"):
+            rows[f"{side}_over_{line}_odds"] = (
+                teams.map(tg[f"Team_Over_{line}"]).values if tg is not None else pd.NA)
+
+    # Columns added after earlier seasons were recorded: backfill the archive as NA
+    for col in rows.columns:
+        if col not in hist.columns:
+            hist[col] = pd.NA
 
     key_cols = ["Season", "home_team", "away_team"]
     new_keys = set(map(tuple, rows[key_cols].values))

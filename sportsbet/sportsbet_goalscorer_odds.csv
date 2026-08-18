@@ -1,223 +1,461 @@
 player_name,match_id,odds_decimal
-Martin Zubimendi,90000001,7.07
-Gabriel Martinelli,90000002,3.14
-Cristhian Mosquera,90000003,13.65
-Eberechi Eze,90000004,2.73
-Riccardo Calafiori,90000005,7.87
-Viktor Gyokeres,90000006,2.07
-Declan Rice,90000007,5.19
-Piero Hincapie,90000008,9.07
-Gabriel Magalhaes,90000009,7.16
-Bukayo Saka,90000010,2.53
-Martin Odegaard,90000011,4.28
-Ezri Konsa,90000012,18.75
-Alejandro Garnacho,90000013,4.5
-Pau Torres,90000014,15.62
-Ian Maatsen,90000016,11.44
-Matty Cash,90000017,10.32
-Emiliano Buendia,90000018,5.44
-Ollie Watkins,90000019,3.18
-Johan Manzambi,90000020,6.82
-John McGinn,90000021,7.34
-Joao Gomes,90000022,10.97
-Bafode Diakite,90000023,21.01
-Adrien Truffert,90000024,18.79
-Tyler Adams,90000025,18.96
-Alex Scott,90000026,11.23
-Adam Smith,90000027,31.05
-Rayan,90000028,4.63
-Evanilson,90000029,4.41
-Marcus Tavernier,90000030,6.34
-Junior Kroupi,90000032,8.36
-James Hill,90000033,19.5
-Kristoffer Ajer,90000034,19.43
-Nathan Collins,90000036,15.14
-Sepp van den Berg,90000037,13.99
-Jaidon Anthony,90000038,4.19
-Igor Thiago,90000039,2.86
-Dango Ouattara,90000040,4.56
-Mathias Jensen,90000041,11.85
-Mikkel Damsgaard,90000042,7.64
-Kevin Schade,90000043,3.87
-Michael Kayode,90000044,20.93
-Yankuba Minteh,90000045,5.11
-Lewis Dunk,90000046,13.78
-Kaoru Mitoma,90000047,4.86
-Pascal Struijk,90000048,9.83
-Ferdi Kadioglu,90000049,10.52
-Pascal Gross,90000050,6.82
-Yasin Ayari,90000051,7.76
-Jack Hinshelwood,90000052,7.97
-Luka Vušković,90000053,14.2
-Charalampos Kostoulas,90000055,3.98
-Georginio Rutter,90000056,2.2
-Trevoh Chalobah,90000057,12.23
-Joao Pedro,90000058,3.39
-Reece James,90000059,8.86
-Enzo Fernandez,90000060,5.48
-Pedro Neto,90000061,5.36
-Cole Palmer,90000062,3.5
-Wesley Fofana,90000063,26.32
-Moises Caicedo,90000064,12.18
-Morgan Rogers,90000065,4.12
-Maxence Lacroix,90000067,13.5
-Marco Palestra,90000068,15.11
-Josh Eccles,90000069,20.42
-Jack Rudoni,90000070,20.42
-Brandon Thomas-Asante,90000071,11.03
-Tatsuhiro Sakamoto,90000072,20.42
-Ephron Mason-Clark,90000073,20.42
-Frank Onyeka,90000074,34.86
-Matt Grimes,90000075,20.42
-Haji Wright,90000077,11.03
-Loum Tchaouna,90000078,14.38
-Bobby Thomas,90000079,33.71
-Ellis Simms,90000080,11.03
-Aurèle Amenda,90000081,33.71
-Jake Bidwell,90000082,33.71
-Jean-Philippe Mateta,90000084,3.44
-Adam Wharton,90000085,16.51
-Brennan Johnson,90000087,5.81
-Jaydee Canvot,90000088,25.98
-Daniel Munoz,90000089,12.56
-Ismaila Sarr,90000090,5.27
-Oscar Mingueza,90000091,19.74
-Tyrick Mitchell,90000092,28.9
-Jorgen Strand Larsen,90000093,3.73
-Chris Richards,90000094,19.92
-Daichi Kamada,90000095,10.71
-Tim Iroegbunam,90000096,12.19
-Iliman Ndiaye,90000097,3.43
-Michael Keane,90000098,7.5
-Thierno Barry,90000099,3.33
-Dwight McNeil,90000100,4.93
-Jarrad Branthwaite,90000101,17.77
-James Tarkowski,90000102,16.02
-Vitalii Mykolenko,90000103,19.2
-Christian Norgaard,90000105,12.29
-Hayden Hackney,90000106,5.99
-Jake O'Brien,90000107,10.76
-Kiernan Dewsbury-Hall,90000108,5.37
-Sander Berge,90000110,12.04
-Kevin,90000111,4.92
-Calvin Bassey,90000112,16.5
-Emile Smith Rowe,90000113,4.53
-Gonzalo García,90000114,3.29
-Rodrigo Muniz,90000115,3.03
-Alex Iwobi,90000116,6.95
-Ryan Sessegnon,90000117,17.89
-Antonee Robinson,90000118,20.02
-Timothy Castagne,90000119,17.95
-Josh King,90000120,5.11
-Kenny Tete,90000121,21.36
-David Akintola,90000122,12.19
-Óscar Zambrano,90000123,12.19
-Abu Kamara,90000124,12.19
-Mohamed Belloumi,90000125,12.19
-Cody Drameh,90000127,23.14
-Matt Targett,90000128,23.14
-Oli McBurnie,90000129,6.4
-Regan Slater,90000130,12.19
-Abdülkadir Ömür,90000131,12.19
-Charlie Hughes,90000132,23.14
-John Egan,90000133,23.14
-Hidemasa Morita,90000134,12.19
-Liam Millar,90000135,12.19
-Marcelino Núñez,90000136,7.59
-Cédric Kipré,90000137,17.68
-Azor Matusiwa,90000138,7.59
-Jack Clarke,90000139,7.59
-Daizen Maeda,90000140,7.59
-Chiedozie Ogbene,90000141,7.59
-Chuba Akpom,90000142,3.82
-Emersonn Correia da Silva,90000143,3.82
-Issa Diop,90000144,22.77
-Dara O'Shea,90000146,17.68
-Jaden Philogene,90000147,7.59
-Abdul Fatawu,90000148,7.59
-Ben Johnson,90000149,17.68
-Anton Stach,90000150,9.38
-Brenden Aaronson,90000151,5.66
-Dominic Calvert-Lewin,90000152,3.79
-Jayden Bogle,90000153,14.2
-Joe Rodon,90000154,17.8
-Ethan Ampadu,90000156,26.1
-Tarik Muharemović,90000157,20.69
-Noah Okafor,90000158,5.35
-Harry Wilson,90000159,5.34
-Gabriel Gudmundsson,90000160,20.76
-Jeremy Jacquet,90000161,13.14
-Florian Wirtz,90000162,4.66
-Ryan Gravenberch,90000163,9.33
-Jeremie Frimpong,90000164,8.59
-Cody Gakpo,90000165,3.95
-Alexis Mac Allister,90000166,6.53
-Virgil van Dijk,90000167,12.32
-Alexander Isak,90000169,2.7
-Dominik Szoboszlai,90000170,4.57
-Milos Kerkez,90000171,17.09
-Marc Guehi,90000172,8.21
-Phil Foden,90000173,3.56
-Nico O'Reilly,90000174,8.34
-Elliot Anderson,90000175,6.37
-Jeremy Doku,90000176,4.75
-Erling Haaland,90000177,1.89
-Rodri,90000178,7.14
-Matheus Nunes,90000180,10.37
-Rayan Cherki,90000181,3.92
-Ruben Dias,90000182,16.83
-Antoine Semenyo,90000183,2.79
-Bruno Fernandes,90000185,3.67
-Matheus Cunha,90000186,3.38
-Diogo Dalot,90000187,12.36
-Benjamin Sesko,90000188,3.04
-Harry Maguire,90000189,12.56
-Youri Tielemans,90000190,6.74
-Leny Yoro,90000191,18.28
-Luke Shaw,90000192,16.41
-Amad Diallo,90000193,4.42
-Bryan Mbeumo,90000194,3.14
-Malick Thiaw,90000195,11.64
-Lewis Hall,90000196,17.7
-Harvey Barnes,90000197,4.07
-Bazoumana Touré,90000199,6.79
-Aladji Bamba,90000200,6.79
-Jacob Murphy,90000201,4.76
-Dan Burn,90000202,12.74
-Joelinton,90000203,6.74
-Sven Botman,90000204,14.98
-Nick Woltemade,90000205,3.13
-Lewis Miley,90000206,9.53
-Callum Hudson-Odoi,90000207,6.02
-Dan Ndoye,90000208,5.5
-Xaver Schlager,90000209,7.51
-Felipe Rodrigues da Silva,90000211,17.21
-Chris Wood,90000212,3.79
-Igor Jesus,90000213,3.65
-Neco Williams,90000214,14.6
-Nikola Milenkovic,90000215,12.32
-Ola Aina,90000216,32.09
-Omari Hutchinson,90000217,5.5
-Morgan Gibbs-White,90000218,5.43
-Marcos Senesi,90000220,18.68
-Mathys Tel,90000221,4.09
-Pedro Porro,90000222,13.54
-Mateus Fernandes,90000223,7.23
-Jan Paul van Hecke,90000224,13.79
-Andrew Robertson,90000225,15.5
-Xavi Simons,90000226,4.79
-Richarlison,90000227,3.24
-Micky van de Ven,90000228,12.19
-Dominic Solanke,90000229,3.05
-Mohammed Kudus,90000230,4.84
-Sandro Tonali,90000231,8.94
-Dan Ballard,90000232,8.74
-Enzo Le Fee,90000233,5.93
-Nordi Mukiele,90000234,21.37
-Brian Brobbey,90000235,3.61
-Noah Sadiki,90000236,17.19
-Trai Hume,90000238,8.91
-Omar Alderete,90000239,9.66
-Thomas Meunier,90000240,14.69
-Granit Xhaka,90000241,8.33
-Chemsdine Talbi,90000242,4.44
+Viktor Gyokeres,Arsenal vs. Coventry City,1.91
+Reiss Nelson,Arsenal vs. Coventry City,2.1
+Gabriel Jesus,Arsenal vs. Coventry City,2.16
+Kai Havertz,Arsenal vs. Coventry City,2.26
+Christos Tzolis,Arsenal vs. Coventry City,2.4
+Bukayo Saka,Arsenal vs. Coventry City,2.55
+Eberechi Eze,Arsenal vs. Coventry City,2.7
+Ethan Nwaneri,Arsenal vs. Coventry City,2.7
+Gabriel Martinelli,Arsenal vs. Coventry City,2.75
+Mikel Merino,Arsenal vs. Coventry City,2.9
+Noni Madueke,Arsenal vs. Coventry City,3.05
+Max Dowman,Arsenal vs. Coventry City,3.1
+Fabio Vieira,Arsenal vs. Coventry City,3.3
+Martin Odegaard,Arsenal vs. Coventry City,3.95
+Bruno Guimaraes,Arsenal vs. Coventry City,4.1
+Declan Rice,Arsenal vs. Coventry City,4.7
+Gabriel Magalhaes,Arsenal vs. Coventry City,5.4
+Haji Wright,Arsenal vs. Coventry City,5.6
+Ellis Simms,Arsenal vs. Coventry City,5.6
+Martin Zubimendi,Arsenal vs. Coventry City,5.8
+Taiwo Awoniyi,Arsenal vs. Coventry City,6.0
+Riccardo Calafiori,Arsenal vs. Coventry City,6.6
+Brandon Thomas-Asante,Arsenal vs. Coventry City,6.8
+Ben White,Arsenal vs. Coventry City,8.0
+Myles Lewis-Skelly,Arsenal vs. Coventry City,8.0
+Marli Salmon,Arsenal vs. Coventry City,8.2
+Ephron Mason-Clark,Arsenal vs. Coventry City,8.4
+Victor Torp,Arsenal vs. Coventry City,9.0
+Jack Rudoni,Arsenal vs. Coventry City,9.0
+Piero Hincapie,Arsenal vs. Coventry City,9.2
+Gustavo Hamer,Arsenal vs. Coventry City,9.4
+Tatsuhiro Sakamoto,Arsenal vs. Coventry City,10.0
+Raphael Borges Rodrigues,Arsenal vs. Coventry City,10.0
+Loum Tchaouna,Arsenal vs. Coventry City,10.0
+Cristhian Mosquera,Arsenal vs. Coventry City,11.0
+Josh Eccles,Arsenal vs. Coventry City,13.0
+Kaine Kesler-Hayden,Arsenal vs. Coventry City,13.0
+Caleb Yirenkyi,Arsenal vs. Coventry City,16.0
+Frank Onyeka,Arsenal vs. Coventry City,17.0
+Bobby Thomas,Arsenal vs. Coventry City,19.0
+Matt Grimes,Arsenal vs. Coventry City,20.0
+Liam Kitching,Arsenal vs. Coventry City,23.0
+Miguel Brau,Arsenal vs. Coventry City,23.0
+Jake Bidwell,Arsenal vs. Coventry City,24.0
+Jay Dasilva,Arsenal vs. Coventry City,24.0
+Joel Latibeaudiere,Arsenal vs. Coventry City,24.0
+Luke Woolfenden,Arsenal vs. Coventry City,24.0
+Milan van Ewijk,Arsenal vs. Coventry City,24.0
+Aurèle Amenda,Arsenal vs. Coventry City,24.0
+Benjamin Sesko,Hull City vs. Manchester United,1.97
+Bryan Mbeumo,Hull City vs. Manchester United,2.39
+Matheus Cunha,Hull City vs. Manchester United,2.4
+Joshua Zirkzee,Hull City vs. Manchester United,2.43
+Marcus Rashford,Hull City vs. Manchester United,2.47
+Bruno Fernandes,Hull City vs. Manchester United,2.7
+Shea Lacey,Hull City vs. Manchester United,3.35
+Amad Diallo,Hull City vs. Manchester United,3.45
+Mason Mount,Hull City vs. Manchester United,3.9
+Oli McBurnie,Hull City vs. Manchester United,4.0
+Patrick Dorgu,Hull City vs. Manchester United,4.0
+Youri Tielemans,Hull City vs. Manchester United,5.0
+Andrey Santos,Hull City vs. Manchester United,5.2
+Mohamed Belloumi,Hull City vs. Manchester United,5.4
+Tyler Fletcher,Hull City vs. Manchester United,5.8
+Kieran Dowell,Hull City vs. Manchester United,6.6
+David Akintola,Hull City vs. Manchester United,6.8
+Harry Maguire,Hull City vs. Manchester United,7.2
+Liam Millar,Hull City vs. Manchester United,7.2
+Jens Hjertø-Dahl,Hull City vs. Manchester United,7.2
+Kobbie Mainoo,Hull City vs. Manchester United,7.4
+Elliot Stroud,Hull City vs. Manchester United,7.4
+Matt Crooks,Hull City vs. Manchester United,8.0
+Diogo Dalot,Hull City vs. Manchester United,8.2
+Ayden Heaven,Hull City vs. Manchester United,9.0
+Luke Shaw,Hull City vs. Manchester United,11.0
+Noussair Mazraoui,Hull City vs. Manchester United,11.0
+Lisandro Martinez,Hull City vs. Manchester United,11.0
+Leny Yoro,Hull City vs. Manchester United,11.0
+Matt Targett,Hull City vs. Manchester United,13.0
+Regan Slater,Hull City vs. Manchester United,13.0
+Matty Jacob,Hull City vs. Manchester United,14.0
+Lucas Gourna-Douath,Hull City vs. Manchester United,14.0
+Paddy McNair,Hull City vs. Manchester United,15.0
+Hidemasa Morita,Hull City vs. Manchester United,15.0
+Nobel Mendy,Hull City vs. Manchester United,15.0
+Lewie Coyle,Hull City vs. Manchester United,16.0
+John Egan,Hull City vs. Manchester United,17.0
+Ryan Giles,Hull City vs. Manchester United,17.0
+Lucas Herrington,Hull City vs. Manchester United,17.0
+Semi Ajayi,Hull City vs. Manchester United,18.0
+Cody Drameh,Hull City vs. Manchester United,19.0
+Joe Gelhardt,Hull City vs. Manchester United,4.36
+Beto,Everton FC vs. Crystal Palace,2.6
+Jean-Philippe Mateta,Everton FC vs. Crystal Palace,2.65
+Thierno Barry,Everton FC vs. Crystal Palace,3.0
+Eddie Nketiah,Everton FC vs. Crystal Palace,3.15
+Jorgen Strand Larsen,Everton FC vs. Crystal Palace,3.25
+Iliman Ndiaye,Everton FC vs. Crystal Palace,3.35
+Ismaila Sarr,Everton FC vs. Crystal Palace,3.6
+Tyrique George,Everton FC vs. Crystal Palace,3.8
+Evann Guessand,Everton FC vs. Crystal Palace,3.85
+Kiernan Dewsbury-Hall,Everton FC vs. Crystal Palace,4.0
+Brennan Johnson,Everton FC vs. Crystal Palace,4.1
+Tyler Dibling,Everton FC vs. Crystal Palace,4.6
+Jesurun Rak-Sakyi,Everton FC vs. Crystal Palace,4.7
+Charly Alcaraz,Everton FC vs. Crystal Palace,4.8
+Romain Esse,Everton FC vs. Crystal Palace,4.9
+Matheus França de Oliveira,Everton FC vs. Crystal Palace,5.0
+Hayden Hackney,Everton FC vs. Crystal Palace,5.4
+Yeremy Pino,Everton FC vs. Crystal Palace,5.6
+Merlin Röhl,Everton FC vs. Crystal Palace,6.0
+Dwight McNeil,Everton FC vs. Crystal Palace,6.2
+James Garner,Everton FC vs. Crystal Palace,6.8
+Justin Devenny,Everton FC vs. Crystal Palace,7.0
+Daniel Munoz,Everton FC vs. Crystal Palace,7.4
+Harrison Armstrong,Everton FC vs. Crystal Palace,7.6
+Tim Iroegbunam,Everton FC vs. Crystal Palace,7.8
+Michael Keane,Everton FC vs. Crystal Palace,8.0
+Christian Norgaard,Everton FC vs. Crystal Palace,8.4
+Daichi Kamada,Everton FC vs. Crystal Palace,8.4
+Cheick Doucoure,Everton FC vs. Crystal Palace,9.0
+Jarrad Branthwaite,Everton FC vs. Crystal Palace,9.0
+James Tarkowski,Everton FC vs. Crystal Palace,9.2
+Anan Khalaili,Everton FC vs. Crystal Palace,9.6
+David Ozoh,Everton FC vs. Crystal Palace,9.8
+Takehiro Tomiyasu,Everton FC vs. Crystal Palace,11.0
+Vitalii Mykolenko,Everton FC vs. Crystal Palace,11.0
+Nathan Patterson,Everton FC vs. Crystal Palace,11.0
+Jake O'Brien,Everton FC vs. Crystal Palace,11.0
+Adam Aznou,Everton FC vs. Crystal Palace,11.0
+Will Hughes,Everton FC vs. Crystal Palace,12.0
+Jefferson Lerma,Everton FC vs. Crystal Palace,12.0
+Borna Sosa,Everton FC vs. Crystal Palace,12.0
+Oscar Mingueza,Everton FC vs. Crystal Palace,13.0
+Tyrick Mitchell,Everton FC vs. Crystal Palace,13.0
+Adam Wharton,Everton FC vs. Crystal Palace,13.0
+Chris Richards,Everton FC vs. Crystal Palace,14.0
+Jaydee Canvot,Everton FC vs. Crystal Palace,14.0
+Chadi Riad,Everton FC vs. Crystal Palace,15.0
+Brian Brobbey,Ipswich Town vs. Sunderland AFC,2.95
+Wilson Isidor,Ipswich Town vs. Sunderland AFC,3.05
+Anis Mehmeti,Ipswich Town vs. Sunderland AFC,3.2
+Emersonn Correia da Silva,Ipswich Town vs. Sunderland AFC,3.25
+Daizen Maeda,Ipswich Town vs. Sunderland AFC,3.3
+George Hirst,Ipswich Town vs. Sunderland AFC,3.3
+Chuba Akpom,Ipswich Town vs. Sunderland AFC,3.4
+Ali Al-Hamadi,Ipswich Town vs. Sunderland AFC,3.5
+Julio Enciso,Ipswich Town vs. Sunderland AFC,3.5
+Jack Clarke,Ipswich Town vs. Sunderland AFC,3.55
+Jaden Philogene,Ipswich Town vs. Sunderland AFC,3.8
+Simon Adingra,Ipswich Town vs. Sunderland AFC,4.0
+Sindre Walle Egeli,Ipswich Town vs. Sunderland AFC,4.0
+Nilson Angulo,Ipswich Town vs. Sunderland AFC,4.4
+Abdul Fatawu,Ipswich Town vs. Sunderland AFC,4.4
+Chemsdine Talbi,Ipswich Town vs. Sunderland AFC,4.6
+Marcelino Núñez,Ipswich Town vs. Sunderland AFC,4.7
+Enzo Le Fee,Ipswich Town vs. Sunderland AFC,4.9
+Kasey McAteer,Ipswich Town vs. Sunderland AFC,4.9
+Chiedozie Ogbene,Ipswich Town vs. Sunderland AFC,5.0
+Romaine Mundle,Ipswich Town vs. Sunderland AFC,5.0
+Habib Diarra,Ipswich Town vs. Sunderland AFC,5.2
+Djiamgone Jocelin Ta Bi,Ipswich Town vs. Sunderland AFC,5.4
+Chris Rigg,Ipswich Town vs. Sunderland AFC,5.6
+Alan Browne,Ipswich Town vs. Sunderland AFC,6.4
+Dan Ballard,Ipswich Town vs. Sunderland AFC,6.4
+Abdoul Ouattara,Ipswich Town vs. Sunderland AFC,7.8
+Granit Xhaka,Ipswich Town vs. Sunderland AFC,8.0
+Jack Taylor,Ipswich Town vs. Sunderland AFC,8.2
+Trai Hume,Ipswich Town vs. Sunderland AFC,8.2
+Thomas Meunier,Ipswich Town vs. Sunderland AFC,9.0
+Sasa Lukic,Ipswich Town vs. Sunderland AFC,9.6
+Luke O'Nien,Ipswich Town vs. Sunderland AFC,11.0
+Nordi Mukiele,Ipswich Town vs. Sunderland AFC,11.0
+Florentino,Ipswich Town vs. Sunderland AFC,11.0
+Cédric Kipré,Ipswich Town vs. Sunderland AFC,11.0
+Ben Johnson,Ipswich Town vs. Sunderland AFC,11.0
+Jenson Seelt,Ipswich Town vs. Sunderland AFC,11.0
+Darnell Furlong,Ipswich Town vs. Sunderland AFC,12.0
+Noah Sadiki,Ipswich Town vs. Sunderland AFC,12.0
+Issa Diop,Ipswich Town vs. Sunderland AFC,13.0
+Reinildo Mandava,Ipswich Town vs. Sunderland AFC,13.0
+Dara O'Shea,Ipswich Town vs. Sunderland AFC,13.0
+Azor Matusiwa,Ipswich Town vs. Sunderland AFC,13.0
+Leif Davis,Ipswich Town vs. Sunderland AFC,13.0
+Jacob Greaves,Ipswich Town vs. Sunderland AFC,13.0
+Omar Alderete,Ipswich Town vs. Sunderland AFC,9.54
+Chris Wood,Nottingham Forest vs. Leeds United,2.65
+Dominic Calvert-Lewin,Nottingham Forest vs. Leeds United,2.8
+Arnaud Kalimuendo,Nottingham Forest vs. Leeds United,2.9
+Morgan Gibbs-White,Nottingham Forest vs. Leeds United,3.05
+Igor Jesus,Nottingham Forest vs. Leeds United,3.1
+Lukas Nmecha,Nottingham Forest vs. Leeds United,3.2
+Joel Piroe,Nottingham Forest vs. Leeds United,3.45
+Noah Okafor,Nottingham Forest vs. Leeds United,3.55
+Harry Wilson,Nottingham Forest vs. Leeds United,3.6
+Gnonto Wilfried,Nottingham Forest vs. Leeds United,4.2
+Callum Hudson-Odoi,Nottingham Forest vs. Leeds United,4.3
+Daniel James,Nottingham Forest vs. Leeds United,4.6
+Brenden Aaronson,Nottingham Forest vs. Leeds United,4.8
+James McAtee,Nottingham Forest vs. Leeds United,4.8
+Dilane Bakwa,Nottingham Forest vs. Leeds United,5.4
+Dan Ndoye,Nottingham Forest vs. Leeds United,5.4
+Omari Hutchinson,Nottingham Forest vs. Leeds United,5.4
+Anton Stach,Nottingham Forest vs. Leeds United,6.2
+Nicolas Dominguez,Nottingham Forest vs. Leeds United,6.8
+Ao Tanaka,Nottingham Forest vs. Leeds United,7.4
+Ryan Yates,Nottingham Forest vs. Leeds United,8.4
+Xaver Schlager,Nottingham Forest vs. Leeds United,8.8
+Sean Longstaff,Nottingham Forest vs. Leeds United,8.8
+Neco Williams,Nottingham Forest vs. Leeds United,9.2
+Ibrahim Sangare,Nottingham Forest vs. Leeds United,9.4
+Jayden Bogle,Nottingham Forest vs. Leeds United,10.0
+Nicolo Savona,Nottingham Forest vs. Leeds United,10.0
+James Justin,Nottingham Forest vs. Leeds United,11.0
+Nikola Milenkovic,Nottingham Forest vs. Leeds United,11.0
+Murillo dos Santos,Nottingham Forest vs. Leeds United,11.0
+Jair Paula da Cunha Filho,Nottingham Forest vs. Leeds United,12.0
+Zach Abbott,Nottingham Forest vs. Leeds United,12.0
+Sebastiaan Bornauw,Nottingham Forest vs. Leeds United,13.0
+Omar Richards,Nottingham Forest vs. Leeds United,13.0
+Luca Netz,Nottingham Forest vs. Leeds United,13.0
+Felipe Rodrigues da Silva,Nottingham Forest vs. Leeds United,13.0
+Tarik Muharemović,Nottingham Forest vs. Leeds United,13.0
+Ousmane Diomande,Nottingham Forest vs. Leeds United,13.0
+Eric Da Silva Moreira,Nottingham Forest vs. Leeds United,13.0
+Ola Aina,Nottingham Forest vs. Leeds United,14.0
+Ilia Gruev,Nottingham Forest vs. Leeds United,14.0
+Jaka Bijol,Nottingham Forest vs. Leeds United,14.0
+Tyler Bindon,Nottingham Forest vs. Leeds United,14.0
+Joe Rodon,Nottingham Forest vs. Leeds United,15.0
+Ethan Ampadu,Nottingham Forest vs. Leeds United,15.0
+Igor Thiago,Brentford FC vs. Tottenham Hotspur,2.18
+Callum Wilson,Brentford FC vs. Tottenham Hotspur,2.7
+Richarlison,Brentford FC vs. Tottenham Hotspur,2.8
+Dominic Solanke,Brentford FC vs. Tottenham Hotspur,2.95
+Kevin Schade,Brentford FC vs. Tottenham Hotspur,3.3
+Fabio Carvalho,Brentford FC vs. Tottenham Hotspur,3.6
+Mathys Tel,Brentford FC vs. Tottenham Hotspur,3.75
+Dango Ouattara,Brentford FC vs. Tottenham Hotspur,3.75
+Jaidon Anthony,Brentford FC vs. Tottenham Hotspur,3.9
+Mikey Moore,Brentford FC vs. Tottenham Hotspur,3.9
+Mohammed Kudus,Brentford FC vs. Tottenham Hotspur,4.0
+Dejan Kulusevski,Brentford FC vs. Tottenham Hotspur,4.4
+James Maddison,Brentford FC vs. Tottenham Hotspur,4.5
+Mikkel Damsgaard,Brentford FC vs. Tottenham Hotspur,5.2
+Conor Gallagher,Brentford FC vs. Tottenham Hotspur,5.4
+Keane Lewis-Potter,Brentford FC vs. Tottenham Hotspur,5.6
+Gustavo Nunes,Brentford FC vs. Tottenham Hotspur,5.6
+Josh Dasilva,Brentford FC vs. Tottenham Hotspur,5.8
+Yunus Emre Konak,Brentford FC vs. Tottenham Hotspur,6.6
+Pape Matar Sarr,Brentford FC vs. Tottenham Hotspur,6.8
+Mamadou Sangaré,Brentford FC vs. Tottenham Hotspur,6.8
+Mathias Jensen,Brentford FC vs. Tottenham Hotspur,7.2
+Lucas Bergvall,Brentford FC vs. Tottenham Hotspur,7.2
+Sandro Tonali,Brentford FC vs. Tottenham Hotspur,7.4
+Mateus Fernandes,Brentford FC vs. Tottenham Hotspur,7.6
+Micky van de Ven,Brentford FC vs. Tottenham Hotspur,8.0
+Yehor Yarmoliuk,Brentford FC vs. Tottenham Hotspur,8.4
+Archie Gray,Brentford FC vs. Tottenham Hotspur,8.8
+Jannik Schuster,Brentford FC vs. Tottenham Hotspur,8.8
+Rodrigo Bentancur,Brentford FC vs. Tottenham Hotspur,9.0
+Joao Souza,Brentford FC vs. Tottenham Hotspur,9.0
+Vitaly Janelt,Brentford FC vs. Tottenham Hotspur,9.2
+Pedro Porro,Brentford FC vs. Tottenham Hotspur,9.2
+Jayden Meghoma,Brentford FC vs. Tottenham Hotspur,10.0
+Andrew Robertson,Brentford FC vs. Tottenham Hotspur,11.0
+Rico Henry,Brentford FC vs. Tottenham Hotspur,11.0
+Ethan Pinnock,Brentford FC vs. Tottenham Hotspur,11.0
+Nathan Collins,Brentford FC vs. Tottenham Hotspur,11.0
+Jan Paul van Hecke,Brentford FC vs. Tottenham Hotspur,11.0
+Aaron Hickey,Brentford FC vs. Tottenham Hotspur,11.0
+Kristoffer Ajer,Brentford FC vs. Tottenham Hotspur,12.0
+Michael Kayode,Brentford FC vs. Tottenham Hotspur,12.0
+Ben Davies,Brentford FC vs. Tottenham Hotspur,13.0
+Destiny Udogie,Brentford FC vs. Tottenham Hotspur,13.0
+Kim Ji-soo,Brentford FC vs. Tottenham Hotspur,13.0
+Marcos Senesi,Brentford FC vs. Tottenham Hotspur,14.0
+Kevin Danso,Brentford FC vs. Tottenham Hotspur,15.0
+Kota Takai,Brentford FC vs. Tottenham Hotspur,15.0
+Ollie Watkins,Brighton vs. Aston Villa,2.5
+Tammy Abraham,Brighton vs. Aston Villa,2.6
+Charalampos Kostoulas,Brighton vs. Aston Villa,3.15
+Zadok Yohanna,Brighton vs. Aston Villa,3.2
+Georginio Rutter,Brighton vs. Aston Villa,3.45
+Diego Gomez,Brighton vs. Aston Villa,3.6
+Amario Cozier-Duberry,Brighton vs. Aston Villa,3.75
+Jack Hinshelwood,Brighton vs. Aston Villa,4.0
+Ibrahim Osman,Brighton vs. Aston Villa,4.0
+Kaoru Mitoma,Brighton vs. Aston Villa,4.1
+Emiliano Buendia,Brighton vs. Aston Villa,4.2
+Bradley Burrowes,Brighton vs. Aston Villa,4.2
+Johan Manzambi,Brighton vs. Aston Villa,4.4
+Alejandro Garnacho,Brighton vs. Aston Villa,4.5
+Luka Lynch,Brighton vs. Aston Villa,4.7
+Matt O'Riley,Brighton vs. Aston Villa,4.8
+Yasin Ayari,Brighton vs. Aston Villa,4.9
+John McGinn,Brighton vs. Aston Villa,5.2
+Ross Barkley,Brighton vs. Aston Villa,5.6
+Maxim De Cuyper,Brighton vs. Aston Villa,5.6
+Alysson Edward Franco da Rocha dos Santos,Brighton vs. Aston Villa,5.6
+Leon Bailey,Brighton vs. Aston Villa,6.2
+Malick Yalcouye,Brighton vs. Aston Villa,6.6
+Pascal Gross,Brighton vs. Aston Villa,7.0
+Luka Vušković,Brighton vs. Aston Villa,7.2
+Ferdi Kadioglu,Brighton vs. Aston Villa,7.6
+George Hemmings,Brighton vs. Aston Villa,7.8
+Matty Cash,Brighton vs. Aston Villa,9.2
+Ian Maatsen,Brighton vs. Aston Villa,9.2
+Carlos Baleba,Brighton vs. Aston Villa,9.2
+Pascal Struijk,Brighton vs. Aston Villa,9.6
+Mats Wieffer,Brighton vs. Aston Villa,9.6
+Michael Svoboda,Brighton vs. Aston Villa,9.8
+Lewis Dunk,Brighton vs. Aston Villa,10.0
+Costinha,Brighton vs. Aston Villa,11.0
+Eiran Cashin,Brighton vs. Aston Villa,11.0
+Modou Keba Cisse,Brighton vs. Aston Villa,11.0
+Victor Lindelof,Brighton vs. Aston Villa,12.0
+Olivier Boscagli,Brighton vs. Aston Villa,12.0
+Boubacar Kamara,Brighton vs. Aston Villa,12.0
+Triston Rowe,Brighton vs. Aston Villa,12.0
+Ezri Konsa,Brighton vs. Aston Villa,13.0
+Lamare Bogarde,Brighton vs. Aston Villa,13.0
+Tyrone Mings,Brighton vs. Aston Villa,15.0
+Pau Torres,Brighton vs. Aston Villa,15.0
+Kosta Nedeljkovic,Brighton vs. Aston Villa,15.0
+Erling Haaland,Manchester City vs. AFC Bournemouth,1.6
+Antoine Semenyo,Manchester City vs. AFC Bournemouth,2.25
+Omar Marmoush,Manchester City vs. AFC Bournemouth,2.31
+Jeremy Monga,Manchester City vs. AFC Bournemouth,2.85
+Phil Foden,Manchester City vs. AFC Bournemouth,3.0
+Claudio Echeverri,Manchester City vs. AFC Bournemouth,3.3
+Rayan Cherki,Manchester City vs. AFC Bournemouth,3.6
+Evanilson,Manchester City vs. AFC Bournemouth,3.7
+Álvaro Rodríguez,Manchester City vs. AFC Bournemouth,4.0
+Jack Grealish,Manchester City vs. AFC Bournemouth,4.1
+Rayan,Manchester City vs. AFC Bournemouth,4.2
+Daniel Jebbison,Manchester City vs. AFC Bournemouth,4.4
+Nico O'Reilly,Manchester City vs. AFC Bournemouth,4.8
+David Brooks,Manchester City vs. AFC Bournemouth,4.9
+Justin Kluivert,Manchester City vs. AFC Bournemouth,5.0
+Marcus Tavernier,Manchester City vs. AFC Bournemouth,5.4
+Amine Adli,Manchester City vs. AFC Bournemouth,5.6
+Elliot Anderson,Manchester City vs. AFC Bournemouth,6.0
+Ben Gannon-Doak,Manchester City vs. AFC Bournemouth,6.0
+Mateo Kovačić,Manchester City vs. AFC Bournemouth,6.4
+Marc Guehi,Manchester City vs. AFC Bournemouth,6.8
+Nico Gonzalez,Manchester City vs. AFC Bournemouth,7.0
+Josko Gvardiol,Manchester City vs. AFC Bournemouth,7.4
+Juanlu Sánchez,Manchester City vs. AFC Bournemouth,8.0
+Rayan Ait Nouri,Manchester City vs. AFC Bournemouth,8.4
+Rico Lewis,Manchester City vs. AFC Bournemouth,8.6
+Alex Scott,Manchester City vs. AFC Bournemouth,9.0
+Matheus Nunes,Manchester City vs. AFC Bournemouth,9.2
+Ruben Dias,Manchester City vs. AFC Bournemouth,9.4
+Abduqodir Khusanov,Manchester City vs. AFC Bournemouth,9.6
+Alex Tóth,Manchester City vs. AFC Bournemouth,9.6
+Vitor de Oliveira Nunes dos Reis,Manchester City vs. AFC Bournemouth,10.0
+Abdulay Juma Bah,Manchester City vs. AFC Bournemouth,11.0
+Josh Wilson-Esbrand,Manchester City vs. AFC Bournemouth,12.0
+Lewis Cook,Manchester City vs. AFC Bournemouth,13.0
+Veljko Milosavljevic,Manchester City vs. AFC Bournemouth,13.0
+Tyler Adams,Manchester City vs. AFC Bournemouth,14.0
+Max Aarons,Manchester City vs. AFC Bournemouth,14.0
+Bafode Diakite,Manchester City vs. AFC Bournemouth,14.0
+James Hill,Manchester City vs. AFC Bournemouth,14.0
+António João Pereira de Albuquerque Tavares da Silva,Manchester City vs. AFC Bournemouth,14.0
+Julio Soler Barreto,Manchester City vs. AFC Bournemouth,14.0
+Issa Kabore,Manchester City vs. AFC Bournemouth,14.0
+Adrien Truffert,Manchester City vs. AFC Bournemouth,15.0
+Adam Smith,Manchester City vs. AFC Bournemouth,16.0
+Alexander Isak,Newcastle United vs. Liverpool FC,2.13
+Cody Gakpo,Newcastle United vs. Liverpool FC,2.75
+Federico Chiesa,Newcastle United vs. Liverpool FC,2.8
+Yoane Wissa,Newcastle United vs. Liverpool FC,2.95
+William Osula,Newcastle United vs. Liverpool FC,2.95
+Nick Woltemade,Newcastle United vs. Liverpool FC,3.3
+Victor Munoz,Newcastle United vs. Liverpool FC,3.35
+Rio Ngumoha,Newcastle United vs. Liverpool FC,3.35
+Lewis Koumas,Newcastle United vs. Liverpool FC,3.35
+Harvey Barnes,Newcastle United vs. Liverpool FC,3.55
+Dominik Szoboszlai,Newcastle United vs. Liverpool FC,3.55
+Florian Wirtz,Newcastle United vs. Liverpool FC,3.7
+Harvey Elliott,Newcastle United vs. Liverpool FC,3.85
+Bazoumana Touré,Newcastle United vs. Liverpool FC,4.3
+Anthony Elanga,Newcastle United vs. Liverpool FC,4.4
+Jacob Murphy,Newcastle United vs. Liverpool FC,5.0
+Alexis Mac Allister,Newcastle United vs. Liverpool FC,5.4
+Trey Nyoni,Newcastle United vs. Liverpool FC,5.6
+Curtis Jones,Newcastle United vs. Liverpool FC,6.0
+Jacob Ramsey,Newcastle United vs. Liverpool FC,6.2
+James McConnell,Newcastle United vs. Liverpool FC,6.2
+Jeremie Frimpong,Newcastle United vs. Liverpool FC,6.4
+Virgil van Dijk,Newcastle United vs. Liverpool FC,7.0
+Stefan Bajcetic,Newcastle United vs. Liverpool FC,7.0
+Ryan Gravenberch,Newcastle United vs. Liverpool FC,7.4
+Ronald Araujo,Newcastle United vs. Liverpool FC,7.4
+Joe Willock,Newcastle United vs. Liverpool FC,7.6
+Endo Wataru,Newcastle United vs. Liverpool FC,7.8
+Lewis Miley,Newcastle United vs. Liverpool FC,8.6
+Aladji Bamba,Newcastle United vs. Liverpool FC,8.8
+Fabian Schar,Newcastle United vs. Liverpool FC,9.0
+Calvin Ramsay,Newcastle United vs. Liverpool FC,9.0
+Jeremy Jacquet,Newcastle United vs. Liverpool FC,9.2
+Milos Kerkez,Newcastle United vs. Liverpool FC,9.4
+Malick Thiaw,Newcastle United vs. Liverpool FC,9.8
+Lewis Hall,Newcastle United vs. Liverpool FC,11.0
+Leo Shahar,Newcastle United vs. Liverpool FC,11.0
+Dan Burn,Newcastle United vs. Liverpool FC,12.0
+Sven Botman,Newcastle United vs. Liverpool FC,12.0
+Tino Livramento,Newcastle United vs. Liverpool FC,12.0
+Kostas Tsimikas,Newcastle United vs. Liverpool FC,13.0
+Nicolas Jackson,Fulham FC vs. Chelsea,2.42
+Danny Welbeck,Fulham FC vs. Chelsea,2.55
+Joao Pedro,Fulham FC vs. Chelsea,2.55
+Emmanuel Emegha,Fulham FC vs. Chelsea,2.6
+Marc Guiu,Fulham FC vs. Chelsea,2.65
+Cole Palmer,Fulham FC vs. Chelsea,2.85
+Liam Delap,Fulham FC vs. Chelsea,3.2
+Rodrigo Muniz,Fulham FC vs. Chelsea,3.25
+Gonzalo García,Fulham FC vs. Chelsea,3.25
+Jonah Kusi-Asare,Fulham FC vs. Chelsea,3.3
+Morgan Rogers,Fulham FC vs. Chelsea,3.5
+Estevao,Fulham FC vs. Chelsea,3.55
+Enzo Fernandez,Fulham FC vs. Chelsea,4.0
+Jamie Gittens,Fulham FC vs. Chelsea,4.4
+Pedro Neto,Fulham FC vs. Chelsea,4.5
+Geovany Quenda,Fulham FC vs. Chelsea,4.6
+Emile Smith Rowe,Fulham FC vs. Chelsea,4.7
+César Palacios,Fulham FC vs. Chelsea,4.7
+Josh King,Fulham FC vs. Chelsea,4.8
+Kevin,Fulham FC vs. Chelsea,4.8
+Alex Iwobi,Fulham FC vs. Chelsea,5.6
+Oscar Bobb,Fulham FC vs. Chelsea,6.4
+Shea Charles,Fulham FC vs. Chelsea,7.0
+Ryan Sessegnon,Fulham FC vs. Chelsea,7.4
+Valentín Barco,Fulham FC vs. Chelsea,7.4
+Tom Cairney,Fulham FC vs. Chelsea,7.8
+Marco Palestra,Fulham FC vs. Chelsea,7.8
+Roméo Lavia,Fulham FC vs. Chelsea,8.0
+Reece James,Fulham FC vs. Chelsea,8.2
+Moises Caicedo,Fulham FC vs. Chelsea,8.2
+Dário Luís Essugo,Fulham FC vs. Chelsea,8.8
+Aaron Anselmino,Fulham FC vs. Chelsea,8.8
+Josh Acheampong,Fulham FC vs. Chelsea,9.2
+Harrison Reed,Fulham FC vs. Chelsea,9.8
+Maxence Lacroix,Fulham FC vs. Chelsea,9.8
+Tosin Adarabioyo,Fulham FC vs. Chelsea,11.0
+Wesley Fofana,Fulham FC vs. Chelsea,11.0
+Pep Chavarría,Fulham FC vs. Chelsea,11.0
+Jorrel Hato,Fulham FC vs. Chelsea,11.0
+Timothy Castagne,Fulham FC vs. Chelsea,12.0
+Joachim Andersen,Fulham FC vs. Chelsea,12.0
+Sander Berge,Fulham FC vs. Chelsea,12.0
+Jorge Cuenca,Fulham FC vs. Chelsea,12.0
+Levi Samuels Colwill,Fulham FC vs. Chelsea,12.0
+Malo Gusto,Fulham FC vs. Chelsea,12.0
+Malang Sarr,Fulham FC vs. Chelsea,12.0
+Kenny Tete,Fulham FC vs. Chelsea,13.0
+Antonee Robinson,Fulham FC vs. Chelsea,13.0
+Calvin Bassey,Fulham FC vs. Chelsea,13.0
