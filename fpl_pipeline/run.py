@@ -16,7 +16,7 @@ coefficients_workbook.json.
 import os
 import sys
 
-from . import config, history, ingest, markets, model, players, reconcile, team_model
+from . import config, history, ingest, markets, model, names, players, reconcile, team_model
 from .io_utils import reset_counter, snapshot
 
 
@@ -37,7 +37,8 @@ def guard_synthetic_archive(gameweek, force=False):
         return "none"
     if not os.path.exists(note) or force:
         return "all"
-    print(f"  {os.path.basename(note)} present: player odds are synthetic placeholders.\n"
+    print(f"  {os.path.basename(note)} present: not every priced input is a true per-player\n"
+          f"  quote (see the note - e.g. card odds game-max fill for unlisted players).\n"
           f"  Archiving MATCH odds only (unbackfillable); player history withheld so the\n"
           f"  trailing-median factors stay clean. Use --force-archive to record both.")
     return "fixtures_only"
@@ -73,6 +74,10 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
         sportsbet = ingest.load_sportsbet(config.PARITY_SPORTSBET_DIR)
     else:
         inputs = ingest.load_inputs()
+        # Lineups go through the same name mapper as the roster/odds, so a
+        # name_mappings.csv row can fix a lineup spelling (accent/alias) too.
+        inputs["starting_lineups"]["Player"] = names.apply_player_names(
+            inputs["starting_lineups"]["Player"])
         sportsbet = ingest.load_sportsbet()
 
     if parity_mode:
@@ -89,7 +94,7 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
     teamview = snapshot(team_model.team_fixture_view(inputs, sportsbet, draw_aware=improved),
                         "team_fixture_view")
 
-    mkts = markets.build_all(sportsbet, inputs, dedup_f2=improved)
+    mkts = markets.build_all(sportsbet, inputs, dedup_f2=improved, roster_names=roster["name"])
     for key in ("score1", "score2", "assist", "yellow", "clean_sheet", "concede", "gk_saves"):
         snapshot(mkts[key], f"market_{key}")
 

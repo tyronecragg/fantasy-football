@@ -27,7 +27,8 @@ Improved mode (build(..., improved=True); parity mode = improved=False is workbo
    which include an exact `p == 0.3` float-equality branch. F1 Score 2+ stays pure
    odds; F1 Score 3+ (no market exists) uses the same smooth curve.
 8. F7/F8 fixture projections: same machinery as F3-F6, extending the optimiser's
-   horizon to eight gameweeks (start probabilities reuse the F6 belief; Total XP
+   horizon to eight gameweeks (start probabilities come from curated F7/F8 columns
+   in starting_lineups.csv, falling back to the F6 belief if absent; Total XP
    remains the workbook's 6-fixture blend).
 9. F2 score uses the generic factor x baseline instead of the workbook's
    Coefficients-sheet score model. Backtested (tools/backtest_projections.py): the
@@ -94,12 +95,33 @@ def normalize_start_probs(lineups, target=11.0):
     return lineups
 
 
-def _dc_table(dc_stats, params_row):
-    """Defensive Contribution sheet equivalent: probability of hitting the DC threshold,
-    falling back to the position average for players with under 4 full matches."""
+def _dc_table(dc_stats, params_row, improved=True):
+    """Defensive Contribution sheet equivalent: probability of hitting the DC threshold.
+
+    Improved mode SHRINKS each player's own hit-probability toward the reliable-population
+    average in proportion to his evidence: weight = nineties / config.DC_SHRINK_NINETIES,
+    capped at 1 (one full match = 25% own + 75% average; four or more = own). Under
+    config.DC_SHRINK_MIN_NINETIES (0.65 nineties ~= 59 min) the weight is zero - cameos are not
+    evidence - so those players get the average, as do players with no minutes at all. The average is the mean hit-probability of the reliable (>= cap) players,
+    recomputed each run so it tracks the current blended data. Blending in probability space
+    (not rate space) keeps the zero-evidence fallback equal to the population's expected
+    probability — the right prior for a player we know nothing about.
+
+    Parity keeps the workbook's hard cliff — own rate at >= 4 nineties, otherwise the frozen
+    params_row["average_dc90"] — so its output stays byte-identical."""
     df = dc_stats.copy()
+    n = df["nineties"].fillna(0).astype(float)
     df["prob"] = model.dc_probability(df["dc90"], params_row["sd"], params_row["threshold"])
-    df["prob_filled"] = df["prob"].where(df["nineties"].fillna(0) >= 4, params_row["average_dc90"])
+    if improved:
+        reliable = n >= config.DC_SHRINK_NINETIES
+        avg = (float(df.loc[reliable, "prob"].mean()) if reliable.any()
+               else float(params_row["average_dc90"]))
+        w = (n / config.DC_SHRINK_NINETIES).clip(0.0, 1.0)
+        w = w.where(n >= config.DC_SHRINK_MIN_NINETIES, 0.0)   # under ~59 min played: no evidence
+        df["dc_weight"] = w
+        df["prob_filled"] = w * df["prob"].fillna(avg) + (1.0 - w) * avg
+    else:
+        df["prob_filled"] = df["prob"].where(n >= 4, params_row["average_dc90"])
     return df
 
 
@@ -107,6 +129,24 @@ def _season_lookup(master, keys, season):
     return (vlookup(keys, season, "team", "title"),
             vlookup(keys, season, "team", "relegation"),
             vlookup(keys, season, "team", "top6"))
+
+
+def _assist2_ratio(mkts, floor_p1=0.02, min_pairs=20):
+    """Measured P(2+ assist) / P(1+ assist) from players Betway priced for BOTH.
+
+    Assists cluster far more than a Poisson tail predicts (real 2+ runs ~0.24x the 1+ chance
+    and stays roughly flat, vs model.poisson_score2's ~0.03-0.13 that rises with the 1+ chance
+    and under-states 2+ assists 2-3x). So missing 2+ assists are filled with this ratio, not the
+    curve. Falls back to config.ASSIST2_RATIO when too few real pairs exist to measure.
+    """
+    a1, a2 = mkts.get("assist"), mkts.get("assist2")
+    if a1 is None or a2 is None or getattr(a2, "empty", True):
+        return config.ASSIST2_RATIO
+    both = a1.merge(a2, on="player", suffixes=("_1", "_2"))
+    ok = both["prob_1"] > floor_p1
+    if ok.sum() < min_pairs:
+        return config.ASSIST2_RATIO
+    return float((both.loc[ok, "prob_2"] / both.loc[ok, "prob_1"]).median())
 
 
 def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params,
@@ -122,6 +162,8 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     pos = m["Position"]
     name = m["Player Name"]
     team = m["Team"]
+    # 2+ assists don't follow the Poisson tail (they cluster) — fill from this measured ratio
+    assist2_ratio = _assist2_ratio(mkts) if improved else 0.0
 
     def clip01(cols):
         """Clamp modelled probability columns to [0, 1] (improved mode only)."""
@@ -147,17 +189,19 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     # Season probabilities (Overall Odds)
     m["Title"], m["Relegation"], m["Top 6"] = _season_lookup(m, team, season)
 
-    # Start probabilities: Starting Lineups cols C:H, missing player -> 0.
-    # Beliefs only extend six fixtures out; F7/F8 (improved mode) reuse the F6 belief.
+    # Start probabilities: Starting Lineups cols C:H (+ F7/F8 when curated), missing
+    # player -> 0. A lineups file that only carries F1-F6 (parity snapshot, older
+    # files) falls back to the F6 belief for F7/F8.
     lineup_cols = list(lineups.columns)
     for k in range(1, 9):
+        col_idx = 1 + k if len(lineup_cols) > 1 + k else 1 + min(k, 6)
         m[f"_start{k}"] = vlookup(name, lineups, lineup_cols[0],
-                                  lineup_cols[1 + min(k, 6)]).fillna(0.0)
+                                  lineup_cols[col_idx]).fillna(0.0)
 
     # Defensive contribution probabilities (position-gated, 0 for other positions)
     prm = dc_params.set_index("position")
-    dc_def = _dc_table(dc_stats["DEF"], prm.loc["DEF"])
-    dc_mid = _dc_table(dc_stats["MID"], prm.loc["MID"])
+    dc_def = _dc_table(dc_stats["DEF"], prm.loc["DEF"], improved)
+    dc_mid = _dc_table(dc_stats["MID"], prm.loc["MID"], improved)
     m["F1 Defensive Contribution - DEF"] = vlookup(name, dc_def, "name", "prob_filled").where(pos == "DEF", 0.0)
     m["F1 Defensive Contribution - MID"] = vlookup(name, dc_mid, "name", "prob_filled").where(pos == "MID", 0.0)
 
@@ -176,6 +220,12 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     m["F1 Score 3+"] = (model.poisson_score3(m["F1 Score 1+"]) if improved
                         else model.ladder_score3(m["F1 Score 1+"]))
     m["F1 Assist"] = vlookup(name, mkts["assist"], "player", "prob")
+    if improved:
+        # 2+ assists: real Betway price where it exists, else the same Poisson tail that
+        # fills 2+ goals. Lets expected assists count a player's occasional two-assist game.
+        # Improved-mode only (like F7/F8) — parity reproduces the workbook's columns exactly.
+        real_a2 = vlookup(name, mkts["assist2"], "player", "prob")
+        m["F1 Assist 2+"] = real_a2.where(real_a2.notna(), assist2_ratio * m["F1 Assist"])
     m["F1 Yellow Card"] = vlookup(name, mkts["yellow"], "player", "prob")
     m["F1 Clean Sheet"] = vlookup(team, mkts["clean_sheet"], "team", "prob")
     m["F1 Concede 2+ Goals"] = vlookup(team, mkts["concede"], "team", "prob2")
@@ -226,9 +276,10 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
 
     xp_block("F1", m["F1 Start"], {
         "score1": m["F1 Score 1+"], "score2": m["F1 Score 2+"], "score3": m["F1 Score 3+"],
-        "assist": m["F1 Assist"], "yellow": m["F1 Yellow Card"], "clean_sheet": m["F1 Clean Sheet"],
+        "assist": m["F1 Assist"], **({"assist2": m["F1 Assist 2+"]} if improved else {}), "yellow": m["F1 Yellow Card"], "clean_sheet": m["F1 Clean Sheet"],
         "concede2": m["F1 Concede 2+ Goals"], "concede4": m["F1 Concede 4+ Goals"],
         "saves3": m["F1 3+ Saves"], "saves6": m["F1 6+ Saves"],
+        **({"saves_tail": model.saves_tail(m["F1 3+ Saves"], m["F1 6+ Saves"])} if improved else {}),
         "dc_def": m["F1 Defensive Contribution - DEF"], "dc_mid": m["F1 Defensive Contribution - MID"],
     })
     m["F1 Pred XP"] = model.baseline("pred_xp", m["F1 Win"], m["F1 Opponent Win"], pos, home1)
@@ -291,13 +342,16 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     clip01(["F2 Assist", "F2 Yellow Card", "F2 Clean Sheet", "F2 Concede 2+ Goals",
             "F2 Concede 4+ Goals", "F2 3+ Saves", "F2 6+ Saves"])
     blend_with_f1("F2 Assist", "F1 Assist", "assist")
+    if improved:
+        m["F2 Assist 2+"] = assist2_ratio * m["F2 Assist"]
     blend_with_f1("F2 3+ Saves", "F1 3+ Saves", "saves3")
 
     xp_block("F2", m["F2 Start"], {
         "score1": m["F2 Score 1+"], "score2": m["F2 Score 2+"], "score3": m["F2 Score 3+"],
-        "assist": m["F2 Assist"], "yellow": m["F2 Yellow Card"], "clean_sheet": m["F2 Clean Sheet"],
+        "assist": m["F2 Assist"], **({"assist2": m["F2 Assist 2+"]} if improved else {}), "yellow": m["F2 Yellow Card"], "clean_sheet": m["F2 Clean Sheet"],
         "concede2": m["F2 Concede 2+ Goals"], "concede4": m["F2 Concede 4+ Goals"],
         "saves3": m["F2 3+ Saves"], "saves6": m["F2 6+ Saves"],
+        **({"saves_tail": model.saves_tail(m["F2 3+ Saves"], m["F2 6+ Saves"])} if improved else {}),
         "dc_def": m["F2 Defensive Contribution - DEF"], "dc_mid": m["F2 Defensive Contribution - MID"],
     })
 
@@ -343,13 +397,16 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         clip01([f"{p} Assist", f"{p} Yellow Card", f"{p} Clean Sheet", f"{p} Concede 2+ Goals",
                 f"{p} Concede 4+ Goals", f"{p} 3+ Saves", f"{p} 6+ Saves"])
         blend_with_f1(f"{p} Assist", "F1 Assist", "assist")
+        if improved:
+            m[f"{p} Assist 2+"] = assist2_ratio * m[f"{p} Assist"]
         blend_with_f1(f"{p} 3+ Saves", "F1 3+ Saves", "saves3")
 
         xp_block(p, m[f"{p} Start"], {
             "score1": m[f"{p} Score 1+"], "score2": m[f"{p} Score 2+"], "score3": m[f"{p} Score 3+"],
-            "assist": m[f"{p} Assist"], "yellow": m[f"{p} Yellow Card"], "clean_sheet": m[f"{p} Clean Sheet"],
+            "assist": m[f"{p} Assist"], **({"assist2": m[f"{p} Assist 2+"]} if improved else {}), "yellow": m[f"{p} Yellow Card"], "clean_sheet": m[f"{p} Clean Sheet"],
             "concede2": m[f"{p} Concede 2+ Goals"], "concede4": m[f"{p} Concede 4+ Goals"],
             "saves3": m[f"{p} 3+ Saves"], "saves6": m[f"{p} 6+ Saves"],
+            **({"saves_tail": model.saves_tail(m[f"{p} 3+ Saves"], m[f"{p} 6+ Saves"])} if improved else {}),
             "dc_def": m[f"{p} Defensive Contribution - DEF"], "dc_mid": m[f"{p} Defensive Contribution - MID"],
         })
 

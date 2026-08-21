@@ -9,7 +9,7 @@ NAME_MAPPINGS = player_map()
 STAGING_CSV = "inputs/ffs_predicted_lineups.csv"
 CURATED_CSV = "inputs/starting_lineups.csv"
 NEWS_MD = "inputs/ffs_team_news.md"
-PROB_COLUMNS = ["F1", "F2", "F3", "F4", "F5", "F6"]
+PROB_COLUMNS = ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8"]
 
 
 def convert_special_characters(text):

@@ -160,6 +160,20 @@ def dc_probability(dc90, sd, threshold):
     return dc90.map(lambda mu: 1.0 - cdf(threshold, mu))
 
 
+def saves_tail(p3, p6):
+    """Expected save points beyond the 6+ milestone. FPL pays 1 pt per 3 saves with no upper
+    limit, but only the 3+ and 6+ probabilities are available (derive_saves emits those two);
+    the 9+/12+/... milestones are extrapolated by assuming the milestone probability keeps
+    falling at the same ratio r = P(6+)/P(3+):
+        tail = P(9+) + P(12+) + ... = P(6+) * r / (1 - r).
+    Without it a keeper who makes 9 or 12 saves is credited for only 6. r is clipped below 1
+    so a near-flat ladder cannot blow the geometric sum up, and a missing/zero P(3+) gives 0."""
+    p3 = p3.fillna(0.0)
+    p6 = p6.fillna(0.0)
+    r = (p6 / p3.where(p3 > 0)).fillna(0.0).clip(0.0, 0.9)
+    return p6 * r / (1.0 - r)
+
+
 # FPL scoring: goals points per position; the tail-sum P(1+)+P(2+)+P(3+) approximates E[goals]
 GOAL_POINTS = {"GK": 10, "DEF": 6, "MID": 5, "FWD": 4}
 
@@ -177,7 +191,10 @@ def xp_pre(pos, start, s):
 
     goals = pd.Series([GOAL_POINTS.get(p, 0) for p in pos], index=pos.index, dtype=float)
     goal_pts = goals * (z(s["score1"]) + z(s["score2"]) + z(s["score3"]))
-    common = 2.0 + goal_pts + 3.0 * z(s["assist"]) - z(s["yellow"])
+    # Assists mirror goals: sum 1+ and 2+ so a player's occasional two-assist game counts.
+    # 'assist2' is improved-mode only; when it is absent the term is 0, so parity is unchanged.
+    assist_pts = 3.0 * (z(s["assist"]) + (z(s["assist2"]) if "assist2" in s else 0.0))
+    common = 2.0 + goal_pts + assist_pts - z(s["yellow"])
 
     is_gk = pos == "GK"
     is_def = pos == "DEF"
@@ -187,7 +204,8 @@ def xp_pre(pos, start, s):
     pts = pts + np.where(is_gk | is_def, 4.0 * z(s["clean_sheet"]), 0.0)
     pts = pts + np.where(is_mid, 1.0 * z(s["clean_sheet"]), 0.0)
     pts = pts - np.where(is_gk | is_def, 2.0 * z(s["concede2"]) + 2.0 * z(s["concede4"]), 0.0)
-    pts = pts + np.where(is_gk, z(s["saves3"]) + z(s["saves6"]), 0.0)
+    pts = pts + np.where(is_gk, z(s["saves3"]) + z(s["saves6"])
+                         + (z(s["saves_tail"]) if "saves_tail" in s else 0.0), 0.0)
     pts = pts + np.where(is_def, 2.0 * z(s["dc_def"]), 0.0)
     pts = pts + np.where(is_mid, 2.0 * z(s["dc_mid"]), 0.0)
 

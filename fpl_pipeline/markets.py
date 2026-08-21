@@ -6,7 +6,7 @@ renamed CSV header can't silently shift a lookup.
 import numpy as np
 import pandas as pd
 
-from . import config
+from . import config, names
 
 
 def implied(odds, margin):
@@ -60,11 +60,25 @@ def player_market(df, calibrate=False):
     })
 
 
-def yellow_market(df):
-    """Booking CSV: match_name, date, player_name, odds_decimal."""
+def yellow_market(df, roster_names=None, improved=False):
+    """Booking CSV: match_name, date, player_name, odds_decimal.
+
+    Bet365-sourced and collected by hand, so names are resolved independently of the
+    roster-side name_mappings the Betway markets rely on: the Bet365-only mapping first
+    (genuine spelling/form differences), then an accent/case-insensitive match to the roster,
+    so a stray accent can't silently drop a card. Improved mode only — parity keeps the exact
+    passthrough and the MARGIN_PLAYER divisor so its output stays byte-identical. The card
+    market runs a heavier overround than goals/assists, hence MARGIN_CARD."""
+    names_col = df.iloc[:, 2]
+    margin = config.MARGIN_PLAYER
+    if improved:
+        margin = config.MARGIN_CARD
+        names_col = names.apply_bet365_names(names_col)
+        if roster_names is not None:
+            names_col = names.resolve_to_roster(names_col, roster_names)
     return pd.DataFrame({
-        "player": df.iloc[:, 2],
-        "prob": implied(df.iloc[:, 3], config.MARGIN_PLAYER),
+        "player": names_col,
+        "prob": implied(df.iloc[:, 3], margin),
     })
 
 
@@ -117,7 +131,7 @@ def _without_f1_duplicate(f1_raw, f2_raw, label):
     return f2_raw
 
 
-def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None):
+def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None, roster_names=None):
     # calibration rides with improved mode unless told otherwise
     calibrate = dedup_f2 if calibrate is None else calibrate
     f2_cs, f2_tg = sportsbet["f2_clean_sheet"], sportsbet["f2_team_goals"]
@@ -128,7 +142,8 @@ def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None):
         "score1": player_market(sportsbet["score1"], calibrate),
         "score2": player_market(sportsbet["score2"], calibrate),
         "assist": player_market(sportsbet["assist"], calibrate),
-        "yellow": yellow_market(sportsbet["yellow"]),
+        "assist2": player_market(sportsbet["assist2"], calibrate),
+        "yellow": yellow_market(sportsbet["yellow"], roster_names, improved=calibrate),
         "clean_sheet": clean_sheet_market(sportsbet["clean_sheet"]),
         "concede": concede_market(sportsbet["team_goals"]),
         "gk_saves": gk_saves_market(sportsbet["gk_saves"]),

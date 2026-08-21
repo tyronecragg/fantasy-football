@@ -127,7 +127,13 @@ def fixtures(limit=None, region="england", league="premier-league"):
     for o in data.get("outcomes", []):
         odds = price.get(o["outcomeId"])
         if odds:
-            by_event[o["eventId"]][(o.get("displayName") or "").strip().lower()] = odds
+            # Key by the CANONICAL team name: split_teams() returns mapped names ('Man Utd'),
+            # while Betway's outcome displayName is its own form ('Manchester United'), so an
+            # unmapped key silently dropped the price for every team needing a rename — six of
+            # ten GW1 2026-27 fixtures lost a win price this way (fixed 2026-08-21).
+            raw = (o.get("displayName") or "").strip()
+            key = raw if raw.lower() == "draw" else names.apply_team_names(pd.Series([raw]))[0]
+            by_event[o["eventId"]][str(key).strip().lower()] = odds
 
     evs = []
     for ev in data.get("events", []):
@@ -189,6 +195,43 @@ def assign_f1_f2(rows, per_gw=PER_GW):
     return gw_of, f1 + f2
 
 
+def _scheduled_pairings(gw_col):
+    """{frozenset(home, away)} for a gameweek column of inputs/fixtures.csv (the pipeline's
+    own schedule), or None if the file/column is missing. GW columns are relative — 'GW1
+    Opponent' is always the current gameweek — so this is the authority the kickoff-order
+    split is checked against."""
+    path = os.path.join(config.ROOT, "inputs", "fixtures.csv")
+    if not os.path.exists(path):
+        return None
+    fx = pd.read_csv(path)
+    if gw_col not in fx.columns:
+        return None
+    team_col = fx.columns[0]
+    pairings = set()
+    for _, r in fx.iterrows():
+        a = names.apply_team_names(pd.Series([str(r[team_col])]))[0]
+        b = names.apply_team_names(pd.Series([str(r[gw_col])]))[0]
+        if a and b and str(b).lower() != "nan":
+            pairings.add(frozenset((a, b)))
+    return pairings or None
+
+
+def crosscheck_split(f1, f2):
+    """Warn if the kickoff-order F1/F2 split disagrees with inputs/fixtures.csv's current /
+    next gameweek pairings — the rare case a postponed fixture scrambles date order and puts
+    a wrong-gameweek match in a block the pipeline reads positionally. Advisory only."""
+    for tag, chunk, col in (("F1", f1, "GW1 Opponent"), ("F2", f2, "GW2 Opponent")):
+        sched = _scheduled_pairings(col)
+        if not sched or not chunk:
+            continue
+        got = {frozenset(split_teams(m)) for _, m, _ in chunk if all(split_teams(m))}
+        stray = [p for p in got if p not in sched]
+        if stray:
+            print(f"  WARNING: {tag} block has fixtures not in fixtures.csv '{col}': "
+                  + ", ".join(" v ".join(sorted(p)) for p in stray)
+                  + " — kickoff order may be scrambled (postponement?); verify the split.")
+
+
 def split_teams(label):
     """'Arsenal vs. Coventry City' -> canonical ('Arsenal', 'Coventry City')."""
     for sep in (" vs. ", " vs ", " v "):
@@ -247,6 +290,26 @@ def selections(payload):
     return rows
 
 
+def _pool_scale(pairs_by_match, min_pairs=8):
+    """Pooled ladder->fixed rescale from EVERY fixture's players-priced-in-both.
+
+    pairs_by_match maps match -> [(1/fixed_odds, 1/ladder_odds), ...]. The ladder's extra
+    margin is a property of the market, not the match, so we pool all fixtures into one factor
+    sum(1/fixed)/sum(1/ladder) rather than measuring one per fixture: steadier, and it covers
+    fixtures that individually have too few players to trust. Returns (pooled, n_players,
+    fixture_lo, fixture_hi) - the per-fixture range is a diagnostic so a scrape can show the
+    factor barely moves - or None when fewer than min_pairs players match across all fixtures.
+    """
+    allp = [p for ps in pairs_by_match.values() for p in ps]
+    if len(allp) < min_pairs:
+        return None
+    pooled = sum(f for f, _ in allp) / sum(l for _, l in allp)
+    per = [sum(f for f, _ in ps) / sum(l for _, l in ps)
+           for ps in pairs_by_match.values() if len(ps) >= 3]
+    lo, hi = (min(per), max(per)) if per else (pooled, pooled)
+    return pooled, len(allp), lo, hi
+
+
 def collect(fixture_rows, gw_of, delay=3.0):
     """{pipeline key: DataFrame} for whichever markets Betway is currently pricing.
 
@@ -262,6 +325,8 @@ def collect(fixture_rows, gw_of, delay=3.0):
     team_goals, clean_sheet, saves, sot = [], [], [], []
     team_goals_f2, clean_sheet_f2 = [], []
     ladder_scales = []
+    ladder_raw = defaultdict(list)   # goals/assists ladder rungs (match, player, level, odds)
+    sot_ladder_raw = []              # shots-on-target ladder rungs, likewise
     seen_markets = set()
 
     for event_id, match, date in fixture_rows:
@@ -276,14 +341,20 @@ def collect(fixture_rows, gw_of, delay=3.0):
         for market, sel, sbv, odds in rows:
             by_market[market].append((sel, sbv, odds))
 
-        # per-team clean sheets: "<Team> To Keep A Clean Sheet" (both gameweeks)
+        # per-team clean sheets: "<Team> To Keep A Clean Sheet" (both gameweeks). Match the
+        # market's OWN team name (mapped to the roster name) against the fixture, rather than
+        # the fixture team's first word against the market string: Betway's official names
+        # ("Tottenham Hotspur", "Nottingham Forest") share no first word with the roster names
+        # ("Spurs", "Nott'm Forest"), which silently dropped exactly those two clean sheets.
         cs_bucket = clean_sheet if gw == "f1" else clean_sheet_f2
-        for team in (home, away):
-            m = next((k for k in by_market if "clean sheet" in k.lower()
-                      and team.split()[0].lower() in k.lower() and "1st half" not in k.lower()), None)
-            if m:
-                p = {s.lower(): o for s, _, o in by_market[m]}
-                cs_bucket.append({"match_name": match, "date": date, "team_name": team,
+        for k in by_market:
+            kl = k.lower()
+            if "clean sheet" not in kl or "1st half" in kl or " to keep" not in kl:
+                continue
+            mteam = names.apply_team_names(pd.Series([k[:kl.index(" to keep")].strip()]))[0]
+            if mteam in (home, away):
+                p = {s.lower(): o for s, _, o in by_market[k]}
+                cs_bucket.append({"match_name": match, "date": date, "team_name": mteam,
                                   "clean_sheet_yes": p.get("yes"), "clean_sheet_no": p.get("no")})
 
         # total goals -> the team-goals shape the pipeline reads (both gameweeks). Betway's
@@ -323,41 +394,18 @@ def collect(fixture_rows, gw_of, delay=3.0):
                                          "match_id": match, "odds_decimal": odds})
 
         # ladder markets: "<Surname, Firstname> 2+" -> threshold from the selection suffix.
-        # LADDERS CARRY MORE MARGIN THAN THE FIXED MARKETS — measured 2026-08-19, summed
-        # implied probability runs ~3.7x true for ladders against ~3.0x for fixed, on both
-        # goals and assists. Left unadjusted, a player gap-filled from a ladder gets a
-        # factor ~28% higher than an identical player priced from the fixed market. Uniform
-        # inflation cancels in a factor, but this is a RELATIVE difference between players,
-        # so it does not. Rescale each ladder to the fixed market's level using the players
-        # priced in both, per fixture — the same self-calibrating trick as derive_saves().
-        for market, levels in LADDERS.items():
-            fixed_for = {lvl: k for lvl, k in levels.items()}
-            scale = {}
-            for lvl, key in fixed_for.items():
-                fixed_px = {p["player_name"]: p["odds_decimal"]
-                            for p in player_rows.get(key, []) if p["match_id"] == match}
-                pairs = []
-                for sel, _, odds in by_market.get(market, []):
-                    nm, _, tail = sel.rpartition(" ")
-                    if tail == f"{lvl}+":
-                        who = player_name(nm)
-                        if who in fixed_px:
-                            pairs.append((1 / fixed_px[who], 1 / odds))
-                if len(pairs) >= 8:
-                    scale[lvl] = sum(f for f, _ in pairs) / sum(l for _, l in pairs)
+        # LADDERS CARRY MORE MARGIN THAN THE FIXED MARKETS (summed implied probability runs
+        # ~3.7x true for ladders vs ~3.0x for fixed, on both goals and assists). Left as-is a
+        # player gap-filled from a ladder gets a factor ~28% higher than an identical player
+        # priced from the fixed market — a RELATIVE distortion that does not cancel. Stash the
+        # rungs now; they are rescaled to the fixed level POOLED across every fixture after the
+        # loop (one factor per market+rung is steadier than a per-fixture one, and covers thin
+        # fixtures the old per-fixture >=8 rule would have skipped and left un-rescaled).
+        for market in LADDERS:
             for sel, _, odds in by_market.get(market, []):
-                name, _, tail = sel.rpartition(" ")
-                if not tail.endswith("+") or not tail[:-1].isdigit():
-                    continue
-                lvl = int(tail[:-1])
-                key = levels.get(lvl)
-                if key:
-                    adj = odds / scale.get(lvl, 1.0)      # scale<1 lengthens the price
-                    player_rows[key].append({"player_name": player_name(name),
-                                             "match_id": match,
-                                             "odds_decimal": round(adj, 2)})
-            if scale:
-                ladder_scales.append((match, market.split()[1], scale))
+                nm, _, tail = sel.rpartition(" ")
+                if tail.endswith("+") and tail[:-1].isdigit():
+                    ladder_raw[market].append((match, player_name(nm), int(tail[:-1]), odds))
 
         # goalkeeper saves, if they have published it yet
         for market in by_market:
@@ -378,51 +426,74 @@ def collect(fixture_rows, gw_of, delay=3.0):
                 seen_sot.add((who, n))
                 sot.append({"Match": match, "Date": date, "player_name": who,
                             "threshold": n, "odds_decimal": odds})
-        # The shots ladder is over-margined exactly like the goals/assists ladders —
-        # measured 0.74-0.85 (mean ~0.78) across three fixtures and every threshold that
-        # appears in both shapes. Rescale it to the fixed markets' level per fixture, or a
-        # player gap-filled from the ladder carries ~28% more implied shots than a
-        # neighbour priced from the fixed market, distorting the team split the saves model
-        # depends on. The 5+ level exists ONLY in the ladder, so it inherits the mean of the
-        # levels that could be measured.
-        lad = defaultdict(dict)
+        # shots-on-target ladder: stash for the same pooled rescale as goals/assists. Its 5+
+        # rung exists ONLY in the ladder (no fixed market to anchor against), so after the loop
+        # it inherits the mean of the rungs that could be measured.
         for sel, _, odds in by_market.get(SOT_LADDER, []):
             nm2, _, tail = sel.rpartition(" ")
             if tail.endswith("+") and tail[:-1].isdigit():
-                lad[int(tail[:-1])][player_name(nm2)] = odds
-        sot_scale = {}
-        for lvl, priced in lad.items():
-            fixed_px = {player_name(s): o
-                        for s, _, o in by_market.get(f"Player {lvl}+ Shots On Target", [])}
-            both = set(fixed_px) & set(priced)
-            if len(both) >= 8:
-                sot_scale[lvl] = (sum(1 / fixed_px[k] for k in both)
-                                  / sum(1 / priced[k] for k in both))
-        default_scale = (sum(sot_scale.values()) / len(sot_scale)) if sot_scale else 1.0
-        for lvl, priced in sorted(lad.items()):
-            k = sot_scale.get(lvl, default_scale)
-            for who, odds in priced.items():
-                if (who, lvl) in seen_sot:
-                    continue
-                seen_sot.add((who, lvl))
-                sot.append({"Match": match, "Date": date, "player_name": who,
-                            "threshold": lvl, "odds_decimal": round(odds / k, 2)})
-        if sot_scale:
-            ladder_scales.append((match, "SoT", {**sot_scale,
-                                                 **{l: default_scale for l in lad
-                                                    if l not in sot_scale}}))
+                sot_ladder_raw.append((match, date, player_name(nm2), int(tail[:-1]), odds))
 
         print(f"  [F1] {match:<32} {len(rows):>5} selections, {len(by_market):>3} markets")
         time.sleep(delay)
 
+    # ---- pooled ladder rescaling: one factor per market+rung across EVERY fixture ----
+    # Goals/assists first. The fixed anchor (player_rows[key]) holds only the fixed markets at
+    # this point, since ladder application was deferred. The 2+ rungs have no fixed market to
+    # anchor against, so they INHERIT the 1+ rung's factor: a ladder's markup is ~uniform across
+    # its rungs, so the measured 1+ shrink is a far better estimate for 2+ than leaving the full
+    # ladder margin on (which was quietly under-stating 2+ goals and 2+ assists).
+    for market, levels in LADDERS.items():
+        scale, report = {}, {}
+        for lvl, key in levels.items():
+            fixed_px = {(p["match_id"], p["player_name"]): p["odds_decimal"]
+                        for p in player_rows.get(key, [])}
+            by_match = defaultdict(list)
+            for mt, who, l2, odds in ladder_raw[market]:
+                if l2 == lvl and (mt, who) in fixed_px:
+                    by_match[mt].append((1.0 / fixed_px[(mt, who)], 1.0 / odds))
+            pooled = _pool_scale(by_match)
+            if pooled:
+                scale[lvl], report[lvl] = pooled[0], pooled
+        anchor = scale.get(1, 1.0)     # 1+ factor; the 2+ rung (no fixed market) inherits it
+        for mt, who, lvl, odds in ladder_raw[market]:
+            key = levels.get(lvl)
+            if key:
+                player_rows[key].append({"player_name": who, "match_id": mt,
+                                         "odds_decimal": round(odds / scale.get(lvl, anchor), 2)})
+        if report:
+            ladder_scales.append((market.split()[1], report))
+
+    # shots-on-target: same pooled rescale; the ladder-only 5+ rung inherits the mean factor
+    fixed_sot = {(r["Match"], r["player_name"], r["threshold"]): r["odds_decimal"] for r in sot}
+    sot_scale, sot_report = {}, {}
+    for lvl in sorted({l for _, _, _, l, _ in sot_ladder_raw}):
+        by_match = defaultdict(list)
+        for mt, dt, who, l2, odds in sot_ladder_raw:
+            if l2 == lvl and (mt, who, lvl) in fixed_sot:
+                by_match[mt].append((1.0 / fixed_sot[(mt, who, lvl)], 1.0 / odds))
+        pooled = _pool_scale(by_match)
+        if pooled:
+            sot_scale[lvl], sot_report[lvl] = pooled[0], pooled
+    default_scale = (sum(sot_scale.values()) / len(sot_scale)) if sot_scale else 1.0
+    seen = set(fixed_sot)
+    for mt, dt, who, lvl, odds in sot_ladder_raw:
+        if (mt, who, lvl) in seen:
+            continue
+        seen.add((mt, who, lvl))
+        sot.append({"Match": mt, "Date": dt, "player_name": who, "threshold": lvl,
+                    "odds_decimal": round(odds / sot_scale.get(lvl, default_scale), 2)})
+    if sot_report:
+        ladder_scales.append(("SoT", sot_report))
+
     if ladder_scales:
         print()
-        print("  ladder margin rescaled to the fixed markets' level (per fixture, "
-              "measured on players priced in both):")
-        for m, what, sc in ladder_scales[:4]:
-            print(f"    {m:<34} {what:<9} " + "  ".join(f"{k}+ x{v:.2f}" for k, v in sorted(sc.items())))
-        if len(ladder_scales) > 4:
-            print(f"    ... and {len(ladder_scales)-4} more")
+        print("  ladder margin rescaled to the fixed level, POOLED across all fixtures "
+              "(per-fixture range in brackets - it should barely move):")
+        for what, report in ladder_scales:
+            cells = "  ".join(f"{lvl}+ x{r[0]:.2f} [n={r[1]}, {r[2]:.2f}-{r[3]:.2f}]"
+                              for lvl, r in sorted(report.items()))
+            print(f"    {what:<9} {cells}")
 
     out = {}
     for key, rows in player_rows.items():
@@ -706,6 +777,8 @@ if __name__ == "__main__":
     fx_all, wdw = fixtures(args.limit)
     print(f"{len(fx_all)} fixtures discovered, {len(wdw)} with 1X2 prices")
     gw_of, fx = assign_f1_f2(fx_all)
+    crosscheck_split([r for r in fx if gw_of.get(r[1]) == "f1"],
+                     [r for r in fx if gw_of.get(r[1]) == "f2"])
     frames, seen = collect(fx, gw_of, delay=args.delay)
     if not wdw.empty:
         # Order the win/draw/win frame as [F1 block][F2 block] and drop the helper 'match'

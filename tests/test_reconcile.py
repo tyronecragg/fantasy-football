@@ -50,6 +50,36 @@ def test_starter_without_attacking_odds_flagged():
     assert "Josh King" in set(rec[rec["source"] == "coverage"]["name"])
 
 
+def _one(name, team, position):
+    return pd.DataFrame({"name": [name], "team": [team], "position": [position]})
+
+
+def test_any_token_abbreviation_matches_non_final_surname():
+    # 'Guimaraes' is token 2 of 5, not the last token — the old last-token rule missed this.
+    roster = _one("Bruno Guimaraes Rodrigues da Silva", "Newcastle", "MID")
+    lin = pd.DataFrame({"Player": ["Bruno Guimaraes"], "Team": ["Newcastle"], "F1": [1.0]})
+    rec = reconcile.report(roster, lin, _mkts([], []))
+    row = rec[rec["source"] == "starting_lineups"].iloc[0]
+    assert row["suggestion"] == "Bruno Guimaraes Rodrigues da Silva"
+
+
+def test_surname_collision_still_refused():
+    # Same surname, different player: must NOT propose the forward onto the defender.
+    roster = _one("Matheus Cunha", "Man Utd", "FWD")
+    lin = pd.DataFrame({"Player": ["Jair Cunha"], "Team": ["Nott'm Forest"], "F1": [1.0]})
+    rec = reconcile.report(roster, lin, _mkts([], []))
+    row = rec[rec["name"] == "Jair Cunha"].iloc[0]
+    assert row["suggestion"] != "Matheus Cunha"
+
+
+def test_shared_first_name_alone_does_not_match():
+    roster = _one("James Maddison", "Spurs", "MID")
+    lin = pd.DataFrame({"Player": ["James Rodriguez"], "Team": ["Spurs"], "F1": [1.0]})
+    rec = reconcile.report(roster, lin, _mkts([], []))
+    row = rec[rec["name"] == "James Rodriguez"].iloc[0]
+    assert row["suggestion"] != "James Maddison"
+
+
 def test_read_csv_tolerant_repairs_excel_ansi_save(tmp_path):
     """An Excel ANSI re-save mixes plain cp1252 accents with double-encoded UTF-8
     ('Touré' displayed and saved as 'TourÃ©'). The tolerant reader must repair both

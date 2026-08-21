@@ -81,7 +81,7 @@ def build_lineups(roster):
         for _, p in best.iterrows():
             prob = 1.0 if p["minutes"] >= 2400 else (0.85 if p["minutes"] >= 1200 else 0.75)
             rows.append({"Player": p["name"], "Team": team,
-                         **{f"F{k}": prob for k in range(1, 7)}})
+                         **{f"F{k}": prob for k in range(1, 9)}})
     return pd.DataFrame(rows)
 
 
@@ -95,7 +95,7 @@ def apply_overrides(lineups, roster):
         return lineups
     overrides = pd.read_csv(path)
     r = roster.set_index("name")
-    prob_cols = [f"F{k}" for k in range(1, 7)]
+    prob_cols = [c for c in lineups.columns if c.startswith("F") and c[1:].isdigit()]
     min_pos = {"DEF": 3, "MID": 2, "FWD": 1}
 
     for _, o in overrides.iterrows():
@@ -437,7 +437,7 @@ def patch_lineups(roster):
     drop an explicit `replaces` target if named)."""
     path = os.path.join(config.INPUTS_DIR, "starting_lineups.csv")
     lineups = pd.read_csv(path)
-    prob_cols = [f"F{k}" for k in range(1, 7)]
+    prob_cols = [c for c in lineups.columns if c.startswith("F") and c[1:].isdigit()]
 
     unavailable_path = os.path.join(config.INPUTS_DIR, "unavailable_players.csv")
     if os.path.exists(unavailable_path):

@@ -1,0 +1,31 @@
+Odds provenance, 2026-27 season (moved from SYNTHETIC_NOTE.txt on 2026-08-21; this file is
+documentation only - the --gw archive guard does NOT read it).
+
+REAL, scraped from Betway (tools/betway.py):
+  - 1X2 (win/draw/win), team goals, clean sheets
+  - PLAYER goalscorer, 2+ goals, assists, 2+ assists
+
+REAL, collected by hand from Ladbrokes (tools/ladbrokes_cards.py):
+  - Yellow CARDS (sportsbet_booking_odds.csv): real "to be booked" odds for every listed
+    player. Every other roster player in the two teams of a COMPLETE match is filled with
+    that match's max (longest) captured price - a low, conservative booking chance, not a
+    true per-player quote. This game-max fill is a STANDING feature of the weekly workflow.
+
+DERIVED from real data (no market exists on Betway):
+  - Goalkeeper saves: built from the real shots-on-target ladders (betway.py derive_saves).
+    The SoT->goals CONVERSION (0.30) was validated 2026-08-20 against real Ladbrokes match
+    shots-on-target lines and Bet365 save ladders (both independently ~0.30).
+
+SYNTHETIC placeholders (harmless to the archive - only F1 columns are archived):
+  - GW2 team markets (*_f2 clean sheet / team goals) until bookmakers price the next GW.
+
+ARCHIVE POLICY (decided 2026-08-21): plain `python -m fpl_pipeline.run --gw N` archives BOTH
+match odds and player history every week. The accepted trade-off: unlisted fringe players'
+yellow-card factors seed from the conservative game-max fill price; the trailing medians
+smooth this over subsequent weeks, and the alternative was no card history at all.
+
+NEXT PRE-SEASON: tools/build_preseason_data.py recreates sportsbet/SYNTHETIC_NOTE.txt when
+it writes genuinely synthetic odds, and the --gw guard blocks again - correctly. Delete that
+note BY HAND only once BOTH the first real Betway player scrape AND the first Ladbrokes card
+ingest of the season have landed (betway.py does not auto-delete it, and sportsbet.py's
+auto-delete fires before cards are real - so the manual check is deliberate).

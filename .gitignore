@@ -209,3 +209,7 @@ __marimo__/
 # FPL pipeline: regenerable artifacts and IDE config
 outputs/
 .idea/
+
+# raw odds captures (regenerate on demand, never track)
+*.har
+odds_raw/

@@ -21,6 +21,18 @@ PARITY_SPORTSBET_DIR = os.path.join(ROOT, "parity_reference", "sportsbet")
 
 # Bookmaker margin divisors (odds -> probability = 1/odds/margin)
 MARGIN_PLAYER = 1.05   # player & team match markets
+MARGIN_CARD = 1.10     # Bet365 "player to be booked" — higher overround than goals/assists
+
+# 2+ assists as a fraction of the 1+ chance, measured on the CALIBRATED probabilities the fill
+# is applied to (i.e. after MARGIN_PLAYER and the longshot shrink, not the raw odds). Real 2+
+# assists sit at a roughly FLAT ~0.09x the 1+ chance in that space, while the Poisson tail used
+# for 2+ goals (model.poisson_score2) has the wrong shape — it ramps ~0.03->0.15 with the 1+
+# chance. The flat ratio fits better (2026-08-19, n=187 priced in both: mean abs error 0.0058
+# vs Poisson's 0.0081). So missing 2+ assists are filled with this ratio, not the curve;
+# players.py re-measures it each run and falls back to this default only when too few pairs
+# exist. NOTE: on the RAW de-margined odds the same ratio is ~0.24 - the gap is the longshot
+# calibration shrinking the small 2+ numbers, which is provisional for 2+ markets (see #25).
+ASSIST2_RATIO = 0.088
 
 # Longshot calibration for PLAYER attacking markets (goalscorer / 2+ goals / assists).
 # A flat MARGIN_PLAYER cannot be right: the total load on Betway's goalscorer market
@@ -85,6 +97,18 @@ POSITION_ORDER = ["GK", "DEF", "MID", "FWD"]
 N_FIXTURES = 6
 
 # Defensive-contribution blending: prior-season DC-per-90 is blended with the current
-# season minutes-weighted, with the prior's weight capped at this many minutes (10 full
-# matches) — pure prior at GW1, ~50/50 after 10 current matches, current-dominated later.
-DC_PRIOR_CAP_MINUTES = 900
+# season minutes-weighted, with the prior's weight capped at this many minutes (19 full
+# matches = half a season) — most regulars then carry their whole last-season DC sample
+# (median ~15 nineties), only ever-presents are trimmed. Pure prior at GW1, ~50/50 after
+# 19 current matches, current-dominated in the run-in. DefCon has only one prior season
+# (2025-26; the stat is new), so this is the deepest history available.
+DC_PRIOR_CAP_MINUTES = 1710
+# Improved mode: a player's own DC hit-probability is shrunk toward the reliable-population
+# average in proportion to his evidence — weight = nineties / DC_SHRINK_NINETIES, capped at 1. So one
+# full match = 25% his own + 75% the average; four or more = his own (minimum below). Parity keeps
+# the workbook's hard >=4 cliff (own rate or the average, nothing in between).
+DC_SHRINK_NINETIES = 4.0
+# ...but a brief cameo counts for nothing: below this many nineties (0.65 = ~59 min, roughly a
+# played-most-of-the-match appearance) the weight is zero (straight population average). At or
+# above it, weight = nineties/4 as above, so 0.65 nineties -> 0.65/4 own, 3.35/4 average.
+DC_SHRINK_MIN_NINETIES = 0.65

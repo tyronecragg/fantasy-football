@@ -1,8 +1,13 @@
 import os
 import sys
+import warnings
 
 import pandas as pd
 import pulp
+
+# The two-stage tie-break deliberately re-sets the objective (XP ceiling, then ownership);
+# PuLP warns on every objective overwrite, which is expected here, not a problem.
+warnings.filterwarnings("ignore", message="Overwriting previously set objective")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fpl_pipeline.prices import apply_sell_prices  # noqa: E402
@@ -109,13 +114,18 @@ def collapse_fungible_bench(df, current_team_names, fixture_columns):
     swapping one warm body for another (observed: 25 'distinct' squads differing only in a
     £4.0m 0-XP keeper).
 
-    Per position, keep every player the manager already owns (selling one is a real,
-    budget-relevant call) and collapse the rest of the 0-XP crowd to a SINGLE cheapest
-    representative, relabelled generically ('Any £4.0m 0-XP DEF'). The optimum is unchanged:
-    the cheapest 0-XP filler was always what it wanted, and for outfield slots the optimiser
-    prefers a cheap PLAYING player anyway (bench points), so real cheap options remain to
-    keep every squad feasible. Only the degeneracy goes. A player with 0 XP now but real XP
-    later (injury ramp) has max fixture XP > 0 and is never collapsed. Returns (df, {pos: name}).
+    Per position, collapse the 0-XP crowd to a SINGLE cheapest representative, relabelled
+    generically ('Any £4.0m 0-XP DEF'). Owned players are never dropped (they must stay
+    transferable). But if the manager ALREADY OWNS a 0-XP filler here, that filler IS the
+    slot: a bought generic is only worth offering when it is STRICTLY cheaper than the owned
+    one (a real budget-freeing downgrade). A same/higher-price generic is a wasted transfer
+    for nothing, so it is dropped and the owned incumbent stands un-churned (otherwise the
+    enumerator flips between 'keep your £4.0m keeper' and 'buy an identical £4.0m keeper').
+
+    The optimum is unchanged: the cheapest 0-XP filler was always what it wanted, and for
+    outfield slots the optimiser prefers a cheap PLAYING player anyway (bench points), so real
+    cheap options remain to keep every squad feasible. A player with 0 XP now but real XP later
+    (injury ramp) has max fixture XP > 0 and is never collapsed. Returns (df, {pos: name}).
     """
     owned = {n.strip() for n in current_team_names}
     never_plays = df[fixture_columns].max(axis=1) < 0.05
@@ -125,18 +135,30 @@ def collapse_fungible_bench(df, current_team_names, fixture_columns):
     df = df.copy()
     drop = []
     for pos in ('GK', 'DEF', 'MID', 'FWD'):
-        pool = df.index[(pos_norm == pos) & never_plays & ~owned_mask]
-        if len(pool) > 1:
-            rep = df.loc[pool].sort_values('Cost').index[0]
+        fungible = (pos_norm == pos) & never_plays
+        owned_fung = df.index[fungible & owned_mask]
+        non_owned = list(df.index[fungible & ~owned_mask])
+        if len(owned_fung):
+            # Owned filler is the incumbent: keep only non-owned fillers strictly cheaper
+            # than it (a genuine downgrade); drop the same/higher-price ones as pure churn.
+            floor = df.loc[owned_fung, 'Cost'].min()
+            drop.extend(i for i in non_owned if df.loc[i, 'Cost'] >= floor)
+            non_owned = [i for i in non_owned if df.loc[i, 'Cost'] < floor]
+            min_to_collapse = 1     # even one surviving downgrade becomes the generic option
+        else:
+            min_to_collapse = 2     # no incumbent: collapse only when it would otherwise churn
+        if len(non_owned) >= min_to_collapse:
+            rep = min(non_owned, key=lambda i: df.loc[i, 'Cost'])
             name = f"Any £{df.loc[rep, 'Cost']:.1f}m 0-XP {pos}"
             df.loc[rep, 'Player Name'] = name
             df.loc[rep, 'Team'] = GENERIC_TEAM   # no committed team - exempt from per-team caps
             generics[pos] = name
-            drop.extend(i for i in pool if i != rep)
+            drop.extend(i for i in non_owned if i != rep)
     if drop:
         df = df.drop(index=drop)
-        print("  Collapsed interchangeable 0-XP bench fillers to one option per position "
-              f"({', '.join(generics.values())}); dropped {len(drop)} redundant duplicates")
+        print("  Collapsed interchangeable 0-XP bench fillers"
+              + (f" ({', '.join(generics.values())})" if generics else " (owned incumbents kept)")
+              + f"; dropped {len(drop)} redundant duplicates")
     return df, generics
 
 
@@ -403,6 +425,27 @@ def bench_points_for_fixture(df, bench_indices, fixture_col, bench_slot_weights,
     return total
 
 
+def pure_xp_lineup(squad_indices, df, fixture_col):
+    """Max-XP legal XI, bench, and captain for one fixture, chosen PURELY on expected points
+    from a fixed 15-man squad. Applied after the squad is decided so the ownership tie-break
+    only ever shapes transfers/squad selection -- never who you field. Formation: 1 GK,
+    3-5 DEF, 2-5 MID, 1-3 FWD; bench outfielders and the captain fall out by XP too.
+    """
+    pos = {k: [] for k in ('GK', 'DEF', 'MID', 'FWD')}
+    for i in squad_indices:
+        pos[df.loc[i, 'Position']].append(i)
+    for k in pos:
+        pos[k].sort(key=lambda i: df.loc[i, fixture_col], reverse=True)
+    xi = pos['GK'][:1] + pos['DEF'][:3] + pos['MID'][:2] + pos['FWD'][:1]
+    rest = pos['DEF'][3:5] + pos['MID'][2:5] + pos['FWD'][1:3]
+    rest.sort(key=lambda i: df.loc[i, fixture_col], reverse=True)
+    xi += rest[:4]
+    xi_set = set(xi)
+    bench = [i for i in squad_indices if i not in xi_set]
+    captain = max(xi, key=lambda i: df.loc[i, fixture_col])
+    return xi, bench, captain
+
+
 def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights):
     """
     Calculate the optimal baseline score for the current squad by running a mini-optimizer.
@@ -553,7 +596,9 @@ def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, be
 def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, num_fixtures=5,
                              fixture_weights=None, players_sheet='Players',
                              additional_budget=0.0, bench_slot_weights=None, gk_bench_weights=None,
-                             force_transfer_out=None, num_solutions=3, max_defensive_players_per_team=3):
+                             force_transfer_out=None, num_solutions=3, max_defensive_players_per_team=3,
+                             force_transfer_in=None, tie_breaker=None,
+                             tie_break_mode='differential', xp_tolerance=0.5):
     # Set default weights
     if fixture_weights is None:
         fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4, 0.25]
@@ -572,6 +617,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     # Handle forced transfers
     if force_transfer_out is None:
         force_transfer_out = []
+    if force_transfer_in is None:
+        force_transfer_in = []
 
     print(f"\nOptimising transfers: max {max_transfers} transfers for {num_fixtures} fixtures")
     print(f"Finding top {num_solutions} transfer combinations")
@@ -585,6 +632,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     print(f"Max defensive players (GK+DEF) per team: {max_defensive_players_per_team}")
     if force_transfer_out:
         print(f"Forced transfers out: {force_transfer_out}")
+    if force_transfer_in:
+        print(f"Forced transfers in: {force_transfer_in}")
 
     # Load player data
     df = load_sheet(excel_file, players_sheet)
@@ -608,6 +657,13 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     df = drop_departed(df, current_team_names, departed_players(excel_file))
     df, generic_slots = collapse_fungible_bench(df, current_team_names, fixture_columns)
     df = df.reset_index(drop=True)
+
+    # Ownership for the optional two-stage tie-break: when many squads score ~the same XP,
+    # break the tie by ownership (differential = favour low-owned, template = favour high).
+    if tie_breaker == 'ownership':
+        own = load_ownership()
+        df['_ownership'] = df['Player Name'].map(own).fillna(0.0)
+        print(f"Tie-break: {tie_break_mode} by ownership, within {xp_tolerance:.2f} XP of optimal")
 
     # Identify current team players in database
     current_team_indices = []
@@ -649,6 +705,20 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         print(f"ERROR: Number of forced transfers ({num_forced_transfers}) exceeds max transfers ({max_transfers})")
         return None
 
+    # Resolve forced transfers IN: players the squad MUST contain (a new pickup to test, or an
+    # owned player protected from sale). Matched against the finalised pool, so a departed or
+    # collapsed name will not resolve. Budget/position limits still apply, so an unaffordable
+    # pick simply makes the problem infeasible (no solution) rather than being smuggled in.
+    forced_in_indices = []
+    for forced_name in force_transfer_in:
+        matches = df[df['Player Name'].str.strip() == forced_name.strip()]
+        if len(matches) == 0:
+            matches = df[df['Player Name'].str.contains(forced_name.strip(), case=False, na=False)]
+        if len(matches) > 0:
+            forced_in_indices.append(matches.index[0])
+        else:
+            print(f"WARNING: forced-in player not found in pool (departed/collapsed/typo?): {forced_name}")
+
     # Calculate total budget available
     total_budget = current_team_cost + additional_budget
 
@@ -660,6 +730,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     # Store all solutions
     all_solutions = []
     excluded_transfer_combinations = []
+    max_xp = None    # XP ceiling for the two-stage tie-break, found once on the first solve
 
     # Solve multiple times to get top N solutions
     for solution_num in range(num_solutions):
@@ -732,7 +803,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 prob, df[fixture_col], bench_vars[fixture], outfield_index, weight,
                 bench_slot_weights[i], f"s{solution_num}_{fixture}"))
 
-        prob += pulp.lpSum(objective_terms)
+        xp_expr = pulp.lpSum(objective_terms)
+        prob += xp_expr
 
         # Constraint 1: Exactly 15 players in squad
         prob += pulp.lpSum([squad_vars[i] for i in df.index]) == 15
@@ -770,6 +842,12 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # Constraint 5: Force specific players to be transferred out
         for forced_idx in forced_out_indices:
             prob += transfer_out_vars[forced_idx] == 1
+
+        # Constraint 5b: Force specific players INTO the final squad (a pickup to test, or an
+        # owned player protected from sale). The transfer-logic constraints above then set
+        # their transfer_in var automatically when they are not already owned.
+        for forced_idx in forced_in_indices:
+            prob += squad_vars[forced_idx] == 1
 
         # Constraint 6: Maximum transfers
         total_transfers = []
@@ -876,6 +954,28 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             if matching_transfers:
                 prob += pulp.lpSum(matching_transfers) <= len(matching_transfers) - 1
 
+        # Two-stage tie-break (optional): find the XP ceiling once, then among squads within
+        # xp_tolerance of it, maximise ownership (differential = favour low-owned, template =
+        # high-owned). This shapes the SQUAD / transfers only — the XI you field is ALWAYS set
+        # afterwards by pure XP (pure_xp_lineup), never by ownership.
+        if tie_breaker == 'ownership':
+            if max_xp is None:
+                prob.solve(pulp.PULP_CBC_CMD(msg=0))          # stage 1: the pure-XP ceiling
+                if prob.status == pulp.LpStatusOptimal:
+                    max_xp = pulp.value(xp_expr)
+            if max_xp is not None:
+                sign = -1.0 if tie_break_mode == 'differential' else 1.0
+                f1 = fixtures[0]
+                secondary = pulp.lpSum(sign * float(df.loc[i, '_ownership']) * starting_vars[f1][i]
+                                       for i in df.index)
+                # Keep what you already own when it doesn't cost XP. This settles the fungible
+                # slots the ownership tilt can't see — above all the BENCH KEEPER: a benched GK is
+                # worth ~nothing, so without this the optimiser freely swaps your owned Palmer for
+                # another equivalent keeper. Ranked below ownership (0.01 vs ~1/point), above XP.
+                keep_owned = pulp.lpSum(squad_vars[i] for i in current_team_indices)
+                prob += xp_expr >= max_xp - xp_tolerance      # stay within tolerance of optimal
+                prob += secondary + 0.01 * keep_owned + 1e-4 * xp_expr   # tilt > keep-owned > XP
+
         # Solve the problem
         prob.solve(pulp.PULP_CBC_CMD(msg=0))
 
@@ -914,17 +1014,15 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         captains = {}
         bench_players = {}
 
+        # The LP's starting_vars can be tilted by the ownership tie-break; that tilt is
+        # allowed to shape the SQUAD (transfers) exactly as before. But once the 15 is fixed,
+        # ALWAYS set the XI / bench order / captain by pure expected points, so who you field
+        # is never affected by ownership. (Tyrone, 2026-08-21.)
         for fixture in fixtures:
-            starting_lineups[fixture] = []
-            bench_players[fixture] = []
-
-            for i in df.index:
-                if starting_vars[fixture][i].varValue == 1:
-                    starting_lineups[fixture].append(i)
-                if captain_vars[fixture][i].varValue == 1:
-                    captains[fixture] = i
-                if bench_vars[fixture][i].varValue == 1:
-                    bench_players[fixture].append(i)
+            xi, bench, cap = pure_xp_lineup(final_squad_indices, df, f'{fixture} XP')
+            starting_lineups[fixture] = xi
+            bench_players[fixture] = bench
+            captains[fixture] = cap
 
         final_squad = df.loc[final_squad_indices].copy()
         transfers_out_players = df.loc[transfers_out].copy() if transfers_out else pd.DataFrame()
@@ -1131,7 +1229,10 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
 
         all_solutions.append(solution_result)
 
-    return all_solutions
+    # Return the finalised pool alongside the solutions: departed players dropped, fungible
+    # fillers collapsed/renamed, index reset. Every display keyed by solution indices MUST use
+    # THIS df, or names/indices will not line up (role table blanks out, horizon XI collapses).
+    return all_solutions, df
 
 
 def display_f1_starting_xi_comparison(solution, df, current_team_indices, transfers_out):
@@ -1497,7 +1598,11 @@ def display_horizon_table(all_solutions, df):
         row = f"{s['solution_number']:>4}{s['num_transfers']:>4}{s['budget_remaining']:>6.1f}m"
         for _, xi, bench in horizon_bands(s, df):
             row += f"{xi:>11.2f}{bench:>10.2f}"
-        print(row + f"{s['total_starting_points']:>11.2f}")
+        # The RANKING objective is the full weighted total (starting XI + captain + bench),
+        # not the starting XI alone — print that so the column is monotonic and Option 1 (the
+        # objective maximum) reads highest. total_starting_points omits captain+bench, which is
+        # exactly where a top solution can bank its edge (e.g. a stronger bench).
+        print(row + f"{s['final_points']:>11.2f}")
 
     print("-" * 112)
     print("  XI includes the captain bonus; Bench is the plain sum of all four subs, so the")
@@ -1683,11 +1788,41 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
     print(f"  Chip watch: Bench Boost +{total_bench_value:.2f} pts | "
           f"Triple Captain +{captain_bonus:.2f} pts ({captain_name})")
 
+    # Key probabilities for this fixture (%): goals, assists, clean sheet, defensive
+    # contribution. DefCon is position-gated (the DEF/MID column that applies); a 0 or
+    # missing value shows as '-'. XI (grouped by position) first, then the four bench.
+    _pcols = [("1 Goal", f"{fixture} Score 1+"), ("2 Goals", f"{fixture} Score 2+"),
+              ("1 Asst", f"{fixture} Assist"), ("2 Asst", f"{fixture} Assist 2+"),
+              ("CleanSh", f"{fixture} Clean Sheet")]
+    _dc = {"DEF": f"{fixture} Defensive Contribution - DEF",
+           "MID": f"{fixture} Defensive Contribution - MID"}
+    if all(c in final_squad.columns for _, c in _pcols):
+        def _prob_row(player):
+            pos = str(player['Position'])
+            vals = [player[c] for _, c in _pcols]
+            dc = _dc.get(pos)
+            vals.append(player[dc] if dc and dc in final_squad.columns else float('nan'))
+            cells = "".join((f"{v * 100:>7.0f}%" if pd.notna(v) and v > 0 else f"{'-':>8}")
+                            for v in vals)
+            print(f"    {str(player['Player Name'])[:24]:<25}{pos:<5}{cells}")
+
+        print(f"\n  Key probabilities - {fixture} (%):")
+        print("    " + f"{'Player':<25}{'Pos':<5}"
+              + "".join(f"{lab:>8}" for lab, _ in _pcols) + f"{'DefCon':>8}")
+        for _, player in starting_sorted.iterrows():
+            _prob_row(player)
+        if len(bench_players_data):
+            print("    ---- Bench ----")
+            for _, player in pd.concat([gk_bench, outfield_bench]).iterrows():
+                _prob_row(player)
+
 
 def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", max_transfers=2, num_fixtures=5,
                                   fixture_weights=None, show_current_analysis=True,
                                   additional_budget=0.0, bench_slot_weights=None, gk_bench_weights=None,
-                                  force_transfer_out=None, num_solutions_display=3,
+                                  force_transfer_out=None, force_transfer_in=None,
+                                  tie_breaker=None, tie_break_mode='differential', xp_tolerance=0.5,
+                                  num_solutions_display=3,
                                   show_all_details=False, show_detailed_f1=False,
                                   compute_solutions=20, show_frequency_analysis=True,
                                   min_frequency=2, max_defensive_players_per_team=3,
@@ -1735,13 +1870,23 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             # Display current team analysis
             display_current_team_analysis(current_team_df, analysis, num_fixtures, weights)
 
-        # Load player data for detailed display
-        df = load_sheet(excel_file, 'Players')
-        df.columns = df.columns.str.strip()
-        apply_dgw_adjustment(df)  # TEMPORARY
-        apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
+        # Optimise transfers - get multiple solutions AND the finalised pool they index into
+        # (departed dropped, fungible fillers collapsed, index reset). All displays below use
+        # this df; reloading a fresh one would desync indices/names and blank the role table.
+        result = optimise_transfers_multi(
+            excel_file, current_team_names, max_transfers, num_fixtures,
+            fixture_weights, 'Players', additional_budget, bench_slot_weights,
+            gk_bench_weights_used, force_transfer_out, compute_solutions, max_defensive_players_per_team,
+            force_transfer_in=force_transfer_in, tie_breaker=tie_breaker,
+            tie_break_mode=tie_break_mode, xp_tolerance=xp_tolerance
+        )
+        all_solutions, df = result if result else (None, None)
 
-        # Get current team indices
+        if not all_solutions:
+            print("No solutions found!")
+            return None
+
+        # Current team indices, resolved against that same finalised pool
         current_team_indices = []
         for player_name in current_team_names:
             matches = df[df['Player Name'].str.strip() == player_name.strip()]
@@ -1749,18 +1894,6 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                 matches = df[df['Player Name'].str.contains(player_name.strip(), case=False, na=False)]
             if len(matches) > 0:
                 current_team_indices.append(matches.index[0])
-
-        # Optimise transfers - get multiple solutions
-        # Compute more solutions than we display for better frequency analysis
-        all_solutions = optimise_transfers_multi(
-            excel_file, current_team_names, max_transfers, num_fixtures,
-            fixture_weights, 'Players', additional_budget, bench_slot_weights,
-            gk_bench_weights_used, force_transfer_out, compute_solutions, max_defensive_players_per_team
-        )
-
-        if not all_solutions:
-            print("No solutions found!")
-            return None
 
         # Show frequency analysis if requested
         if show_frequency_analysis and len(all_solutions) > 1:
@@ -1810,7 +1943,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 
 result = main_multi_transfer_optimiser(
     excel_file="outputs/13_players_master.csv",
-    max_transfers=15,
+    max_transfers=1,
     num_fixtures=8,
     # How fast the squad churns / how fixable a bad far fixture is - independent of forecast quality
     ownership_weights=[1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558],
@@ -1818,16 +1951,20 @@ result = main_multi_transfer_optimiser(
     reliability_weights=[1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472],
     show_current_analysis=False,
     additional_budget=0.0,
-    bench_slot_weights=(0.16, 0.02, 0.01),   # sub order 1/2/3, applied every fixture
+    bench_slot_weights=(0.25, 0.05, 0.01),   # sub order 1/2/3, applied every fixture
     # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*7,
     gk_bench_weights=[0.01]*8,
     # gk_bench_weights=[1.0] + [0.05]*7,
     max_defensive_players_per_team=2,
-    compute_solutions=20,
-    num_solutions_display=20,
+    compute_solutions=1,
+    num_solutions_display=1,
     show_all_details=False,
     show_detailed_f1=False,
     # force_transfer_out=["Rodrigo Muniz"],
+    # force_transfer_in=["Erling Haaland"],
+    # tie_breaker="ownership",
+    # tie_break_mode="differential",
+    # xp_tolerance=1.0,
 )
 
 if __name__ == "__main__":

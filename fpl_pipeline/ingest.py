@@ -127,6 +127,7 @@ SPORTSBET_FILES = {
     "score1": "sportsbet_goalscorer_odds.csv",
     "score2": "sportsbet_two_goals_odds.csv",
     "assist": "sportsbet_assist_odds.csv",
+    "assist2": "sportsbet_two_assists_odds.csv",
     "yellow": "sportsbet_booking_odds.csv",
     "clean_sheet": "sportsbet_clean_sheet_odds.csv",
     "team_goals": "sportsbet_team_goals_odds.csv",

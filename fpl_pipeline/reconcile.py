@@ -46,8 +46,18 @@ def _forenames_compatible(a, b):
 
 
 def _suggest(name, roster_names, norm_map, team_of=None, allowed=None):
-    """Best-effort roster match for an unmatched name: accent/case fold, then unique
-    surname, then fuzzy. Returns (suggestion, how) or (None, None)."""
+    """Best-effort roster match for an unmatched name: accent/case fold, then a token match
+    in ANY position, then fuzzy. Returns (suggestion, how) or (None, None).
+
+    The token stage matches on tokens wherever they sit, not just the last one — the old
+    last-token rule missed names whose distinguishing token is not final ('Bruno Guimaraes'
+    vs roster 'Bruno Guimaraes Rodrigues da Silva'; 'Brau Blanquez' vs 'Brau X Blanquez').
+    Two ways in, each requiring a UNIQUE hit in the pool:
+      - abbrev:  one name's tokens are a subset of the other's (an abbreviation) — strong on
+                 its own, uniqueness handles same-surname ties ('Silva' -> two Silvas = skip).
+      - surname: they share a NON-forename token (a surname in any position) AND the forenames
+                 are compatible — the guard that refuses 'Jair Cunha' -> 'Matheus Cunha'.
+    """
     n = _norm(name)
     if n in norm_map:
         return norm_map[n], "accent/case"
@@ -55,14 +65,26 @@ def _suggest(name, roster_names, norm_map, team_of=None, allowed=None):
     pool = roster_names
     if allowed and team_of:
         pool = [r for r in roster_names if team_of.get(r) in allowed] or roster_names
-    last = n.split()[-1] if n.split() else ""
-    if last:
-        surname_hits = [r for r in pool if _norm(r).split()[-1] == last]
-        if len(surname_hits) == 1 and _forenames_compatible(n, _norm(surname_hits[0])):
-            return surname_hits[0], "surname" + ("+team" if pool is not roster_names else "")
+    suffix = "+team" if pool is not roster_names else ""
+    tn = n.split()
+    if tn:
+        tn_set = set(tn)
+        abbrev, surname = [], []
+        for r in pool:
+            tr_set = set(_norm(r).split())
+            shared = tn_set & tr_set
+            if not shared:
+                continue
+            if tn_set <= tr_set or tr_set <= tn_set:
+                abbrev.append(r)                       # one name abbreviates the other
+            elif (shared - {tn[0]}) and _forenames_compatible(n, _norm(r)):
+                surname.append(r)                      # shared surname (any position), same forename
+        for hits, how in ((abbrev, "abbrev"), (surname, "surname")):
+            if len(hits) == 1:
+                return hits[0], how + suffix
     fuzzy = get_close_matches(name, pool, n=1, cutoff=0.8)
     if fuzzy:
-        return fuzzy[0], "fuzzy" + ("+team" if pool is not roster_names else "")
+        return fuzzy[0], "fuzzy" + suffix
     return None, None
 
 
@@ -161,9 +183,11 @@ def print_summary(rec):
 
 
 if __name__ == "__main__":
-    from . import ingest, markets
+    from . import ingest, markets, names
 
     inputs = ingest.load_inputs()
+    inputs["starting_lineups"]["Player"] = names.apply_player_names(
+        inputs["starting_lineups"]["Player"])
     sportsbet = ingest.load_sportsbet()
     rec = report(ingest.load_fpl_players(), inputs["starting_lineups"],
                  markets.build_all(sportsbet, inputs, dedup_f2=True))
