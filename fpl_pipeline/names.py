@@ -2,7 +2,7 @@
 
 All renames live in inputs/name_mappings.csv (columns: type, name, name_cleaned) —
 consolidated from the old fpl_data/player_name_changes.csv, the FFS dict that lived in
-starting_lineups.py, and the team fixes scattered across sportsbet.py / Overall Odds.
+starting_lineups.py, and the team fixes scattered across the scrapers / Overall Odds.
 """
 import os
 import unicodedata

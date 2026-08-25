@@ -78,6 +78,14 @@ TOTAL_XP_WEIGHTS = [1.0, 0.85, 0.7, 0.7, 0.7, 0.7]
 # absent here backtested best at w=1.0 (pure model) and are not blended.
 PROJECTION_BLEND = {"score1": 0.70, "assist": 0.85, "saves3": 0.85}
 
+# Use the trained forward-projection models (outputs/models/) for F3-F8 clean_sheet/concede2/
+# saves3 instead of factor x baseline. Only these three beat the real pipeline value on
+# walk-forward (2025-26); score1's F1-blend already wins, assist/yellow never do. saves3 keeps
+# its PROJECTION_BLEND. See tools/save_projection_models.py + fpl_pipeline/projection_serving.py.
+USE_PROJECTION_MODEL = True
+PROJECTION_MODEL_STATS = {"clean_sheet": "Clean Sheet", "concede2": "Concede 2+ Goals",
+                          "saves3": "3+ Saves"}
+
 # Stats whose live factor is the trailing MEDIAN of this season's weekly factors
 # (factor experiment 2026-08: median beat single-week on holdout for all of these —
 # yellow by 14%, concede2 7%, score1/saves3 5%, clean_sheet 4%, concede4/saves6
@@ -103,6 +111,13 @@ N_FIXTURES = 6
 # 19 current matches, current-dominated in the run-in. DefCon has only one prior season
 # (2025-26; the stat is new), so this is the deepest history available.
 DC_PRIOR_CAP_MINUTES = 1710
+# Improved mode: this season's minutes are weighted this many times prior-season minutes when
+# blending the DC RATE (dc90) - recent form counts for more. Applies ONLY to the rate's weighted
+# average (numerator AND denominator), so it stays a proper mean. It deliberately does NOT touch
+# the EVIDENCE count (nineties = true minutes / 90), which drives the reliability gate and the
+# shrinkage below - a recency preference is not extra evidence, so a player with one recent match
+# is still one match of evidence (25% own / 75% average), not two. Set to 1.0 to disable.
+DC_CURRENT_SEASON_WEIGHT = 2.0
 # Improved mode: a player's own DC hit-probability is shrunk toward the reliable-population
 # average in proportion to his evidence — weight = nineties / DC_SHRINK_NINETIES, capped at 1. So one
 # full match = 25% his own + 75% the average; four or more = his own (minimum below). Parity keeps
@@ -112,3 +127,20 @@ DC_SHRINK_NINETIES = 4.0
 # played-most-of-the-match appearance) the weight is zero (straight population average). At or
 # above it, weight = nineties/4 as above, so 0.65 nineties -> 0.65/4 own, 3.35/4 average.
 DC_SHRINK_MIN_NINETIES = 0.65
+
+# Predicted match odds (F2 fallback + F3-F8): win_pred and opp_win_pred are fitted INDEPENDENTLY,
+# so the implied draw (1 - win - opp) is an unconstrained residual that balloons when both fits
+# undershoot (a one-sided match could show a ~37% draw). model.reconcile_win_draw clamps the draw
+# into a decisiveness-aware band before splitting the rest back to win/opp by their ratio. Band:
+# draw in [DRAW_FLOOR, DRAW_CEIL_EVEN - DRAW_CEIL_SLOPE * |2r-1|]. Anchored to the 2025-26 PL draw
+# rate (27.4%, roughly flat vs match closeness - only a mild taper at big mismatches); improved
+# mode only, so parity is untouched. Matches already inside the band are left UNCHANGED.
+DRAW_CEIL_EVEN = 0.32     # max plausible draw for an even match (league avg ~0.27, ceiling above it)
+DRAW_CEIL_SLOPE = 0.14    # how the ceiling tapers with decisiveness (even 0.32 -> total mismatch 0.18)
+DRAW_FLOOR = 0.15         # min plausible draw (also replaces the old sum>1 -> zero-draw guard)
+
+# Bonus points: when True (improved mode only), replace the flat linear P(bonus) uplift with an
+# odds-anchored model — each team's bonus pot from win/draw/loss probabilities, split within the
+# team by XP above the appearance floor (model.bonus_points_odds). Measured to fix the ~2.2x
+# under-allocation and the fodder-vs-elite mis-shape. OFF until validated on the backtest harness.
+BONUS_ODDS_MODEL = True

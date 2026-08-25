@@ -3,7 +3,7 @@ import pytest
 
 pulp = pytest.importorskip("pulp")  # optimisers run under the PuLP venv (env/Scripts/python)
 
-import optimisation_gameweek as og
+import optimisation as og
 
 
 def _squad_df():
@@ -61,7 +61,7 @@ def test_baseline_lp_matches_hand_computed_slot_pricing():
 
 
 def test_fixture_weights_combine_ownership_and_reliability():
-    import optimisation_gameweek as og
+    import optimisation as og
 
     w = og.combine_fixture_weights()
     assert w[0] == 1.0                                  # normalised to F1

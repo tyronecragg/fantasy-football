@@ -30,6 +30,7 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
 import time
 from collections import defaultdict
@@ -197,9 +198,9 @@ def assign_f1_f2(rows, per_gw=PER_GW):
 
 def _scheduled_pairings(gw_col):
     """{frozenset(home, away)} for a gameweek column of inputs/fixtures.csv (the pipeline's
-    own schedule), or None if the file/column is missing. GW columns are relative — 'GW1
-    Opponent' is always the current gameweek — so this is the authority the kickoff-order
-    split is checked against."""
+    own schedule), or None if the file/column is missing. Columns are labelled by ABSOLUTE
+    gameweek (build_fixtures --gw N writes 'GW{N} Opponent' first), so callers pass the actual
+    first/second Opponent column — this is the authority the kickoff-order split is checked against."""
     path = os.path.join(config.ROOT, "inputs", "fixtures.csv")
     if not os.path.exists(path):
         return None
@@ -220,7 +221,15 @@ def crosscheck_split(f1, f2):
     """Warn if the kickoff-order F1/F2 split disagrees with inputs/fixtures.csv's current /
     next gameweek pairings — the rare case a postponed fixture scrambles date order and puts
     a wrong-gameweek match in a block the pipeline reads positionally. Advisory only."""
-    for tag, chunk, col in (("F1", f1, "GW1 Opponent"), ("F2", f2, "GW2 Opponent")):
+    # The window's columns are labelled by ABSOLUTE gameweek (build_fixtures --gw N writes
+    # 'GW{N} Opponent' first), so take the first two Opponent columns rather than hardcoding GW1/GW2.
+    fpath = os.path.join(config.ROOT, "inputs", "fixtures.csv")
+    opp_cols = ([c for c in pd.read_csv(fpath, nrows=0).columns if c.endswith("Opponent")]
+                if os.path.exists(fpath) else [])
+    opp_cols += [None, None]
+    for tag, chunk, col in (("F1", f1, opp_cols[0]), ("F2", f2, opp_cols[1])):
+        if col is None:
+            continue
         sched = _scheduled_pairings(col)
         if not sched or not chunk:
             continue
@@ -357,25 +366,33 @@ def collect(fixture_rows, gw_of, delay=3.0):
                 cs_bucket.append({"match_name": match, "date": date, "team_name": mteam,
                                   "clean_sheet_yes": p.get("yes"), "clean_sheet_no": p.get("no")})
 
-        # total goals -> the team-goals shape the pipeline reads (both gameweeks). Betway's
-        # Total Goals is the MATCH total; concede_market() reads the file POSITIONALLY
-        # (cols 4-5 = the 1.5/2+ line, cols 6-7 = the 3.5/4+ line) and keys on the Opponent
-        # column — so emit both perspectives, and keep the 3.5 line in cols 6-7, or the home
-        # side of every fixture gets no concede price and 4+ silently duplicates 2+.
-        tg = defaultdict(dict)
-        for sel, sbv, odds in by_market.get("Total Goals", []):
-            if sbv:
-                tg[sbv][sel.lower()] = odds
-        if tg:
+        # Per-team goal totals -> the team-goals shape the pipeline reads (both gameweeks).
+        # Betway prices each side separately as "<Team> Total (X.5)" (Over/Under). We read those
+        # rather than the whole-match "Total Goals" (which can't distinguish the two sides — it
+        # gave every team the same ~75% concede). The line comes from the market NAME; the line's
+        # sbv and the 'Over '/'Under ' selection names both carry stray spaces, so strip them.
+        # concede_market() reads the file POSITIONALLY (cols 4-5 = the 1.5/2+ line, 6-7 = 3.5/4+)
+        # and keys on the Opponent column, so emit both perspectives with each team's OWN totals.
+        team_tot = defaultdict(dict)
+        for market, mrows in by_market.items():
+            mm = re.match(r"^(.+?) Total \((\d\.5)\)$", market)
+            if not mm:
+                continue
+            tname = names.apply_team_names(pd.Series([mm.group(1).strip()]))[0]
+            for sel, _, odds in mrows:
+                team_tot[(tname, mm.group(2))][sel.strip().lower()] = odds
+        if any(t in (home, away) for t, _ in team_tot):
             tg_bucket = team_goals if gw == "f1" else team_goals_f2
             for a, b in ((home, away), (away, home)):
                 row = {"Match": match, "Date": date, "Team": a, "Opponent": b}
+                # Team_Over/Under for BOTH lines first (concede_market reads cols 4-5 = 1.5,
+                # 6-7 = 3.5 positionally), then the mirrored Opponent_Concedes columns.
                 for want in ("1.5", "3.5"):
-                    o = tg.get(want, {})
+                    o = team_tot.get((a, want), {})
                     row[f"Team_Over_{want}"] = o.get("over")
                     row[f"Team_Under_{want}"] = o.get("under")
                 for want in ("1.5", "3.5"):
-                    o = tg.get(want, {})
+                    o = team_tot.get((a, want), {})
                     row[f"Opponent_Concedes_Over_{want}"] = o.get("over")
                     row[f"Opponent_Concedes_Under_{want}"] = o.get("under")
                 tg_bucket.append(row)
@@ -700,25 +717,57 @@ FILES = {"assist2": "sportsbet_two_assists_odds.csv",
 F2_FILES = {"clean_sheet_f2": "sportsbet_clean_sheet_odds_f2.csv",
             "team_goals_f2": "sportsbet_team_goals_odds_f2.csv"}
 
+# Betway prices whole matches at a time, so a partial scrape must NOT wipe the synthetic rows for
+# the matches it didn't price. Upsert each market: real where Betway prices it, synthetic
+# (build_synthetic_gw) everywhere else — but BETWAY-AUTHORITATIVE PER MATCH. Player-props are kept
+# only for players whose TEAM Betway didn't price at all; once Betway prices a player's team, its
+# listed players are the whole truth for that team and any teammate it omitted goes to NA (Betway
+# didn't rate him a scorer). Team markets upsert directly on their team column (already per-match).
+PLAYER_PROP = {"score1": "match_id", "score2": "match_id", "assist": "match_id",
+               "assist2": "match_id", "yellow": "match_name"}   # market -> match column
+TEAM_KEY = {"clean_sheet": "team_name", "team_goals": "Team", "gk_saves": "Team"}
+
+
+def _player_team_map():
+    """name -> team from the roster snapshot, to resolve which teams Betway priced."""
+    r = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv"))
+    return r.drop_duplicates(subset="name").set_index("name")["team"]
+
+
+def _priced_teams(priced_df, keycol, tmap):
+    """Teams Betway priced = the two MAJORITY teams of each priced match (grouped by the match
+    column), NOT a per-player roster lookup — so a loan player registered to one club but playing
+    for another (Disasi @ Chelsea, on loan at Palace) can't flip his parent club to 'priced'."""
+    if keycol not in priced_df.columns:
+        return set(priced_df["player_name"].map(tmap).dropna())
+    team = priced_df["player_name"].map(tmap)
+    out = set()
+    for _, idx in priced_df.groupby(keycol).groups.items():
+        out.update(team.loc[idx].value_counts().head(2).index)
+    return out
+
 
 def write(frames, dry_run=False):
     print("\nmarkets found and written (everything else keeps its current file):")
+    tmap = _player_team_map() if any(k in PLAYER_PROP for k in frames) else None
     for key, fname in FILES.items():
         path = os.path.join(config.SPORTSBET_DIR, fname)
         if key in frames:
             out = frames[key]
-            # Saves are derived per fixture and only where shots-on-target markets exist,
-            # so a plain write would delete the placeholder rows for every OTHER keeper.
-            # Upsert on team instead: real where we have it, placeholder everywhere else.
-            if key == "gk_saves" and os.path.exists(path):
+            # Keep synthetic rows for matches Betway didn't price; Betway-authoritative per match.
+            if os.path.exists(path):
                 old = pd.read_csv(path)
-                if "Team" in old.columns:
-                    kept = old[~old["Team"].isin(set(out["Team"]))]
+                if key in PLAYER_PROP and "player_name" in old.columns and tmap is not None:
+                    priced_teams = _priced_teams(out, PLAYER_PROP[key], tmap)   # majority teams of priced matches
+                    kept = old[~old["player_name"].map(tmap).isin(priced_teams)]  # unknown team -> kept (safe)
                     out = pd.concat([out, kept], ignore_index=True)
+                elif key in TEAM_KEY and TEAM_KEY[key] in old.columns and TEAM_KEY[key] in out.columns:
+                    kcol = TEAM_KEY[key]
+                    out = pd.concat([out, old[~old[kcol].isin(set(out[kcol]))]], ignore_index=True)
             if not dry_run:
                 out.to_csv(path, index=False)
-            note = (f"  ({len(frames[key])} derived, {len(out) - len(frames[key])} placeholder kept)"
-                    if key == "gk_saves" and len(out) > len(frames[key]) else "")
+            kept_n = len(out) - len(frames[key])
+            note = f"  ({len(frames[key])} priced, {kept_n} synthetic kept)" if kept_n > 0 else ""
             print(f"  WRITE  {fname:<40} {len(out):>5} rows{note}")
         else:
             exists = os.path.exists(path)
@@ -746,6 +795,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--har", help="parse a saved HAR instead of fetching")
     ap.add_argument("--limit", type=int, help="only this many fixtures")
+    ap.add_argument("--skip-fixture", action="append", default=[], metavar="TERM",
+                    help="drop fixtures whose 'Home vs. Away' label contains TERM (case-insensitive) "
+                         "BEFORE the F1/F2 split — use to ignore a stray earlier-gameweek match "
+                         "Betway still lists (repeatable). The kickoff-order split then lands the "
+                         "first 10 remaining on F1 and the next 10 on F2.")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-fill", action="store_true",
                     help="write only what Betway priced; do not derive the gaps")
@@ -776,6 +830,14 @@ if __name__ == "__main__":
 
     fx_all, wdw = fixtures(args.limit)
     print(f"{len(fx_all)} fixtures discovered, {len(wdw)} with 1X2 prices")
+    if args.skip_fixture:
+        terms = [t.lower() for t in args.skip_fixture]
+        dropped = [r[1] for r in fx_all if any(t in r[1].lower() for t in terms)]
+        fx_all = [r for r in fx_all if not any(t in r[1].lower() for t in terms)]
+        for d in dropped:
+            print(f"  --skip-fixture: ignoring '{d}' (kept {len(fx_all)} fixtures for the F1/F2 split)")
+        if not dropped:
+            print(f"  WARNING: --skip-fixture {args.skip_fixture} matched no fixture label")
     gw_of, fx = assign_f1_f2(fx_all)
     crosscheck_split([r for r in fx if gw_of.get(r[1]) == "f1"],
                      [r for r in fx if gw_of.get(r[1]) == "f2"])

@@ -50,6 +50,10 @@ model predicts them: each stat has a **regression baseline** (probability as a f
 win/opponent-win probability, position, venue) and each player has a **factor** = actual F1 odds ÷
 F1 baseline. Future fixture probability = factor × baseline at that fixture's predicted win odds.
 Win odds for F3–F6 are themselves predicted from title/relegation/top-6 odds (Lasso regression).
+**Exception (`config.USE_PROJECTION_MODEL`):** for `clean_sheet`/`concede2`/`saves3` in F3–F8 — and
+the F2 fallback where F2 has no real odds (synthetic seeds F1 only, so F2+ derive off F1) — a trained
+LightGBM model replaces `factor × baseline` (via `fpl_pipeline/projection_serving.py`). See README
+**Forward-projection models**.
 
 ## Scripts → sheets
 
@@ -59,7 +63,7 @@ Win odds for F3–F6 are themselves predicted from title/relegation/top-6 odds (
 | `starting_lineups.py` | fantasyfootballscout.co.uk team news | Starting Lineups **cols A–B only** (+ `starting_lineups/data.csv`) | Start probabilities C–H are manual |
 | `extract_fpl_data.py` | FPL-Core-Insights `players.csv`, `playerstats.csv`, `teams.csv` + `fpl_data/player_name_changes.csv` | FPL Players (name/position/team/cost) | Roster source for Players sheet |
 | `extract_defensive_contributions.py` | FPL-Core-Insights `players.csv`, `playerstats.csv` | Defensive Contribution DEF / MID **cols A–C only** | Cols D–E are formulas; G–H (SD, average) are manual |
-| `optimisation_gameweek.py` | Players, GW Teams | console only | PuLP multi-transfer optimiser (max_transfers, hits, captain) |
+| `optimisation.py` | Players, GW Teams | console only | PuLP multi-transfer optimiser (max_transfers, hits, captain) |
 | `optimisation_full.py` | Players | console only | PuLP full-squad optimiser (wildcard/free-hit style) |
 | `fpl_data/calculate_standard_deviations.py` | FPL-Core-Insights GW folders | console only | Mean/SD of defensive_contribution per 90 → manually typed into DC sheets G/H |
 | `modelling/predict_match_win.py` | **hardcoded data** (paste of Historical Fixture Odds) | console only | Lasso for win% from title/releg/top6 odds; prints the Excel formula pasted into Players (F3–F6 "Win Pred") |
@@ -98,7 +102,7 @@ Win odds for F3–F6 are themselves predicted from title/relegation/top-6 odds (
 | Defensive Contribution DEF / MID | script (A–C) + formulas (D–E) + manual (G–H) | Players AA/AB | active |
 | Coefficients | manual (from modelling scripts) | Players (F2 Score 1+, F3–F6 opponent win pred) | active |
 | Fallback Factors | manual paste-values | Players AC–AI fallbacks | active |
-| GW Teams | manual | `optimisation_gameweek.py` | active (script input) |
+| GW Teams | manual | `optimisation.py` | active (script input) |
 | Historical Fixture Odds | manual + formulas | `modelling/predict_match_win.py` (via paste) | active (offline) |
 | Historical Player Data | manual paste-values | baseline regression fitting (offline) | active (offline) |
 | Historical Expected Points | manual | nothing | tracking only |
@@ -141,7 +145,7 @@ Bonus: `P(bonus) = clamp(−0.021039 + 0.023522·XP_pre, 0, 1)`; `XP = XP_pre + 
 `F1 Pred XP` (col AM) = pure-regression XP sanity check, not used downstream.
 
 ### 6. Optimisation
-PuLP ILP: 15-man squad, ≤3 per club, budget, position quotas; `optimisation_gameweek.py` adds
+PuLP ILP: 15-man squad, ≤3 per club, budget, position quotas; `optimisation.py` adds
 current-squad constraints, transfer count/hits, captaincy; both print rosters to console.
 
 ## Quirks worth preserving/reviewing in the rewrite

@@ -3,7 +3,7 @@
 Phase 1 (default) - gather the week's data, then pause for lineup curation:
     python weekly_update.py
   1. pull the latest FPL data (git)
-  2. scrape Sportsbet odds (skipped with a warning if the API looks geo-blocked - VPN)
+  2. scrape Betway odds (tools/betway.py - plain requests, no VPN needed)
   3. stage the FFS predicted lineups + team news for curation
 
   -> then review inputs/ffs_team_news.md and the printed diff with Claude, update
@@ -12,11 +12,13 @@ Phase 1 (default) - gather the week's data, then pause for lineup curation:
 Phase 2 (--resume) - rebuild everything downstream of the curated lineups:
     python weekly_update.py --resume --gw N
   4. rebuild the F1-F8 fixture window for GW N
-  5. rebuild projections (records GW N archives; guarded against synthetic odds)
-  6. run the transfer optimiser (PuLP venv)
+  5. freeze this week's predicted XIs (FFS + our curation) into the source-history ledger
+  6. rebuild projections (records GW N archives; guarded against synthetic odds)
+  7. run the transfer optimiser (PuLP venv)
+  8. log chip values + forward F1..F8 chip radar, then score LAST week's frozen predictions against the actual XIs
 
 Flags: --gw N (required to archive; omit to rebuild without touching archives),
-       --skip-sportsbet, --force-scrape (ignore the VPN preflight),
+       --skip-odds (skip the Betway scrape; --skip-sportsbet still accepted),
        --force-archive (override the synthetic-odds guard).
 """
 import os
@@ -26,7 +28,6 @@ import sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PY = [sys.executable, "-X", "utf8"]
 VENV_PY = os.path.join(ROOT, "env", "Scripts", "python.exe")
-SPORTSBET_API = "https://www.sportsbet.com.au/apigw/sportsbook-sports"
 
 # Files Excel tends to hold open; a locked one aborts the phase before any half-writes
 LOCK_CHECKS = {
@@ -71,15 +72,6 @@ def check_locks(phase):
         summary_and_exit(1)
 
 
-def sportsbet_reachable():
-    try:
-        import requests
-        status = requests.get(SPORTSBET_API, timeout=8).status_code
-        return status != 403, f"HTTP {status}"
-    except Exception as exc:
-        return False, str(exc)
-
-
 def summary_and_exit(code):
     if results:
         print(f"\n{'=' * 70}\nSUMMARY\n{'=' * 70}")
@@ -94,19 +86,15 @@ def phase1(argv):
     step("Pull FPL data", ["git", "-C", os.path.join(ROOT, "fpl_data", "FPL-Core-Insights"), "pull"],
          fatal=False)
 
-    if "--skip-sportsbet" in argv:
-        report("Sportsbet scrape", True, "skipped (--skip-sportsbet)")
+    if "--skip-odds" in argv or "--skip-sportsbet" in argv:   # --skip-sportsbet kept as an alias
+        report("Betway scrape", True, "skipped")
     else:
-        reachable, detail = sportsbet_reachable()
-        if not reachable and "--force-scrape" not in argv:
-            report("Sportsbet scrape", False,
-                   f"skipped: API preflight failed ({detail}) - VPN on? Rerun or use --force-scrape")
-        else:
-            before = os.path.getmtime(os.path.join(ROOT, "sportsbet", "sportsbet_win_draw_win_odds.csv"))
-            step("Sportsbet scrape", PY + [os.path.join(ROOT, "sportsbet.py")], fatal=False)
-            after = os.path.getmtime(os.path.join(ROOT, "sportsbet", "sportsbet_win_draw_win_odds.csv"))
-            if after == before:
-                report("Sportsbet freshness", False, "odds files were NOT refreshed - check the scrape output")
+        odds_csv = os.path.join(ROOT, "sportsbet", "sportsbet_win_draw_win_odds.csv")
+        before = os.path.getmtime(odds_csv) if os.path.exists(odds_csv) else 0
+        step("Betway scrape", PY + [os.path.join(ROOT, "tools", "betway.py")], fatal=False)
+        after = os.path.getmtime(odds_csv) if os.path.exists(odds_csv) else 0
+        if after == before:
+            report("Betway freshness", False, "odds files were NOT refreshed - check the scrape output")
 
     step("Stage FFS lineups + team news", PY + [os.path.join(ROOT, "starting_lineups.py")], fatal=False)
     step("Injury cross-check vs FPL flags", PY + [os.path.join(ROOT, "tools", "injury_check.py")],
@@ -130,6 +118,14 @@ def phase2(argv):
     else:
         report("Build fixture window", True, "skipped (no --gw; keeping the current F1-F8 window)")
 
+    # Freeze this week's predictions BEFORE the pipeline can move on - FFS staging + our curated XI.
+    # External sources (RotoWire, All About FPL, the deadline sweep) are captured during curation
+    # via tools/source_history.capture(); see inputs/curation_sources.md "Earning trust".
+    if gw:
+        step("Freeze source predictions (FFS + our curation)",
+             PY + [os.path.join(ROOT, "tools", "source_history.py"), "--seed-ffs", "--seed-ours", "--gw", gw],
+             fatal=False)
+
     pipeline = PY + ["-m", "fpl_pipeline.run"]
     if gw:
         pipeline += ["--gw", gw]
@@ -140,8 +136,27 @@ def phase2(argv):
     step("Rebuild projections", pipeline)
 
     optimiser_py = [VENV_PY] if os.path.exists(VENV_PY) else [sys.executable]
-    step("Transfer optimiser", optimiser_py + ["-X", "utf8", os.path.join(ROOT, "optimisation_gameweek.py")],
+    step("Transfer optimiser", optimiser_py + ["-X", "utf8", os.path.join(ROOT, "optimisation.py")],
          fatal=False)
+
+    chip_cmd = optimiser_py + ["-X", "utf8", os.path.join(ROOT, "tools", "chip_history.py"), "--radar"]
+    if gw:
+        chip_cmd += ["--gw", gw]
+    step("Log chip values + forward F1..F8 chip radar (Bench Boost / Triple Captain / Wildcard / Free Hit)",
+         chip_cmd, fatal=False)
+    # This auto-run uses the DEFAULT 1 free transfer and £0 bank - the wildcard/free-hit deltas (and the
+    # radar's Free Hit column) are only right when those match reality. Re-run by hand with your real
+    # numbers to overwrite the row and refresh the radar.
+    report("Chip values - MANUAL RE-RUN REMINDER", True,
+           f"deltas + radar above assume 1 free transfer / £0 bank; if yours differ, re-run: "
+           f"env\\Scripts\\python tools/chip_history.py --gw {gw or 'N'} --free-transfers <FT> --bank <BANK> --radar")
+
+    # Now that GW N is building, GW N-1 has played - score last week's frozen predictions against
+    # the actual XIs. Skips cleanly (fatal=False) if the actuals aren't in the FPL data yet.
+    if gw and int(gw) > 1:
+        step("Score last week's predictions vs actual XIs",
+             PY + [os.path.join(ROOT, "tools", "source_history.py"), "--score", "--gw", str(int(gw) - 1)],
+             fatal=False)
     summary_and_exit(0)
 
 

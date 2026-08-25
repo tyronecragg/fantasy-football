@@ -1,4 +1,4 @@
-"""Backtest the F2-F6 projections against what actually happened to the odds.
+"""Backtest the F2-F8 projections against what actually happened to the odds.
 
 For every pair of archived gameweeks (M, N=M+k), reconstruct the prediction the
 pipeline would have made at GW M for GW N using only week-M information:
@@ -40,7 +40,7 @@ STATS = {
     "concede2": "F1 Concede 2+ Goals",
     "saves3": "F1 3+ Saves",
 }
-MAX_HORIZON = 5
+MAX_HORIZON = 7   # F2..F8 (the optimiser's full 8-fixture horizon)
 
 NUMERIC = ["Gameweek", "Title", "Relegation", "Top 6", "F1 Win", "F1 Opponent Win"] \
     + list(STATS.values())
@@ -78,9 +78,11 @@ def build_pairs(archive, factor_overrides=None):
 def _build_season_pairs(archive, factor_overrides=None):
     gws = sorted(archive["Gameweek"].dropna().unique())
     team_probs = team_probs_by_gw(archive)
+    season = archive["Season"].iloc[0] if "Season" in archive.columns and len(archive) else "unknown"
     out = []
 
-    base_cols = ["Player Name", "Position", "Team", "Title", "Relegation", "Top 6",
+    id_cols = ["player_id"] if "player_id" in archive.columns else []
+    base_cols = id_cols + ["Player Name", "Position", "Team", "Title", "Relegation", "Top 6",
                  "F1 Win", "F1 Opponent Win", "F1 Venue"] + list(STATS.values())
     actual_cols = ["Player Name", "F1 Opponent", "F1 Venue", "F1 Win", "F1 Opponent Win"] \
         + list(STATS.values())
@@ -114,7 +116,7 @@ def _build_season_pairs(archive, factor_overrides=None):
                 pair["Title"], pair["Relegation"],
                 pd.Series(opp_at_m["Title"].values, index=pair.index),
                 pd.Series(opp_at_m["Relegation"].values, index=pair.index), home_n)
-            win_hat, opp_hat = model.scale_win_pair(win_hat.clip(0, 1), opp_hat.clip(0, 1))
+            win_hat, opp_hat = model.reconcile_win_draw(win_hat.clip(0, 1), opp_hat.clip(0, 1))
 
             for stat, col in STATS.items():
                 prob_m = pair[f"{col}_m"]
@@ -140,12 +142,21 @@ def _build_season_pairs(archive, factor_overrides=None):
                 pos_mean = prob_m.groupby(pos.values).transform("mean")
 
                 rows = pd.DataFrame({
-                    "stat": stat, "horizon": k, "gw_from": m, "gw_to": n,
-                    "player": pair["Player Name"], "position": pos.values,
+                    "season": season, "stat": stat, "horizon": k, "gw_from": m, "gw_to": n,
+                    "player_id": pair["player_id"].values if "player_id" in pair else pd.NA,
+                    "player": pair["Player Name"].values, "position": pos.values,
+                    "venue": pair["F1 Venue_n"].values,     # the future fixture's venue (H/A)
                     "predicted": pred, "oracle_odds": oracle, "persistence": prob_m.values,
                     "position_mean": pos_mean.values, "f2_formula": f2_formula,
                     "f2_oracle": f2_oracle, "actual": actual.values,
                     "valid_opp": known_opp.values,
+                    # FEATURES for training a forward-projection model (all known at gameweek M):
+                    "factor": factor.values,                                  # trailing per-player factor
+                    "win_hat": win_hat.values, "opp_hat": opp_hat.values,     # predicted win/opp for the future fixture
+                    "own_title": pair["Title"].values, "own_releg": pair["Relegation"].values,
+                    "own_top6": pair["Top 6"].values,
+                    "opp_title": opp_at_m["Title"].values, "opp_releg": opp_at_m["Relegation"].values,
+                    "opp_top6": opp_at_m["Top 6"].values,
                 })
                 out.append(rows[rows["actual"].notna() & rows["persistence"].notna()])
 

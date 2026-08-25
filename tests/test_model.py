@@ -20,12 +20,25 @@ def test_ladders_match_workbook_steps():
     assert model.ladder_score2(p).isna()[5] and model.ladder_score3(p).isna()[5]
 
 
-def test_scale_win_pair():
-    win, opp = pd.Series([0.8, 0.3]), pd.Series([0.5, 0.4])
-    w, o = model.scale_win_pair(win, opp)
-    assert np.isclose(w[0] + o[0], 1.0)          # over-certain pair scaled to sum 1
-    assert np.isclose(w[0] / o[0], 0.8 / 0.5)    # ratio preserved
-    assert w[1] == 0.3 and o[1] == 0.4           # valid pair untouched
+def test_reconcile_win_draw():
+    from fpl_pipeline import config
+    # [0] over-certain pair (sum 1.3): pulled to the draw floor, ratio preserved (not zero-draw)
+    # [1] valid, in-band pair (draw 0.3 <= even ceiling): left UNCHANGED
+    # [2] ballooned draw (0.14/0.49 -> resid 0.37): clamped down into the band
+    win = pd.Series([0.8, 0.3, 0.14])
+    opp = pd.Series([0.5, 0.4, 0.49])
+    w, o = model.reconcile_win_draw(win, opp)
+    draw = 1.0 - w - o
+    # [0] over-certain -> draw == floor, win/opp ratio preserved
+    assert np.isclose(draw[0], config.DRAW_FLOOR)
+    assert np.isclose(w[0] / o[0], 0.8 / 0.5)
+    # [1] in-band -> untouched
+    assert np.isclose(w[1], 0.3) and np.isclose(o[1], 0.4)
+    # [2] draw clamped below its 0.37 residual, and to the decisiveness-aware ceiling
+    r = 0.14 / (0.14 + 0.49)
+    ceil = config.DRAW_CEIL_EVEN - config.DRAW_CEIL_SLOPE * abs(2 * r - 1)
+    assert draw[2] < 0.37 and np.isclose(draw[2], ceil)
+    assert np.isclose(w[2] / o[2], 0.14 / 0.49)   # relative strength preserved
 
 
 def test_dc_probability_midpoint():

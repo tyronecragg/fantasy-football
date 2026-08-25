@@ -20,8 +20,10 @@ Improved mode (build(..., improved=True); parity mode = improved=False is workbo
    factor x baseline stats can leave [0, 1]). Every modelled probability is clipped to
    [0, 1] before it feeds the score curves and XP scoring. Odds-derived probabilities
    are untouched.
-6. Win-pair scaling: independently predicted win + opponent-win pairs that sum above 1
-   are scaled down proportionally (model.scale_win_pair).
+6. Win/draw reconciliation: win_pred/opp_win_pred run per team-row, so a fixture has two rows
+   with two estimates of each outcome. _unify_match averages them into ONE shared prediction
+   (both rows then agree); model.reconcile_win_draw then clamps the residual draw into a
+   decisiveness-aware band (~27% even, tapering for mismatches) and re-splits by ratio.
 7. Smooth score curves: modelled P(score 2+/3+) come from a Poisson-consistent curve
    on P(score 1+) (model.poisson_score2/3) instead of the workbook's step ladders —
    which include an exact `p == 0.3` float-equality branch. F1 Score 2+ stays pure
@@ -125,6 +127,23 @@ def _dc_table(dc_stats, params_row, improved=True):
     return df
 
 
+def _unify_match(win, opp, team, opponent):
+    """Collapse a fixture's two team-rows into ONE shared prediction (improved mode).
+
+    win_pred/opp_win_pred run per team-row, so a match carries two estimates of each outcome:
+    P(team wins) is this row's win_pred AND the opponent row's opp_win_pred. Averaging the two
+    (a) uses both models' information — measured lower 1X2 error vs market than either row alone —
+    and (b) makes the rows agree: P(team wins) = mean(team.win_pred, opp.opp_win_pred) is symmetric,
+    so after reconcile_win_draw both rows carry an identical win/draw/loss. Win/opp are constant
+    within a team, so a team->value map suffices; falls back to the row's own value if the opponent
+    is absent from the data (e.g. a not-yet-registered side)."""
+    tw = win.groupby(team).first()      # team -> its own win_pred
+    to = opp.groupby(team).first()      # team -> its own opp_win_pred
+    uni_win = ((win + opponent.map(to)) / 2.0).fillna(win)   # + opponent's view of THIS team winning
+    uni_opp = ((opp + opponent.map(tw)) / 2.0).fillna(opp)   # + opponent's own win = this team's opp
+    return uni_win, uni_opp
+
+
 def _season_lookup(master, keys, season):
     return (vlookup(keys, season, "team", "title"),
             vlookup(keys, season, "team", "relegation"),
@@ -150,7 +169,7 @@ def _assist2_ratio(mkts, floor_p1=0.02, min_pairs=20):
 
 
 def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params,
-          improved=True, factor_history=None):
+          improved=True, factor_history=None, gameweek=None):
     if improved:
         lineups = normalize_start_probs(lineups)
     m = pd.DataFrame({
@@ -159,6 +178,11 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         "Team": roster["team"],
         "Cost": roster["cost"],
     })
+    # FPL's per-season player id, for robust WITHIN-season joins/archiving (ids are reassigned each
+    # season, so it is not a cross-season key). Guarded: parity's workbook roster has no id, so the
+    # column is simply absent there and the workbook-exact output is unchanged.
+    if "player_id" in roster.columns:
+        m.insert(0, "player_id", roster["player_id"].values)
     pos = m["Position"]
     name = m["Player Name"]
     team = m["Team"]
@@ -269,10 +293,20 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
 
     def xp_block(prefix, start, stats):
         pre = model.xp_pre(pos, start, stats)
-        bonus = model.bonus_probability(pre)
         m[f"{prefix} XP Pre"] = pre
-        m[f"{prefix} Bonus Probability"] = bonus
-        m[f"{prefix} XP"] = model.xp_with_bonus(pre, bonus)
+        if improved and config.BONUS_ODDS_MODEL:
+            # odds-anchored bonus: team pot from win/draw/loss, split by performance above the
+            # 2-pt appearance floor. Bonus-prob column holds expected-bonus/2 so XP = pre + 2*col.
+            weight = (pre - 2.0 * start.fillna(0.0)).clip(lower=0.0)
+            wc = f"{prefix} Win" if f"{prefix} Win" in m else f"{prefix} Win Pred"          # F1/F2 odds, F3+ predicted
+            oc = f"{prefix} Opponent Win" if f"{prefix} Opponent Win" in m else f"{prefix} Opponent Win Pred"
+            bpts = model.bonus_points_odds(weight, team, m[wc], m[oc])
+            m[f"{prefix} Bonus Probability"] = bpts / 2.0
+            m[f"{prefix} XP"] = pre + bpts
+        else:
+            bonus = model.bonus_probability(pre)
+            m[f"{prefix} Bonus Probability"] = bonus
+            m[f"{prefix} XP"] = model.xp_with_bonus(pre, bonus)
 
     xp_block("F1", m["F1 Start"], {
         "score1": m["F1 Score 1+"], "score2": m["F1 Score 2+"], "score3": m["F1 Score 3+"],
@@ -283,6 +317,18 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         "dc_def": m["F1 Defensive Contribution - DEF"], "dc_mid": m["F1 Defensive Contribution - MID"],
     })
     m["F1 Pred XP"] = model.baseline("pred_xp", m["F1 Win"], m["F1 Opponent Win"], pos, home1)
+
+    # Trained forward-projection models override factor x baseline for the defensive markets in
+    # F3-F8 (the only components that beat the real pipeline value on walk-forward). Needs the
+    # current gameweek + the on-disk archive (trailing form); silently stays off otherwise.
+    server = None
+    if improved and config.USE_PROJECTION_MODEL and gameweek:
+        try:
+            from . import history, projection_serving
+            _archive = pd.read_csv(history.PLAYER_HISTORY_CSV, low_memory=False)
+            server = projection_serving.make_server(m, _archive, config.SEASON, gameweek)
+        except Exception as exc:  # never let serving break the core pipeline
+            warnings.warn(f"projection-model serving disabled: {exc}")
 
     # ---- F2: partial odds, otherwise factor x baseline ----
     m["F2 Start"] = m["_start2"]
@@ -303,7 +349,9 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             pred_opp = model.opp_win_pred(
                 m["Title"], m["Relegation"],
                 m["F2 Opponent Title"], m["F2 Opponent Relegation"], home2)
-            pred_win, pred_opp = model.scale_win_pair(pred_win.clip(0.0, 1.0), pred_opp.clip(0.0, 1.0))
+            pred_win, pred_opp = _unify_match(pred_win.clip(0.0, 1.0), pred_opp.clip(0.0, 1.0),
+                                              m["Team"], m["F2 Opponent"])
+            pred_win, pred_opp = model.reconcile_win_draw(pred_win, pred_opp)
             m["F2 Win"] = m["F2 Win"].where(~no_odds, pred_win)
             m["F2 Opponent Win"] = m["F2 Opponent Win"].where(~no_odds, pred_opp)
             n_pred = int((no_odds & m["F2 Win"].notna()).sum())
@@ -324,6 +372,10 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     m["F2 Yellow Card"] = f2_yellow_odds.where(
         f2_yellow_odds.notna(),
         m["F1 Yellow Card Factor"] * model.baseline("yellow", w2, ow2, pos, home2))
+    # F2 projection model (horizon 1): fills the factor x baseline FALLBACK for the deployed
+    # defensive markets where F2 has no real odds (real Betway odds are always kept). saves3 has no
+    # F2 market at all, so it is model-driven whenever the server is active.
+    preds2 = server.predict_horizon(m, 2) if server is not None else None
     m["F2 Clean Sheet"] = vlookup(team, mkts["f2_clean_sheet"], "team", "prob")
     m["F2 Concede 2+ Goals"] = vlookup(team, mkts["f2_concede"], "team", "prob2")
     m["F2 Concede 4+ Goals"] = vlookup(team, mkts["f2_concede"], "team", "prob4")
@@ -333,9 +385,13 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             ("F2 Concede 2+ Goals", "F1 Concede 2+ Goals Factor", "concede2"),
             ("F2 Concede 4+ Goals", "F1 Concede 4+ Goals Factor", "concede4"),
         ]:
-            modelled = m[factor_col] * model.baseline(stat, w2, ow2, pos, home2)
-            m[col] = m[col].where(m[col].notna(), modelled)
-    m["F2 3+ Saves"] = m["F1 3+ Saves Factor"] * model.baseline("saves3", w2, ow2, pos, home2)
+            fb = (preds2[stat] if (preds2 is not None and stat in preds2)
+                  else m[factor_col] * model.baseline(stat, w2, ow2, pos, home2))
+            m[col] = m[col].where(m[col].notna(), fb)
+    if preds2 is not None:
+        m["F2 3+ Saves"] = preds2["saves3"]                     # no real F2 saves market
+    else:
+        m["F2 3+ Saves"] = m["F1 3+ Saves Factor"] * model.baseline("saves3", w2, ow2, pos, home2)
     m["F2 6+ Saves"] = m["F1 6+ Saves Factor"] * model.baseline("saves6", w2, ow2, pos, home2)
     m["F2 Defensive Contribution - DEF"] = m["F1 Defensive Contribution - DEF"]
     m["F2 Defensive Contribution - MID"] = m["F1 Defensive Contribution - MID"]
@@ -344,7 +400,8 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     blend_with_f1("F2 Assist", "F1 Assist", "assist")
     if improved:
         m["F2 Assist 2+"] = assist2_ratio * m["F2 Assist"]
-    blend_with_f1("F2 3+ Saves", "F1 3+ Saves", "saves3")
+    if server is None:                                 # model-driven F2 saves3 is used PURE (no blend)
+        blend_with_f1("F2 3+ Saves", "F1 3+ Saves", "saves3")
 
     xp_block("F2", m["F2 Start"], {
         "score1": m["F2 Score 1+"], "score2": m["F2 Score 2+"], "score3": m["F2 Score 3+"],
@@ -376,8 +433,9 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             m[f"{p} Opponent Title"], m[f"{p} Opponent Relegation"], home)
         clip01([f"{p} Win Pred", f"{p} Opponent Win Pred"])
         if improved:
-            m[f"{p} Win Pred"], m[f"{p} Opponent Win Pred"] = model.scale_win_pair(
-                m[f"{p} Win Pred"], m[f"{p} Opponent Win Pred"])
+            uw, uo = _unify_match(m[f"{p} Win Pred"], m[f"{p} Opponent Win Pred"],
+                                  m["Team"], m[f"{p} Opponent"])
+            m[f"{p} Win Pred"], m[f"{p} Opponent Win Pred"] = model.reconcile_win_draw(uw, uo)
         m[f"{p} Diff"] = m[f"{p} Win Pred"] - m[f"{p} Opponent Win Pred"]
 
         w, ow = m[f"{p} Win Pred"], m[f"{p} Opponent Win Pred"]
@@ -392,6 +450,10 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         m[f"{p} Concede 4+ Goals"] = m["F1 Concede 4+ Goals Factor"] * model.baseline("concede4", w, ow, pos, home)
         m[f"{p} 3+ Saves"] = m["F1 3+ Saves Factor"] * model.baseline("saves3", w, ow, pos, home)
         m[f"{p} 6+ Saves"] = m["F1 6+ Saves Factor"] * model.baseline("saves6", w, ow, pos, home)
+        if server is not None:                         # model overrides factor x baseline (F3-F8)
+            preds = server.predict_horizon(m, k)       # clean_sheet/concede2 pure; saves3 blended below
+            for _stat, _label in config.PROJECTION_MODEL_STATS.items():
+                m[f"{p} {_label}"] = preds[_stat].values
         m[f"{p} Defensive Contribution - DEF"] = m["F1 Defensive Contribution - DEF"]
         m[f"{p} Defensive Contribution - MID"] = m["F1 Defensive Contribution - MID"]
         clip01([f"{p} Assist", f"{p} Yellow Card", f"{p} Clean Sheet", f"{p} Concede 2+ Goals",
@@ -399,7 +461,8 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         blend_with_f1(f"{p} Assist", "F1 Assist", "assist")
         if improved:
             m[f"{p} Assist 2+"] = assist2_ratio * m[f"{p} Assist"]
-        blend_with_f1(f"{p} 3+ Saves", "F1 3+ Saves", "saves3")
+        if server is None:                             # model-driven saves3 is used PURE (no blend)
+            blend_with_f1(f"{p} 3+ Saves", "F1 3+ Saves", "saves3")
 
         xp_block(p, m[f"{p} Start"], {
             "score1": m[f"{p} Score 1+"], "score2": m[f"{p} Score 2+"], "score3": m[f"{p} Score 3+"],

@@ -24,7 +24,8 @@ def guard_synthetic_archive(gameweek, force=False):
     """Decide what may be archived while the player odds are pre-season placeholders.
 
     tools/build_preseason_data.py drops sportsbet/SYNTHETIC_NOTE.txt when it writes
-    synthetic odds; sportsbet.py removes it after a real player-market scrape.
+    synthetic odds; delete it by hand once real Betway odds AND Ladbrokes cards have
+    landed (tools/betway.py never auto-removes it).
 
     Returns "all" | "fixtures_only" | "none". The two archives carry different risk:
     synthetic PLAYER odds would poison the trailing-median factors, so player history is
@@ -111,7 +112,7 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
     master = snapshot(
         players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
                       inputs["fallback_factors"], dc_stats, inputs["dc_params"],
-                      improved=improved, factor_history=factor_history),
+                      improved=improved, factor_history=factor_history, gameweek=gameweek),
         "players_master")
 
     if improved:

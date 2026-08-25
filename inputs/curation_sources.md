@@ -227,11 +227,35 @@ are still collected — but **only** as the **ground truth for post-hoc source-a
 
 ---
 
-## Earning trust (to-do — needs a few gameweeks of data)
+## Earning trust — the source-history ledger (`tools/source_history.py`)
 
-Do not *assign* trust to a source — **measure** it. We already store the actual lineups for
-every match (`By Gameweek/GW*/lineups.csv`, `is_starting`). So each source's predicted XI can
-be scored against who actually started, giving a hit rate per source — and per club-type, so
-we can see who is best on established teams versus promoted ones. The reliable sources earn
-their Tier-1 place with a number; authoritative-looking-but-inaccurate ones get demoted. Same
-principle as the longshot calibration: outcomes decide.
+Do not *assign* trust to a source — **measure** it. We store the actual lineups for every match
+(`By Gameweek/GW*/lineups.csv`, `is_starting`), so each source's predicted XI can be scored
+against who actually started, giving a hit rate per source. The reliable sources earn their
+Tier-1 place with a number; authoritative-looking-but-inaccurate ones get demoted. Same principle
+as the longshot calibration: outcomes decide.
+
+**How it works.** Each source's predicted XI is *frozen* per gameweek in
+`inputs/source_history/predicted_xis.csv` (`Season, Gameweek, Source, Team, Player`), then scored
+once the gameweek plays. Names are resolved to the FPL roster by a **team-scoped resolver**
+(`source_history.Resolver`) that handles full names (FFS) *and* surnames/nicknames (AAF, RotoWire) —
+"Palmer" → Cole Palmer, "DCL" → Calvert-Lewin — flagging anything ambiguous rather than guessing.
+
+- **Frozen automatically every week** by phase 2 of `weekly_update.py`:
+  - **`FFS`** — the staged `ffs_predicted_lineups.csv` (`--seed-ffs`).
+  - **`Curated`** — our own call, the 11 highest-F1 players per team from `starting_lineups.csv`
+    (`--seed-ours`). This is the one that actually matters: it validates *our* curation, not just a feed.
+- **Frozen during the deadline sweep** (external cross-checks): write a `Source,Team,Player` CSV
+  (one row per predicted starter) for **RotoWire**, **All About FPL** and the sweep consensus, then
+  `python tools/source_history.py --capture-csv FILE.csv --gw N`. Surnames/nicknames resolve
+  automatically; **check the printed UNMATCHED lines** and add an `ALIASES` entry or a
+  `name_mappings.csv` row before trusting the row. GW1's back-fill (pre-CLI) is
+  `tools/seed_gw1_sources.py`, kept as a worked example.
+- **Scored** by `weekly_update.py` (or `python tools/source_history.py --score --gw N`): once GW N-1
+  has played, it prints a hit-rate table per source. Fails cleanly if the actuals aren't in yet.
+
+GW1 2026-27 seeded with **Curated + FFS + AllAboutFPL** (20 XIs each; cross-source agreement ~9.9/11,
+so the fringe calls are what get graded). RotoWire's live page had already flipped to confirmed XIs
+by the time the ledger was built, so its GW1 pre-deadline prediction wasn't back-filled — it joins
+from GW2 via the sweep. **Next step:** add per-club-type splits (settled vs promoted) once a few
+gameweeks of scored data accrue.

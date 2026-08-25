@@ -1,8 +1,16 @@
 """Historical archives: automatic upserts that replace the old manual paste-values ritual.
 
-- Player history (inputs/historical_player_data.csv): one F1-block snapshot per player
+- Player history (inputs/historical_player_data.csv): one full F1-F8 snapshot per player
   per gameweek, keyed by the Gameweek column — re-running the same gameweek replaces its
   rows instead of appending duplicates.
+  NOTE: the F2-F8 columns (Win Pred/Score/Assist/Opponent/Venue/...) are the PREDICTIONS we
+  made that week for future fixtures — keep them. They are the record used to BACK-TEST the
+  forward projections: score a gameweek-M F{k} prediction against the real odds-derived F1
+  value archived when that fixture became current (gameweek M+k-1), the F{k} Opponent/Venue
+  identifying it as the same fixture. The rate/factor code only reads the F1 block, but the
+  F2-F8 columns are the substrate for evaluating and improving the projection models, so a
+  cleanup pass must NOT drop them as "unused" (see tools/backtest_projections.py). The values
+  are snapshotted from the master, so anything the master carries populates automatically.
 - Fixture history (inputs/historical_fixture_odds.csv): one row per fixture with match
   and season odds, keyed by the (home_team, away_team) pair.
 - Fallback factors (inputs/fallback_factors.csv): per-player factors refreshed from the

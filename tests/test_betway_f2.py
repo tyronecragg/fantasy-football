@@ -17,18 +17,23 @@ spec.loader.exec_module(betway)
 
 from fpl_pipeline import markets  # noqa: E402
 
-# Betway's Total Goals is the MATCH total; sbv carries the line, selection is Over/Under.
+# Betway prices each side's goal total separately as "<Team> Total (X.5)"; the line is in the
+# market NAME, the selection is 'Over '/'Under ' (Betway sends stray spaces the parser strips).
 _CANNED = {
-    "e1": [("Total Goals", "Over", "1.5", 1.30), ("Total Goals", "Under", "1.5", 3.50),
-           ("Total Goals", "Over", "3.5", 3.00), ("Total Goals", "Under", "3.5", 1.36),
+    "e1": [("Arsenal Total (1.5)", "Over ", "", 1.90), ("Arsenal Total (1.5)", "Under ", "", 1.90),
+           ("Arsenal Total (3.5)", "Over ", "", 6.00), ("Arsenal Total (3.5)", "Under ", "", 1.12),
+           ("Aston Villa Total (1.5)", "Over ", "", 3.00), ("Aston Villa Total (1.5)", "Under ", "", 1.35),
+           ("Aston Villa Total (3.5)", "Over ", "", 9.00), ("Aston Villa Total (3.5)", "Under ", "", 1.05),
            ("Arsenal To Keep A Clean Sheet", "Yes", "", 1.90),
            ("Arsenal To Keep A Clean Sheet", "No", "", 1.80),
            ("Aston Villa To Keep A Clean Sheet", "Yes", "", 3.20),
            ("Aston Villa To Keep A Clean Sheet", "No", "", 1.30),
            ("Anytime Goalscorer", "Saka, Bukayo", "", 2.50),
            ("Player 1+ Assists", "Saka, Bukayo", "", 3.50)],
-    "e2": [("Total Goals", "Over", "1.5", 1.28), ("Total Goals", "Under", "1.5", 3.60),
-           ("Total Goals", "Over", "3.5", 2.90), ("Total Goals", "Under", "3.5", 1.40),
+    "e2": [("Chelsea Total (1.5)", "Over ", "", 1.80), ("Chelsea Total (1.5)", "Under ", "", 1.95),
+           ("Chelsea Total (3.5)", "Over ", "", 5.00), ("Chelsea Total (3.5)", "Under ", "", 1.15),
+           ("Everton Total (1.5)", "Over ", "", 3.30), ("Everton Total (1.5)", "Under ", "", 1.30),
+           ("Everton Total (3.5)", "Over ", "", 9.50), ("Everton Total (3.5)", "Under ", "", 1.04),
            ("Chelsea To Keep A Clean Sheet", "Yes", "", 1.95),
            ("Chelsea To Keep A Clean Sheet", "No", "", 1.75),
            ("Everton To Keep A Clean Sheet", "Yes", "", 3.40),
@@ -106,9 +111,21 @@ def test_ladder_rescale_is_pooled_across_fixtures(monkeypatch):
     assert abs(y["odds_decimal"].iloc[0] - round(8.0 / pooled, 2)) < 0.02    # NOT 8.00 (un-rescaled)
 
 
+def _f1_opponent_col():
+    """The first 'GW* Opponent' column in the live fixtures.csv — gameweek-agnostic, so these
+    tests pass whatever gameweek the window is currently rolled to."""
+    import os
+
+    import pandas as pd
+
+    from fpl_pipeline import config
+    cols = pd.read_csv(os.path.join(config.INPUTS_DIR, "fixtures.csv"), nrows=0).columns
+    return next(c for c in cols if c.endswith("Opponent"))
+
+
 def test_crosscheck_silent_when_split_matches_schedule(capsys):
-    sched = betway._scheduled_pairings("GW1 Opponent")
-    assert sched, "inputs/fixtures.csv should carry a GW1 Opponent column"
+    sched = betway._scheduled_pairings(_f1_opponent_col())
+    assert sched, "inputs/fixtures.csv should carry a first-gameweek Opponent column"
     rows = [(f"e{i}", f"{sorted(p)[0]} vs. {sorted(p)[1]}", "2026-08-21T19:00:00")
             for i, p in enumerate(sched)]
     betway.crosscheck_split(rows, [])
@@ -116,11 +133,14 @@ def test_crosscheck_silent_when_split_matches_schedule(capsys):
 
 
 def test_crosscheck_warns_on_wrong_gameweek_fixture(capsys):
-    sched = betway._scheduled_pairings("GW1 Opponent")
-    assert frozenset(("Arsenal", "Liverpool")) not in sched   # not a GW1 pairing
-    betway.crosscheck_split([("e0", "Arsenal vs. Liverpool", "2026-08-21T19:00:00")], [])
+    sched = betway._scheduled_pairings(_f1_opponent_col())
+    # Two teams from DIFFERENT F1 matches are never a real pairing this gameweek.
+    pairs = [sorted(p) for p in sched]
+    wrong = (pairs[0][0], pairs[1][0])
+    assert frozenset(wrong) not in sched
+    betway.crosscheck_split([("e0", f"{wrong[0]} vs. {wrong[1]}", "2026-08-21T19:00:00")], [])
     out = capsys.readouterr().out
-    assert "WARNING" in out and "Arsenal" in out
+    assert "WARNING" in out and wrong[0] in out
 
 
 def test_team_goals_column_order_matches_concede_market(monkeypatch):

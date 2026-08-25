@@ -122,7 +122,7 @@ def f2_yellow_market(df):
 
 
 def _without_f1_duplicate(f1_raw, f2_raw, label):
-    """A single-gameweek scrape used to make sportsbet.py write the F1 odds into the F2
+    """A single-gameweek scrape used to make the old Sportsbet scraper write the F1 odds into the F2
     files verbatim (tail(20) of a 20-row frame). Wrong-fixture odds are worse than no
     odds, so an F2 file identical to its F1 file is treated as absent."""
     if len(f2_raw) and f2_raw.equals(f1_raw):

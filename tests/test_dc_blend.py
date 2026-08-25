@@ -31,8 +31,11 @@ def seasons(tmp_path, monkeypatch):
 def test_minutes_weighted_blend(seasons):
     dc = ingest.load_defensive_contributions()["DEF"].set_index("name")
 
-    # A: current 900min@6 + prior 1800min@10 capped at 1710 -> (900*6 + 1710*10)/2610 = 8.6207
-    assert abs(dc.loc["A X", "dc90"] - (900 * 6 + 1710 * 10) / (900 + 1710)) < 1e-9
+    # A: current 900min@6 weighted W x + prior 1800min@10 capped at 1710. The RATE tilts to the
+    # recent (lower) form via W; the EVIDENCE count (nineties) stays TRUE minutes (900+1710)/90=29,
+    # undoubled — proving the two denominators are kept separate.
+    W = config.DC_CURRENT_SEASON_WEIGHT
+    assert abs(dc.loc["A X", "dc90"] - (W * 900 * 6 + 1710 * 10) / (W * 900 + 1710)) < 1e-9
     assert abs(dc.loc["A X", "nineties"] - 29.0) < 0.01
 
     # B: no current data -> pure prior (capped weight), dc90 unchanged

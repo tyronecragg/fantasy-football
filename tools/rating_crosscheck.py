@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
     try:
         sys.path.insert(0, config.ROOT)
-        from optimisation_gameweek import combine_fixture_weights
+        from optimisation import combine_fixture_weights
         w = combine_fixture_weights(num_fixtures=args.fixtures) if args.fixtures <= 8 else \
             combine_fixture_weights(num_fixtures=8) + [0.24, 0.22]
     except Exception:

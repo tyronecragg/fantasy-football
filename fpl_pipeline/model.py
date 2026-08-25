@@ -141,18 +141,40 @@ def poisson_score3(p1):
     return (1.0 - np.exp(-lam) * (1.0 + lam + lam ** 2 / 2.0)).where(p1.notna())
 
 
-def scale_win_pair(win, opp):
-    """Force predicted win + opponent-win <= 1 (they are fitted independently and can
-    jointly exceed certainty). Pairs summing above 1 are scaled down proportionally,
-    which implies a zero draw share for them — the least-intervention correction.
-    Inputs are assumed already clipped to [0, 1]."""
-    total = win + opp
-    factor = np.where(total > 1.0, 1.0 / total, 1.0)
-    return win * factor, opp * factor
+def reconcile_win_draw(win, opp):
+    """Reconcile two independently-fitted win probabilities into a coherent win/draw/loss.
+
+    win_pred and opp_win_pred are fitted SEPARATELY, so the implied draw (1 - win - opp) is an
+    unconstrained residual: when both fits jointly undershoot it balloons, and a fairly one-sided
+    match can show a ~37% draw. This clamps the draw into a decisiveness-aware band and returns
+    win/opp filling the rest in their existing ratio (relative strength preserved):
+
+        draw in [config.DRAW_FLOOR, config.DRAW_CEIL_EVEN - config.DRAW_CEIL_SLOPE * decisiveness]
+        decisiveness = |2r - 1|,  r = win / (win + opp)   (scale-free: 0 even, 1 total mismatch)
+
+    So even matches keep a high draw ceiling (~the 2025-26 league average, 27%) and mismatches a
+    lower one. A match whose draw already sits inside the band is returned UNCHANGED (minimum
+    intervention). This also subsumes the old sum-to-1 guard: an over-certain pair (draw below the
+    floor, sum > 1 included) is pulled to the floor, not to a zero draw. Returns (win, opp); the
+    draw stays implicit as 1 - win - opp. Inputs assumed already clipped to [0, 1]."""
+    s = win + opp
+    r = (win / s.where(s > 0)).fillna(0.5)                 # home's share of the win probability
+    dec = (2.0 * r - 1.0).abs()                            # decisiveness, scale-free
+    ceil = (config.DRAW_CEIL_EVEN - config.DRAW_CEIL_SLOPE * dec).clip(lower=config.DRAW_FLOOR)
+    draw = (1.0 - s).clip(lower=config.DRAW_FLOOR, upper=ceil)
+    live = 1.0 - draw
+    return live * r, live * (1.0 - r)
 
 
 def dc_probability(dc90, sd, threshold):
-    """P(defensive contribution >= threshold) = 1 - NormCDF(threshold; dc90, sd)."""
+    """P(defensive contribution >= threshold) = 1 - NormCDF(threshold; dc90, sd).
+
+    `sd` is the WITHIN-player match-to-match spread (dc_params.csv: DEF 3.86, MID 3.49), measured
+    from 90-min games last season - NOT the pooled cross-player SD, which is too wide (it double-
+    counts how much players differ from each other) and inflated low-DC hit rates ~2x.
+    TODO (#2, mean-dependent SD): within-player spread grows with the mean (corr ~0.46), so a single
+    fixed sd still slightly overstates the lowest-DC band. Fit sd(mu) or move to a count model
+    (Poisson/NB), or replace the whole curve with the measured empirical hit-rate-by-dc90 (#3)."""
     def cdf(x, mu):
         if pd.isna(mu):
             return np.nan
@@ -219,3 +241,27 @@ def bonus_probability(xp):
 
 def xp_with_bonus(xp, bonus):
     return xp + 2.0 * bonus
+
+
+# Measured per-team bonus by match result, 2025-26 (player_gameweek_stats.csv, 60+ min starters):
+# winner 5.62, draw ~3.24, loser 0.78; match mean 6.41, winner's share ~88%. Anchors the odds model.
+BONUS_BY_RESULT = {"win": 5.62, "draw": 3.24, "lose": 0.78}
+
+
+def bonus_points_odds(weight, team, pwin, ploss):
+    """Expected bonus POINTS per player, anchored to bookmaker win/draw/loss odds.
+
+    Each team's bonus pot = P(win)*5.62 + P(draw)*3.24 + P(lose)*0.78, distributed within the team
+    in proportion to `weight` (a bonus-worthiness score — pass XP above the appearance floor, so a
+    goalscorer or clean-sheet keeper takes most and a player who merely appears ~0). Replaces the
+    flat linear P(bonus) uplift, which under-allocated total bonus ~2.2x and, being a straight line,
+    handed fodder bonus while starving the elite. All args are aligned Series over every player.
+    """
+    pwin = pwin.fillna(0.0).clip(0.0, 1.0)
+    ploss = ploss.fillna(0.0).clip(0.0, 1.0)
+    pdraw = (1.0 - pwin - ploss).clip(0.0, 1.0)
+    pot = pwin * BONUS_BY_RESULT["win"] + pdraw * BONUS_BY_RESULT["draw"] + ploss * BONUS_BY_RESULT["lose"]
+    w = weight.clip(lower=0.0)
+    denom = w.groupby(team).transform("sum")
+    share = (w / denom).where(denom > 0, 0.0)
+    return pot * share

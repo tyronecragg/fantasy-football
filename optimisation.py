@@ -378,6 +378,127 @@ def combine_fixture_weights(ownership=None, reliability=None, num_fixtures=8):
     return [w / combined[0] for w in combined]
 
 
+_TC_XI_MIN = {"GK": 1, "DEF": 3, "MID": 2, "FWD": 1}
+_TC_XI_MAX = {"GK": 1, "DEF": 5, "MID": 5, "FWD": 3}
+_TC_SQUAD = {"GK": 2, "DEF": 5, "MID": 5, "FWD": 3}
+
+
+def _tc_best_squad(d, budget, obj, current_idx, max_transfers):
+    """Best 15-squad maximising `obj` over its 11-man XI, within budget & <=3/club, changing at most
+    `max_transfers` players from current_idx. Returns (xi_set, squad15_set) or (None, None). XI-only
+    objective (bench weight 0) — a chip/timing lens, matching tools/chip_history."""
+    idx = list(d.index)
+    prob = pulp.LpProblem("tc", pulp.LpMaximize)
+    sq = {i: pulp.LpVariable(f"tq{i}", cat="Binary") for i in idx}
+    st = {i: pulp.LpVariable(f"ts{i}", cat="Binary") for i in idx}
+    prob += pulp.lpSum(d.loc[i, obj] * st[i] for i in idx)
+    prob += pulp.lpSum(sq.values()) == 15
+    prob += pulp.lpSum(st.values()) == 11
+    prob += pulp.lpSum(d.loc[i, "Cost"] * sq[i] for i in idx) <= budget
+    for i in idx:
+        prob += st[i] <= sq[i]
+    for pos, n in _TC_SQUAD.items():
+        p = d.index[d["Position"] == pos]
+        prob += pulp.lpSum(sq[i] for i in p) == n
+    for pos in _TC_XI_MIN:
+        p = d.index[d["Position"] == pos]
+        prob += pulp.lpSum(st[i] for i in p) >= _TC_XI_MIN[pos]
+        prob += pulp.lpSum(st[i] for i in p) <= _TC_XI_MAX[pos]
+    for team in d["Team"].dropna().unique():
+        t = d.index[d["Team"] == team]
+        prob += pulp.lpSum(sq[i] for i in t) <= 3
+    if current_idx is not None and max_transfers < 15:
+        prob += pulp.lpSum(sq[i] for i in current_idx) >= max(0, 15 - max_transfers)
+    prob.solve(pulp.PULP_CBC_CMD(msg=0))
+    if pulp.LpStatus[prob.status] != "Optimal":
+        return None, None
+    return ({i for i in idx if st[i].value() == 1}, {i for i in idx if sq[i].value() == 1})
+
+
+def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additional_budget=0.0,
+                          free_transfers=1, max_per_gw=2, max_ft=5):
+    """Transfer PLAN valued over the FULL 8-fixture horizon, where `lookahead_gws` only bounds WHEN
+    transfers may be made (the timing window), NOT the evaluation window. It decides how many transfers
+    to make each GW in F1..F{lookahead_gws} (0..max_per_gw, free-transfer accrual +1/GW capped at
+    max_ft); the squad then evolves and is scored across ALL of F1..F8 (ownership x reliability weights).
+
+    This is the key point: a myopic swap (sell a premium to dodge one bad fixture) LOSES that player's
+    value across the rest of the horizon, so the full-horizon value rejects it — it only reorders WHEN
+    you transfer, not who you'd never sell. Answers "use my free transfer now or bank it?" by searching
+    every feasible plan and reporting THIS GW's optimal move count. lookahead_gws < 2 is a NO-OP (off).
+    XI-only value (bench weight 0). Rolling — re-run each week, robust to forced (injury) transfers."""
+    from tools.chip_history import best_xi
+    K = int(lookahead_gws)
+    if K < 2:
+        return                                                          # =1 (or less) -> off
+    N = len(OWNERSHIP_WEIGHTS)                                           # FULL horizon (8 fixtures)
+    K = min(K, N)                                                        # transfers allowed only in GWs 0..K-1
+    w = combine_fixture_weights(num_fixtures=N)
+    fcols = [f"F{f} XP" for f in range(1, N + 1)]
+    df = pd.read_csv(excel_file)
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
+    d = df[["Player Name", "Position", "Team", "Cost"] + fcols].copy()
+    for c in fcols:
+        d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0.0)
+    for g in range(K):                                                  # a GW-g move is kept for F{g+1}..F8
+        d[f"_obj{g}"] = sum(w[i] * d[fcols[i]] for i in range(g, N))
+    owned = {n.strip() for n in current_team_names}
+    cur = frozenset(d.index[d["Player Name"].isin(owned)].tolist())
+    budget = float(d.loc[list(cur), "Cost"].sum()) + additional_budget
+
+    def gw_xp(squad, f):                          # raw predicted XP at fixture index f: best XI + captain
+        _, xi = best_xi(d.loc[list(squad)], fcols[f])
+        x = d.loc[list(xi)]
+        return float(x[fcols[f]].sum()) + float(x[fcols[f]].max())
+
+    def moves(squad, base):
+        return ([d.loc[i, "Player Name"] for i in base if i not in squad],
+                [d.loc[i, "Player Name"] for i in squad if i not in base])
+
+    best_by_t0 = {}                               # this-GW transfer count -> best plan starting with it
+
+    def search(squad, g, ft, wacc, plan, raw):
+        if g == K:                                                      # no more transfers; squad is final
+            wtotal = wacc + sum(w[f] * gw_xp(squad, f) for f in range(K, N))   # tail fixtures F{K+1}..F8
+            t0 = plan[0][0]
+            if t0 not in best_by_t0 or wtotal > best_by_t0[t0]["wtotal"]:
+                best_by_t0[t0] = {"wtotal": wtotal, "plan": list(plan), "raw": list(raw)}
+            return
+        for t in range(0, min(ft, max_per_gw) + 1):                    # transfers this GW
+            if t == 0:
+                sq_t, mv = squad, ([], [])
+            else:
+                _, sq = _tc_best_squad(d, budget, f"_obj{g}", list(squad), t)   # optimise the FULL remaining horizon
+                if sq is None:
+                    continue
+                sq_t, mv = frozenset(sq), moves(frozenset(sq), squad)
+            r = gw_xp(sq_t, g)                                          # fixture index g, post-transfer squad
+            search(sq_t, g + 1, min(ft - t + 1, max_ft), wacc + w[g] * r, plan + [(t, mv)], raw + [r])
+
+    search(cur, 0, free_transfers, 0.0, [], [])
+    if not best_by_t0:
+        print("\nTransfer-timing check: infeasible (skipped).")
+        return
+
+    best_t0 = max(best_by_t0, key=lambda k: best_by_t0[k]["wtotal"])
+    print(f"\n{'=' * 66}\nTransfer-timing plan — value over FULL F1..F{N}, transfers within F1..F{K} "
+          f"(start {free_transfers} FT, <= {max_per_gw}/GW, cap {max_ft}):")
+    for t0 in sorted(best_by_t0):
+        rec = best_by_t0[t0]
+        raw = rec["raw"]
+        label = "BANK (hold now)" if t0 == 0 else f"MOVE ({t0} now)"
+        star = "  <-- best" if t0 == best_t0 else ""
+        print(f"  {label:<16} F1 XP {raw[0]:6.2f}   F2 XP {raw[1]:6.2f}   "
+              f"8-fixture value {rec['wtotal']:7.2f}{star}")
+        for g, (t, (out, inn)) in enumerate(rec["plan"]):
+            if t:
+                tag = "now" if g == 0 else f"GW+{g}"
+                print(f"       {tag:<6} {', '.join(out)} -> {', '.join(inn)}")
+    verdict = ("BANK your free transfer this GW" if best_t0 == 0
+               else f"MAKE {best_t0} transfer{'s' if best_t0 > 1 else ''} this GW")
+    print(f"  -> {verdict}\n{'=' * 66}")
+
+
 def _normalise_slot_weights(spec, num_fixtures):
     """Accept one (s1, s2, s3) triple applied to every fixture, or a per-fixture list
     of triples (e.g. [(1, 1, 1)] + [(0.3, 0.1, 0.05)] * 7 for a GW1 Bench Boost).
@@ -1826,7 +1947,8 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   show_all_details=False, show_detailed_f1=False,
                                   compute_solutions=20, show_frequency_analysis=True,
                                   min_frequency=2, max_defensive_players_per_team=3,
-                                  ownership_weights=None, reliability_weights=None):
+                                  ownership_weights=None, reliability_weights=None,
+                                  bank_lookahead_gws=None):
     # Fixture weights come from the two components unless one is passed explicitly
     # (an explicit fixture_weights still wins, so old call sites keep working).
     derived = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures)
@@ -1929,6 +2051,12 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                 f"Showing detailed view for OPTION 1 only. Set show_all_details=True to see all {num_solutions_display} options.")
             display_solution_detail(solutions_to_display[0], excel_file, current_team_names)
 
+        # Transfer-timing plan (bank now vs move now) — printed LAST so it's the final takeaway.
+        # Starting free transfers = max_transfers (your GW1 FTs); the plan accrues +1 each GW after.
+        if bank_lookahead_gws:
+            transfer_timing_check(excel_file, current_team_names, bank_lookahead_gws,
+                                  additional_budget, max_transfers)
+
         return all_solutions
 
     except FileNotFoundError:
@@ -1944,20 +2072,21 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 result = main_multi_transfer_optimiser(
     excel_file="outputs/13_players_master.csv",
     max_transfers=1,
+    additional_budget=0.0,
     num_fixtures=8,
+    compute_solutions=1,
+    num_solutions_display=1,
+    bank_lookahead_gws=2,
     # How fast the squad churns / how fixable a bad far fixture is - independent of forecast quality
     ownership_weights=[1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558],
     # How much the projection is trusted - re-measure from the backtest as the archive grows
     reliability_weights=[1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472],
     show_current_analysis=False,
-    additional_budget=0.0,
     bench_slot_weights=(0.25, 0.05, 0.01),   # sub order 1/2/3, applied every fixture
     # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*7,
     gk_bench_weights=[0.01]*8,
     # gk_bench_weights=[1.0] + [0.05]*7,
     max_defensive_players_per_team=2,
-    compute_solutions=1,
-    num_solutions_display=1,
     show_all_details=False,
     show_detailed_f1=False,
     # force_transfer_out=["Rodrigo Muniz"],

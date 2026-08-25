@@ -1,0 +1,661 @@
+Season,Gameweek,Source,Team,Player
+2026-2027,1,AllAboutFPL,Arsenal,David Raya
+2026-2027,1,AllAboutFPL,Arsenal,Ben White
+2026-2027,1,AllAboutFPL,Arsenal,Cristhian Mosquera
+2026-2027,1,AllAboutFPL,Arsenal,Gabriel Magalhaes
+2026-2027,1,AllAboutFPL,Arsenal,Riccardo Calafiori
+2026-2027,1,AllAboutFPL,Arsenal,Declan Rice
+2026-2027,1,AllAboutFPL,Arsenal,Myles Lewis-Skelly
+2026-2027,1,AllAboutFPL,Arsenal,Noni Madueke
+2026-2027,1,AllAboutFPL,Arsenal,Martin Odegaard
+2026-2027,1,AllAboutFPL,Arsenal,Christos Tzolis
+2026-2027,1,AllAboutFPL,Arsenal,Kai Havertz
+2026-2027,1,AllAboutFPL,Aston Villa,Marco Bizot
+2026-2027,1,AllAboutFPL,Aston Villa,Matty Cash
+2026-2027,1,AllAboutFPL,Aston Villa,Victor Lindelof
+2026-2027,1,AllAboutFPL,Aston Villa,Pau Torres
+2026-2027,1,AllAboutFPL,Aston Villa,Ian Maatsen
+2026-2027,1,AllAboutFPL,Aston Villa,Lamare Bogarde
+2026-2027,1,AllAboutFPL,Aston Villa,Boubacar Kamara
+2026-2027,1,AllAboutFPL,Aston Villa,John McGinn
+2026-2027,1,AllAboutFPL,Aston Villa,Emiliano Buendia
+2026-2027,1,AllAboutFPL,Aston Villa,George Hemmings
+2026-2027,1,AllAboutFPL,Aston Villa,Tammy Abraham
+2026-2027,1,AllAboutFPL,Bournemouth,Djordje Petrovic
+2026-2027,1,AllAboutFPL,Bournemouth,Adam Smith
+2026-2027,1,AllAboutFPL,Bournemouth,António João Pereira de Albuquerque Tavares da Silva
+2026-2027,1,AllAboutFPL,Bournemouth,James Hill
+2026-2027,1,AllAboutFPL,Bournemouth,Adrien Truffert
+2026-2027,1,AllAboutFPL,Bournemouth,Tyler Adams
+2026-2027,1,AllAboutFPL,Bournemouth,Alex Scott
+2026-2027,1,AllAboutFPL,Bournemouth,Rayan
+2026-2027,1,AllAboutFPL,Bournemouth,Justin Kluivert
+2026-2027,1,AllAboutFPL,Bournemouth,Marcus Tavernier
+2026-2027,1,AllAboutFPL,Bournemouth,Evanilson
+2026-2027,1,AllAboutFPL,Brentford,Caoimhin Kelleher
+2026-2027,1,AllAboutFPL,Brentford,Michael Kayode
+2026-2027,1,AllAboutFPL,Brentford,Kristoffer Ajer
+2026-2027,1,AllAboutFPL,Brentford,Nathan Collins
+2026-2027,1,AllAboutFPL,Brentford,Keane Lewis-Potter
+2026-2027,1,AllAboutFPL,Brentford,Vitaly Janelt
+2026-2027,1,AllAboutFPL,Brentford,Mamadou Sangaré
+2026-2027,1,AllAboutFPL,Brentford,Dango Ouattara
+2026-2027,1,AllAboutFPL,Brentford,Mathias Jensen
+2026-2027,1,AllAboutFPL,Brentford,Kevin Schade
+2026-2027,1,AllAboutFPL,Brentford,Igor Thiago
+2026-2027,1,AllAboutFPL,Brighton,Bart Verbruggen
+2026-2027,1,AllAboutFPL,Brighton,Mats Wieffer
+2026-2027,1,AllAboutFPL,Brighton,Luka Vušković
+2026-2027,1,AllAboutFPL,Brighton,Olivier Boscagli
+2026-2027,1,AllAboutFPL,Brighton,Ferdi Kadioglu
+2026-2027,1,AllAboutFPL,Brighton,Pascal Gross
+2026-2027,1,AllAboutFPL,Brighton,Yasin Ayari
+2026-2027,1,AllAboutFPL,Brighton,Diego Gomez
+2026-2027,1,AllAboutFPL,Brighton,Jack Hinshelwood
+2026-2027,1,AllAboutFPL,Brighton,Maxim De Cuyper
+2026-2027,1,AllAboutFPL,Brighton,Georginio Rutter
+2026-2027,1,AllAboutFPL,Chelsea,Robert Sanchez
+2026-2027,1,AllAboutFPL,Chelsea,Reece James
+2026-2027,1,AllAboutFPL,Chelsea,Maxence Lacroix
+2026-2027,1,AllAboutFPL,Chelsea,Levi Samuels Colwill
+2026-2027,1,AllAboutFPL,Chelsea,Pedro Neto
+2026-2027,1,AllAboutFPL,Chelsea,Moises Caicedo
+2026-2027,1,AllAboutFPL,Chelsea,Enzo Fernandez
+2026-2027,1,AllAboutFPL,Chelsea,Marco Palestra
+2026-2027,1,AllAboutFPL,Chelsea,Cole Palmer
+2026-2027,1,AllAboutFPL,Chelsea,Joao Pedro
+2026-2027,1,AllAboutFPL,Chelsea,Morgan Rogers
+2026-2027,1,AllAboutFPL,Coventry City,Carl Rushworth
+2026-2027,1,AllAboutFPL,Coventry City,Milan van Ewijk
+2026-2027,1,AllAboutFPL,Coventry City,Aurèle Amenda
+2026-2027,1,AllAboutFPL,Coventry City,Bobby Thomas
+2026-2027,1,AllAboutFPL,Coventry City,Jay Dasilva
+2026-2027,1,AllAboutFPL,Coventry City,Matt Grimes
+2026-2027,1,AllAboutFPL,Coventry City,Frank Onyeka
+2026-2027,1,AllAboutFPL,Coventry City,Loum Tchaouna
+2026-2027,1,AllAboutFPL,Coventry City,Caleb Yirenkyi
+2026-2027,1,AllAboutFPL,Coventry City,Brandon Thomas-Asante
+2026-2027,1,AllAboutFPL,Coventry City,Ellis Simms
+2026-2027,1,AllAboutFPL,Crystal Palace,Dean Henderson
+2026-2027,1,AllAboutFPL,Crystal Palace,Chris Richards
+2026-2027,1,AllAboutFPL,Crystal Palace,Jaydee Canvot
+2026-2027,1,AllAboutFPL,Crystal Palace,Chadi Riad
+2026-2027,1,AllAboutFPL,Crystal Palace,Oscar Mingueza
+2026-2027,1,AllAboutFPL,Crystal Palace,Adam Wharton
+2026-2027,1,AllAboutFPL,Crystal Palace,Daichi Kamada
+2026-2027,1,AllAboutFPL,Crystal Palace,Tyrick Mitchell
+2026-2027,1,AllAboutFPL,Crystal Palace,Ismaila Sarr
+2026-2027,1,AllAboutFPL,Crystal Palace,Jorgen Strand Larsen
+2026-2027,1,AllAboutFPL,Crystal Palace,Dwight McNeil
+2026-2027,1,AllAboutFPL,Everton,Jordan Pickford
+2026-2027,1,AllAboutFPL,Everton,Jake O'Brien
+2026-2027,1,AllAboutFPL,Everton,James Tarkowski
+2026-2027,1,AllAboutFPL,Everton,Jarrad Branthwaite
+2026-2027,1,AllAboutFPL,Everton,Vitalii Mykolenko
+2026-2027,1,AllAboutFPL,Everton,Hayden Hackney
+2026-2027,1,AllAboutFPL,Everton,Harrison Armstrong
+2026-2027,1,AllAboutFPL,Everton,Iliman Ndiaye
+2026-2027,1,AllAboutFPL,Everton,Kiernan Dewsbury-Hall
+2026-2027,1,AllAboutFPL,Everton,Tyrique George
+2026-2027,1,AllAboutFPL,Everton,Thierno Barry
+2026-2027,1,AllAboutFPL,Fulham,Bernd Leno
+2026-2027,1,AllAboutFPL,Fulham,Timothy Castagne
+2026-2027,1,AllAboutFPL,Fulham,Jorge Cuenca
+2026-2027,1,AllAboutFPL,Fulham,Calvin Bassey
+2026-2027,1,AllAboutFPL,Fulham,Antonee Robinson
+2026-2027,1,AllAboutFPL,Fulham,Sander Berge
+2026-2027,1,AllAboutFPL,Fulham,Alex Iwobi
+2026-2027,1,AllAboutFPL,Fulham,Oscar Bobb
+2026-2027,1,AllAboutFPL,Fulham,Josh King
+2026-2027,1,AllAboutFPL,Fulham,César Palacios
+2026-2027,1,AllAboutFPL,Fulham,Gonzalo García
+2026-2027,1,AllAboutFPL,Hull City,Konstantinos Tzolakis
+2026-2027,1,AllAboutFPL,Hull City,Lewie Coyle
+2026-2027,1,AllAboutFPL,Hull City,Semi Ajayi
+2026-2027,1,AllAboutFPL,Hull City,John Egan
+2026-2027,1,AllAboutFPL,Hull City,Ryan Giles
+2026-2027,1,AllAboutFPL,Hull City,Elliot Stroud
+2026-2027,1,AllAboutFPL,Hull City,Regan Slater
+2026-2027,1,AllAboutFPL,Hull City,Jens Hjertø-Dahl
+2026-2027,1,AllAboutFPL,Hull City,Mohamed Belloumi
+2026-2027,1,AllAboutFPL,Hull City,Oli McBurnie
+2026-2027,1,AllAboutFPL,Hull City,Liam Millar
+2026-2027,1,AllAboutFPL,Ipswich Town,Kjell Scherpen
+2026-2027,1,AllAboutFPL,Ipswich Town,Dara O'Shea
+2026-2027,1,AllAboutFPL,Ipswich Town,Issa Diop
+2026-2027,1,AllAboutFPL,Ipswich Town,Jacob Greaves
+2026-2027,1,AllAboutFPL,Ipswich Town,Leif Davis
+2026-2027,1,AllAboutFPL,Ipswich Town,Florentino
+2026-2027,1,AllAboutFPL,Ipswich Town,Sasa Lukic
+2026-2027,1,AllAboutFPL,Ipswich Town,Abdul Fatawu
+2026-2027,1,AllAboutFPL,Ipswich Town,Sindre Walle Egeli
+2026-2027,1,AllAboutFPL,Ipswich Town,Daizen Maeda
+2026-2027,1,AllAboutFPL,Ipswich Town,Emersonn Correia da Silva
+2026-2027,1,AllAboutFPL,Leeds,James Trafford
+2026-2027,1,AllAboutFPL,Leeds,Joe Rodon
+2026-2027,1,AllAboutFPL,Leeds,Jaka Bijol
+2026-2027,1,AllAboutFPL,Leeds,Tarik Muharemović
+2026-2027,1,AllAboutFPL,Leeds,Jayden Bogle
+2026-2027,1,AllAboutFPL,Leeds,Anton Stach
+2026-2027,1,AllAboutFPL,Leeds,Ethan Ampadu
+2026-2027,1,AllAboutFPL,Leeds,James Justin
+2026-2027,1,AllAboutFPL,Leeds,Harry Wilson
+2026-2027,1,AllAboutFPL,Leeds,Dominic Calvert-Lewin
+2026-2027,1,AllAboutFPL,Leeds,Brenden Aaronson
+2026-2027,1,AllAboutFPL,Liverpool,Alisson Becker
+2026-2027,1,AllAboutFPL,Liverpool,Jeremie Frimpong
+2026-2027,1,AllAboutFPL,Liverpool,Jeremy Jacquet
+2026-2027,1,AllAboutFPL,Liverpool,Virgil van Dijk
+2026-2027,1,AllAboutFPL,Liverpool,Milos Kerkez
+2026-2027,1,AllAboutFPL,Liverpool,Ryan Gravenberch
+2026-2027,1,AllAboutFPL,Liverpool,Dominik Szoboszlai
+2026-2027,1,AllAboutFPL,Liverpool,Rio Ngumoha
+2026-2027,1,AllAboutFPL,Liverpool,Florian Wirtz
+2026-2027,1,AllAboutFPL,Liverpool,Cody Gakpo
+2026-2027,1,AllAboutFPL,Liverpool,Alexander Isak
+2026-2027,1,AllAboutFPL,Man City,Gianluigi Donnarumma
+2026-2027,1,AllAboutFPL,Man City,Matheus Nunes
+2026-2027,1,AllAboutFPL,Man City,Ruben Dias
+2026-2027,1,AllAboutFPL,Man City,Josko Gvardiol
+2026-2027,1,AllAboutFPL,Man City,Nico O'Reilly
+2026-2027,1,AllAboutFPL,Man City,Mateo Kovačić
+2026-2027,1,AllAboutFPL,Man City,Elliot Anderson
+2026-2027,1,AllAboutFPL,Man City,Rayan Cherki
+2026-2027,1,AllAboutFPL,Man City,Phil Foden
+2026-2027,1,AllAboutFPL,Man City,Antoine Semenyo
+2026-2027,1,AllAboutFPL,Man City,Erling Haaland
+2026-2027,1,AllAboutFPL,Man Utd,Senne Lammens
+2026-2027,1,AllAboutFPL,Man Utd,Diogo Dalot
+2026-2027,1,AllAboutFPL,Man Utd,Harry Maguire
+2026-2027,1,AllAboutFPL,Man Utd,Ayden Heaven
+2026-2027,1,AllAboutFPL,Man Utd,Luke Shaw
+2026-2027,1,AllAboutFPL,Man Utd,Andrey Santos
+2026-2027,1,AllAboutFPL,Man Utd,Youri Tielemans
+2026-2027,1,AllAboutFPL,Man Utd,Amad Diallo
+2026-2027,1,AllAboutFPL,Man Utd,Bruno Fernandes
+2026-2027,1,AllAboutFPL,Man Utd,Matheus Cunha
+2026-2027,1,AllAboutFPL,Man Utd,Bryan Mbeumo
+2026-2027,1,AllAboutFPL,Newcastle,Lukás Hornícek
+2026-2027,1,AllAboutFPL,Newcastle,Amar Dedic
+2026-2027,1,AllAboutFPL,Newcastle,Malick Thiaw
+2026-2027,1,AllAboutFPL,Newcastle,Dan Burn
+2026-2027,1,AllAboutFPL,Newcastle,Lewis Hall
+2026-2027,1,AllAboutFPL,Newcastle,Sean Steur
+2026-2027,1,AllAboutFPL,Newcastle,Aladji Bamba
+2026-2027,1,AllAboutFPL,Newcastle,Anthony Elanga
+2026-2027,1,AllAboutFPL,Newcastle,Nick Woltemade
+2026-2027,1,AllAboutFPL,Newcastle,Bazoumana Touré
+2026-2027,1,AllAboutFPL,Newcastle,Yoane Wissa
+2026-2027,1,AllAboutFPL,Nott'm Forest,Matz Sels
+2026-2027,1,AllAboutFPL,Nott'm Forest,Murillo dos Santos
+2026-2027,1,AllAboutFPL,Nott'm Forest,Nikola Milenkovic
+2026-2027,1,AllAboutFPL,Nott'm Forest,Ousmane Diomande
+2026-2027,1,AllAboutFPL,Nott'm Forest,Ola Aina
+2026-2027,1,AllAboutFPL,Nott'm Forest,Ibrahim Sangare
+2026-2027,1,AllAboutFPL,Nott'm Forest,James McAtee
+2026-2027,1,AllAboutFPL,Nott'm Forest,Neco Williams
+2026-2027,1,AllAboutFPL,Nott'm Forest,Dan Ndoye
+2026-2027,1,AllAboutFPL,Nott'm Forest,Gabriel Jesus
+2026-2027,1,AllAboutFPL,Nott'm Forest,Morgan Gibbs-White
+2026-2027,1,AllAboutFPL,Spurs,Antonín Kinský
+2026-2027,1,AllAboutFPL,Spurs,Archie Gray
+2026-2027,1,AllAboutFPL,Spurs,Jan Paul van Hecke
+2026-2027,1,AllAboutFPL,Spurs,Marcos Senesi
+2026-2027,1,AllAboutFPL,Spurs,Andrew Robertson
+2026-2027,1,AllAboutFPL,Spurs,Sandro Tonali
+2026-2027,1,AllAboutFPL,Spurs,Mateus Fernandes
+2026-2027,1,AllAboutFPL,Spurs,Mikey Moore
+2026-2027,1,AllAboutFPL,Spurs,Conor Gallagher
+2026-2027,1,AllAboutFPL,Spurs,Mathys Tel
+2026-2027,1,AllAboutFPL,Spurs,Richarlison
+2026-2027,1,AllAboutFPL,Sunderland,Robin Roefs
+2026-2027,1,AllAboutFPL,Sunderland,Nordi Mukiele
+2026-2027,1,AllAboutFPL,Sunderland,Dan Ballard
+2026-2027,1,AllAboutFPL,Sunderland,Luke O'Nien
+2026-2027,1,AllAboutFPL,Sunderland,Reinildo Mandava
+2026-2027,1,AllAboutFPL,Sunderland,Granit Xhaka
+2026-2027,1,AllAboutFPL,Sunderland,Noah Sadiki
+2026-2027,1,AllAboutFPL,Sunderland,Trai Hume
+2026-2027,1,AllAboutFPL,Sunderland,Enzo Le Fee
+2026-2027,1,AllAboutFPL,Sunderland,Nilson Angulo
+2026-2027,1,AllAboutFPL,Sunderland,Brian Brobbey
+2026-2027,1,Curated,Arsenal,David Raya
+2026-2027,1,Curated,Arsenal,Gabriel Magalhaes
+2026-2027,1,Curated,Arsenal,Martin Odegaard
+2026-2027,1,Curated,Arsenal,Riccardo Calafiori
+2026-2027,1,Curated,Arsenal,Ben White
+2026-2027,1,Curated,Arsenal,Cristhian Mosquera
+2026-2027,1,Curated,Arsenal,Christos Tzolis
+2026-2027,1,Curated,Arsenal,Myles Lewis-Skelly
+2026-2027,1,Curated,Arsenal,Declan Rice
+2026-2027,1,Curated,Arsenal,Kai Havertz
+2026-2027,1,Curated,Arsenal,Bukayo Saka
+2026-2027,1,Curated,Aston Villa,John McGinn
+2026-2027,1,Curated,Aston Villa,Pau Torres
+2026-2027,1,Curated,Aston Villa,Boubacar Kamara
+2026-2027,1,Curated,Aston Villa,Emiliano Buendia
+2026-2027,1,Curated,Aston Villa,Matty Cash
+2026-2027,1,Curated,Aston Villa,Ian Maatsen
+2026-2027,1,Curated,Aston Villa,Ollie Watkins
+2026-2027,1,Curated,Aston Villa,Ross Barkley
+2026-2027,1,Curated,Aston Villa,Victor Lindelof
+2026-2027,1,Curated,Aston Villa,Zion Suzuki
+2026-2027,1,Curated,Aston Villa,Alejandro Garnacho
+2026-2027,1,Curated,Bournemouth,Djordje Petrovic
+2026-2027,1,Curated,Bournemouth,Marcus Tavernier
+2026-2027,1,Curated,Bournemouth,Alex Scott
+2026-2027,1,Curated,Bournemouth,Adrien Truffert
+2026-2027,1,Curated,Bournemouth,Evanilson
+2026-2027,1,Curated,Bournemouth,António João Pereira de Albuquerque Tavares da Silva
+2026-2027,1,Curated,Bournemouth,Justin Kluivert
+2026-2027,1,Curated,Bournemouth,Rayan
+2026-2027,1,Curated,Bournemouth,Adam Smith
+2026-2027,1,Curated,Bournemouth,James Hill
+2026-2027,1,Curated,Bournemouth,Lewis Cook
+2026-2027,1,Curated,Brentford,Michael Kayode
+2026-2027,1,Curated,Brentford,Kevin Schade
+2026-2027,1,Curated,Brentford,Dango Ouattara
+2026-2027,1,Curated,Brentford,Nathan Collins
+2026-2027,1,Curated,Brentford,Caoimhin Kelleher
+2026-2027,1,Curated,Brentford,Keane Lewis-Potter
+2026-2027,1,Curated,Brentford,Kristoffer Ajer
+2026-2027,1,Curated,Brentford,Igor Thiago
+2026-2027,1,Curated,Brentford,Mamadou Sangaré
+2026-2027,1,Curated,Brentford,Mathias Jensen
+2026-2027,1,Curated,Brentford,Vitaly Janelt
+2026-2027,1,Curated,Brighton,Bart Verbruggen
+2026-2027,1,Curated,Brighton,Ferdi Kadioglu
+2026-2027,1,Curated,Brighton,Mats Wieffer
+2026-2027,1,Curated,Brighton,Diego Gomez
+2026-2027,1,Curated,Brighton,Maxim De Cuyper
+2026-2027,1,Curated,Brighton,Jack Hinshelwood
+2026-2027,1,Curated,Brighton,Pascal Gross
+2026-2027,1,Curated,Brighton,Georginio Rutter
+2026-2027,1,Curated,Brighton,Luka Vušković
+2026-2027,1,Curated,Brighton,Yasin Ayari
+2026-2027,1,Curated,Brighton,Olivier Boscagli
+2026-2027,1,Curated,Chelsea,Moises Caicedo
+2026-2027,1,Curated,Chelsea,Robert Sanchez
+2026-2027,1,Curated,Chelsea,Joao Pedro
+2026-2027,1,Curated,Chelsea,Cole Palmer
+2026-2027,1,Curated,Chelsea,Maxence Lacroix
+2026-2027,1,Curated,Chelsea,Levi Samuels Colwill
+2026-2027,1,Curated,Chelsea,Morgan Rogers
+2026-2027,1,Curated,Chelsea,Reece James
+2026-2027,1,Curated,Chelsea,Marco Palestra
+2026-2027,1,Curated,Chelsea,Pedro Neto
+2026-2027,1,Curated,Chelsea,Enzo Fernandez
+2026-2027,1,Curated,Coventry City,Carl Rushworth
+2026-2027,1,Curated,Coventry City,Matt Grimes
+2026-2027,1,Curated,Coventry City,Milan van Ewijk
+2026-2027,1,Curated,Coventry City,Aurèle Amenda
+2026-2027,1,Curated,Coventry City,Bobby Thomas
+2026-2027,1,Curated,Coventry City,Ellis Simms
+2026-2027,1,Curated,Coventry City,Caleb Yirenkyi
+2026-2027,1,Curated,Coventry City,Loum Tchaouna
+2026-2027,1,Curated,Coventry City,Frank Onyeka
+2026-2027,1,Curated,Coventry City,Jay Dasilva
+2026-2027,1,Curated,Coventry City,Brandon Thomas-Asante
+2026-2027,1,Curated,Crystal Palace,Chris Richards
+2026-2027,1,Curated,Crystal Palace,Adam Wharton
+2026-2027,1,Curated,Crystal Palace,Tyrick Mitchell
+2026-2027,1,Curated,Crystal Palace,Chadi Riad
+2026-2027,1,Curated,Crystal Palace,Oscar Mingueza
+2026-2027,1,Curated,Crystal Palace,Jorgen Strand Larsen
+2026-2027,1,Curated,Crystal Palace,Daichi Kamada
+2026-2027,1,Curated,Crystal Palace,Ismaila Sarr
+2026-2027,1,Curated,Crystal Palace,Jaydee Canvot
+2026-2027,1,Curated,Crystal Palace,Dwight McNeil
+2026-2027,1,Curated,Crystal Palace,Dean Henderson
+2026-2027,1,Curated,Everton,Kiernan Dewsbury-Hall
+2026-2027,1,Curated,Everton,Jordan Pickford
+2026-2027,1,Curated,Everton,Vitalii Mykolenko
+2026-2027,1,Curated,Everton,James Tarkowski
+2026-2027,1,Curated,Everton,Harrison Armstrong
+2026-2027,1,Curated,Everton,Iliman Ndiaye
+2026-2027,1,Curated,Everton,Jarrad Branthwaite
+2026-2027,1,Curated,Everton,Hayden Hackney
+2026-2027,1,Curated,Everton,Thierno Barry
+2026-2027,1,Curated,Everton,Merlin Röhl
+2026-2027,1,Curated,Everton,Jake O'Brien
+2026-2027,1,Curated,Fulham,Alex Iwobi
+2026-2027,1,Curated,Fulham,Antonee Robinson
+2026-2027,1,Curated,Fulham,Calvin Bassey
+2026-2027,1,Curated,Fulham,Bernd Leno
+2026-2027,1,Curated,Fulham,Jorge Cuenca
+2026-2027,1,Curated,Fulham,Gonzalo García
+2026-2027,1,Curated,Fulham,Sander Berge
+2026-2027,1,Curated,Fulham,Timothy Castagne
+2026-2027,1,Curated,Fulham,Oscar Bobb
+2026-2027,1,Curated,Fulham,Josh King
+2026-2027,1,Curated,Fulham,César Palacios
+2026-2027,1,Curated,Hull City,Konstantinos Tzolakis
+2026-2027,1,Curated,Hull City,Oli McBurnie
+2026-2027,1,Curated,Hull City,Semi Ajayi
+2026-2027,1,Curated,Hull City,Lewie Coyle
+2026-2027,1,Curated,Hull City,Regan Slater
+2026-2027,1,Curated,Hull City,Mohamed Belloumi
+2026-2027,1,Curated,Hull City,Ryan Giles
+2026-2027,1,Curated,Hull City,Elliot Stroud
+2026-2027,1,Curated,Hull City,Matt Crooks
+2026-2027,1,Curated,Hull City,Jens Hjertø-Dahl
+2026-2027,1,Curated,Hull City,Nobel Mendy
+2026-2027,1,Curated,Ipswich Town,Dara O'Shea
+2026-2027,1,Curated,Ipswich Town,Jacob Greaves
+2026-2027,1,Curated,Ipswich Town,Daizen Maeda
+2026-2027,1,Curated,Ipswich Town,Leif Davis
+2026-2027,1,Curated,Ipswich Town,Issa Diop
+2026-2027,1,Curated,Ipswich Town,Emersonn Correia da Silva
+2026-2027,1,Curated,Ipswich Town,Sasa Lukic
+2026-2027,1,Curated,Ipswich Town,Kjell Scherpen
+2026-2027,1,Curated,Ipswich Town,Abdul Fatawu
+2026-2027,1,Curated,Ipswich Town,Marcelino Núñez
+2026-2027,1,Curated,Ipswich Town,Sindre Walle Egeli
+2026-2027,1,Curated,Leeds,Ethan Ampadu
+2026-2027,1,Curated,Leeds,James Trafford
+2026-2027,1,Curated,Leeds,Jayden Bogle
+2026-2027,1,Curated,Leeds,Dominic Calvert-Lewin
+2026-2027,1,Curated,Leeds,Joe Rodon
+2026-2027,1,Curated,Leeds,Jaka Bijol
+2026-2027,1,Curated,Leeds,Tarik Muharemović
+2026-2027,1,Curated,Leeds,James Justin
+2026-2027,1,Curated,Leeds,Anton Stach
+2026-2027,1,Curated,Leeds,Harry Wilson
+2026-2027,1,Curated,Leeds,Brenden Aaronson
+2026-2027,1,Curated,Liverpool,Jeremie Frimpong
+2026-2027,1,Curated,Liverpool,Milos Kerkez
+2026-2027,1,Curated,Liverpool,Alexander Isak
+2026-2027,1,Curated,Liverpool,Alisson Becker
+2026-2027,1,Curated,Liverpool,Virgil van Dijk
+2026-2027,1,Curated,Liverpool,Ryan Gravenberch
+2026-2027,1,Curated,Liverpool,Florian Wirtz
+2026-2027,1,Curated,Liverpool,Rio Ngumoha
+2026-2027,1,Curated,Liverpool,Dominik Szoboszlai
+2026-2027,1,Curated,Liverpool,Cody Gakpo
+2026-2027,1,Curated,Liverpool,Jeremy Jacquet
+2026-2027,1,Curated,Man City,Antoine Semenyo
+2026-2027,1,Curated,Man City,Gianluigi Donnarumma
+2026-2027,1,Curated,Man City,Erling Haaland
+2026-2027,1,Curated,Man City,Phil Foden
+2026-2027,1,Curated,Man City,Ruben Dias
+2026-2027,1,Curated,Man City,Elliot Anderson
+2026-2027,1,Curated,Man City,Josko Gvardiol
+2026-2027,1,Curated,Man City,Nico O'Reilly
+2026-2027,1,Curated,Man City,Mateo Kovačić
+2026-2027,1,Curated,Man City,Rayan Cherki
+2026-2027,1,Curated,Man City,Matheus Nunes
+2026-2027,1,Curated,Man Utd,Harry Maguire
+2026-2027,1,Curated,Man Utd,Bruno Fernandes
+2026-2027,1,Curated,Man Utd,Senne Lammens
+2026-2027,1,Curated,Man Utd,Amad Diallo
+2026-2027,1,Curated,Man Utd,Andrey Santos
+2026-2027,1,Curated,Man Utd,Youri Tielemans
+2026-2027,1,Curated,Man Utd,Bryan Mbeumo
+2026-2027,1,Curated,Man Utd,Diogo Dalot
+2026-2027,1,Curated,Man Utd,Luke Shaw
+2026-2027,1,Curated,Man Utd,Ayden Heaven
+2026-2027,1,Curated,Man Utd,Matheus Cunha
+2026-2027,1,Curated,Newcastle,Sven Botman
+2026-2027,1,Curated,Newcastle,Malick Thiaw
+2026-2027,1,Curated,Newcastle,Lewis Hall
+2026-2027,1,Curated,Newcastle,Amar Dedic
+2026-2027,1,Curated,Newcastle,Lukás Hornícek
+2026-2027,1,Curated,Newcastle,Anthony Elanga
+2026-2027,1,Curated,Newcastle,Yoane Wissa
+2026-2027,1,Curated,Newcastle,Jacob Ramsey
+2026-2027,1,Curated,Newcastle,William Osula
+2026-2027,1,Curated,Newcastle,Harvey Barnes
+2026-2027,1,Curated,Newcastle,Aladji Bamba
+2026-2027,1,Curated,Nott'm Forest,Neco Williams
+2026-2027,1,Curated,Nott'm Forest,Nikola Milenkovic
+2026-2027,1,Curated,Nott'm Forest,Morgan Gibbs-White
+2026-2027,1,Curated,Nott'm Forest,Matz Sels
+2026-2027,1,Curated,Nott'm Forest,Ousmane Diomande
+2026-2027,1,Curated,Nott'm Forest,Murillo dos Santos
+2026-2027,1,Curated,Nott'm Forest,Ola Aina
+2026-2027,1,Curated,Nott'm Forest,Ibrahim Sangare
+2026-2027,1,Curated,Nott'm Forest,Igor Jesus
+2026-2027,1,Curated,Nott'm Forest,Xaver Schlager
+2026-2027,1,Curated,Nott'm Forest,Dan Ndoye
+2026-2027,1,Curated,Spurs,Sandro Tonali
+2026-2027,1,Curated,Spurs,Antonín Kinský
+2026-2027,1,Curated,Spurs,Jan Paul van Hecke
+2026-2027,1,Curated,Spurs,Marcos Senesi
+2026-2027,1,Curated,Spurs,Mathys Tel
+2026-2027,1,Curated,Spurs,Archie Gray
+2026-2027,1,Curated,Spurs,Andrew Robertson
+2026-2027,1,Curated,Spurs,Mikey Moore
+2026-2027,1,Curated,Spurs,Richarlison
+2026-2027,1,Curated,Spurs,Conor Gallagher
+2026-2027,1,Curated,Spurs,Mateus Fernandes
+2026-2027,1,Curated,Sunderland,Robin Roefs
+2026-2027,1,Curated,Sunderland,Dan Ballard
+2026-2027,1,Curated,Sunderland,Granit Xhaka
+2026-2027,1,Curated,Sunderland,Enzo Le Fee
+2026-2027,1,Curated,Sunderland,Noah Sadiki
+2026-2027,1,Curated,Sunderland,Trai Hume
+2026-2027,1,Curated,Sunderland,Brian Brobbey
+2026-2027,1,Curated,Sunderland,Reinildo Mandava
+2026-2027,1,Curated,Sunderland,Luke O'Nien
+2026-2027,1,Curated,Sunderland,Nilson Angulo
+2026-2027,1,Curated,Sunderland,Thomas Meunier
+2026-2027,1,FFS,Arsenal,David Raya
+2026-2027,1,FFS,Arsenal,Ben White
+2026-2027,1,FFS,Arsenal,Cristhian Mosquera
+2026-2027,1,FFS,Arsenal,Gabriel Magalhaes
+2026-2027,1,FFS,Arsenal,Riccardo Calafiori
+2026-2027,1,FFS,Arsenal,Martin Odegaard
+2026-2027,1,FFS,Arsenal,Myles Lewis-Skelly
+2026-2027,1,FFS,Arsenal,Declan Rice
+2026-2027,1,FFS,Arsenal,Noni Madueke
+2026-2027,1,FFS,Arsenal,Kai Havertz
+2026-2027,1,FFS,Arsenal,Christos Tzolis
+2026-2027,1,FFS,Aston Villa,Marco Bizot
+2026-2027,1,FFS,Aston Villa,Matty Cash
+2026-2027,1,FFS,Aston Villa,Victor Lindelof
+2026-2027,1,FFS,Aston Villa,Pau Torres
+2026-2027,1,FFS,Aston Villa,Ian Maatsen
+2026-2027,1,FFS,Aston Villa,Ross Barkley
+2026-2027,1,FFS,Aston Villa,Boubacar Kamara
+2026-2027,1,FFS,Aston Villa,John McGinn
+2026-2027,1,FFS,Aston Villa,Emiliano Buendia
+2026-2027,1,FFS,Aston Villa,Alejandro Garnacho
+2026-2027,1,FFS,Aston Villa,Ollie Watkins
+2026-2027,1,FFS,Bournemouth,Djordje Petrovic
+2026-2027,1,FFS,Bournemouth,Adam Smith
+2026-2027,1,FFS,Bournemouth,James Hill
+2026-2027,1,FFS,Bournemouth,António João Pereira de Albuquerque Tavares da Silva
+2026-2027,1,FFS,Bournemouth,Adrien Truffert
+2026-2027,1,FFS,Bournemouth,Lewis Cook
+2026-2027,1,FFS,Bournemouth,Alex Scott
+2026-2027,1,FFS,Bournemouth,Rayan
+2026-2027,1,FFS,Bournemouth,Justin Kluivert
+2026-2027,1,FFS,Bournemouth,Marcus Tavernier
+2026-2027,1,FFS,Bournemouth,Evanilson
+2026-2027,1,FFS,Brentford,Caoimhin Kelleher
+2026-2027,1,FFS,Brentford,Michael Kayode
+2026-2027,1,FFS,Brentford,Kristoffer Ajer
+2026-2027,1,FFS,Brentford,Nathan Collins
+2026-2027,1,FFS,Brentford,Keane Lewis-Potter
+2026-2027,1,FFS,Brentford,Mamadou Sangaré
+2026-2027,1,FFS,Brentford,Vitaly Janelt
+2026-2027,1,FFS,Brentford,Dango Ouattara
+2026-2027,1,FFS,Brentford,Mathias Jensen
+2026-2027,1,FFS,Brentford,Kevin Schade
+2026-2027,1,FFS,Brentford,Igor Thiago
+2026-2027,1,FFS,Brighton,Bart Verbruggen
+2026-2027,1,FFS,Brighton,Mats Wieffer
+2026-2027,1,FFS,Brighton,Luka Vušković
+2026-2027,1,FFS,Brighton,Olivier Boscagli
+2026-2027,1,FFS,Brighton,Ferdi Kadioglu
+2026-2027,1,FFS,Brighton,Yasin Ayari
+2026-2027,1,FFS,Brighton,Pascal Gross
+2026-2027,1,FFS,Brighton,Diego Gomez
+2026-2027,1,FFS,Brighton,Jack Hinshelwood
+2026-2027,1,FFS,Brighton,Maxim De Cuyper
+2026-2027,1,FFS,Brighton,Georginio Rutter
+2026-2027,1,FFS,Chelsea,Robert Sanchez
+2026-2027,1,FFS,Chelsea,Reece James
+2026-2027,1,FFS,Chelsea,Maxence Lacroix
+2026-2027,1,FFS,Chelsea,Levi Samuels Colwill
+2026-2027,1,FFS,Chelsea,Pedro Neto
+2026-2027,1,FFS,Chelsea,Roméo Lavia
+2026-2027,1,FFS,Chelsea,Moises Caicedo
+2026-2027,1,FFS,Chelsea,Marco Palestra
+2026-2027,1,FFS,Chelsea,Cole Palmer
+2026-2027,1,FFS,Chelsea,Joao Pedro
+2026-2027,1,FFS,Chelsea,Morgan Rogers
+2026-2027,1,FFS,Coventry City,Carl Rushworth
+2026-2027,1,FFS,Coventry City,Milan van Ewijk
+2026-2027,1,FFS,Coventry City,Bobby Thomas
+2026-2027,1,FFS,Coventry City,Aurèle Amenda
+2026-2027,1,FFS,Coventry City,Jay Dasilva
+2026-2027,1,FFS,Coventry City,Caleb Yirenkyi
+2026-2027,1,FFS,Coventry City,Matt Grimes
+2026-2027,1,FFS,Coventry City,Frank Onyeka
+2026-2027,1,FFS,Coventry City,Loum Tchaouna
+2026-2027,1,FFS,Coventry City,Ellis Simms
+2026-2027,1,FFS,Coventry City,Brandon Thomas-Asante
+2026-2027,1,FFS,Crystal Palace,Dean Henderson
+2026-2027,1,FFS,Crystal Palace,Jaydee Canvot
+2026-2027,1,FFS,Crystal Palace,Chris Richards
+2026-2027,1,FFS,Crystal Palace,Chadi Riad
+2026-2027,1,FFS,Crystal Palace,Oscar Mingueza
+2026-2027,1,FFS,Crystal Palace,Daichi Kamada
+2026-2027,1,FFS,Crystal Palace,Adam Wharton
+2026-2027,1,FFS,Crystal Palace,Tyrick Mitchell
+2026-2027,1,FFS,Crystal Palace,Ismaila Sarr
+2026-2027,1,FFS,Crystal Palace,Dwight McNeil
+2026-2027,1,FFS,Crystal Palace,Jorgen Strand Larsen
+2026-2027,1,FFS,Everton,Jordan Pickford
+2026-2027,1,FFS,Everton,Jake O'Brien
+2026-2027,1,FFS,Everton,James Tarkowski
+2026-2027,1,FFS,Everton,Jarrad Branthwaite
+2026-2027,1,FFS,Everton,Vitalii Mykolenko
+2026-2027,1,FFS,Everton,Hayden Hackney
+2026-2027,1,FFS,Everton,Harrison Armstrong
+2026-2027,1,FFS,Everton,Merlin Röhl
+2026-2027,1,FFS,Everton,Kiernan Dewsbury-Hall
+2026-2027,1,FFS,Everton,Iliman Ndiaye
+2026-2027,1,FFS,Everton,Thierno Barry
+2026-2027,1,FFS,Fulham,Bernd Leno
+2026-2027,1,FFS,Fulham,Timothy Castagne
+2026-2027,1,FFS,Fulham,Jorge Cuenca
+2026-2027,1,FFS,Fulham,Calvin Bassey
+2026-2027,1,FFS,Fulham,Antonee Robinson
+2026-2027,1,FFS,Fulham,Sander Berge
+2026-2027,1,FFS,Fulham,Alex Iwobi
+2026-2027,1,FFS,Fulham,Oscar Bobb
+2026-2027,1,FFS,Fulham,Josh King
+2026-2027,1,FFS,Fulham,César Palacios
+2026-2027,1,FFS,Fulham,Gonzalo García
+2026-2027,1,FFS,Hull City,Konstantinos Tzolakis
+2026-2027,1,FFS,Hull City,Lewie Coyle
+2026-2027,1,FFS,Hull City,Semi Ajayi
+2026-2027,1,FFS,Hull City,Nobel Mendy
+2026-2027,1,FFS,Hull City,Ryan Giles
+2026-2027,1,FFS,Hull City,Regan Slater
+2026-2027,1,FFS,Hull City,Matt Crooks
+2026-2027,1,FFS,Hull City,Mohamed Belloumi
+2026-2027,1,FFS,Hull City,Jens Hjertø-Dahl
+2026-2027,1,FFS,Hull City,Elliot Stroud
+2026-2027,1,FFS,Hull City,Oli McBurnie
+2026-2027,1,FFS,Ipswich Town,Kjell Scherpen
+2026-2027,1,FFS,Ipswich Town,Dara O'Shea
+2026-2027,1,FFS,Ipswich Town,Issa Diop
+2026-2027,1,FFS,Ipswich Town,Jacob Greaves
+2026-2027,1,FFS,Ipswich Town,Leif Davis
+2026-2027,1,FFS,Ipswich Town,Marcelino Núñez
+2026-2027,1,FFS,Ipswich Town,Sasa Lukic
+2026-2027,1,FFS,Ipswich Town,Abdul Fatawu
+2026-2027,1,FFS,Ipswich Town,Sindre Walle Egeli
+2026-2027,1,FFS,Ipswich Town,Daizen Maeda
+2026-2027,1,FFS,Ipswich Town,Emersonn Correia da Silva
+2026-2027,1,FFS,Leeds,James Trafford
+2026-2027,1,FFS,Leeds,Joe Rodon
+2026-2027,1,FFS,Leeds,Jaka Bijol
+2026-2027,1,FFS,Leeds,Tarik Muharemović
+2026-2027,1,FFS,Leeds,Jayden Bogle
+2026-2027,1,FFS,Leeds,Ethan Ampadu
+2026-2027,1,FFS,Leeds,Anton Stach
+2026-2027,1,FFS,Leeds,James Justin
+2026-2027,1,FFS,Leeds,Harry Wilson
+2026-2027,1,FFS,Leeds,Dominic Calvert-Lewin
+2026-2027,1,FFS,Leeds,Brenden Aaronson
+2026-2027,1,FFS,Liverpool,Alisson Becker
+2026-2027,1,FFS,Liverpool,Jeremie Frimpong
+2026-2027,1,FFS,Liverpool,Jeremy Jacquet
+2026-2027,1,FFS,Liverpool,Virgil van Dijk
+2026-2027,1,FFS,Liverpool,Milos Kerkez
+2026-2027,1,FFS,Liverpool,Ryan Gravenberch
+2026-2027,1,FFS,Liverpool,Dominik Szoboszlai
+2026-2027,1,FFS,Liverpool,Rio Ngumoha
+2026-2027,1,FFS,Liverpool,Florian Wirtz
+2026-2027,1,FFS,Liverpool,Cody Gakpo
+2026-2027,1,FFS,Liverpool,Alexander Isak
+2026-2027,1,FFS,Man City,Gianluigi Donnarumma
+2026-2027,1,FFS,Man City,Abduqodir Khusanov
+2026-2027,1,FFS,Man City,Ruben Dias
+2026-2027,1,FFS,Man City,Josko Gvardiol
+2026-2027,1,FFS,Man City,Nico O'Reilly
+2026-2027,1,FFS,Man City,Elliot Anderson
+2026-2027,1,FFS,Man City,Mateo Kovačić
+2026-2027,1,FFS,Man City,Antoine Semenyo
+2026-2027,1,FFS,Man City,Phil Foden
+2026-2027,1,FFS,Man City,Jeremy Doku
+2026-2027,1,FFS,Man City,Erling Haaland
+2026-2027,1,FFS,Man Utd,Senne Lammens
+2026-2027,1,FFS,Man Utd,Diogo Dalot
+2026-2027,1,FFS,Man Utd,Harry Maguire
+2026-2027,1,FFS,Man Utd,Ayden Heaven
+2026-2027,1,FFS,Man Utd,Luke Shaw
+2026-2027,1,FFS,Man Utd,Youri Tielemans
+2026-2027,1,FFS,Man Utd,Andrey Santos
+2026-2027,1,FFS,Man Utd,Amad Diallo
+2026-2027,1,FFS,Man Utd,Bruno Fernandes
+2026-2027,1,FFS,Man Utd,Patrick Dorgu
+2026-2027,1,FFS,Man Utd,Bryan Mbeumo
+2026-2027,1,FFS,Newcastle,Lukás Hornícek
+2026-2027,1,FFS,Newcastle,Amar Dedic
+2026-2027,1,FFS,Newcastle,Malick Thiaw
+2026-2027,1,FFS,Newcastle,Sven Botman
+2026-2027,1,FFS,Newcastle,Lewis Hall
+2026-2027,1,FFS,Newcastle,Jacob Ramsey
+2026-2027,1,FFS,Newcastle,Aladji Bamba
+2026-2027,1,FFS,Newcastle,Anthony Elanga
+2026-2027,1,FFS,Newcastle,Yoane Wissa
+2026-2027,1,FFS,Newcastle,Harvey Barnes
+2026-2027,1,FFS,Newcastle,William Osula
+2026-2027,1,FFS,Nott'm Forest,Matz Sels
+2026-2027,1,FFS,Nott'm Forest,Ousmane Diomande
+2026-2027,1,FFS,Nott'm Forest,Nikola Milenkovic
+2026-2027,1,FFS,Nott'm Forest,Murillo dos Santos
+2026-2027,1,FFS,Nott'm Forest,Ola Aina
+2026-2027,1,FFS,Nott'm Forest,Xaver Schlager
+2026-2027,1,FFS,Nott'm Forest,Ibrahim Sangare
+2026-2027,1,FFS,Nott'm Forest,Neco Williams
+2026-2027,1,FFS,Nott'm Forest,Dan Ndoye
+2026-2027,1,FFS,Nott'm Forest,Morgan Gibbs-White
+2026-2027,1,FFS,Nott'm Forest,Igor Jesus
+2026-2027,1,FFS,Spurs,Antonín Kinský
+2026-2027,1,FFS,Spurs,Archie Gray
+2026-2027,1,FFS,Spurs,Jan Paul van Hecke
+2026-2027,1,FFS,Spurs,Marcos Senesi
+2026-2027,1,FFS,Spurs,Andrew Robertson
+2026-2027,1,FFS,Spurs,Sandro Tonali
+2026-2027,1,FFS,Spurs,Mateus Fernandes
+2026-2027,1,FFS,Spurs,Mikey Moore
+2026-2027,1,FFS,Spurs,Conor Gallagher
+2026-2027,1,FFS,Spurs,Mathys Tel
+2026-2027,1,FFS,Spurs,Richarlison
+2026-2027,1,FFS,Sunderland,Robin Roefs
+2026-2027,1,FFS,Sunderland,Thomas Meunier
+2026-2027,1,FFS,Sunderland,Luke O'Nien
+2026-2027,1,FFS,Sunderland,Dan Ballard
+2026-2027,1,FFS,Sunderland,Reinildo Mandava
+2026-2027,1,FFS,Sunderland,Granit Xhaka
+2026-2027,1,FFS,Sunderland,Noah Sadiki
+2026-2027,1,FFS,Sunderland,Trai Hume
+2026-2027,1,FFS,Sunderland,Enzo Le Fee
+2026-2027,1,FFS,Sunderland,Nilson Angulo
+2026-2027,1,FFS,Sunderland,Brian Brobbey

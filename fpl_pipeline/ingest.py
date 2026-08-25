@@ -30,7 +30,7 @@ def load_fpl_players():
     df["position"] = df["position"].astype(pd.CategoricalDtype(categories=config.POSITION_ORDER, ordered=True))
 
     return (
-        df[["name", "position", "team", "cost"]]
+        df[["player_id", "name", "position", "team", "cost"]]
         .sort_values(["team", "position", "name", "cost"], ascending=[True, True, True, False])
         .reset_index(drop=True)
     )
@@ -58,14 +58,20 @@ def load_defensive_contributions():
 
     Current and prior-season DC-per-90 are blended, weighted by minutes played, with
     the prior season's weight capped at config.DC_PRIOR_CAP_MINUTES: pure prior at the
-    season start (current minutes ~0), fading as the current season accumulates.
-    Name-keyed, so club changes carry a player's DC identity. The blended minutes also
-    drive the >=4-nineties reliability gate; players with no data in either season
-    still land on the position average."""
+    season start (current minutes ~0), fading as the current season accumulates. Current
+    minutes are weighted config.DC_CURRENT_SEASON_WEIGHT times prior ones so recent form
+    counts for more. Name-keyed, so club changes carry a player's DC identity.
+
+    TWO denominators, deliberately: the recency weight tilts the RATE (dc90) but NOT the
+    EVIDENCE count. `nineties` is TRUE minutes / 90 (current + capped prior, undoubled) and
+    drives the >=4-nineties reliability gate and the shrinkage in players._dc_table - a
+    recency preference is not extra evidence, so one recent match stays one match of trust.
+    Players with no data in either season still land on the position average."""
     df = _dc_source(config.FPL_DATA_DIR)
 
+    w = config.DC_CURRENT_SEASON_WEIGHT
     m_cur = df["minutes"].fillna(0.0).where(df["dc90"].notna(), 0.0)
-    num = m_cur * df["dc90"].fillna(0.0)
+    num = w * m_cur * df["dc90"].fillna(0.0)
 
     prior_dir = os.path.join(os.path.dirname(config.FPL_DATA_DIR), _prior_season(config.SEASON))
     if os.path.isdir(prior_dir):
@@ -74,12 +80,14 @@ def load_defensive_contributions():
         m_pri = (df["name"].map(prior["minutes"]).fillna(0.0)
                  .clip(upper=config.DC_PRIOR_CAP_MINUTES))
         num = num + m_pri * df["name"].map(prior["dc90"]).fillna(0.0)
-        weight = m_cur + m_pri
+        rate_denom = w * m_cur + m_pri    # recency-tilted, for the dc90 weighted average
+        evidence = m_cur + m_pri          # true minutes, for the reliability/shrinkage count
     else:
-        weight = m_cur
+        rate_denom = w * m_cur
+        evidence = m_cur
 
-    df["dc90"] = (num / weight).where(weight > 0)
-    df["nineties"] = (weight / 90).round(2)
+    df["dc90"] = (num / rate_denom).where(rate_denom > 0)
+    df["nineties"] = (evidence / 90).round(2)
 
     out = {}
     for pos in ("DEF", "MID"):
