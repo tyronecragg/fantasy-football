@@ -29,6 +29,11 @@ The file is `Player, Team, F1 … F8` (F7/F8 curated since 2026-08-21 — the op
 player **starts** that fixture. It is **curated by hand from the sources below** — not generated —
 and it stores **raw beliefs**; the pipeline normalises at consumption time.
 
+> ✅ **TWO DISCRETE CROSS-CHECKS EVERY PASS** (added 2026-08-27 — each was skipped once and left the wrong players starting; normalisation will NOT save you, it only rescales existing values and has no idea who's injured or newly-signed):
+> 1. **Zero the entire out-list, as its own step.** Take the full SportsGambler + FPL-API availability list and set F1≈0 for EVERY player out/suspended for this GW — do not rely on targeted edits to surface injuries. A stale high F1 on an injured player sails straight through a sum-normalisation. *(Caught starting despite being out: Riad, Kovačić [red], Ajayi, Coyle, Osula.)*
+> 2. **Reconcile the file against the LIVE roster, as its own step.** Diff every club's `outputs/01_fpl_players.csv` squad vs the file: **ADD** starter-level new signings the file is missing (they belong in the roster now and carry a real F1), and drop players who left. *(Caught: Sávio — a £50m signing both RotoWire & All About FPL named in the XI — was entirely ABSENT from the file while the youth Mikey Moore sat at 0.42.)*
+> Then check `groupby('Team')['F1'].sum() == 11` and that no cell > 1.0.
+
 - **Sum rule.** `F1` must sum to **exactly 11** per team (the GW1 XI is a known 11). `F2`+ may sit
   **below 11 but never above.** A below-11 column is *correct* when the missing minutes belong to a
   player who isn't in the FPL roster yet (a new signing) — **never pad the gap onto another player**
@@ -135,12 +140,11 @@ return-date rule in "How the numbers work").
   — THE GO-TO.** Fetchable by automated tools, per-club, shows injury type + expected return
   date, and stamps its last-update time (verified current on 21 Aug 2026). Check it before
   writing any injury ramp.
-- [Premier Injuries](https://www.premierinjuries.com) — the underlying data most others cite,
-  but **403-blocks automated fetch** (confirmed Aug 2026). Browser-only.
-- [Official Premier League injury list](https://www.premierleague.com/en/latest-player-injuries) —
-  authoritative but **JS-rendered** (unfetchable by automated tools). Browser-only.
-- [Sky Sports injury table](https://www.skysports.com/football/news/11661/13567456) — return
-  dates and days-lost, searchable by club; also JS-rendered. Browser-only.
+- **Plus the FPL API availability feed** (`chance_of_playing_next_round` + `news`) — authoritative
+  outs / doubts / return-dates, pulled every sweep; covers most of what the removed tables did.
+
+_(Removed 2026-08-27 — unfetchable by automated tools, so useless here: Premier Injuries (403),
+Official PL injury list & Sky Sports table (both JS-rendered). Use SportsGambler + the FPL API feed.)_
 
 ---
 
@@ -171,19 +175,21 @@ Don't escalate for settled teams. Any three sources agree on Arsenal; the effort
 
 The standing escalation panel — for the ~20% of teams hard to call in a given week. A fan site or a
 local beat writer knows a squad's rotation and injury quirks better than a national outlet doing 20
-XIs at speed. Each club has **two independent fan sites + one regional-press beat** (with the named
-writer to follow), all verified active August 2026. A few (Arseblog, This Is Anfield, the SB Nation
-communities, The Fighting Cock, Bluemoon) **block automated fetch** — Cloudflare, not death; verify
-recency in-browser. **Date-check every article** (Golden rule).
+XIs at speed. Each club has up to **two independent fan sites + one regional-press beat** (with the
+named writer to follow), all verified active August 2026. **Cloudflare-blocked sites were removed
+2026-08-27** (Arseblog, This Is Anfield, We Ain't Got No History, Roker Report, The Fighting Cock,
+Bluemoon) and **replaced the same day with fetch-verified alternatives** (Pain in the Arsenal, The
+Pride of London, Anfield Watch, Man City Square, Spurs Web; Sunderland → A Love Supreme) — so every
+club is back to **two fetchable fan sites + one regional beat**. **Date-check every article** (Golden rule).
 
 | Club | Fan site 1 | Fan site 2 | Local/regional beat (writer) |
 |---|---|---|---|
-| Arsenal | [Arseblog](https://arseblog.news) | [Daily Cannon](https://dailycannon.com) | [football.london/arsenal](https://www.football.london/arsenal-fc/) — Kaya Kaynak |
+| Arsenal | [Daily Cannon](https://dailycannon.com) | [Pain in the Arsenal](https://paininthearsenal.com) | [football.london/arsenal](https://www.football.london/arsenal-fc/) — Kaya Kaynak |
 | Aston Villa | [My Old Man Said](https://myoldmansaid.com) | [Read Aston Villa](https://readastonvilla.com) | [BirminghamLive](https://www.birminghammail.co.uk/all-about/aston-villa-fc) — John Townley |
 | Bournemouth | [AFCB Podcast](https://afcbpodcast.com) | [Somerset Cherries](https://somersetcherries.co.uk) | [Bournemouth Echo](https://www.bournemouthecho.co.uk/sport/afcb/) — Alexander Smith |
 | Brentford | [Beesotted](https://beesotted.com) | [Griffin Park Grapevine](https://griffinpark.org) | [West London Sport](https://www.westlondonsport.com/brentford) |
 | Brighton | [We Are Brighton](https://wearebrighton.com) | [Read Brighton](https://readbrighton.com) | [The Argus](https://www.theargus.co.uk/sport/) — Brian Owen |
-| Chelsea | [The Chelsea Chronicle](https://thechelseachronicle.com) | [We Ain't Got No History](https://weaintgotnohistory.sbnation.com) | [football.london/chelsea](https://www.football.london/chelsea-fc/) — Bobby Vincent |
+| Chelsea | [The Chelsea Chronicle](https://thechelseachronicle.com) | [The Pride of London](https://theprideoflondon.com) | [football.london/chelsea](https://www.football.london/chelsea-fc/) — Bobby Vincent |
 | Coventry City | [Sky Blues Blog](https://skybluesblog.co.uk) | [Let's All Sing Together](https://letsallsingtogether.com) | [CoventryLive](https://www.coventrytelegraph.net/all-about/coventry-city-fc) — Andy Turner |
 | Crystal Palace | [We Are Palace](https://wearepalace.uk) | [The Holmesdale Online](https://holmesdale.net) | [football.london/crystal-palace](https://www.football.london/crystal-palace-fc/) |
 | Everton | [ToffeeWeb](https://toffeeweb.com) | [Goodison News](https://goodisonnews.com) | [Liverpool Echo — Everton](https://www.liverpoolecho.co.uk/all-about/everton-fc) — Joe Thomas |
@@ -191,13 +197,13 @@ recency in-browser. **Date-check every article** (Golden rule).
 | Hull City | [Hull City Forum](https://hullcityforum.co.uk) | [hcafcHub](https://hcafchub.com) | [Hull Live](https://www.hulldailymail.co.uk/all-about/hull-city) — Barry Cooper |
 | Ipswich Town | [TWTD](https://twtd.co.uk) | [Blue Monday](https://bluemondayitfc.co.uk) | [East Anglian Daily Times](https://www.eadt.co.uk/sport/) — Stuart Watson |
 | Leeds United | [The Square Ball](https://thesquareball.net) | [Leeds, That!](https://leedsthat.com) | [Yorkshire Evening Post](https://www.yorkshireeveningpost.co.uk/sport/football/leeds-united) |
-| Liverpool | [This Is Anfield](https://thisisanfield.com) | [Empire of the Kop](https://empireofthekop.com) | [Liverpool Echo — LFC](https://www.liverpoolecho.co.uk/all-about/liverpool-fc) — Doyle / Gorst |
-| Man City | [City Xtra](https://cityxtra.co.uk) | [Bluemoon-MCFC](https://bluemoon-mcfc.co.uk) | [Man. Evening News — City](https://www.manchestereveningnews.co.uk/all-about/manchester-city-fc) — Simon Bajkowski |
+| Liverpool | [Empire of the Kop](https://empireofthekop.com) | [Anfield Watch](https://anfieldwatch.co.uk) | [Liverpool Echo — LFC](https://www.liverpoolecho.co.uk/all-about/liverpool-fc) — Doyle / Gorst |
+| Man City | [City Xtra](https://cityxtra.co.uk) | [Man City Square](https://www.mancitysquare.com) | [Man. Evening News — City](https://www.manchestereveningnews.co.uk/all-about/manchester-city-fc) — Simon Bajkowski |
 | Man Utd | [Stretty News](https://strettynews.com) | [The Peoples Person](https://thepeoplesperson.com) | [Man. Evening News — Utd](https://www.manchestereveningnews.co.uk/all-about/manchester-united-fc) — Steven Railston |
 | Newcastle | [The Mag](https://themag.co.uk) | [True Faith](https://tf1892.substack.com) | [ChronicleLive](https://www.chroniclelive.co.uk/all-about/newcastle-united-fc) — Lee Ryder |
 | Nott'm Forest | [Forest Rumours](https://nottinghamforestrumours.co.uk) | [Forza Garibaldi](https://forzagaribaldi.com) | [Nottingham Post](https://www.nottinghampost.com/all-about/nottingham-forest-fc) — Sarah Clapson |
-| Sunderland | [Roker Report](https://rokerreport.sbnation.com) | [Wise Men Say](https://wisemensay.co.uk) | [Sunderland Echo](https://www.sunderlandecho.com/sport/football/sunderland-afc) — Phil Smith |
-| Tottenham | [The Boy Hotspur](https://theboyhotspur.com) | [The Fighting Cock](https://thefightingcock.co.uk) | [football.london/tottenham](https://www.football.london/tottenham-hotspur-fc/) — Alasdair Gold |
+| Sunderland | [Wise Men Say](https://wisemensay.co.uk) | [A Love Supreme](https://alovesupreme.co.uk) | [Sunderland Echo](https://www.sunderlandecho.com/sport/football/sunderland-afc) — Phil Smith |
+| Tottenham | [The Boy Hotspur](https://theboyhotspur.com) | [Spurs Web](https://www.spurs-web.com) | [football.london/tottenham](https://www.football.london/tottenham-hotspur-fc/) — Alasdair Gold |
 
 _Maintenance notes (Aug 2026):_
 - _Fan sites removed as dead/dormant — **Amber Nectar** (Hull, domain lapsed 2019), **Cherry Chimes** (Bournemouth, 2021), **The Scratching Shed** (Leeds, 2020). Corrected: **FYP Fanzine** (Palace) → fypfanzine.uk; SB Nation Fulham is **Cottagers Confidential** not "Cottagers Corner". Fade-alternates: A Love Supreme (Sunderland), Cartilage Free Captain (Spurs), To Hull and Back (Hull)._

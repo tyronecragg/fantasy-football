@@ -2,6 +2,38 @@
 
 **Purpose.** A durable snapshot of who manages whom, who moved where, and who's injured — the facts that go stale fastest and cause the most predicted-XI errors. Load this first when refreshing lineups so you don't re-derive (and re-hallucinate) the landscape. Last compiled **2026-08-20** from multi-source research (team-by-team, ≥5 club-focused sources each). Transfer window shuts **~1 Sept 2026**, so the "live threads" below can still change.
 
+> ⚠️ **This body is the 20-Aug snapshot. The 27-Aug reconciliation below OVERRIDES it where they conflict — and the LIVE FPL roster (`players.csv` / bootstrap) always overrides both** for "is player X at club Y." (A source is only "stale-squad" if it names a player **not in the roster** — do NOT reject a real transfer just because it post-dates this doc. Caught 27 Aug: Tomiyasu and Elanga wrongly flagged as hallucinations against this doc when both are in the roster.)
+
+---
+
+## Roster reconciliation update — 2026-08-27 (diff vs live FPL roster)
+
+Confirmed against `players.csv`. The 20-Aug body missed these.
+
+**Arrivals the body omits (all present in the roster now):**
+- **Takehiro Tomiyasu → Crystal Palace** (from Arsenal)
+- **Anthony Elanga → Newcastle** (from Nott'm Forest)
+- **Malick Thiaw → Newcastle** · **Jacob Ramsey → Newcastle**
+- **James McAtee → Nott'm Forest** (from Man City)
+- **Rayan Aït-Nouri → Man City** · **Ayyoub Bouaddi → Man City** (the doc's "talks intensifying" — DONE)
+- **Sávio → Spurs** (from Man City; doc's "pushing to join Spurs" — DONE. Canonical name **Sávio** everywhere; `name_mappings.csv` maps the old "Savinho"/"Savio" spellings to it)
+- **Carlos Baleba → Man Utd** (doc's "imminent" — DONE; currently injured, ankle)
+- Minor: Eddie Nketiah at Palace; Jamie Gittens at Chelsea; Kepa + Meslier are Arsenal's backup GKs.
+
+**LIVE sagas — window open to Tue 1 Sept 23:00 UK, so roster ≠ final. Transfer sweep 27 Aug:**
+- **Bradley Barcola → Liverpool — DEAL AGREED** (£100m + ~£20m add-ons; medical + signing imminent, ~Thu 28 Aug; This Is Anfield "agreed", multi-source). Effectively done. **KEEP the `Bradley Barcola` placeholder in `starting_lineups.csv`** (do NOT remove — my earlier "did not join" call was the roster snapshot, not the live deal). Ramp him UP F2-F8; he pressures the LFC wide slots (Gakpo/Wirtz/Ngumoha).
+- **Emi Martínez → LEAVING Villa** (Suzuki is Emery's #1). Live suitors **Chelsea** ("would say yes") and **Tottenham**; expected to move before deadline. Watch which — it reshuffles that club's GK (Chelsea: Sánchez; Spurs: Kinsky). Suzuki nailed at Villa regardless.
+- **Cody Gakpo → Spurs** was "on hold unless LFC sign an attacker" — **Barcola arriving reactivates this**; monitor.
+- **Omar Marmoush → Spurs** (from Man City) — RUMOUR only (Spurs Web headline 27 Aug); **roster still shows him at MCI**, so NOT done. Monitor to 1 Sept; if it completes, adds a Spurs attacker and thins City's front line.
+- Roster-current but window still open (were live sagas): **Sarr** at Palace, **Ben White** at Arsenal. **Enzo Fernández** stayed at Chelsea (confirmed).
+- Unverified this sweep (dropped — searches returned stale Jan-2026 content): Douglas Luiz destination, Enciso→Chelsea.
+
+**Departures FPL flags as done (still appear in roster data, but out):** Reijnders (City → Al Qadsiah), Rodrigo (City → Barcelona), Romero (Spurs → Atlético, body had this).
+
+_Not exhaustive — regenerate the full body from the roster when time allows; until then trust this block + the live roster over the 20-Aug prose._
+
+---
+
 > ⚠️ **Known stale-data trap:** national aggregators (Squawka, Goal, OneFootball, FotMob, Sports Mole predicted-XI pages, some FFS *per-club preview* pages) frequently serve **2025-26 squads/managers**. Concrete phantoms caught this window: Guardiola still at City, Rodri/Reijnders at City, Salah/Konaté at Liverpool, Maresca/Cucurella/Delap at Chelsea, Mbeumo/Wissa at Brentford, Senesi at Bournemouth, Romero at Spurs, Bruno Guimarães/Isak/Gordon at Newcastle. If a source names any of these as current, discard it.
 
 ---
@@ -118,8 +150,8 @@
 ### Man City — Maresca · 4-2-3-1 · (Guardiola GONE)
 - **In:** Elliot Anderson (£115m record, Forest), Antoine Semenyo (Bournemouth, Jan 2026), Marc Guéhi (£20m, Palace, Jan 2026), Rayan Cherki.
 - **Out:** **Rodri (→ Barcelona £65m)**, Reijnders (sold), Bernardo; Grealish (loan back from Everton).
-- **Injuries:** **Doku (calf, Community Shield — out several weeks, misses GW1)**, Nunes (muscle), Savinho (illness), Marmoush (knock). With Doku out, **Cherki starts** wide.
-- **Live (targets, to 1 Sept):** Ayyoub Bouaddi (Lille, **DM**, 18) — talks intensifying; Manu Koné (Roma, **CM**); Enzo Fernández (Chelsea, **CM**); a **new winger** (because **Savinho is pushing to join Spurs** — e.g. Mateus Mané, Wolves); a **new right-back**. All in the pivot / wide / RB areas — **none competes for Foden's central No.10 role.**
+- **Injuries:** **Doku (calf, Community Shield — out several weeks, misses GW1)**, Nunes (muscle), Sávio (illness), Marmoush (knock). With Doku out, **Cherki starts** wide.
+- **Live (targets, to 1 Sept):** Ayyoub Bouaddi (Lille, **DM**, 18) — talks intensifying; Manu Koné (Roma, **CM**); Enzo Fernández (Chelsea, **CM**); a **new winger** (because **Sávio is pushing to join Spurs** — e.g. Mateus Mané, Wolves); a **new right-back**. All in the pivot / wide / RB areas — **none competes for Foden's central No.10 role.**
 
 ### Man Utd — Carrick (permanent) · 4-2-3-1
 - **In:** Bryan Mbeumo (Brentford), Matheus Cunha, Benjamin Šeško, Youri Tielemans (Villa), Andrey Santos (Chelsea), Senne Lammens (GK).
@@ -152,7 +184,7 @@
 ---
 
 ## Live transfer sagas to watch to ~1 Sept (affect F2 onward)
-- **Gakpo → Spurs** (Liverpool, on hold) · **Barcola → Liverpool** (can't register GW1) · **Sarr → Galatasaray/Fenerbahçe** (Palace) · **Woltemade → loan out** (Newcastle) · **Baleba → Man Utd** (Brighton, imminent) · **Emi Martínez → Juventus** (Villa) · **Ben White → Everton** (Arsenal) · **Bouaddi/Koné → Man City** · **Savinho → Spurs** (City then buy a winger) · **Sancho → Brentford** (exploratory) · **Enzo Fernández → Man City COLLAPSED** — staying at Chelsea · Newcastle chasing a CM; Forest chasing a CM.
+- **Gakpo → Spurs** (Liverpool, on hold) · **Barcola → Liverpool** (can't register GW1) · **Sarr → Galatasaray/Fenerbahçe** (Palace) · **Woltemade → loan out** (Newcastle) · **Baleba → Man Utd** (Brighton, imminent) · **Emi Martínez → Juventus** (Villa) · **Ben White → Everton** (Arsenal) · **Bouaddi/Koné → Man City** · **Sávio → Spurs** (City then buy a winger) · **Sancho → Brentford** (exploratory) · **Enzo Fernández → Man City COLLAPSED** — staying at Chelsea · Newcastle chasing a CM; Forest chasing a CM.
 
 ## Items to VERIFY (research conflicted or user-flagged)
 1. **Newcastle manager = Jaïssle** (RESOLVED, Aug-2026 audit — "Howe" was a stale-source read).

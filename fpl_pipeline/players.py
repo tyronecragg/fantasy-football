@@ -100,28 +100,29 @@ def normalize_start_probs(lineups, target=11.0):
 def _dc_table(dc_stats, params_row, improved=True):
     """Defensive Contribution sheet equivalent: probability of hitting the DC threshold.
 
-    Improved mode SHRINKS each player's own hit-probability toward the reliable-population
-    average in proportion to his evidence: weight = nineties / config.DC_SHRINK_NINETIES,
-    capped at 1 (one full match = 25% own + 75% average; four or more = own). Under
+    Improved mode SHRINKS each player's own DC RATE (dc90) toward the reliable-population average
+    dc90 in proportion to his evidence, THEN converts to a probability: weight = nineties /
+    config.DC_SHRINK_NINETIES, capped at 1: at gate G, one full match = (1/G) own + rest average, and
+    G-or-more full matches = his own rate untouched. Under
     config.DC_SHRINK_MIN_NINETIES (0.65 nineties ~= 59 min) the weight is zero - cameos are not
-    evidence - so those players get the average, as do players with no minutes at all. The average is the mean hit-probability of the reliable (>= cap) players,
-    recomputed each run so it tracks the current blended data. Blending in probability space
-    (not rate space) keeps the zero-evidence fallback equal to the population's expected
-    probability — the right prior for a player we know nothing about.
+    evidence - so those players get the average, as do players with no minutes at all. The average is
+    the mean dc90 of the reliable (>= gate) players, recomputed each run so it tracks the current data.
+    Blending the RATE (not the probability) means "credit his real minutes at his rate, fill the rest
+    with average-quality minutes" - the interpretable minutes-topped-up-to-the-gate model.
 
-    Parity keeps the workbook's hard cliff — own rate at >= 4 nineties, otherwise the frozen
+    Parity keeps the workbook's hard cliff — own PROBABILITY at >= 4 nineties, otherwise the frozen
     params_row["average_dc90"] — so its output stays byte-identical."""
     df = dc_stats.copy()
     n = df["nineties"].fillna(0).astype(float)
     df["prob"] = model.dc_probability(df["dc90"], params_row["sd"], params_row["threshold"])
     if improved:
         reliable = n >= config.DC_SHRINK_NINETIES
-        avg = (float(df.loc[reliable, "prob"].mean()) if reliable.any()
-               else float(params_row["average_dc90"]))
+        avg_dc90 = float(df.loc[reliable, "dc90"].mean()) if reliable.any() else float(df["dc90"].mean())
         w = (n / config.DC_SHRINK_NINETIES).clip(0.0, 1.0)
         w = w.where(n >= config.DC_SHRINK_MIN_NINETIES, 0.0)   # under ~59 min played: no evidence
         df["dc_weight"] = w
-        df["prob_filled"] = w * df["prob"].fillna(avg) + (1.0 - w) * avg
+        blended = w * df["dc90"].fillna(avg_dc90) + (1.0 - w) * avg_dc90   # blend the RATE
+        df["prob_filled"] = model.dc_probability(blended, params_row["sd"], params_row["threshold"])
     else:
         df["prob_filled"] = df["prob"].where(n >= 4, params_row["average_dc90"])
     return df

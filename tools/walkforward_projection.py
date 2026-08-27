@@ -36,7 +36,7 @@ from tools.backtest_projections import STATS  # noqa: E402
 from tools.train_projection_model import (  # noqa: E402
     SEASON, SPACE, _fit, _mae, _predict, _prep, _sample_params)
 
-N_TRIALS, SEED, MIN_TRAIN = 30, 0, 300
+N_TRIALS, SEED, MIN_TRAIN = 60, 0, 300   # 60 (was 30): the widened SPACE has 2 more dims to cover
 
 
 def make_folds(df, embargo=0):
@@ -87,8 +87,19 @@ def run_component(stat, path, candidates, embargo=0):
     test = eval_on_test(best, df, X, y, folds)                        # score on TEST
 
     base, model = _mae(test["predicted"], test["actual"]), _mae(test["model"], test["actual"])
+    # For blended stats the real bar isn't the raw baseline but the DEPLOYED blend. Compare the
+    # blended baseline (old serving: w*baseline+(1-w)*odds) with the blended model (deployed:
+    # w*model+(1-w)*odds) — the latter is what actually serves, so blM<blB is what justifies it.
+    w = config.PROJECTION_BLEND.get(stat)
+    if w is not None and "persistence" in test.columns:
+        pers = pd.to_numeric(test["persistence"], errors="coerce")
+        blB = _mae(w * pd.to_numeric(test["predicted"], errors="coerce") + (1 - w) * pers, test["actual"])
+        blM = _mae(w * test["model"] + (1 - w) * pers, test["actual"])
+        bstr = f"{blB:>8.4f}{blM:>9.4f}{(blB - blM) / blB * 100:>+7.1f}%"
+    else:
+        bstr = f"{'-':>8}{'-':>9}{'-':>7}"
     print(f"{stat:<12}{len(folds):>5}{len(test):>7} | {base:>8.4f}{model:>8.4f}"
-          f"{(base - model) / base * 100:>+7.1f}%")
+          f"{(base - model) / base * 100:>+7.1f}% |{bstr}")
     return dict(stat=stat, test=test, best=best, folds=folds)
 
 
@@ -123,8 +134,9 @@ def main():
     tdir = os.path.join(config.OUTPUTS_DIR, "training")
     print(f"walk-forward on {SEASON}: leak-free folds, embargo={args.embargo}w, "
           f"{N_TRIALS} candidate sets, common set per component by pooled VAL\n")
-    print(f"{'component':<12}{'folds':>5}{'nTest':>7} | {'base':>8}{'model':>8}{'impr':>8}")
-    print("-" * 48)
+    print(f"{'component':<12}{'folds':>5}{'nTest':>7} | {'base':>8}{'model':>8}{'impr':>8} | "
+          f"{'blB':>8}{'blM':>9}{'blM>blB':>8}")
+    print("-" * 68)
     results = []
     for stat in STATS:
         path = os.path.join(tdir, f"train_{stat}.csv")

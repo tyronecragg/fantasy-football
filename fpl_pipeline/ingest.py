@@ -9,7 +9,7 @@ import pandas as pd
 
 from . import config
 from .io_utils import read_csv_tolerant
-from .names import apply_player_names as _apply_name_changes
+from .names import apply_player_names as _apply_name_changes, apply_team_names as _apply_team_names
 
 
 def load_fpl_players():
@@ -50,7 +50,22 @@ def _dc_source(data_dir):
     df["name"] = _apply_name_changes(df["first_name"] + " " + df["second_name"])
     df["nineties"] = (df["minutes"] / 90).round(2)
     df["position"] = df["position"].map(config.POSITION_MAP)
+    teams = pd.read_csv(os.path.join(data_dir, "teams.csv")).set_index("code")["name"]
+    df["team"] = _apply_team_names(df["team_code"].map(teams))     # normalised, to detect club changes
     return df.rename(columns={"defensive_contribution_per_90": "dc90"})
+
+
+def _merge_external_prior(prior):
+    """Add face-value DefCon priors (Championship / foreign leagues, from tools/build_dc_prior.py)
+    for players the FPL PL prior has no row for. FPL history always wins on overlap; the external
+    rows only FILL GAPS. Columns aligned to the FPL prior: name-indexed dc90, minutes, team. Same-club
+    promoted players carry their own club as the team, so the mover discount does NOT fire (face value)."""
+    path = config.EXTERNAL_DC_PRIOR
+    if not os.path.exists(path):
+        return prior
+    ext = pd.read_csv(path).dropna(subset=["dc90"]).drop_duplicates(subset="name").set_index("name")
+    new = ext[~ext.index.isin(prior.index)][["minutes", "team", "dc90"]]
+    return pd.concat([prior[["minutes", "team", "dc90"]], new]) if len(new) else prior
 
 
 def load_defensive_contributions():
@@ -77,11 +92,17 @@ def load_defensive_contributions():
     if os.path.isdir(prior_dir):
         prior = (_dc_source(prior_dir).dropna(subset=["dc90"])
                  .drop_duplicates(subset="name").set_index("name"))
+        prior = _merge_external_prior(prior)
         m_pri = (df["name"].map(prior["minutes"]).fillna(0.0)
                  .clip(upper=config.DC_PRIOR_CAP_MINUTES))
-        num = num + m_pri * df["name"].map(prior["dc90"]).fillna(0.0)
-        rate_denom = w * m_cur + m_pri    # recency-tilted, for the dc90 weighted average
-        evidence = m_cur + m_pri          # true minutes, for the reliability/shrinkage count
+        # MOVERS: a player at a different club than last season has a stale role, so his prior counts
+        # only DC_MOVER_PRIOR_WEIGHT in the RATE blend (not the evidence). Requires both teams known.
+        prior_team = df["name"].map(prior["team"])
+        mover = df["team"].notna() & prior_team.notna() & (df["team"] != prior_team)
+        prior_rate = m_pri * mover.map({True: config.DC_MOVER_PRIOR_WEIGHT, False: 1.0}).astype(float)
+        num = num + prior_rate * df["name"].map(prior["dc90"]).fillna(0.0)
+        rate_denom = w * m_cur + prior_rate   # recency- and mover-tilted, for the dc90 weighted average
+        evidence = m_cur + m_pri              # true minutes (mover discount does NOT touch evidence)
     else:
         rate_denom = w * m_cur
         evidence = m_cur

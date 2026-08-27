@@ -8,6 +8,8 @@ SPORTSBET_DIR = os.path.join(ROOT, "sportsbet")
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 COEFFICIENTS_JSON = os.path.join(DATA_DIR, "coefficients.json")
 WORKBOOK = os.path.join(ROOT, "Fantasy Premier League.xlsx")
+# Odds provenance manifest — which sportsbet markets are real vs synthetic right now (fpl_pipeline/provenance.py)
+PROVENANCE_JSON = os.path.join(SPORTSBET_DIR, "_provenance.json")
 
 SEASON = "2026-2027"
 FPL_DATA_DIR = os.path.join(ROOT, "fpl_data", "FPL-Core-Insights", "data", SEASON)
@@ -83,6 +85,9 @@ PROJECTION_BLEND = {"score1": 0.70, "assist": 0.85, "saves3": 0.85}
 # walk-forward (2025-26); score1's F1-blend already wins, assist/yellow never do. saves3 keeps
 # its PROJECTION_BLEND. See tools/save_projection_models.py + fpl_pipeline/projection_serving.py.
 USE_PROJECTION_MODEL = True
+# assist is NOT here: the model beats the RAW baseline (+2%) but the deployed serving blends 0.85
+# with the current odds, and the blended BASELINE beats the blended MODEL (-2.1% walk-forward,
+# 2026-08). The F1 anchor is what helps attacking stats, not the tree. score1 same. See memory.
 PROJECTION_MODEL_STATS = {"clean_sheet": "Clean Sheet", "concede2": "Concede 2+ Goals",
                           "saves3": "3+ Saves"}
 
@@ -111,6 +116,12 @@ N_FIXTURES = 6
 # 19 current matches, current-dominated in the run-in. DefCon has only one prior season
 # (2025-26; the stat is new), so this is the deepest history available.
 DC_PRIOR_CAP_MINUTES = 1710
+# Face-value DefCon prior for players with NO Premier League history — promoted-club (Championship)
+# and foreign-league signings — built by tools/build_dc_prior.py from raw defensive components
+# (name, team, position, dc90 proxy, minutes). Merged in load_defensive_contributions ONLY where the
+# FPL PL prior has no row for that name, so a good new player starts from real evidence, not the average.
+# Absent file -> no external priors (parity mode uses the workbook loader and never touches this).
+EXTERNAL_DC_PRIOR = os.path.join(INPUTS_DIR, "external_dc_prior.csv")
 # Improved mode: this season's minutes are weighted this many times prior-season minutes when
 # blending the DC RATE (dc90) - recent form counts for more. Applies ONLY to the rate's weighted
 # average (numerator AND denominator), so it stays a proper mean. It deliberately does NOT touch
@@ -118,10 +129,21 @@ DC_PRIOR_CAP_MINUTES = 1710
 # shrinkage below - a recency preference is not extra evidence, so a player with one recent match
 # is still one match of evidence (25% own / 75% average), not two. Set to 1.0 to disable.
 DC_CURRENT_SEASON_WEIGHT = 2.0
-# Improved mode: a player's own DC hit-probability is shrunk toward the reliable-population
-# average in proportion to his evidence — weight = nineties / DC_SHRINK_NINETIES, capped at 1. So one
-# full match = 25% his own + 75% the average; four or more = his own (minimum below). Parity keeps
-# the workbook's hard >=4 cliff (own rate or the average, nothing in between).
+# Improved mode: for a player who CHANGED CLUBS between seasons, his prior (old-club) minutes count
+# only this fraction in the RATE blend — his old role is stale, so his dc90 leans toward this season's
+# new club. Like DC_CURRENT_SEASON_WEIGHT it tilts only the RATE, NOT the evidence (nineties = true
+# minutes), so a mover keeps full trust but a new-role rate. 1.0 = no mover discount; 0.5 = old club
+# at half weight (≈ this season weighted 2x more, for movers only). Only bites players in BOTH seasons
+# at different clubs — new/promoted players have no prior, so are untouched.
+DC_MOVER_PRIOR_WEIGHT = 0.5
+# Improved mode: a player's own DC RATE (dc90) is shrunk toward the reliable-population average dc90 in
+# proportion to his evidence — weight = nineties / DC_SHRINK_NINETIES, capped at 1. At 4 (@360 min), a
+# player needs four full matches before his own rate is fully trusted; one match = 25% own + 75% average.
+# Set conservative (2026-08) once external DefCon priors backfilled promoted/foreign players (see
+# external_dc_prior.csv): good new players now carry ~20 nineties of prior evidence and clear the gate
+# regardless, so the gate no longer needs to run fast to surface them — it only governs whoever is BOTH
+# thin AND unbackfilled, where slow = fewer single-game blow-ups. Blends the RATE then converts to
+# probability. Parity keeps the workbook's hard >=4 cliff (own rate or the frozen average).
 DC_SHRINK_NINETIES = 4.0
 # ...but a brief cameo counts for nothing: below this many nineties (0.65 = ~59 min, roughly a
 # played-most-of-the-match appearance) the weight is zero (straight population average). At or

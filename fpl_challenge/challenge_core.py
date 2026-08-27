@@ -24,8 +24,33 @@ import pulp
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLAYERS_CSV = os.path.join(ROOT, "outputs", "13_players_master.csv")
+KICKOFFS_CSV = os.path.join(ROOT, "outputs", "fixture_kickoffs.csv")
 INPUTS = os.path.join(ROOT, "inputs")
 XP_COL = "F1 XP"
+
+# Lineups drop ~1h before kickoff, so a player's start is "known" from this long before KO.
+LINEUP_LEAD_MIN = 60
+
+# Kickoffs are stored in UTC; display them in SAST (UTC+2). Timing maths stays in UTC.
+DISPLAY_OFFSET = pd.Timedelta(hours=2)
+
+
+def load_kickoffs(gw="f1"):
+    """team -> UTC kickoff Timestamp for the current gameweek, from fixture_kickoffs.csv
+    (written by tools/betway.py). Empty dict if the file isn't there — timing then unknown."""
+    ko = {}
+    if not os.path.exists(KICKOFFS_CSV):
+        return ko
+    k = pd.read_csv(KICKOFFS_CSV)
+    if "gw" in k.columns and (k["gw"] == gw).any():
+        k = k[k["gw"] == gw]
+    for _, r in k.iterrows():
+        t = pd.to_datetime(r.get("kickoff_utc"), errors="coerce")
+        if pd.notna(t):
+            for tm in (r.get("home_team"), r.get("away_team")):
+                if isinstance(tm, str) and tm.strip():
+                    ko[tm.strip()] = t
+    return ko
 
 FORMATIONS = {
     "1-1-3": (1, 1, 3), "1-2-2": (1, 2, 2), "1-3-1": (1, 3, 1),
@@ -129,6 +154,119 @@ def solve_formation(df, shape, max_per_club):
     return total, xi, df.loc[cap_i]
 
 
+def best_over_formations(df, max_per_club):
+    """Best (total, xi, cap) across all six formations, or None."""
+    best = None
+    for shape in FORMATIONS.values():
+        r = solve_formation(df, shape, max_per_club)
+        if r and (best is None or r[0] > best[0]):
+            best = r
+    return best
+
+
+def highlight_if_start(df, base_total, base_xi, max_per_club, boost_tag,
+                       max_candidates=40, min_gain=0.1):
+    """'Bring in if they start' watchlist, grouped by club.
+
+    Because the Challenge lets you change a player until their match kicks off, a rotation
+    risk you left out becomes worth having the moment they're confirmed. Every player's
+    points scale with start probability, so their value IF they start is eff_xp / start.
+
+    For each non-nailed player (0 < start < 1) not already picked, we raise them to that
+    confirmed value and re-solve every formation; if the best team then beats the base pick,
+    they're a candidate. Candidates are grouped by their own club (i.e. the lineup you watch),
+    listed under that club's provisional picks. Only upgrades worth >= min_gain are shown.
+
+    Timing is NOT wired in yet. Within one match you see the whole XI at once before kickoff,
+    so a same-club swap is always actionable; a CROSS-club swap only works if the incoming
+    player's news lands before the player they'd replace kicks off — check that by eye until
+    fixture kickoff times are available.
+    """
+    if "F1 Start" not in df.columns:
+        return
+    base_names = set(base_xi["Player Name"])
+    start = df["F1 Start"].fillna(0.0)
+    base = df["Player Name"].isin(base_names)
+    min_base_eff = df.loc[base, "eff_xp"].min()
+    cond_eff = df["eff_xp"] / start.clip(lower=1e-6)
+    cond_cap = df["cap_bonus"] / start.clip(lower=1e-6)
+
+    # only uncertain starters who, confirmed, could out-score the weakest current pick
+    cand = df.index[(start > 0.0) & (start < 1.0) & (~base) & (cond_eff > min_base_eff)]
+    cand = sorted(cand, key=lambda i: cond_eff[i], reverse=True)[:max_candidates]
+
+    hits, hidden = [], 0
+    for i in cand:
+        tmp = df.copy()
+        tmp.loc[i, "eff_xp"] = cond_eff[i]
+        tmp.loc[i, "cap_bonus"] = cond_cap[i]
+        best = best_over_formations(tmp, max_per_club)
+        if not best or best[0] <= base_total + 1e-6:
+            continue
+        new_names = set(best[1]["Player Name"])
+        if df.loc[i, "Player Name"] not in new_names:
+            continue
+        gain = best[0] - base_total
+        if gain < min_gain:
+            hidden += 1
+            continue
+        hits.append((i, cond_eff[i], gain, base_names - new_names))
+
+    # timing: a swap works only if the incoming player's lineup news (~LINEUP_LEAD_MIN before
+    # their kickoff) lands before the player they'd replace kicks off. Same-match swaps always
+    # qualify (you see the whole XI at once). Needs fixture_kickoffs.csv; unknown without it.
+    kickoffs = load_kickoffs()
+    n2t = dict(zip(base_xi["Player Name"], base_xi["Team"]))
+    lead = pd.Timedelta(minutes=LINEUP_LEAD_MIN)
+
+    def swap_status(inc_team, dropped):
+        ki = kickoffs.get(inc_team)
+        outs = [kickoffs.get(n2t.get(n)) for n in dropped]
+        if ki is None or not outs or any(o is None for o in outs):
+            return "timing?"
+        if all(n2t.get(n) == inc_team for n in dropped):
+            return "same match"
+        return "actionable" if (ki - lead) < min(outs) else "TOO LATE"
+
+    def fmt_ko(t):  # stored UTC -> displayed SAST (UTC+2); comparisons above stay in UTC
+        return (t + DISPLAY_OFFSET).strftime("%a %d %b %H:%M SAST") if t is not None else "kickoff ?"
+
+    print("\nBRING IN IF THEY START — watch each club's lineup; if a listed player starts, swap in")
+    print("(only swaps you could actually make in time are shown)")
+
+    # keep only actionable swaps (drop TOO LATE); a club with none left isn't printed
+    picks_by_club = base_xi.groupby("Team")["Player Name"].apply(list).to_dict()
+    hits_by_club, too_late = {}, 0
+    for i, ce, gain, dropped in hits:
+        club = df.loc[i, "Team"]
+        st = swap_status(club, dropped)
+        if st == "TOO LATE":
+            too_late += 1
+            continue
+        hits_by_club.setdefault(club, []).append((i, ce, gain, dropped, st))
+
+    footer = [f"{n} {label}" for n, label in
+              ((hidden, f"below +{min_gain:.1f}"), (too_late, "too late to swap")) if n]
+    if not hits_by_club:
+        print("    none actionable — worthwhile upgrades are all nailed, selected, or too late")
+        if footer:
+            print(f"    ({', '.join(footer)})")
+        return
+
+    # most valuable club first: biggest available upgrade at the top
+    clubs = sorted(hits_by_club, key=lambda c: max(h[2] for h in hits_by_club[c]), reverse=True)
+    for club in clubs:
+        prov = ", ".join(picks_by_club.get(club, [])) or "none"
+        print(f"\n  {club}  [{fmt_ko(kickoffs.get(club))}]  (provisional: {prov})")
+        for i, ce, gain, dropped, st in sorted(hits_by_club[club], key=lambda h: h[2], reverse=True):
+            r = df.loc[i]
+            who = ", ".join(sorted(dropped)) if dropped else "(reshuffle)"
+            print(f"      [{st:<10}] {r['Position']:<4}{r['Player Name']:<22}"
+                  f"start {r['F1 Start']*100:3.0f}%  xp {ce:5.2f}  +{gain:.2f}  (replaces {who})")
+    if footer:
+        print(f"\n  ({', '.join(footer)} — hidden)")
+
+
 def solve_and_report(df, max_per_club, title_lines, boost_tag):
     """Rank all six formations on the prepared frame and print the best XI.
     df must carry: eff_xp, cap_bonus, boosted (bool). boost_tag labels boosted rows."""
@@ -171,4 +309,6 @@ def solve_and_report(df, max_per_club, title_lines, boost_tag):
     for _, r in top.iterrows():
         print(f"    {r['Position']:<4}{r['Player Name']:<24}{r['Team']:<15}"
               f"xp {r[XP_COL]:4.2f} -> {r['eff_xp']:5.2f}")
+
+    highlight_if_start(df, total, xi, max_per_club, boost_tag)
     return results

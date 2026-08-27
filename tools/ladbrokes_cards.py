@@ -5,8 +5,14 @@ captured players' real odds AND fills every other roster player in the two teams
 match's MAX (longest) odds — the least-bookable captured price, a low, conservative booking
 chance. Matches with too little data (a stray keeper or two) are left entirely synthetic.
 
-    python tools/ladbrokes_cards.py --input odds_raw/ladbrokes.html
-    python tools/ladbrokes_cards.py --input odds_raw/ladbrokes.html --dry-run
+    python tools/ladbrokes_cards.py                         # DEFAULT: fetch the market live
+    python tools/ladbrokes_cards.py --dry-run
+    python tools/ladbrokes_cards.py --har  odds_raw/lad.har # fallback: saved HAR / detail-service JSON
+    python tools/ladbrokes_cards.py --input odds_raw/ladbrokes.html   # fallback: legacy saved HTML
+
+The eurobet detail-service API answers 200 server-to-server (no Cloudflare clearance needed), so a
+bare run fetches directly; --har/--input remain as fallbacks. All feed the same resolve + game-max
+fill + upsert, and mark the bookings market REAL in the provenance manifest.
 
 Names arrive as 'Surname Given...' (and occasionally already 'Given Surname'); each is resolved
 by trying candidate word-orders against the roster, then the shared card name-map
@@ -15,6 +21,7 @@ from the resolved players themselves, so no team-name parsing is needed. Upserts
 pipeline never reads match_name, so only the player and price matter.
 """
 import argparse
+import json
 import os
 import re
 import sys
@@ -23,9 +30,21 @@ from collections import Counter
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from fpl_pipeline import config, names  # noqa: E402
+from fpl_pipeline import config, names, provenance  # noqa: E402
 
-BOOKING_CSV = os.path.join(config.SPORTSBET_DIR, "sportsbet_booking_odds.csv")
+BOOKING_FILE = "sportsbet_booking_odds.csv"
+BOOKING_CSV = os.path.join(config.SPORTSBET_DIR, BOOKING_FILE)
+YELLOW_BET_ID = 12064   # eurobet 'PLAYER TO GET A YELLOW CARD'
+# The eurobet detail-service endpoint for the PL yellow-card market. Server-to-server it answers 200
+# without Cloudflare clearance (unlike the browser HTML), so --fetch pulls it live; --har stays as a
+# fallback if they ever gate it. The trailing id is the market's stable alias code.
+YELLOW_URL = ("https://www.ladbrokes.be/detail-service/sport-schedule/services/meeting/"
+              "calcio/ing-premier-league/tutte/ammonito-si-47-no_1592484600768?prematch=1&live=0")
+FETCH_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:154.0) Gecko/20100101 Firefox/154.0",
+    "Accept": "application/json, text/plain, */*",
+    "X-EB-MarketId": "5", "X-EB-PlatformId": "1", "X-EB-Accept-Language": "en_BE",
+}
 ROSTER_CSV = os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv")
 MIN_PLAYERS = 8   # fewer resolved than this -> treat the match as incomplete, leave it synthetic
 
@@ -77,16 +96,78 @@ def parse_matches(html):
     return out
 
 
+def _yellow_json_blobs(obj):
+    """Yield the eurobet detail-service JSON object(s) that carry the yellow-card market, from
+    either a HAR (log.entries[].response.content.text) or a raw detail-service JSON."""
+    if isinstance(obj, dict) and "log" in obj:
+        for e in obj["log"].get("entries", []):
+            text = e.get("response", {}).get("content", {}).get("text", "")
+            if text and ("ammonito" in text or "YELLOW CARD" in text):
+                try:
+                    yield json.loads(text)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+    else:
+        yield obj
+
+
+def _parse_detail(doc):
+    """eurobet detail-service doc (HAR or raw JSON) -> [(home, away, [(name, decimal_odds)...])...].
+    oddValue is decimal odds x100 (285 -> 2.85); only the 'Yes' side (resultCode 1) is taken."""
+    out = []
+    for j in _yellow_json_blobs(doc):
+        for dg in j.get("result", {}).get("dataGroupList", []):
+            for item in dg.get("itemList", []):
+                ev = item.get("eventInfo", {})
+                home = ev.get("teamHome", {}).get("description", "").strip()
+                away = ev.get("teamAway", {}).get("description", "").strip()
+                players = []
+                for bg in item.get("betGroupList", []):
+                    if bg.get("betId") != YELLOW_BET_ID:
+                        continue
+                    for og in bg.get("oddGroupList", []):
+                        raw = og.get("oddGroupDescription", "").strip()   # 'Surname Given'
+                        yes = next((o.get("oddValue") for o in og.get("oddList", [])
+                                    if o.get("resultCode") == 1), None)
+                        if raw and yes:
+                            players.append((raw, yes / 100.0))
+                if players:
+                    out.append((home, away, players))
+    return out
+
+
+def parse_har(path):
+    return _parse_detail(json.load(open(path, encoding="utf-8")))
+
+
+def fetch_yellow(url=YELLOW_URL):
+    import requests
+    r = requests.get(url, headers=FETCH_HEADERS, timeout=30)
+    r.raise_for_status()
+    return _parse_detail(r.json())
+
+
 def main():
     ap = argparse.ArgumentParser(description="Ingest Ladbrokes booking odds into the pipeline CSV.")
-    ap.add_argument("--input", required=True, help="saved Ladbrokes 'To Be Booked' HTML file")
+    src = ap.add_mutually_exclusive_group()   # none given -> fetch live (the default)
+    src.add_argument("--input", help="saved Ladbrokes 'To Be Booked' HTML file (fallback)")
+    src.add_argument("--har", help="saved HAR / eurobet detail-service JSON (fallback)")
+    ap.add_argument("--url", default=YELLOW_URL, help="override the fetch endpoint")
     ap.add_argument("--dry-run", action="store_true", help="show what would change, write nothing")
     args = ap.parse_args()
 
-    html = open(args.input, encoding="utf-8").read()
-    matches = parse_matches(html)
-    if not matches:
-        sys.exit("No matches parsed — check the saved HTML is the 'To Be Booked' page.")
+    if args.input:
+        matches = parse_matches(open(args.input, encoding="utf-8").read())
+        if not matches:
+            sys.exit("No matches parsed — check the saved HTML is the 'To Be Booked' page.")
+    elif args.har:
+        matches = parse_har(args.har)
+        if not matches:
+            sys.exit("No yellow-card market found in the HAR/JSON (expected betId 12064 / 'ammonito').")
+    else:                                       # default: fetch live
+        matches = fetch_yellow(args.url)
+        if not matches:
+            sys.exit("Fetched OK but no yellow-card market found (endpoint or betId 12064 changed?).")
 
     ros = pd.read_csv(ROSTER_CSV)
     resolve = make_resolver(list(ros["name"]))
@@ -134,7 +215,11 @@ def main():
     kept = existing[~existing["player_name"].isin(new["player_name"])]
     out = pd.concat([kept, new], ignore_index=True)
     out.to_csv(BOOKING_CSV, index=False)
-    print(f"\nWrote {len(new)} players ({len(existing) - len(kept)} replaced); {len(out)} rows total.")
+    n_matches = sum(1 for m in matches if len({resolve(r) for r, _ in m[2]} - {None}) >= MIN_PLAYERS)
+    provenance.mark(BOOKING_FILE, "real", "ladbrokes",
+                    f"{len(new)} players over {n_matches} priced matches (game-max fill)")
+    print(f"\nWrote {len(new)} players ({len(existing) - len(kept)} replaced); {len(out)} rows total. "
+          f"Bookings marked REAL (provenance).")
 
 
 if __name__ == "__main__":

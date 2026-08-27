@@ -719,7 +719,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                              additional_budget=0.0, bench_slot_weights=None, gk_bench_weights=None,
                              force_transfer_out=None, num_solutions=3, max_defensive_players_per_team=3,
                              force_transfer_in=None, tie_breaker=None,
-                             tie_break_mode='differential', xp_tolerance=0.5):
+                             tie_break_mode='differential', xp_tolerance=0.5, value_weight=0.0):
     # Set default weights
     if fixture_weights is None:
         fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4, 0.25]
@@ -745,6 +745,9 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     print(f"Finding top {num_solutions} transfer combinations")
     print(f"Using fixture weights: {[f'{w:.2f}' for w in weights]}")
     print(f"Additional budget available: £{additional_budget:.1f}m")
+    if value_weight:
+        print(f"Value preference: {value_weight:.2f} weighted XP per £1.0m of squad value "
+              f"(accepts {value_weight * 0.1:.2f} lower XP per £0.1m saved)")
     if len(set(bench_slot_weights)) == 1:
         print(f"Bench slot weights (sub order 1/2/3): {[f'{w:.2f}' for w in bench_slot_weights[0]]}")
     else:
@@ -925,6 +928,15 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 bench_slot_weights[i], f"s{solution_num}_{fixture}"))
 
         xp_expr = pulp.lpSum(objective_terms)
+        # Value preference: charge value_weight weighted-XP per £1.0m of squad cost, so the optimiser
+        # keeps money in the bank unless XP pays for the spend. A transfer to a player £0.1m cheaper is
+        # then taken even at up to value_weight*0.1 lower weighted XP (value_weight=1.0 -> 0.5 XP for a
+        # £0.5m saving, per Tyrone's spec). value_weight=0.0 -> pure XP, unchanged. Folded into xp_expr
+        # so the tie-break ceiling/tolerance track the SAME objective; reported points are recomputed
+        # from the chosen squad below, so this only steers selection, it does not distort displayed XP.
+        if value_weight:
+            squad_cost = pulp.lpSum(df.loc[i, 'Cost'] * squad_vars[i] for i in df.index)
+            xp_expr = xp_expr - value_weight * squad_cost
         prob += xp_expr
 
         # Constraint 1: Exactly 15 players in squad
@@ -1948,7 +1960,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   compute_solutions=20, show_frequency_analysis=True,
                                   min_frequency=2, max_defensive_players_per_team=3,
                                   ownership_weights=None, reliability_weights=None,
-                                  bank_lookahead_gws=None):
+                                  bank_lookahead_gws=None, value_weight=0.0):
     # Fixture weights come from the two components unless one is passed explicitly
     # (an explicit fixture_weights still wins, so old call sites keep working).
     derived = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures)
@@ -2000,7 +2012,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             fixture_weights, 'Players', additional_budget, bench_slot_weights,
             gk_bench_weights_used, force_transfer_out, compute_solutions, max_defensive_players_per_team,
             force_transfer_in=force_transfer_in, tie_breaker=tie_breaker,
-            tie_break_mode=tie_break_mode, xp_tolerance=xp_tolerance
+            tie_break_mode=tie_break_mode, xp_tolerance=xp_tolerance, value_weight=value_weight
         )
         all_solutions, df = result if result else (None, None)
 
@@ -2071,12 +2083,15 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 
 result = main_multi_transfer_optimiser(
     excel_file="outputs/13_players_master.csv",
-    max_transfers=1,
-    additional_budget=0.0,
+    max_transfers=0,
+    additional_budget=0.5,
     num_fixtures=8,
     compute_solutions=1,
     num_solutions_display=1,
-    bank_lookahead_gws=2,
+    bank_lookahead_gws=1,
+    # Weighted-XP charged per £1.0m of squad value: prefers cheaper squads/transfers, trading XP for
+    # bank at this rate. 0.0 = pure XP (off). e.g. 1.0 -> accept 0.5 lower weighted XP to save £0.5m.
+    value_weight=0.5,
     # How fast the squad churns / how fixable a bad far fixture is - independent of forecast quality
     ownership_weights=[1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558],
     # How much the projection is trusted - re-measure from the backtest as the archive grows

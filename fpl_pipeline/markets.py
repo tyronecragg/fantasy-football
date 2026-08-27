@@ -47,15 +47,25 @@ def longshot_calibrate(prob, enabled=True):
     return (p * mult).clip(0, 1).where(p.notna())
 
 
-def player_market(df, calibrate=False):
+def player_market(df, calibrate=False, roster_names=None):
     """Goalscorer / 2+ goals / assist CSVs: player_name, match_id, odds_decimal.
 
     `calibrate` is improved-mode only. Parity mode must reproduce the workbook exactly, and
     the workbook applied a flat margin, so the longshot correction is a deliberate
     divergence and stays off there.
+
+    Improved mode also resolves names at READ time (the roster-side name_mappings, then an
+    accent/case-insensitive match to the roster), mirroring yellow_market. Betway cleans names
+    on write too, but that only helps future scrapes — read-time resolution means a mapping
+    added after a scrape takes effect on the next plain pipeline run, no re-scrape needed.
     """
+    players = df.iloc[:, 0]
+    if calibrate:
+        players = names.apply_player_names(players)
+        if roster_names is not None:
+            players = names.resolve_to_roster(players, roster_names)
     return pd.DataFrame({
-        "player": df.iloc[:, 0],
+        "player": players,
         "prob": longshot_calibrate(implied(df.iloc[:, 2], config.MARGIN_PLAYER), calibrate),
     })
 
@@ -139,10 +149,10 @@ def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None, roster_names=Non
         f2_cs = _without_f1_duplicate(sportsbet["clean_sheet"], f2_cs, "clean-sheet")
         f2_tg = _without_f1_duplicate(sportsbet["team_goals"], f2_tg, "team-goals")
     return {
-        "score1": player_market(sportsbet["score1"], calibrate),
-        "score2": player_market(sportsbet["score2"], calibrate),
-        "assist": player_market(sportsbet["assist"], calibrate),
-        "assist2": player_market(sportsbet["assist2"], calibrate),
+        "score1": player_market(sportsbet["score1"], calibrate, roster_names),
+        "score2": player_market(sportsbet["score2"], calibrate, roster_names),
+        "assist": player_market(sportsbet["assist"], calibrate, roster_names),
+        "assist2": player_market(sportsbet["assist2"], calibrate, roster_names),
         "yellow": yellow_market(sportsbet["yellow"], roster_names, improved=calibrate),
         "clean_sheet": clean_sheet_market(sportsbet["clean_sheet"]),
         "concede": concede_market(sportsbet["team_goals"]),

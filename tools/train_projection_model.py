@@ -48,12 +48,17 @@ FIXED = dict(objective="regression", n_estimators=3000, learning_rate=0.03,
 # Searched — XGBoost-style knobs mapped to LightGBM names (gamma->min_split_gain,
 # min_child_weight = min hessian sum, alpha->reg_alpha). num_leaves is tied to max_depth
 # below so depth is the effective control on this leaf-wise learner.
-SPACE = dict(max_depth=[3, 4, 5, 6, 8],
+# Widened 2026-08: added reg_lambda + learning_rate to the search and stronger-regularisation
+# options (depth 2, higher min_child_weight/reg_alpha), to test whether harder tuning lets the tree
+# match the smooth F1-blend. Overrides in SPACE win over FIXED (see _sample_params).
+SPACE = dict(max_depth=[2, 3, 4, 5, 6, 8],
              subsample=[0.6, 0.8, 1.0],           # bagging_fraction
-             colsample_bytree=[0.6, 0.8, 1.0],    # feature_fraction
+             colsample_bytree=[0.5, 0.6, 0.8, 1.0],   # feature_fraction
              min_split_gain=[0.0, 0.01, 0.1],     # gamma
-             min_child_weight=[1e-3, 1.0, 5.0],   # min hessian in leaf
-             reg_alpha=[0.0, 0.1, 1.0])           # alpha
+             min_child_weight=[1e-3, 1.0, 5.0, 20.0],   # min hessian in leaf
+             reg_alpha=[0.0, 0.1, 1.0, 5.0],      # alpha (L1)
+             reg_lambda=[0.5, 1.0, 5.0],          # L2
+             learning_rate=[0.02, 0.03, 0.05])
 
 
 def _mae(pred, actual):

@@ -20,10 +20,17 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from fpl_pipeline import config  # noqa: E402
-from tools.train_projection_model import CATEGORICAL, FIXED, SEASON, _prep  # noqa: E402
+from tools.train_projection_model import CATEGORICAL, FIXED, SEASON  # noqa: E402
 from tools.build_training_data import FEATURES  # noqa: E402
 
-# Walk-forward-selected common hyperparameters per deployable component (19-feature model)
+# Stats served WITH the baseline `predicted` as an extra feature. Currently EMPTY: assist was tried
+# (2026-08) — `predicted` beats the RAW baseline but the deployed 0.85 blend of the MODEL loses to
+# the 0.85 blend of the BASELINE (-2.1% walk-forward), so assist stays on the blended baseline. The
+# per-stat-feature machinery is kept for the next candidate. `predicted` is leak-free (audited).
+PREDICTED_STATS = set()
+
+# Walk-forward-selected common hyperparameters per deployable component (defensive markets only —
+# the attacking stats are better served by their F1-blend than by any tree; see memory).
 DEPLOY = {
     "clean_sheet": dict(max_depth=3, subsample=1.0, colsample_bytree=0.6,
                         min_split_gain=0.0, min_child_weight=0.001, reg_alpha=1.0),
@@ -35,10 +42,24 @@ DEPLOY = {
 VAL_WEEKS = 2   # last N prediction-weeks held out to early-stop the tree count
 
 
+def features_for(stat):
+    return FEATURES + (["predicted"] if stat in PREDICTED_STATS else [])
+
+
+def _prep(df, feats):
+    X = df[feats].copy()
+    for c in feats:
+        if c not in CATEGORICAL:
+            X[c] = pd.to_numeric(X[c], errors="coerce")
+    for c in CATEGORICAL:
+        X[c] = X[c].astype("category")
+    return X
+
+
 def train_one(stat, params):
     df = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "training", f"train_{stat}.csv"))
     df = df[df["season"] == SEASON].dropna(subset=["actual"]).reset_index(drop=True)
-    X, y = _prep(df), df["actual"].astype(float)
+    X, y = _prep(df, features_for(stat)), df["actual"].astype(float)
     weeks = np.sort(df["gw_from"].unique())
     cut = weeks[-VAL_WEEKS]
     tr, va = df["gw_from"] < cut, df["gw_from"] >= cut
@@ -57,7 +78,8 @@ def main():
         model, trees, ntr, nva = train_one(stat, params)
         joblib.dump(model, os.path.join(outdir, f"proj_{stat}.joblib"))
         print(f"{stat:<12}{trees:>6}{ntr:>9}{nva:>7}")
-    joblib.dump({"features": FEATURES, "categorical": CATEGORICAL, "deploy": list(DEPLOY)},
+    joblib.dump({"features": FEATURES, "categorical": CATEGORICAL, "deploy": list(DEPLOY),
+                 "features_by_stat": {s: features_for(s) for s in DEPLOY}},
                 os.path.join(outdir, "proj_meta.joblib"))
     print(f"\nsaved {len(DEPLOY)} models + proj_meta.joblib -> {os.path.relpath(outdir, ROOT)}")
 

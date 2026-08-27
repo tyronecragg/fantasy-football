@@ -17,6 +17,7 @@ def seasons(tmp_path, monkeypatch):
                                 for i, (n, _, _) in enumerate(rows)])
         stats = pd.DataFrame([{"id": i, "gw": 1, "minutes": m, "defensive_contribution_per_90": dc}
                               for i, (_, m, dc) in enumerate(rows)])
+        pd.DataFrame([{"code": 1, "name": "T"}]).to_csv(d / "teams.csv", index=False)
         players.to_csv(d / "players.csv", index=False)
         stats.to_csv(d / "playerstats.csv", index=False)
 
@@ -51,24 +52,48 @@ def test_minutes_weighted_blend(seasons):
     assert dc.loc["D X", "nineties"] == 0.0
 
 
+def test_external_prior_fills_gaps_only(tmp_path, monkeypatch):
+    """External DefCon prior backfills players with NO FPL history; never overrides one who has it."""
+    ext = pd.DataFrame({"name": ["new_signing", "has_pl_history"], "team": ["Hull City", "Arsenal"],
+                        "position": ["DEF", "MID"], "dc90": [9.0, 99.0], "minutes": [1710, 1710],
+                        "source": ["championship_2025_26", "championship_2025_26"]})
+    path = tmp_path / "external_dc_prior.csv"
+    ext.to_csv(path, index=False)
+    monkeypatch.setattr(config, "EXTERNAL_DC_PRIOR", str(path))
+    fpl_prior = pd.DataFrame({"minutes": [1000.0], "team": ["Arsenal"], "dc90": [5.0]},
+                             index=pd.Index(["has_pl_history"], name="name"))
+    merged = ingest._merge_external_prior(fpl_prior)
+    assert merged.loc["new_signing", "dc90"] == 9.0            # gap filled from external
+    assert merged.loc["has_pl_history", "dc90"] == 5.0         # FPL history wins, external 99.0 ignored
+
+
+def test_external_prior_absent_is_noop(monkeypatch):
+    monkeypatch.setattr(config, "EXTERNAL_DC_PRIOR", "/nonexistent/path.csv")
+    fpl_prior = pd.DataFrame({"minutes": [1000.0], "team": ["Arsenal"], "dc90": [5.0]},
+                             index=pd.Index(["x"], name="name"))
+    assert ingest._merge_external_prior(fpl_prior).equals(fpl_prior)
+
+
 def test_dc_shrinkage_toward_population_average():
-    """Improved mode: weight = nineties/4 capped at 1 on the player's own hit-probability,
-    the rest on the reliable-population mean; parity keeps the hard >=4 cliff."""
+    """Improved mode: the RATE (dc90) is shrunk toward the reliable-population mean dc90 by
+    weight = min(nineties/DC_SHRINK_NINETIES, 1) (zeroed below DC_SHRINK_MIN_NINETIES), THEN
+    converted to a probability. Assertions replicate the formula so they track any gate.
+    Parity keeps the hard >=4 cliff on the probability."""
     import pandas as pd
     from fpl_pipeline import players, model, config
+    g, mn = config.DC_SHRINK_NINETIES, config.DC_SHRINK_MIN_NINETIES
     prm = pd.Series({"threshold": 10, "sd": 4.27, "average_dc90": 0.44})
-    dc = pd.DataFrame({"name": ["a", "b", "c", "d", "e", "f", "g"],
+    dc = pd.DataFrame({"name": ["a", "b", "c", "d", "e", "f", "gg"],
                        "dc90": [12.0, 8.0, 14.0, 14.0, float("nan"), 14.0, 14.0],
                        "nineties": [10.0, 10.0, 1.0, 3.0, 0.0, 0.4, 0.65]})
     out = players._dc_table(dc, prm, improved=True).set_index("name")
-    avg = model.dc_probability(pd.Series([12.0, 8.0]), 4.27, 10).mean()
-    own_c = model.dc_probability(pd.Series([14.0]), 4.27, 10).iloc[0]
-    assert abs(out.loc["a", "prob_filled"] - out.loc["a", "prob"]) < 1e-12          # reliable: own
-    assert abs(out.loc["c", "prob_filled"] - (0.25 * own_c + 0.75 * avg)) < 1e-12   # 1 ninety: 25/75
-    assert abs(out.loc["d", "prob_filled"] - (0.75 * own_c + 0.25 * avg)) < 1e-12   # 3 nineties: 75/25
-    assert abs(out.loc["e", "prob_filled"] - avg) < 1e-12                            # no evidence: average
-    assert abs(out.loc["f", "prob_filled"] - avg) < 1e-12                            # 0.4 < 0.65: no weight
-    assert abs(out.loc["g", "prob_filled"] - ((0.65 / 4) * own_c + (1 - 0.65 / 4) * avg)) < 1e-12  # 0.65: 0.65/4 own
+    P = lambda rate: model.dc_probability(pd.Series([rate]), 4.27, 10).iloc[0]
+    avg = dc.loc[dc["nineties"] >= g, "dc90"].mean()        # mean dc90 of reliable, same as the code
+    for _, r in dc.iterrows():
+        n = r["nineties"]
+        w = 0.0 if n < mn else min(n / g, 1.0)
+        rate = w * (r["dc90"] if pd.notna(r["dc90"]) else avg) + (1 - w) * avg
+        assert abs(out.loc[r["name"], "prob_filled"] - P(rate)) < 1e-9   # rate-space blend, gate-agnostic
     par = players._dc_table(dc, prm, improved=False).set_index("name")
-    assert par.loc["c", "prob_filled"] == 0.44 and par.loc["d", "prob_filled"] == 0.44  # parity cliff
+    assert par.loc["c", "prob_filled"] == 0.44 and par.loc["d", "prob_filled"] == 0.44  # parity cliff (>=4)
     assert abs(par.loc["a", "prob_filled"] - par.loc["a", "prob"]) < 1e-12

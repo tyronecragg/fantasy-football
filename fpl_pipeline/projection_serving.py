@@ -52,6 +52,9 @@ class Server:
         self.models, self.meta = models, meta
         STATS, FEATURES, add_diffs, dense, prep = _imports()
         self.STATS, self.FEATURES, self.add_diffs, self._prep = STATS, FEATURES, add_diffs, prep
+        self.CATEGORICAL = meta.get("categorical", ["position", "venue"])
+        # per-stat feature lists (assist adds `predicted`); fall back to the global set for old metas
+        self._feats = meta.get("features_by_stat", {s: FEATURES for s in models})
 
         a = archive[archive["Season"] == season].copy()
         # placeholder current-GW rows so the dense reindex reaches M (values unused: form shift(1))
@@ -88,7 +91,19 @@ class Server:
             df["venue"] = m[f"F{k} Venue"].values
             df["horizon"] = k - 1                                    # F{k} predicts M+(k-1)
             df = self.add_diffs(df)                                  # title_diff.../strength_diff/momentum
-            pred = model.predict(self._prep(df)[self.FEATURES])
+            feats = self._feats.get(s, self.FEATURES)
+            if "predicted" in feats:
+                # the pipeline's F{k} baseline (factor x baseline(win_pred)) is exactly the training
+                # `predicted`; read it BEFORE this override replaces it (players.py sets it just above)
+                base_col = f"F{k} {self.STATS[s][3:]}"               # STATS[s] = 'F1 <label>'
+                df["predicted"] = pd.to_numeric(m[base_col], errors="coerce").values
+            X = df[feats].copy()
+            for c in feats:
+                if c not in self.CATEGORICAL:
+                    X[c] = pd.to_numeric(X[c], errors="coerce")
+            for c in self.CATEGORICAL:
+                X[c] = X[c].astype("category")
+            pred = model.predict(X)
             out[s] = pd.Series(pred, index=m.index).clip(0, 1)
         return out
 

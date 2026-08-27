@@ -39,7 +39,7 @@ import pandas as pd
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from fpl_pipeline import config, names  # noqa: E402
+from fpl_pipeline import config, names, provenance  # noqa: E402
 
 BASE = "https://www.betway.co.za/sportsapi/br/v1"
 HEADERS = {
@@ -759,13 +759,23 @@ def write(frames, dry_run=False):
                 old = pd.read_csv(path)
                 if key in PLAYER_PROP and "player_name" in old.columns and tmap is not None:
                     priced_teams = _priced_teams(out, PLAYER_PROP[key], tmap)   # majority teams of priced matches
-                    kept = old[~old["player_name"].map(tmap).isin(priced_teams)]  # unknown team -> kept (safe)
+                    # Resolve legacy spellings before the team lookup: an old row written under an
+                    # unmapped name (e.g. 'Dayann Methalie' before the accent mapping existed) is
+                    # absent from the roster tmap, so it would look 'unknown team -> kept' and
+                    # accumulate a fresh copy every run. Map to canonical first so a priced team's
+                    # stale rows are dropped, then dedupe so the fresh Betway row wins any collision.
+                    old_team = names.apply_player_names(old["player_name"]).map(tmap)
+                    kept = old[~old_team.isin(priced_teams)]  # genuinely-unpriced teams stay (safe)
                     out = pd.concat([out, kept], ignore_index=True)
+                    out = out.drop_duplicates(subset=["player_name", PLAYER_PROP[key]], keep="first")
                 elif key in TEAM_KEY and TEAM_KEY[key] in old.columns and TEAM_KEY[key] in out.columns:
                     kcol = TEAM_KEY[key]
                     out = pd.concat([out, old[~old[kcol].isin(set(out[kcol]))]], ignore_index=True)
             if not dry_run:
                 out.to_csv(path, index=False)
+                kept_n = len(out) - len(frames[key])
+                provenance.mark(fname, "real", "betway",
+                                f"{len(frames[key])} priced" + (f", {kept_n} synthetic kept" if kept_n > 0 else ""))
             kept_n = len(out) - len(frames[key])
             note = f"  ({len(frames[key])} priced, {kept_n} synthetic kept)" if kept_n > 0 else ""
             print(f"  WRITE  {fname:<40} {len(out):>5} rows{note}")
@@ -789,6 +799,35 @@ def write(frames, dry_run=False):
             p = os.path.join(config.OUTPUTS_DIR, fname)
             frames[key].to_csv(p, index=False)
             print(f"  dump   {fname:<40} {len(frames[key]):>5} rows  ({note})")
+
+
+def write_kickoffs(fx_rows, gw_of, dry_run=False):
+    """Emit outputs/fixture_kickoffs.csv — one row per discovered fixture with its UTC
+    kickoff, from the (eventId, 'Home vs. Away', iso_datetime) rows fixtures() already
+    returns. For tools that need match timing (the FPL Challenge late-swap watchlist), and
+    purely additive: it touches no existing file. Covers every fixture found — both
+    gameweeks and any beyond — tagged f1/f2 where the split applies."""
+    rows = []
+    for _eid, label, iso in fx_rows:
+        home, away = split_teams(label)
+        rows.append({"match": label, "home_team": home, "away_team": away,
+                     "kickoff_utc": iso or "", "gw": gw_of.get(label, "")})
+    kf = pd.DataFrame(rows, columns=["match", "home_team", "away_team", "kickoff_utc", "gw"])
+    if kf.empty:
+        print("\nno fixtures discovered — fixture_kickoffs.csv not written")
+        return kf
+    # kickoff_utc is ISO, so lexical sort is chronological; undated ('') sorts last
+    kf = kf.sort_values("kickoff_utc", key=lambda s: s.replace("", "9999")).reset_index(drop=True)
+    path = os.path.join(config.OUTPUTS_DIR, "fixture_kickoffs.csv")
+    if not dry_run:
+        kf.to_csv(path, index=False)
+    where = "dry-run, not written" if dry_run else os.path.relpath(path, config.ROOT)
+    print(f"\nkickoffs -> {where}:")
+    for _, r in kf.iterrows():
+        tag = f"[{r['gw'].upper()}]" if r["gw"] else "    "
+        ko = (r["kickoff_utc"] or "undated")[:16].replace("T", " ")
+        print(f"  {tag} {ko:<16} {r['match']}")
+    return kf
 
 
 if __name__ == "__main__":
@@ -841,6 +880,7 @@ if __name__ == "__main__":
     gw_of, fx = assign_f1_f2(fx_all)
     crosscheck_split([r for r in fx if gw_of.get(r[1]) == "f1"],
                      [r for r in fx if gw_of.get(r[1]) == "f2"])
+    write_kickoffs(fx_all, gw_of, args.dry_run)
     frames, seen = collect(fx, gw_of, delay=args.delay)
     if not wdw.empty:
         # Order the win/draw/win frame as [F1 block][F2 block] and drop the helper 'match'

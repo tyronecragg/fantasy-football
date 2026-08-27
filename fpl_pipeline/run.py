@@ -16,30 +16,37 @@ coefficients_workbook.json.
 import os
 import sys
 
-from . import config, history, ingest, markets, model, names, players, reconcile, team_model
+from . import config, history, ingest, markets, model, names, players, provenance, reconcile, team_model
 from .io_utils import reset_counter, snapshot
 
 
+# Scraped per-player markets that feed the trailing-median PLAYER factors — if any is still
+# synthetic, archiving player history would poison those factors. (two_assists is runtime-derived
+# from assist, not independently scraped, so it does not gate.)
+_PLAYER_MARKETS = ["sportsbet_goalscorer_odds.csv", "sportsbet_two_goals_odds.csv",
+                   "sportsbet_assist_odds.csv", "sportsbet_booking_odds.csv",
+                   "sportsbet_goalkeeper_saves_odds.csv"]
+
+
 def guard_synthetic_archive(gameweek, force=False):
-    """Decide what may be archived while the player odds are pre-season placeholders.
+    """Decide what may be archived, driven by the odds provenance manifest (fpl_pipeline/provenance.py).
 
-    tools/build_preseason_data.py drops sportsbet/SYNTHETIC_NOTE.txt when it writes
-    synthetic odds; delete it by hand once real Betway odds AND Ladbrokes cards have
-    landed (tools/betway.py never auto-removes it).
-
-    Returns "all" | "fixtures_only" | "none". The two archives carry different risk:
-    synthetic PLAYER odds would poison the trailing-median factors, so player history is
-    withheld. MATCH odds can be real while player markets are still closed (they were
-    for GW1 2026-27, pasted by hand), and they are unbackfillable, so fixture history is
-    still recorded - losing a gameweek of real match odds is the worse mistake.
+    Returns "all" | "fixtures_only" | "none". The two archives carry different risk: synthetic PLAYER
+    odds would poison the trailing-median factors, so player history is withheld until EVERY scraped
+    player market is real. MATCH odds can be real while some player markets are still closed, and they
+    are unbackfillable, so fixture history is still recorded - losing real match odds is the worse
+    mistake. The manifest is stamped by the writers (betway=real, synthetic seed/card partials=synthetic),
+    so this self-clears when the last market goes real - no hand-deleting a note. `tools/odds_status.py`
+    shows the current state; --force-archive overrides.
     """
-    note = os.path.join(config.SPORTSBET_DIR, "SYNTHETIC_NOTE.txt")
     if not gameweek:
         return "none"
-    if not os.path.exists(note) or force:
+    if force:
         return "all"
-    print(f"  {os.path.basename(note)} present: not every priced input is a true per-player\n"
-          f"  quote (see the note - e.g. card odds game-max fill for unlisted players).\n"
+    synthetic = [provenance.FRIENDLY.get(f, f) for f in _PLAYER_MARKETS if not provenance.is_real(f)]
+    if not synthetic:
+        return "all"
+    print(f"  Player markets still synthetic: {', '.join(synthetic)} (see tools/odds_status.py).\n"
           f"  Archiving MATCH odds only (unbackfillable); player history withheld so the\n"
           f"  trailing-median factors stay clean. Use --force-archive to record both.")
     return "fixtures_only"
@@ -138,9 +145,17 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
             hint = f" (FPL data suggests GW{guess})" if guess else ""
             print(f"Archives not updated - rerun with --gw N to record this run{hint}")
 
-    top = master.nlargest(10, "Total XP")[["Player Name", "Position", "Team", "Cost", "F1 XP", "Total XP"]]
-    print("\nTop 10 by Total XP:")
-    print(top.to_string(index=False))
+    cols = ["Player Name", "Position", "Team", "Cost", "F1 XP", "Total XP"]
+    print("\nTop 5 by F1 XP:")
+    print(master.nlargest(5, "F1 XP")[cols].to_string(index=False))
+    print("\nTop 5 by Total XP:")
+    print(master.nlargest(5, "Total XP")[cols].to_string(index=False))
+
+    val = master[master["Cost"] > 0].copy()
+    val["XP/£"] = (val["Total XP"] / val["Cost"]).round(3)
+    topv = val.nlargest(5, "XP/£")[["Player Name", "Position", "Team", "Cost", "Total XP", "XP/£"]]
+    print("\nTop 5 by value (Total XP per £):")
+    print(topv.to_string(index=False))
     return master
 
 
