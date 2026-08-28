@@ -17,13 +17,16 @@ import challenge_core as cc
 SIGNINGS_CSV = os.path.join(cc.INPUTS, "fpl_challenge_new_signings.csv")
 
 
-def main():
+def main(exclude=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-stack", dest="stack", action="store_false")
     ap.add_argument("--max-per-club", type=int, default=1)
+    ap.add_argument("--exclude", nargs="*", default=[], metavar="NAME",
+                    help="player names to remove from the pool (quote multi-word names)")
     args = ap.parse_args()
 
     df = cc.load_players()
+    df = cc.apply_exclusions(df, list(exclude or []) + list(args.exclude))
     flags = pd.read_csv(SIGNINGS_CSV)
     signings, missed = cc.match_names(df, flags["Player"].dropna().astype(str))
     df["boosted"] = df["Player Name"].isin(signings)
@@ -41,4 +44,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Exclude players here (or pass --exclude on the command line). Multi-word
+    # names are fine; matching is accent/case-insensitive.
+    main(exclude=[])

@@ -11,13 +11,16 @@ import challenge_core as cc
 MAN_CLUBS = {"Man City", "Man Utd"}
 
 
-def main():
+def main(exclude=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-stack", dest="stack", action="store_false")
     ap.add_argument("--max-per-club", type=int, default=3)
+    ap.add_argument("--exclude", nargs="*", default=[], metavar="NAME",
+                    help="player names to remove from the pool (quote multi-word names)")
     args = ap.parse_args()
 
     df = cc.load_players()
+    df = cc.apply_exclusions(df, list(exclude or []) + list(args.exclude))
     df["boosted"] = df["Team"].isin(MAN_CLUBS)
     df["eff_xp"] = df[cc.XP_COL] * df["boosted"].map({True: 2.0, False: 1.0})
     if args.stack:
@@ -35,4 +38,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Exclude players here (or pass --exclude on the command line). Multi-word
+    # names are fine; matching is accent/case-insensitive.
+    main(exclude=[])

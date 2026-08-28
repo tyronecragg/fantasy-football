@@ -96,6 +96,21 @@ def match_names(df, names):
     return matched, missed
 
 
+def apply_exclusions(df, raw_names):
+    """Drop explicitly-excluded players from the pool before optimising (e.g. a player you
+    already know is injured/benched, or one you simply don't want). Names are matched the
+    same accent/case-insensitive way as everywhere else; unmatched names are reported."""
+    if not raw_names:
+        return df
+    excl, missed = match_names(df, raw_names)
+    if missed:
+        print(f"  ! exclude: no match for {', '.join(missed)}")
+    keep = ~df["Player Name"].isin(excl)
+    if (~keep).any():
+        print(f"  excluding {int((~keep).sum())} player(s): {', '.join(sorted(excl))}")
+    return df[keep].reset_index(drop=True)
+
+
 def _series(df, col):
     return df[col].fillna(0.0) if col in df.columns else pd.Series(0.0, index=df.index)
 
@@ -188,8 +203,18 @@ def highlight_if_start(df, base_total, base_xi, max_per_club, boost_tag,
     start = df["F1 Start"].fillna(0.0)
     base = df["Player Name"].isin(base_names)
     min_base_eff = df.loc[base, "eff_xp"].min()
-    cond_eff = df["eff_xp"] / start.clip(lower=1e-6)
-    cond_cap = df["cap_bonus"] / start.clip(lower=1e-6)
+    # Value IF they start. Only the PRE-BONUS points scale with start (F1 XP Pre = start x
+    # full-match value, exact); the bonus term does not, so dividing the whole XP by start
+    # would over-inflate it. Scale the pre-bonus part, keep the bonus, and lift eff/cap by
+    # that ratio (exact for the x2 weeks; a close approximation for the add-on weeks).
+    if "F1 XP Pre" in df.columns:
+        xppre = df["F1 XP Pre"].fillna(0.0)
+        full_single = xppre / start.clip(lower=1e-6) + (df[XP_COL] - xppre)
+        ratio = full_single / df[XP_COL].where(df[XP_COL].abs() > 1e-9, other=1.0)
+    else:
+        ratio = 1.0 / start.clip(lower=1e-6)       # fallback: whole-XP scaling
+    cond_eff = df["eff_xp"] * ratio
+    cond_cap = df["cap_bonus"] * ratio
 
     # only uncertain starters who, confirmed, could out-score the weakest current pick
     cand = df.index[(start > 0.0) & (start < 1.0) & (~base) & (cond_eff > min_base_eff)]

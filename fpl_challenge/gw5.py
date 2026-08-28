@@ -16,12 +16,15 @@ PER_HIT = 10.0
 NORMAL = 2.0
 
 
-def main():
+def main(exclude=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-per-club", type=int, default=1)
+    ap.add_argument("--exclude", nargs="*", default=[], metavar="NAME",
+                    help="player names to remove from the pool (quote multi-word names)")
     args = ap.parse_args()
 
     df = cc.load_players()
+    df = cc.apply_exclusions(df, list(exclude or []) + list(args.exclude))
     extra = cc.defcon_points(df, PER_HIT - NORMAL)   # the uplift over the 2 pts already in XP
     df["eff_xp"] = df[cc.XP_COL] + extra
     df["cap_bonus"] = df["eff_xp"]
@@ -33,4 +36,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Exclude players here (or pass --exclude on the command line). Multi-word
+    # names are fine; matching is accent/case-insensitive.
+    main(exclude=[])
