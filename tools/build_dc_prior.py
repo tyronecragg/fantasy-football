@@ -19,7 +19,7 @@ NOT. When recoveries are absent, a MID/FWD's proxy would be badly understated (r
 ~half a defensive-mid's count), so we fill the recoveries-per-game from the position median of
 the sources that DO carry it (written to inputs/_dc_prior_recovery_rates.csv), and flag it.
 
-Usage:  python -m tools.build_dc_prior <components.csv> --source championship_2025_26
+Usage:  python -m tools.build_dc_prior inputs/championship_2025_26.csv --source championship_2025_26
         python -m tools.build_dc_prior <ligue1.csv>      --source ligue1_2025_26 --teams Lens,...
 Each run UPSERTS its --source rows into inputs/external_dc_prior.csv (idempotent per source).
 """

@@ -1,6 +1,6 @@
 {
   "gw": 2,
-  "updated": "2026-08-27T23:31:40",
+  "updated": "2026-08-28T11:48:41",
   "markets": {
     "sportsbet_booking_odds.csv": {
       "state": "real",
@@ -12,43 +12,43 @@
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-27T23:31:40"
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_goalscorer_odds.csv": {
       "state": "real",
       "source": "betway",
-      "detail": "432 priced",
-      "ts": "2026-08-27T23:31:40"
+      "detail": "434 priced",
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_two_goals_odds.csv": {
       "state": "real",
       "source": "betway",
-      "detail": "432 priced",
-      "ts": "2026-08-27T23:31:40"
+      "detail": "434 priced",
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_assist_odds.csv": {
       "state": "real",
       "source": "betway",
-      "detail": "364 priced, 4 synthetic kept",
-      "ts": "2026-08-27T23:31:40"
+      "detail": "365 priced, 3 synthetic kept",
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_clean_sheet_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-27T23:31:40"
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_team_goals_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-27T23:31:40"
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_goalkeeper_saves_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-27T23:31:40"
+      "ts": "2026-08-28T11:48:41"
     },
     "sportsbet_two_assists_odds.csv": {
       "state": "derived",

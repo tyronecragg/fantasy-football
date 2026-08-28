@@ -5,7 +5,7 @@ FPL data in, per-player expected points (XP) over the next eight fixtures out, f
 PuLP squad optimisers. Every stage is an inspectable DataFrame snapshotted to `outputs/`.
 
 The workbook itself is retired — kept only as a frozen reference for parity validation.
-`PIPELINE_MAP.md` documents how the original workbook worked and how it was replicated.
+`docs/PIPELINE_MAP.md` documents how the original workbook worked and how it was replicated.
 
 ## Weekly routine (in-season)
 
@@ -758,7 +758,7 @@ predictions) → `model` (baselines, factors machinery, Poisson curves, scoring 
 coefficients from `data/coefficients.json`) → `players` (the master build; every
 improvement documented in its docstring) → `reconcile` (name-join audit) → `history`
 (season-keyed archive upserts) → `validate` (workbook parity) → `run` (orchestration),
-with `io_utils` (snapshots, tolerant CSV reading) underneath. `PIPELINE_MAP.md` maps
+with `io_utils` (snapshots, tolerant CSV reading) underneath. `docs/PIPELINE_MAP.md` maps
 each module back to the workbook sheets it replaced.
 
 ## Tests
