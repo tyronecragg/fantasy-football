@@ -29,6 +29,18 @@ def load_fpl_players():
     df = df.rename(columns={"now_cost": "cost"})
     df["position"] = df["position"].astype(pd.CategoricalDtype(categories=config.POSITION_ORDER, ordered=True))
 
+    # Manual roster overrides: completed transfers the FPL-Core-Insights mirror hasn't registered
+    # yet. That dataset lags deadline-day/late-window moves, so it is NOT ground truth for club
+    # membership near a deadline. This reflects known moves (user- or multi-source-confirmed) until
+    # the mirror catches up; delete a row once the source data updates. Columns: name[,team][,position][,cost].
+    ov_path = os.path.join(config.INPUTS_DIR, "roster_overrides.csv")
+    if os.path.exists(ov_path):
+        ov = pd.read_csv(ov_path)
+        for col in ("team", "position", "cost"):
+            if col in ov.columns:
+                m = dict(zip(ov["name"], ov[col]))
+                df[col] = df.apply(lambda r, m=m, col=col: m.get(r["name"]) if pd.notna(m.get(r["name"])) else r[col], axis=1)
+
     return (
         df[["player_id", "name", "position", "team", "cost"]]
         .sort_values(["team", "position", "name", "cost"], ascending=[True, True, True, False])

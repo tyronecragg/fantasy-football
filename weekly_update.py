@@ -96,13 +96,14 @@ def phase1(argv):
         if after == before:
             report("Betway freshness", False, "odds files were NOT refreshed - check the scrape output")
 
-    step("Stage FFS lineups + team news", PY + [os.path.join(ROOT, "starting_lineups.py")], fatal=False)
+    # FFS auto-staging removed - lineups are now compiled manually from a full
+    # multi-source sweep (see inputs/curation_sources.md).
     step("Injury cross-check vs FPL flags", PY + [os.path.join(ROOT, "tools", "injury_check.py")],
          fatal=False)
 
     print(f"\n{'=' * 70}")
     print("PAUSED FOR CURATION")
-    print("  1. Review the diff above and inputs/ffs_team_news.md with Claude")
+    print("  1. Run the manual multi-source lineup sweep with Claude")
     print("  2. Update inputs/starting_lineups.csv (graded start probabilities)")
     print("  3. Continue with:  python weekly_update.py --resume --gw N")
     print(f"{'=' * 70}")

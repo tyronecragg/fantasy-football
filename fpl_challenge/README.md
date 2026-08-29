@@ -123,6 +123,71 @@ Flags:
 
 - `--max-per-club N` — override the club cap for the week.
 - `--no-stack` — GW1/GW2/GW4 only; captain does not re-double an already-doubled player.
+- `--confirmed-not-starting NAME …` — players confirmed benched/out; removed from the pool.
+- `--confirmed-starting NAME …` — players confirmed in the XI; start set to 1.0 (see below).
+
+`main()` also takes `confirmed_not_starting=[…]` and `confirmed_starting=[…]` as lists, so in
+PyCharm you can just edit the call at the bottom of the script instead of passing CLI args:
+
+```python
+if __name__ == "__main__":
+    main(
+        confirmed_not_starting=["Bobby Thomas"],
+        confirmed_starting=["Ephron Mason-Clark"],
+    )
+```
+
+The list and the CLI flag merge, so you can use either or both. Names are matched
+accent/case-insensitively; **a name that matches nothing prints a large `!!!!` banner** and
+is otherwise ignored — a typo means the intended drop / force-start silently did not happen,
+so the warning is deliberately hard to miss.
+
+---
+
+## Late-swap: confirmed lineups and the "bring in if they start" watchlist
+
+FPL Challenge lets you change any player right up until their match kicks off, so you can react
+as team news lands. The tooling supports this two ways.
+
+**Marking confirmed lineups** (`confirmed_starting` / `confirmed_not_starting`):
+
+- **`confirmed_not_starting`** drops the player from the pool entirely — they can't be picked
+  and can't appear as a swap candidate.
+- **`confirmed_starting`** sets their start probability to **1.0 in place** and lifts their
+  projection to the full-match value, so the optimiser values them as nailed. Only the
+  *pre-bonus* points scale with start (`F1 XP Pre = start × full-match value`, exact), so it
+  divides that part by the old start probability and keeps the bonus term — dividing the whole
+  `F1 XP` by start would over-inflate the bonus. A player with essentially no minutes projection
+  (start ≈ 0) can't be scaled, so it sets start to 1.0, warns, and leaves XP untouched.
+
+Both are applied **before** selection and the watchlist, so re-running after each lineup drop
+updates the pick and the remaining swaps.
+
+**The watchlist** (`BRING IN IF THEY START`, printed automatically every week): for each
+non-nailed player (`0 < start < 1`) who isn't already picked, it works out their value **if they
+start** and, if slotting them in at that value beats the current XI in *any* formation, lists
+them as a candidate swap.
+
+- **Value if they start** = the full-match projection (pre-bonus scaled by `1/start`, bonus
+  kept), carrying the week's boost. This is exact for the ×2 weeks and a close approximation for
+  the add-on weeks.
+- **Grouped by the club whose lineup you'd watch**, most valuable club first, under that club's
+  provisional picks. Each club header shows its **kickoff in SAST (UTC+2)**.
+- **Only swaps you can actually make in time are shown.** Each is tagged:
+  - `same match` — incoming and outgoing kick off together; you see the whole XI at once. Always safe.
+  - `actionable` — cross-club, but the incoming player's news (~1h pre-kickoff) lands before the
+    outgoing player kicks off.
+  - `TOO LATE` swaps are **hidden** (you'd already be locked into the outgoing player), as are
+    clubs with no swappable upgrade; both are rolled into a one-line footer count.
+  - `timing?` — shown only if there's no kickoff data (see below); the swap can't be checked.
+- Tunable in `highlight_if_start`: `min_gain` (default **0.1** — hide upgrades worth less than
+  this) and `max_candidates` (default 40).
+
+**Kickoff times** come from `../outputs/fixture_kickoffs.csv`, written by the weekly Betway
+scrape (`tools/betway.py`) from Betway's `expectedStartEpoch`. It stores UTC (canonical); the
+watchlist displays SAST. Timing comparisons run in UTC, so the display offset never affects which
+swaps are judged actionable. Without the file, headers show `kickoff ?` and swaps fall back to
+`timing?` (the old, timing-blind behaviour).
 
 ---
 
@@ -143,6 +208,7 @@ directly (so you could run all five off one data build), that's a small change t
 
 | File | Purpose |
 |---|---|
-| `challenge_core.py` | shared engine: player loading, name matching, formation ILP, reporting, and the goal/assist/DefCon point helpers |
+| `challenge_core.py` | shared engine: player loading, name matching, confirmed-lineup handling, formation ILP, reporting, the goal/assist/DefCon helpers, and the "bring in if they start" watchlist |
 | `gw1.py` … `gw5.py` | one week each; each just builds `eff_xp` / `cap_bonus` / `boosted` and calls the engine |
 | `../inputs/fpl_challenge_new_signings.csv` | GW1 double-points list |
+| `../outputs/fixture_kickoffs.csv` | per-fixture UTC kickoffs for the watchlist's timing; written by `tools/betway.py` |

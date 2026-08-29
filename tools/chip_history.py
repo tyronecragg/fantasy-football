@@ -57,18 +57,27 @@ _REL = (1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472)
 HORIZON_W = [(o * r) / (_OWN[0] * _REL[0]) for o, r in zip(_OWN, _REL)]
 
 
-def current_squad_names():
-    """The 15 names in gw_teams.csv's last populated GW column (same source the optimiser reads)."""
+def current_squad_names(target_gw):
+    """The 15 names you carried INTO `target_gw` — i.e. your GW(target_gw-1) squad. That is the
+    baseline the chip deltas are measured against; your `--free-transfers` are then applied on top of
+    it to reach the normal team. Reading the target GW's own (already-transferred) column instead
+    would double-count the transfer you already spent. GW1 has no prior week, so it uses the GW1
+    initial squad. Falls back to the most recent populated column strictly before target_gw."""
     df = pd.read_csv(GW_TEAMS)
-    gw_cols = [c for c in df.columns if str(c).upper().startswith("GW")]
-    last = None
-    for c in gw_cols:
-        col = df[c].dropna().astype(str).str.strip()
-        if (col != "").any():
-            last = c
-    if last is None:
-        raise SystemExit("no populated GW column in gw_teams.csv")
-    return [n for n in df[last].dropna().astype(str).str.strip() if n]
+
+    def col_names(c):
+        if c not in df.columns:
+            return []
+        return [n for n in df[c].dropna().astype(str).str.strip() if n]
+
+    for g in range(target_gw - 1, 0, -1):          # most recent populated week BEFORE target_gw
+        names = col_names(f"GW{g}")
+        if names:
+            return names
+    names = col_names(f"GW{target_gw}")            # GW1 case: no prior week, use the initial squad
+    if names:
+        return names
+    raise SystemExit(f"no populated GW column at or before GW{target_gw} in gw_teams.csv")
 
 
 def best_xi(sub, col):
@@ -91,11 +100,12 @@ def captain_horizon(sub, xi_idx):
     return float(sum(w * xi[c].max() for w, c in zip(HORIZON_W, FIX_COLS)))
 
 
-def best_squad(pool, budget, col, current_idx=None, max_transfers=15):
+def best_squad(pool, budget, col, current_idx=None, max_transfers=15, want="xi"):
     """Indices of the best legal XI maximising the sum of `col` over an 11-man XI inside a 15-man
     squad, within `budget` and <=3 players per team, changing AT MOST `max_transfers` players from
-    `current_idx` (None / 15 = a free rebuild). Returns the XI index set, or None if PuLP is
-    missing / the problem is infeasible. Captaincy is added post-hoc by the *_total helpers."""
+    `current_idx` (None / 15 = a free rebuild). `want`: "xi" -> the 11 starters (default),
+    "squad" -> the 15-man squad, "both" -> (squad_set, xi_set). Returns None if PuLP is missing /
+    the problem is infeasible. Captaincy is added post-hoc by the *_total helpers."""
     try:
         import pulp
     except ImportError:
@@ -126,7 +136,11 @@ def best_squad(pool, budget, col, current_idx=None, max_transfers=15):
     prob.solve(pulp.PULP_CBC_CMD(msg=0))
     if pulp.LpStatus[prob.status] != "Optimal":
         return None
-    return {i for i in idx if st[i].value() == 1}
+    squad_set = {i for i in idx if sq[i].value() == 1}
+    xi_set = {i for i in idx if st[i].value() == 1}
+    if want == "both":
+        return squad_set, xi_set
+    return squad_set if want == "squad" else xi_set
 
 
 def horizon_total(pool, xi_idx):
@@ -157,12 +171,17 @@ def chip_radar(m, squad, current_idx, budget, ft):
     ACCUMULATED free transfers by then (`ft` at F1, ft+1 at F2, ... capped at MAX_FT) — evaluated on
     that fixture. So the baseline is the realistic team you'd have, not one myopically built for the
     fixture. Note: Ff slots are per-FIXTURE (not calendar), so double/blank GWs map only approximately."""
+    # Bench Boost / Triple Captain read the team you hold NOW — the carried-in squad plus your `ft` free
+    # transfers (horizon-optimised) — held fixed and valued on each fixture. So F1 matches the headline,
+    # and later weeks show which upcoming fixture YOUR bench spikes on (not a fodder-bench rebuild).
+    now15 = best_squad(m, budget, "_htotal", current_idx, ft, want="squad")
+    now = m.loc[list(now15)] if now15 else squad
     rows, base_by_ft = [], {}
     for k in range(1, 9):
         col = f"F{k} XP"
-        _, xi = best_xi(squad, col)
-        bb = float(squad.loc[~squad.index.isin(xi), col].sum())
-        tc = float(squad.loc[list(xi), col].max())
+        _, xi = best_xi(now, col)
+        bb = float(now.loc[~now.index.isin(xi), col].sum())
+        tc = float(now.loc[list(xi), col].max())
         bt = min(ft + (k - 1), MAX_FT)                          # accumulated free transfers by F{k}
         if bt not in base_by_ft:                                # normal team for this transfer count (horizon obj)
             base_by_ft[bt] = best_squad(m, budget, "_htotal", current_idx, bt)
@@ -173,13 +192,13 @@ def chip_radar(m, squad, current_idx, budget, ft):
     return rows
 
 
-def _print_radar(rows):
-    def mark(rows, key):                       # '*' on the standout fixture for this chip
+def _print_radar(rows, gw):
+    def mark(rows, key):                       # '*' on the standout week for this chip
         vals = [r[key] for r in rows if r[key] is not None]
         return max(vals) if vals else None
     best = {k: mark(rows, k) for k in ("bench_boost", "triple_captain", "free_hit")}
-    print("\nchip radar — each of F1..F8 as a full-weight one-off (`*` = standout week):")
-    print(f"  {'fixture':<8}{'bench boost':>13}{'triple capt':>13}{'free hit':>11}{'(FT base)':>11}")
+    print("\nchip radar — each of the next 8 gameweeks as a full-weight one-off (`*` = standout week):")
+    print(f"  {'gameweek':<11}{'bench boost':>13}{'triple capt':>13}{'free hit':>11}{'(FT base)':>11}")
     for r in rows:
         cells = ""
         for key, w in (("bench_boost", 13), ("triple_captain", 13), ("free_hit", 11)):
@@ -187,7 +206,8 @@ def _print_radar(rows):
             s = "-" if v is None else f"{v:.2f}"
             s += "*" if v is not None and v == best[key] else " "
             cells += f"{s:>{w}}"
-        print(f"  F{r['f']:<7}{cells}{r['ft']:>11}")
+        label = f"GW{gw + r['f'] - 1} (F{r['f']})"      # F{k} maps to calendar GW(gw+k-1)
+        print(f"  {label:<11}{cells}{r['ft']:>11}")
 
 
 def main():
@@ -208,34 +228,39 @@ def main():
 
     m = pd.read_csv(MASTER)[["Player Name", "Position", "Team", "Cost"] + FIX_COLS].copy()
     m["_htotal"] = sum(w * m[c] for w, c in zip(HORIZON_W, FIX_COLS))   # optimiser's 8-fixture total
-    names = current_squad_names()
+    names = current_squad_names(gw)          # the squad you carried INTO this GW (GW-1)
     squad = m[m["Player Name"].isin(names)]
     current_idx = list(squad.index)
     if len(squad) < 15:
         print(f"warning: only {len(squad)}/15 squad players matched the master "
               f"(missing {sorted(set(names) - set(squad['Player Name']))})")
 
-    # Single-GW chips on the current squad: F1 only
-    _, f1_xi = best_xi(squad, "F1 XP")
-    bench_boost = float(squad.loc[~squad.index.isin(f1_xi), "F1 XP"].sum())
-    triple_captain = float(squad.loc[list(f1_xi), "F1 XP"].max())       # the +1x on your captain
-
-    # Baseline = the NORMAL team you'd field: best team reachable with `ft` free transfers on the
-    # 8-fixture (ownership x reliability) objective. BOTH deltas measure a 15-transfer rebuild
-    # against this same team, on the chip's own horizon: WILDCARD over all 8 fixtures (a permanent
-    # squad), FREE HIT on F1 (a one-week team). Captaincy is on both sides.
+    # Baseline = the NORMAL team you'd field this GW: best team reachable with `ft` free transfers from
+    # the squad you carried in, on the 8-fixture (ownership x reliability) objective. ALL chips are
+    # measured against this SAME baseline: BENCH BOOST / TRIPLE CAPTAIN are single-GW (F1) on the
+    # baseline's own 15; WILDCARD is a 15-transfer rebuild over 8 fixtures; FREE HIT a 15-transfer
+    # rebuild on F1. Captaincy is on both sides.
     budget = a.budget if a.budget is not None else float(squad["Cost"].sum()) + a.bank
-    base_h = best_squad(m, budget, "_htotal", current_idx, ft)   # the normal team (ft transfers, horizon obj)
-    wc_xi = best_squad(m, budget, "_htotal", current_idx, 15)    # wildcard: full rebuild, horizon obj
-    fh_xi = best_squad(m, budget, "F1 XP", current_idx, 15)      # free hit: full rebuild, F1 obj
+    base = best_squad(m, budget, "_htotal", current_idx, ft, want="both")  # (15-man squad, XI) normal team
+    wc_xi = best_squad(m, budget, "_htotal", current_idx, 15)              # wildcard: full rebuild, horizon obj
+    fh_xi = best_squad(m, budget, "F1 XP", current_idx, 15)                # free hit: full rebuild, F1 obj
 
-    if None in (base_h, wc_xi, fh_xi):
+    if None in (base, wc_xi, fh_xi):
+        # No PuLP: value the single-GW chips on the carried-in squad (best-effort), skip the ILP deltas.
+        _, f1_xi = best_xi(squad, "F1 XP")
+        bench_boost = float(squad.loc[~squad.index.isin(f1_xi), "F1 XP"].sum())
+        triple_captain = float(squad.loc[list(f1_xi), "F1 XP"].max())
         print("(Wildcard/Free Hit deltas skipped — PuLP unavailable; run with env/Scripts/python)")
         wildcard_diff = free_hit_diff = ""
         base_h_tot = wc_tot = base_f_tot = fh_tot = None
     else:
+        base_15, base_h = base
+        base_sq = m.loc[list(base_15)]                                    # the ft-adjusted normal 15
+        _, f1_xi = best_xi(base_sq, "F1 XP")                              # the XI you'd actually field (F1)
+        bench_boost = float(base_sq.loc[~base_sq.index.isin(f1_xi), "F1 XP"].sum())
+        triple_captain = float(base_sq.loc[list(f1_xi), "F1 XP"].max())   # the +1x on your captain
         base_h_tot, wc_tot = horizon_total(m, base_h), horizon_total(m, wc_xi)
-        base_f_tot, fh_tot = f1_total(m, base_h), f1_total(m, fh_xi)   # same base_h team, valued on F1
+        base_f_tot, fh_tot = f1_total(m, base_h), f1_total(m, fh_xi)      # same baseline team, valued on F1
         wildcard_diff = round(wc_tot - base_h_tot, 2)
         free_hit_diff = round(fh_tot - base_f_tot, 2)
 
@@ -272,7 +297,7 @@ def main():
     print(h.tail(10).to_string(index=False))
 
     if a.radar:
-        _print_radar(chip_radar(m, squad, current_idx, budget, ft))
+        _print_radar(chip_radar(m, squad, current_idx, budget, ft), gw)
 
 
 if __name__ == "__main__":

@@ -2083,7 +2083,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 
 result = main_multi_transfer_optimiser(
     excel_file="outputs/13_players_master.csv",
-    max_transfers=0,
+    max_transfers=1,
     additional_budget=0.5,
     num_fixtures=8,
     compute_solutions=1,

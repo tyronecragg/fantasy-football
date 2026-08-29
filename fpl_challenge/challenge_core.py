@@ -96,19 +96,65 @@ def match_names(df, names):
     return matched, missed
 
 
-def apply_exclusions(df, raw_names):
-    """Drop explicitly-excluded players from the pool before optimising (e.g. a player you
-    already know is injured/benched, or one you simply don't want). Names are matched the
-    same accent/case-insensitive way as everywhere else; unmatched names are reported."""
+def _big_warning(lines):
+    """A hard-to-miss banner — used when a confirmed-lineup name doesn't match any player,
+    since that silently means the intended fix (drop / force-start) did NOT happen."""
+    bar = "!" * 74
+    print("\n" + bar)
+    for ln in lines:
+        print("!!  " + ln)
+    print(bar + "\n")
+
+
+def confirm_not_starting(df, raw_names):
+    """Drop players confirmed out of the XI (benched/injured/rotated), so they can't be
+    picked. Names are matched the same accent/case-insensitive way as everywhere else;
+    unmatched names are reported."""
     if not raw_names:
         return df
-    excl, missed = match_names(df, raw_names)
+    out, missed = match_names(df, raw_names)
     if missed:
-        print(f"  ! exclude: no match for {', '.join(missed)}")
-    keep = ~df["Player Name"].isin(excl)
+        _big_warning([f"confirmed_not_starting: NO MATCH for {len(missed)} name(s): "
+                      + ", ".join(missed),
+                      "These players were NOT removed — check the spelling against the data."])
+    keep = ~df["Player Name"].isin(out)
     if (~keep).any():
-        print(f"  excluding {int((~keep).sum())} player(s): {', '.join(sorted(excl))}")
+        print(f"  confirmed NOT starting — removed {int((~keep).sum())}: {', '.join(sorted(out))}")
     return df[keep].reset_index(drop=True)
+
+
+def confirm_starting(df, raw_names):
+    """Mark players confirmed IN the XI: set start probability to 1.0 in place and lift their
+    projection to the full-match value. Only the pre-bonus points scale with start
+    (F1 XP Pre = start x full, exact), so we divide that by the old start and keep the bonus;
+    downstream eff_xp then values them as nailed. Matched the usual way; unmatched reported."""
+    if not raw_names:
+        return df
+    conf, missed = match_names(df, raw_names)
+    if missed:
+        _big_warning([f"confirmed_starting: NO MATCH for {len(missed)} name(s): "
+                      + ", ".join(missed),
+                      "These players were NOT forced to start — check the spelling against the data."])
+    m = df["Player Name"].isin(conf)
+    if not m.any():
+        return df
+    start = df.loc[m, "F1 Start"].fillna(0.0)
+    tiny = start < 0.01
+    if tiny.any():
+        print(f"  ! confirmed_starting: no minutes projection to scale for "
+              f"{', '.join(sorted(df.loc[m & (df['F1 Start'].fillna(0) < 0.01), 'Player Name']))}"
+              f" — start set to 1.0 but XP left as-is")
+    denom = start.clip(lower=1e-6)
+    if "F1 XP Pre" in df.columns:
+        xppre = df.loc[m, "F1 XP Pre"].fillna(0.0)
+        xppre_full = xppre / denom
+        df.loc[m, XP_COL] = xppre_full + (df.loc[m, XP_COL] - xppre)
+        df.loc[m, "F1 XP Pre"] = xppre_full
+    else:
+        df.loc[m, XP_COL] = df.loc[m, XP_COL] / denom
+    df.loc[m, "F1 Start"] = 1.0
+    print(f"  confirmed starting (start -> 1.0): {', '.join(sorted(conf))}")
+    return df
 
 
 def _series(df, col):
