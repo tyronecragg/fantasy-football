@@ -16,7 +16,10 @@ coefficients_workbook.json.
 import os
 import sys
 
-from . import config, history, ingest, markets, model, names, players, provenance, reconcile, team_model
+import pandas as pd
+
+from . import (config, curation_check, history, ingest, markets, model, names, players,
+               provenance, reconcile, team_model)
 from .io_utils import reset_counter, snapshot
 
 
@@ -125,6 +128,9 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
     if improved:
         rec = reconcile.report(roster, inputs["starting_lineups"], mkts, sportsbet)
         reconcile.print_summary(rec)
+        cur = curation_check.check(master)          # availability ceiling + team start-prob sums
+        curation_check.print_summary(cur)
+        rec = pd.concat([rec, cur], ignore_index=True) if not cur.empty else rec
         if not rec.empty:
             snapshot(rec, "name_reconciliation")
 

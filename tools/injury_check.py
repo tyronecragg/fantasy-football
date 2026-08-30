@@ -11,9 +11,8 @@ CEILING on our belief:
     status i/u/s, 0%  -> start_prob must be 0
 
 So a 100%-available bench player can still be graded 0.15, and a 75% doubt who would
-walk into the XI when fit tops out at 0.75. This reports violations of that ceiling and
-players held in unavailable_players.csv whom FPL now lists as fully available. Nothing
-is auto-applied: transfers out (a sale FPL hasn't processed) legitimately look "fit".
+walk into the XI when fit tops out at 0.75. This reports violations of that ceiling.
+Nothing is auto-applied: transfers out (a sale FPL hasn't processed) legitimately look "fit".
 """
 import os
 import sys
@@ -55,7 +54,6 @@ def availability():
 def main():
     avail = availability()
     lineups = read_csv_tolerant(os.path.join(config.INPUTS_DIR, "starting_lineups.csv"))
-    unavailable = read_csv_tolerant(os.path.join(config.INPUTS_DIR, "unavailable_players.csv"))
 
     over, unmatched = [], []
     for row in lineups.itertuples():
@@ -79,20 +77,6 @@ def main():
                   f"(status {status}) {str(news or '')[:42]}")
     else:
         print("  none - every graded player is within what FPL says is possible")
-
-    print()
-    print("=" * 78)
-    print("HELD UNAVAILABLE BY US, BUT FPL LISTS AS FULLY AVAILABLE")
-    print("=" * 78)
-    print("  (expected for pending transfers out - FPL only reflects completed moves)")
-    for row in unavailable.itertuples():
-        key = fold(row.Player)
-        if key in avail.index:
-            a = avail.loc[key]
-            if isinstance(a, pd.DataFrame):
-                a = a.iloc[0]
-            if a["status"] == "a":
-                print(f"  {row.Player:<24} FPL: available    (our reason: {row.reason})")
 
     if unmatched:
         print(f"\n{len(unmatched)} lineup players not matched in FPL data "

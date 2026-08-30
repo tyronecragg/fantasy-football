@@ -133,8 +133,8 @@ rule applies: run every name past the current roster (stale-squad trap).
 ## Tier 2 — Injury / availability ground truth (when there's a fitness question)
 
 Use to confirm a doubt, get a return date, or resolve a disagreement about *why* someone is
-out. These feed `inputs/unavailable_players.csv` and gate every F3+ injury ramp (see the
-return-date rule in "How the numbers work").
+out. These gate every F3+ injury ramp and the zeroing of unavailable players in
+`inputs/starting_lineups.csv` (see the return-date rule in "How the numbers work").
 
 - **[SportsGambler injury table](https://www.sportsgambler.com/injuries/football/england-premier-league/)
   — THE GO-TO.** Fetchable by automated tools, per-club, shows injury type + expected return

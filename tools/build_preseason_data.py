@@ -48,20 +48,6 @@ def last_season_minutes():
 def build_lineups(roster):
     minutes = last_season_minutes()
     r = roster.copy()
-
-    # Injured/sold players (inputs/unavailable_players.csv) are removed before XI
-    # selection so the algorithm re-picks the best available XI — this handles
-    # cascading absences (e.g. three injured defenders at one club) that pairwise
-    # lineup_overrides swaps cannot.
-    unavailable_path = os.path.join(config.INPUTS_DIR, "unavailable_players.csv")
-    if os.path.exists(unavailable_path):
-        unavailable = pd.read_csv(unavailable_path)
-        unknown = set(unavailable["Player"]) - set(r["name"])
-        if unknown:
-            print(f"  unavailable list: UNRECOGNISED names ignored: {sorted(unknown)}")
-        n_before = len(r)
-        r = r[~r["name"].isin(set(unavailable["Player"]))]
-        print(f"  unavailable list: excluded {n_before - len(r)} players from XI selection")
     r["minutes"] = r["name"].map(minutes).fillna(0)
     r["min_score"] = (r["minutes"] / FULL_SEASON_MINUTES).clip(0, 1)
     r["price_score"] = r.groupby(["team", "position"], observed=True)["cost"].rank(pct=True)
@@ -431,21 +417,12 @@ def report_pool_depth(lineups, target=11.0):
 
 def patch_lineups(roster):
     """Default mode: the XIs in starting_lineups.csv are CURATED (picked with football
-    judgement, not the deterministic algorithm) — preserve them, and just patch the
-    feedback files on top: drop unavailable players (no auto-replacement; curation
-    handles that), then apply overrides (set probability if present, append if not,
-    drop an explicit `replaces` target if named)."""
+    judgement, not the deterministic algorithm) — preserve them, and just apply the
+    lineup_overrides on top (set probability if present, append if not, drop an explicit
+    `replaces` target if named)."""
     path = os.path.join(config.INPUTS_DIR, "starting_lineups.csv")
     lineups = pd.read_csv(path)
     prob_cols = [c for c in lineups.columns if c.startswith("F") and c[1:].isdigit()]
-
-    unavailable_path = os.path.join(config.INPUTS_DIR, "unavailable_players.csv")
-    if os.path.exists(unavailable_path):
-        banned = set(pd.read_csv(unavailable_path)["Player"])
-        dropped = sorted(set(lineups["Player"]) & banned)
-        if dropped:
-            lineups = lineups[~lineups["Player"].isin(banned)]
-            print(f"  patch: dropped unavailable {', '.join(dropped)} (curate replacements!)")
 
     overrides_path = os.path.join(config.INPUTS_DIR, "lineup_overrides.csv")
     if os.path.exists(overrides_path):
@@ -474,9 +451,8 @@ def main(rebuild_lineups=False, lineups_only=False):
     roster = ingest.load_fpl_players()
 
     if lineups_only:
-        # In-season safe mode: apply unavailable_players/lineup_overrides to the
-        # lineups and STOP — never touches the odds files (which hold real scraped
-        # markets once the season is running).
+        # In-season safe mode: apply lineup_overrides to the lineups and STOP — never
+        # touches the odds files (which hold real scraped markets once the season is running).
         patch_lineups(roster)
         return
 

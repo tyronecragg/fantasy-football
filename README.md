@@ -76,8 +76,7 @@ python tools/roll_gameweek.py --gw N            # N = the new gameweek (becomes 
    ~8% outright margin matches `MARGIN_SEASON=1.08`, so raw odds de-margin correctly.
 2. **Lineups** — curate `inputs/starting_lineups.csv` for the new gameweek's team news (the synthetic
    player markets are built for whoever is in the XIs there). `python tools/build_preseason_data.py
-   --lineups-only` patches `unavailable_players.csv` / `lineup_overrides.csv` onto the lineups without
-   touching odds.
+   --lineups-only` patches `lineup_overrides.csv` onto the lineups without touching odds.
 3. **Archive** — GW N-1 must already be archived on real odds (`python -m fpl_pipeline.run --gw N-1`
    was run), because the synthetic factors are read from it. Normal weekly flow guarantees this.
 
@@ -132,7 +131,7 @@ probabilities say. Bookmakers keep pricing players who are about to leave, and F
 XIs lag transfer news by days, so neither input catches this. **Check the squad you already
 own too, not just incoming picks** — a player bought last week can become worthless mid-week,
 and the pipeline will keep projecting points for him until his start probability is edited by
-hand or `inputs/unavailable_players.csv` excludes him.
+hand in `inputs/starting_lineups.csv`.
 
 Step 3b: the FFS scrape only **stages** its output — predicted XIs to
 `inputs/ffs_predicted_lineups.csv` (with a printed diff vs the curated lineups, accent-folded
@@ -172,9 +171,9 @@ Around the commands:
 - **Read the run output**: the `name reconciliation:` block lists any lineup/odds names
   that failed to join (paste verified suggestions into `inputs/name_mappings.csv` and
   re-run); the history lines confirm what was recorded.
-- **When there's team news**, before step 5: add injuries/suspensions/sales to
-  `inputs/unavailable_players.csv` (and remove recovered players), adjust
-  `inputs/lineup_overrides.csv` for start-probability judgement calls, then apply them
+- **When there's team news**, before step 5: zero injured/suspended/sold players and set
+  start-probability judgement calls directly in `inputs/starting_lineups.csv` (or in
+  `inputs/lineup_overrides.csv`), then apply the overrides
   with `python tools/build_preseason_data.py --lineups-only` (patches the lineups and
   touches nothing else — safe after real odds are scraped; the tool's full mode would
   overwrite real odds with synthetic ones). Or edit the F1–F8 probabilities in
@@ -245,16 +244,19 @@ start probability, not margin.
    defensible. **But F1's longshot band is the most biased (2.64×) while F2–F6 sit at
    1.46–1.73×**, so applying F1's curve uniformly slightly OVER-corrects distant fixtures'
    fringe players. Small, partly noise (fewest observations in those cells), but directional.
-2. **Refit on deadline-day odds.** The curve comes from archive-era projections under a
-   different pipeline state and different odds sources. Prices also move through the week —
-   four days out they carry more margin and less information than at the deadline, which is
-   when transfers are actually committed.
+2. **Refit on deadline-day odds — now UNBLOCKED** (see #4: player-odds archiving is live as of
+   2026-08-30). The current curve comes from archive-era projections under a different pipeline
+   state and odds sources, and prices carry more margin four days out than at the deadline. Do
+   the refit once several gameweeks of deadline-day odds accrue (GW5+).
 3. **Only one season, 14 gameweeks, 1,759 rows.** Enough to establish the shape, thin for
    fitting precise knots. The 35–50% bucket already breaks the monotone pattern (1.47×,
    n=81) and is probably noise.
-4. **Player odds are not being archived**, so the raw material for a refit is being
-   discarded every run — `guard_synthetic_archive()` withholds player history while
-   booking odds are synthetic, which they permanently are. See task #25.
+4. **Player odds ARE now archived — RESOLVED 2026-08-30** (was task #25). Cards went real via
+   Ladbrokes, so every scraped player market reports `is_real=True` and `guard_synthetic_archive()`
+   returns `all` — a `--gw` run records player history, so the refit raw material now accumulates
+   (`historical_player_data.csv`, ~22 MB). The old `SYNTHETIC_NOTE.txt` gate is gone; the guard is
+   driven purely by the provenance manifest and self-clears. (Was: history withheld while booking
+   odds were synthetic, "which they permanently are" — no longer true.)
 5. **`LONGSHOT_FLOOR = 0.15`** exists because the raw fit produced ×0.00 on the lowest
    bucket — no one in that training cell scored, so the curve concluded a 4% player is
    impossible. The floor is a guard, not a measurement; Bayesian shrinkage toward the
@@ -303,18 +305,18 @@ Things known to be provisional, with what would settle them:
   model would be sharper. (2) constants are 2025-26; re-measure as 2026-27 accrues. (3) draw
   home/away asymmetry (2.96/3.51) was averaged to 3.24.
 
-- **The synthetic assist ratio is unstable** — it recalibrates every run from fixtures
-  where Betway prices both assists and goalscorer, and moved 0.836 → 1.215 in a single day
-  once assists began arriving from the ladder market as well as `Player 1+ Assists`. A 45%
-  swing between runs means the two market shapes may not be pricing the same thing. Worth
-  measuring separately per source before trusting either.
+- **The synthetic assist ratio — low materiality now.** Used in `betway.py` only to fill
+  fixtures Betway has NOT priced assists for; it recalibrated unstably early (0.836 → 1.215 in a
+  day) and now falls back to a 1.132 convention. Betway prices assists directly for almost every
+  fixture (e.g. this GW 357/361 real, ~4 synthetic), so the ratio touches only the rare unpriced
+  fixture — the instability barely reaches XP. Still worth measuring per market source if the
+  synthetic-fill count grows.
 
-- **`SYNTHETIC_NOTE.txt`** — rewritten 2026-08-18 to reflect reality (goalscorer/assists real
-  from Betway, saves derived, cards the only fully-synthetic player market, GW2/F2 team markets
-  model-projected). It still exists on purpose: the `--gw` guard reads it to withhold player
-  history while cards remain synthetic (archiving them would poison the yellow-card factors).
-  `betway.py` never removes it; delete it by hand only when cards come
-  from a real source — goalscorer/assists being real does not justify deleting it.
+- **`SYNTHETIC_NOTE.txt` — RETIRED (2026-08-30).** The file no longer exists and nothing reads it.
+  The `--gw` archive guard is now driven entirely by the provenance manifest (`provenance.is_real`
+  per player market, in `guard_synthetic_archive()`) and self-clears when the last market goes real
+  — which it now has (cards real via Ladbrokes; all eight markets real). `tools/odds_status.py`
+  shows the state.
 
 - **The saves calibration factor and `CONVERSION = 0.30`** — see the odds-sources section.
   The 3.80× multiplier is not purely bookmaker overround and is not yet explained.
@@ -334,7 +336,6 @@ Things known to be provisional, with what would settle them:
 | `source_history/predicted_xis.csv` | `tools/source_history.py` (weekly) | each source's frozen predicted XI per GW (`Season,Gameweek,Source,Team,Player`) — scored against actual lineups to earn source trust |
 | `ffs_team_news.md` | `starting_lineups.py` | staged FFS write-ups (outs, graded doubts, bans, news paragraphs) — weekly curation reading, nothing reads it directly |
 | `lineup_overrides.csv` | you | `Player,start_prob,replaces` — judgement calls applied after XI selection (pre-season tool) |
-| `unavailable_players.csv` | you | `Player,reason` — excluded before XI selection (pre-season tool) |
 | `gw_teams.csv` | you, weekly | your squad per gameweek; rightmost filled column = current team |
 | `name_mappings.csv` | you, from reconciliation suggestions | `type,name,name_cleaned` = raw spelling → canonical; applied to the roster, the odds files AND `starting_lineups.csv`. Never add a reversed (canonical → raw) row — it un-maps canonical names. |
 | `purchase_prices.csv` | you/Claude, on every transfer | what you paid per squad player; drives FPL sell prices (rise banked at half, falls in full) — the transfer optimiser values owned players at sell price, not market |
@@ -510,9 +511,8 @@ FPL publishes `status` / `chance_of_playing_next_round` / `news` per player. Tha
 "can he play at all?", which is **not** our start probability ("will he be in the XI?"), so
 it's used only as a **ceiling**: `a` imposes no constraint (a fully available player can
 still be graded 0.15), `d` at 75% caps us at 0.75, and `i`/`u`/`s` forces 0. The tool reports
-violations of that ceiling plus players we hold in `unavailable_players.csv` whom FPL lists as
-available. Nothing auto-applies — a pending sale legitimately reads as "available", since FPL
-only reflects completed moves.
+violations of that ceiling. Nothing auto-applies — a pending sale legitimately reads as
+"available", since FPL only reflects completed moves.
 
 ### Price changes by ownership (`tools/price_change_analysis.py`)
 
@@ -545,9 +545,8 @@ Both optimisers configure via their `__main__` blocks (edit and run):
   max, then breaks the tie by ownership (differential = favour low-owned to chase rank; template =
   high-owned to protect), plus a keep-owned term for fungible slots. This shapes the SQUAD /
   transfers only — the XI you field is ALWAYS set afterwards by pure XP (`pure_xp_lineup`:
-  highest expected points per fixture, bench ordered by points), never by ownership. Off by default. Two pool
-  cleanups always run: players marked departed in `unavailable_players.csv` (reason contains
-  "left"/"permanent") are dropped, and interchangeable 0-XP bench fillers collapse to one
+  highest expected points per fixture, bench ordered by points), never by ownership. Off by default. One pool
+  cleanup always runs: interchangeable 0-XP bench fillers collapse to one
   "Any £X.Xm 0-XP {pos}" per position (owned fillers kept). The module-top `DGW_TEAMS` /
   `DGW_EXTRA_FACTOR` block is the double-gameweek hack: list DGW teams to boost their
   F1 XP (proper DGW support is deliberately deferred).
@@ -623,10 +622,9 @@ archived. The backtest measures the pre-blend machinery; pairs land in
 2. Refresh the season inputs: paste the new fixture list into `season_fixtures.csv` and
    run `tools/build_fixtures.py --gw 1`; rewrite the season-odds CSVs with the new
    20-team list; reset `gw_teams.csv` (record your squad from GW1); prune
-   `unavailable_players.csv` and `lineup_overrides.csv` of last season's entries.
+   `lineup_overrides.csv` of last season's entries.
 3. Before real markets/team news exist: `python tools/build_preseason_data.py` builds
-   estimated starting lineups (last-season minutes + launch prices; injured/sold
-   players in `inputs/unavailable_players.csv` are excluded before XI selection, then
+   estimated starting lineups (last-season minutes + launch prices; then
    judgement calls from `inputs/lineup_overrides.csv` — Player, start_prob, optional
    replaces — are applied)
    and synthetic GW1/GW2 odds from the model, and rebuilds `fallback_factors.csv` on

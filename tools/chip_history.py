@@ -33,7 +33,6 @@ Both deltas are budget-constrained ILPs; they need the venv (PuLP) and are blank
 --gw to match your archive gameweek.
 """
 import argparse
-import datetime
 import os
 import sys
 
@@ -265,14 +264,11 @@ def main():
         free_hit_diff = round(fh_tot - base_f_tot, 2)
 
     row = {"Season": a.season, "Gameweek": gw,
-           "updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
            "free_transfers": ft,
            "bench_boost": round(bench_boost, 2),
            "triple_captain": round(triple_captain, 2),
            "wildcard_diff": wildcard_diff,
            "free_hit_diff": free_hit_diff,
-           "baseline_horizon": round(base_h_tot, 2) if base_h_tot is not None else "",
-           "wildcard_horizon": round(wc_tot, 2) if wc_tot is not None else "",
            "baseline_f1": round(base_f_tot, 2) if base_f_tot is not None else "",
            "free_hit_f1": round(fh_tot, 2) if fh_tot is not None else "",
            "budget": round(budget, 1)}
@@ -294,7 +290,7 @@ def main():
           + f"\n  free hit delta = {free_hit_diff} (F1 only"
           + (f": baseline {base_f_tot:.1f} -> rebuild {fh_tot:.1f})" if fh_tot is not None else ")"))
     print(f"\nlogged to {os.path.relpath(HIST, ROOT)} — recent weeks:")
-    print(h.tail(10).to_string(index=False))
+    print(h.tail(10).to_string(index=False, na_rep=""))
 
     if a.radar:
         _print_radar(chip_radar(m, squad, current_idx, budget, ft), gw)
