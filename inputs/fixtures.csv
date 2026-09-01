@@ -1,21 +1,21 @@
-Team,GW2 Opponent,GW2 Venue,GW3 Opponent,GW3 Venue,GW4 Opponent,GW4 Venue,GW5 Opponent,GW5 Venue,GW6 Opponent,GW6 Venue,GW7 Opponent,GW7 Venue,GW8 Opponent,GW8 Venue,GW9 Opponent,GW9 Venue
-Arsenal,Aston Villa,A,Chelsea,H,Sunderland,A,Brighton,A,Leeds,H,Nott'm Forest,A,Everton,H,Liverpool,A
-Aston Villa,Arsenal,H,Hull City,A,Nott'm Forest,H,Spurs,A,Brentford,H,Newcastle,A,Man City,H,Fulham,H
-Bournemouth,Everton,H,Newcastle,A,Brentford,H,Liverpool,H,Chelsea,A,Sunderland,H,Man Utd,A,Leeds,H
-Brentford,Leeds,A,Sunderland,H,Bournemouth,A,Chelsea,H,Aston Villa,A,Liverpool,H,Hull City,A,Nott'm Forest,H
-Brighton,Chelsea,A,Leeds,H,Coventry City,A,Arsenal,H,Sunderland,A,Crystal Palace,H,Liverpool,A,Man City,A
-Chelsea,Brighton,H,Arsenal,A,Hull City,H,Brentford,A,Bournemouth,H,Everton,A,Spurs,H,Man Utd,H
-Coventry City,Hull City,H,Man City,A,Brighton,H,Nott'm Forest,A,Newcastle,H,Spurs,A,Fulham,H,Sunderland,H
-Crystal Palace,Man City,H,Fulham,A,Ipswich Town,H,Leeds,A,Nott'm Forest,H,Brighton,A,Newcastle,H,Spurs,A
-Everton,Bournemouth,A,Man Utd,H,Spurs,A,Ipswich Town,H,Hull City,A,Chelsea,H,Arsenal,A,Newcastle,A
-Fulham,Sunderland,A,Crystal Palace,H,Liverpool,A,Man Utd,H,Ipswich Town,A,Hull City,H,Coventry City,A,Aston Villa,A
-Hull City,Coventry City,A,Aston Villa,H,Chelsea,A,Newcastle,A,Everton,H,Fulham,A,Brentford,H,Ipswich Town,H
-Ipswich Town,Man Utd,A,Liverpool,H,Crystal Palace,A,Everton,A,Fulham,H,Man City,A,Nott'm Forest,H,Hull City,A
-Leeds,Brentford,H,Brighton,A,Newcastle,H,Crystal Palace,H,Arsenal,A,Man Utd,H,Sunderland,A,Bournemouth,A
-Liverpool,Nott'm Forest,H,Ipswich Town,A,Fulham,H,Bournemouth,A,Man City,H,Brentford,A,Brighton,H,Arsenal,H
-Man City,Crystal Palace,A,Coventry City,H,Man Utd,A,Sunderland,H,Liverpool,A,Ipswich Town,H,Aston Villa,A,Brighton,H
-Man Utd,Ipswich Town,H,Everton,A,Man City,H,Fulham,A,Spurs,H,Leeds,A,Bournemouth,H,Chelsea,A
-Newcastle,Spurs,A,Bournemouth,H,Leeds,A,Hull City,H,Coventry City,A,Aston Villa,H,Crystal Palace,A,Everton,H
-Nott'm Forest,Liverpool,A,Spurs,H,Aston Villa,A,Coventry City,H,Crystal Palace,A,Arsenal,H,Ipswich Town,A,Brentford,A
-Spurs,Newcastle,H,Nott'm Forest,A,Everton,H,Aston Villa,H,Man Utd,A,Coventry City,H,Chelsea,A,Crystal Palace,H
-Sunderland,Fulham,H,Brentford,A,Arsenal,H,Man City,A,Brighton,H,Bournemouth,A,Leeds,H,Coventry City,A
+Team,GW3 Opponent,GW3 Venue,GW4 Opponent,GW4 Venue,GW5 Opponent,GW5 Venue,GW6 Opponent,GW6 Venue,GW7 Opponent,GW7 Venue,GW8 Opponent,GW8 Venue,GW9 Opponent,GW9 Venue,GW10 Opponent,GW10 Venue
+Arsenal,Chelsea,H,Sunderland,A,Brighton,A,Leeds,H,Nott'm Forest,A,Everton,H,Liverpool,A,Hull City,H
+Aston Villa,Hull City,A,Nott'm Forest,H,Spurs,A,Brentford,H,Newcastle,A,Man City,H,Fulham,H,Man Utd,A
+Bournemouth,Newcastle,A,Brentford,H,Liverpool,H,Chelsea,A,Sunderland,H,Man Utd,A,Leeds,H,Ipswich Town,A
+Brentford,Sunderland,H,Bournemouth,A,Chelsea,H,Aston Villa,A,Liverpool,H,Hull City,A,Nott'm Forest,H,Brighton,A
+Brighton,Leeds,H,Coventry City,A,Arsenal,H,Sunderland,A,Crystal Palace,H,Liverpool,A,Man City,A,Brentford,H
+Chelsea,Arsenal,A,Hull City,H,Brentford,A,Bournemouth,H,Everton,A,Spurs,H,Man Utd,H,Sunderland,A
+Coventry City,Man City,A,Brighton,H,Nott'm Forest,A,Newcastle,H,Spurs,A,Fulham,H,Sunderland,H,Everton,A
+Crystal Palace,Fulham,A,Ipswich Town,H,Leeds,A,Nott'm Forest,H,Brighton,A,Newcastle,H,Spurs,A,Liverpool,H
+Everton,Man Utd,H,Spurs,A,Ipswich Town,H,Hull City,A,Chelsea,H,Arsenal,A,Newcastle,A,Coventry City,H
+Fulham,Crystal Palace,H,Liverpool,A,Man Utd,H,Ipswich Town,A,Hull City,H,Coventry City,A,Aston Villa,A,Newcastle,H
+Hull City,Aston Villa,H,Chelsea,A,Newcastle,A,Everton,H,Fulham,A,Brentford,H,Ipswich Town,H,Arsenal,A
+Ipswich Town,Liverpool,H,Crystal Palace,A,Everton,A,Fulham,H,Man City,A,Nott'm Forest,H,Hull City,A,Bournemouth,H
+Leeds,Brighton,A,Newcastle,H,Crystal Palace,H,Arsenal,A,Man Utd,H,Sunderland,A,Bournemouth,A,Spurs,H
+Liverpool,Ipswich Town,A,Fulham,H,Bournemouth,A,Man City,H,Brentford,A,Brighton,H,Arsenal,H,Crystal Palace,A
+Man City,Coventry City,H,Man Utd,A,Sunderland,H,Liverpool,A,Ipswich Town,H,Aston Villa,A,Brighton,H,Nott'm Forest,A
+Man Utd,Everton,A,Man City,H,Fulham,A,Spurs,H,Leeds,A,Bournemouth,H,Chelsea,A,Aston Villa,H
+Newcastle,Bournemouth,H,Leeds,A,Hull City,H,Coventry City,A,Aston Villa,H,Crystal Palace,A,Everton,H,Fulham,A
+Nott'm Forest,Spurs,H,Aston Villa,A,Coventry City,H,Crystal Palace,A,Arsenal,H,Ipswich Town,A,Brentford,A,Man City,H
+Spurs,Nott'm Forest,A,Everton,H,Aston Villa,H,Man Utd,A,Coventry City,H,Chelsea,A,Crystal Palace,H,Leeds,A
+Sunderland,Brentford,A,Arsenal,H,Man City,A,Brighton,H,Bournemouth,A,Leeds,H,Coventry City,A,Chelsea,H

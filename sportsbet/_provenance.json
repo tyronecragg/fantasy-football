@@ -1,60 +1,72 @@
 {
-  "gw": 2,
-  "updated": "2026-08-28T18:42:11",
+  "gw": 3,
+  "updated": "2026-09-01T23:00:18",
   "markets": {
     "sportsbet_booking_odds.csv": {
       "state": "real",
       "source": "ladbrokes",
-      "detail": "616 players over 10 priced matches (game-max fill)",
-      "ts": "2026-08-28T18:39:25"
+      "detail": "140 players over 2 priced matches (game-max fill)",
+      "ts": "2026-09-01T23:00:18"
     },
     "sportsbet_win_draw_win_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-28T18:42:11"
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_goalscorer_odds.csv": {
       "state": "real",
       "source": "betway",
-      "detail": "433 priced",
-      "ts": "2026-08-28T18:42:11"
+      "detail": "438 priced, 13 synthetic kept",
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_two_goals_odds.csv": {
-      "state": "real",
+      "state": "derived",
       "source": "betway",
-      "detail": "433 priced",
-      "ts": "2026-08-28T18:42:11"
+      "detail": "Poisson curve off goalscorer (451 players); flips to real when Betway prices 2+",
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_assist_odds.csv": {
       "state": "real",
       "source": "betway",
-      "detail": "361 priced, 4 synthetic kept",
-      "ts": "2026-08-28T18:42:11"
+      "detail": "331 priced, 3 synthetic kept",
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_clean_sheet_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-28T18:42:11"
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_team_goals_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-28T18:42:11"
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_goalkeeper_saves_odds.csv": {
       "state": "real",
       "source": "betway",
       "detail": "20 priced",
-      "ts": "2026-08-28T18:42:11"
+      "ts": "2026-09-01T18:34:04"
     },
     "sportsbet_two_assists_odds.csv": {
       "state": "derived",
       "source": "pipeline",
       "detail": "assist2 = ASSIST2_RATIO x assist at runtime",
       "ts": "2026-08-26T00:46:27"
+    },
+    "sportsbet_clean_sheet_odds_f2.csv": {
+      "state": "real",
+      "source": "betway",
+      "detail": "20 priced (F2 / next gameweek)",
+      "ts": "2026-09-01T18:34:04"
+    },
+    "sportsbet_team_goals_odds_f2.csv": {
+      "state": "real",
+      "source": "betway",
+      "detail": "20 priced (F2 / next gameweek)",
+      "ts": "2026-09-01T18:34:04"
     }
   }
 }

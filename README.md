@@ -16,7 +16,7 @@ preflights (Excel file locks, Sportsbet VPN check) and pauses between phases for
 the lineup curation:
 
 ```
-python weekly_update.py                       # phase 1: FPL data + odds + FFS staging
+python weekly_update.py                       # phase 1: FPL data + odds (deadline-day one-shot)
                                               #   ... curate lineups with Claude ...
 python weekly_update.py --resume --gw N       # phase 2: fixtures + projections + optimiser + chip log + radar
 ```
@@ -25,104 +25,115 @@ python weekly_update.py --resume --gw N       # phase 2: fixtures + projections 
 > (1 free transfer, £0 bank), so its wildcard/free-hit deltas — and the radar's Free Hit column — are
 > only right when those match. Re-run it by hand each week with your real numbers (it overwrites that
 > GW's row and refreshes the radar):
-> `env\Scripts\python tools/chip_history.py --gw N --free-transfers <FT> --bank <BANK> --radar`
+> `env\Scripts\python tools/chip_history.py --gw N --free-transfers <FT> --bank <BANK> --min-f1-gain 0.5 --min-total-gain 1.0 --radar`
+> The `--min-f1-gain 0.5 --min-total-gain 1.0` flags gate the baseline: it keeps its free transfer
+> only if the F1 XI improves ≥0.5 **and** the weighted 8-fixture total improves ≥1.0, else it holds —
+> so chip deltas are measured against the team you'd realistically field. (0.5/1.0 are the defaults;
+> pass them explicitly so the intent is stated. `--min-f1-gain 0 --min-total-gain 0` = old always-transfer.)
 > The `--radar` block prints a forward F1..F8 chip radar — each fixture valued as a full-weight
 > one-off (Bench Boost / Triple Captain / Free Hit) — so a chip spike in the 8-fixture window is
 > visible in advance, not only when it becomes the next fixture. The Free Hit column uses an
 > **accumulating** free-transfer baseline (`FT` at F1, +1 per week, capped at 5), so it decays
 > further out (by then you'd have transferred into those fixtures anyway).
 
-Or step by step:
+Or step by step. **To move to a new gameweek use `roll_gameweek.py`** (see "Rolling to a new
+gameweek" below) — never a bare `build_fixtures.py`, which would leave every F1 market empty until
+odds open:
 
 ```
-git -C fpl_data/FPL-Core-Insights pull        # 1. latest FPL data (players, prices, stats)
-python tools/betway.py                        # 2. scrape odds (preferred — see below)
-python starting_lineups.py                    # 3. stage FFS predicted lineups (prints diff vs curated)
-python tools/injury_check.py                  # 3a. curated probs vs FPL's own availability flags
-                                              # 3b. curate start probabilities with Claude (see below)
-python tools/build_fixtures.py --gw N         # 4. regenerate the F1-F8 fixture window
-python -m fpl_pipeline.run --gw N             # 5. build projections + record archives
-env\Scripts\python optimisation.py   # 6. transfer advice (PuLP, needs the venv)
+git -C fpl_data/FPL-Core-Insights pull             # 1. latest FPL data (players, prices, stats)
+env\Scripts\python tools/roll_gameweek.py --gw N   # 2. roll window + seed synthetic F1 (new GW)
+python tools/betway.py                             # 3. scrape real odds (override synthetic as they open)
+python tools/odds_status.py                        # 3a. real vs synthetic/derived + fixture check
+python tools/injury_check.py                       # 3b. curated probs vs FPL's availability flags
+                                                   # 3c. curate inputs/starting_lineups.csv with Claude
+python -m fpl_pipeline.run                          # 4. projections through the week (no --gw)
+env\Scripts\python -m fpl_pipeline.run --gw N       # 5. project + archive at the deadline
+env\Scripts\python optimisation.py                 # 6. transfer advice (PuLP, needs the venv)
 ```
 
-Archive safety: while `sportsbet/SYNTHETIC_NOTE.txt` exists (pre-season placeholder
-player odds), `--gw` records **match odds only** — player history and the fallback-factor
-refresh are withheld so synthetic player prices can't poison the trailing-median factors.
-Match odds are still archived because they're often real even when player markets are
-closed (GW1 2026-27 was hand-pasted) and are unbackfillable. Delete the note by hand once
-real Betway odds and Ladbrokes cards have landed; `--force-archive` records everything.
+Archive safety: `--gw` archiving is gated by the **provenance manifest** (`tools/odds_status.py`
+shows the live state). While any scraped player market is synthetic, `--gw` records **match odds
+only** — player history *and* the fallback-factor refresh are withheld so synthetic prices can't
+poison the trailing-median factors. Match odds are still archived (often real even when player
+markets are closed, and unbackfillable). It self-clears to full archiving once every player market
+is real; `--force-archive` records everything.
 
-### Rolling to a new gameweek (before Betway prices it)
+### Rolling to a new gameweek
 
-When a gameweek finishes you move the F1–F8 window forward. But **F1, unlike F2, has no model
-fallback** — the pipeline expects real odds for it — so if you shift the window before bookmakers
-open the new gameweek's markets, every F1 market goes empty. The fix is to **seed synthetic F1**
-from the last played week's actuals, then let Betway overwrite it market-by-market as real prices
-arrive. One command does the roll:
+Moving the F1–F8 window forward. **F1 has no model fallback** — the pipeline expects real odds
+for it — so shifting the window before bookmakers open the new markets would empty every F1
+market. The roll seeds **synthetic F1** from the projection the master already holds for that week
+(its F2), and Betway then overwrites each market as real prices arrive.
 
-```
-python tools/roll_gameweek.py --gw N            # N = the new gameweek (becomes F1)
-```
+> **Do the roll as ONE command, FIRST, before scraping or editing anything. Never hand-edit
+> `inputs/fixtures.csv` or shift the master yourself.** The seed step's guard checks that the
+> master's F2 really is the gameweek you're rolling to; a manual shift desyncs that and breaks the
+> roll (it silently leaves last week's or fabricated player markets in place).
 
-**Before you run it**
+**The order, rolling from GW N-1 → GW N** (use `env/Scripts/python` throughout so lightgbm/PuLP load):
 
-1. **Outright odds** — if you have fresh title/relegation/top-6 numbers, update
-   `inputs/title_odds.csv`, `inputs/relegation_odds.csv`, `inputs/top6_odds.csv` (they feed the
-   synthetic win probabilities via `season_probs` → `win_pred`). They move slowly week to week, so
-   most gameweeks you can skip this. Format is `Team,book_1,book_2,…`; `season_probs` averages the
-   `book_` columns (skipping blanks), so a single consensus column per team is fine. **Or scrape them:**
-   `python tools/betway_outrights.py` writes all three files from Betway's outright markets (title/
-   top-6 raw odds; relegation via the per-team Yes/No markets with a main-market fallback). Betway's
-   ~8% outright margin matches `MARGIN_SEASON=1.08`, so raw odds de-margin correctly.
-2. **Lineups** — curate `inputs/starting_lineups.csv` for the new gameweek's team news (the synthetic
-   player markets are built for whoever is in the XIs there). `python tools/build_preseason_data.py
-   --lineups-only` patches `lineup_overrides.csv` onto the lineups without touching odds.
-3. **Archive** — GW N-1 must already be archived on real odds (`python -m fpl_pipeline.run --gw N-1`
-   was run), because the synthetic factors are read from it. Normal weekly flow guarantees this.
+**Precondition:** GW N-1 was archived on real odds (`run --gw N-1`) and you have NOT hand-shifted
+fixtures or the master since. The normal weekly flow guarantees this.
 
-**What `roll_gameweek.py` does** (each step is a subprocess; a failure stops the roll)
+1. **`tools/roll_gameweek.py --gw N`** — FIRST. Shifts the fixture window to GW N *and* seeds every
+   synthetic F1 market (goalscorer, 2+ goals, assist, bookings, saves, clean sheet, team goals,
+   W/D/W) from the master's F2 projection, so assist/yellow/saves carry forward at real-odds-derived
+   levels. Provenance is stamped synthetic; the archive guard then withholds player history until the
+   markets go real. Update `title_odds.csv` / `relegation_odds.csv` / `top6_odds.csv` first *only* if
+   outrights moved materially (they feed the synthetic win probs — most weeks skip; or scrape them
+   with `tools/betway_outrights.py`). `--factor-gw M` points the seed at a different archived week if
+   GW N-1 wasn't itself archived on real odds.
+2. **`tools/betway.py`** — scrape. Overwrites each market Betway prices (W/D/W, goalscorer, clean
+   sheet, team goals, and assist/saves once those open), leaving the rest synthetic. Re-run through
+   the week as more markets appear. Stray earlier-GW fixture Betway still lists? `--skip-fixture
+   "TERM"` drops it (a team name or any text in the `Home vs. Away` label, repeatable).
+3. **Cards** (Ladbrokes / bet365) once card odds are up → bookings go real.
+4. **`tools/odds_status.py`** — confirm `fixture check: every team-bearing market points at GW N`,
+   and see real vs synthetic/derived. Assist showing `synth` and two-goals `deriv` early is expected
+   — the pipeline keeps them accurate (see below) until real odds land.
+5. **Curate `inputs/starting_lineups.csv`** — GW N team news: zero departed players across **F1–F8**,
+   zero injured/suspended, and sum each team's F1 to exactly 11. The pipeline's curation block flags
+   ceiling / team-sum issues in the run output.
 
-1. `tools/build_fixtures.py --gw N` — regenerates `inputs/fixtures.csv` as the GW N…N+7 window
-   (F1 = GW N). Columns are labelled by **absolute** gameweek (`GW{N} Opponent`, …). Hand-edit this
-   file afterwards for postponements / double-gameweeks before projecting.
-2. `tools/build_synthetic_gw.py --gw N` — for each player, reads their **GW N-1 actual market factor**
-   from the archive (`factor = archived P(stat) ÷ baseline at GW N-1's win probs` — GW-specific, not
-   the all-history median `rebuild_factors` uses) and re-casts it onto GW N: `P = factor × baseline`
-   at GW N's win probs (from `win_pred` on the current outright odds). It writes every **F1-only**
-   market — win/draw/win, goalscorer, 2+ goals, assist, bookings, saves, clean sheets, team goals — to
-   `sportsbet/*.csv`, with the usual margins so de-margining recovers the intended probabilities, and
-   drops `sportsbet/SYNTHETIC_NOTE.txt`. Synthetic seeds **F1 only**; the `_f2` files are cleared
-   (header-only) so F2+ derive off F1 (projection model / `factor × baseline`), and real Betway F2
-   odds repopulate them when priced.
-   - `--factor-gw M` overrides which archived gameweek supplies the factors (default `N-1`). Use it
-     if GW N-1 wasn't archived on real odds (e.g. it was itself synthetic) — point at the last week
-     that was.
+6. **Projections during the week:** `python -m fpl_pipeline.run` (no `--gw`, archives nothing) —
+   sanity-check the top players. **At the deadline:** `python -m fpl_pipeline.run --gw N` to project
+   and archive the final real-odds state.
+7. **Chips + optimiser:** re-run `tools/chip_history.py` with your real free transfers / bank and the
+   baseline-gate flags —
+   `tools/chip_history.py --gw N --free-transfers <FT> --bank <BANK> --min-f1-gain 0.5 --min-total-gain 1.0 --radar`
+   — then run the optimiser (`env\Scripts\python optimisation.py`).
 
-**After you run it**
+**Why the order matters — assist (and bookings/saves).** Betway prices anytime-assist *late*, often
+not until close to kickoff, so for most of the week assist has no real market. Step 1 seeds it from
+the master's F2 and `betway.py` no longer invents assist odds, so the seed survives; and while the
+market is not real, the pipeline builds F1 assist from the **trailing-median factor of the real-odds
+archive weeks** (`players.py`, gated on the provenance manifest) — accurate, not a scrape-time guess.
+Skip step 1 or hand-shift the window, and assist/bookings/saves fall back to stale or fabricated
+values that silently distort the projections you plan on all week.
 
-1. `python -m fpl_pipeline.run` — projects GW N on the synthetic markets (no `--gw`, so nothing is
-   archived). Sanity-check the top players.
-2. `tools/betway.py` — run it once the real markets open. It **upserts each market Betway-authoritative
-   per match**: real odds replace synthetic for every match Betway prices, a player Betway omits from a
-   priced match goes NA (it didn't rate him), and **wholly-unpriced matches keep synthetic** — so real
-   odds override automatically as they arrive, no manual merge. ("Priced team" = a majority team of some
-   priced match, so a loan player can't falsely flag his parent club.) For F1 player-prop gaps in
-   still-unpriced matches, `tools/fill_synthetic_gaps.py` backfills from the prior GW's archived F2.
-   - **Stray earlier-gameweek fixture?** Betway sometimes still lists a not-yet-played match from a
-     past gameweek; because the F1/F2 split is by kickoff order (first 10 = F1, next 10 = F2), a stray
-     earlier match would sort into F1 and shift everything by one. Drop it with
-     `--skip-fixture "TERM"` (a team name or any text in the `Home vs. Away` label, repeatable) —
-     e.g. `tools/betway.py --skip-fixture "Wolves"`. The remaining fixtures then split cleanly (first
-     10 → F1, next 10 → F2), and the built-in crosscheck against `fixtures.csv`'s GW N / GW N+1
-     pairings **warns** if any block still doesn't line up, so a missed or wrong skip is caught.
-3. `python -m fpl_pipeline.run --gw N` — project and archive. While `SYNTHETIC_NOTE.txt` exists the
-   guard records **match odds only** (player history is withheld so synthetic prices can't poison the
-   trailing-median factors). **Delete `sportsbet/SYNTHETIC_NOTE.txt` by hand** once real Betway player
-   odds (and Ladbrokes cards) have landed, then re-run `--gw N` to archive player history too;
-   `--force-archive` records everything regardless.
+**What `roll_gameweek.py` does** (each step a subprocess; a failure stops the roll):
 
-Next gameweek it's just `python tools/roll_gameweek.py --gw N+1`. The in-season builder mirrors the
-pre-season `build_preseason_data.py`; use that one only before the season starts.
+1. `build_fixtures.py --gw N` — regenerates `inputs/fixtures.csv` as the GW N…N+7 window (F1 = GW N),
+   columns labelled by **absolute** gameweek (`GW{N} Opponent`, …). Hand-edit afterwards for
+   postponements / double-gameweeks before projecting.
+2. `build_synthetic_gw.py --gw N` — carries the current master's **F2 projection** (its forecast for
+   GW N) onto GW N's F1, writing every F1-only market — win/draw/win, goalscorer, 2+ goals, assist,
+   bookings, saves, clean sheet, team goals — to `sportsbet/*.csv` and stamping them synthetic in the
+   provenance manifest. It **refuses if the master's F2 isn't GW N** (the guard against a double
+   shift). `_f2` files are cleared so F2+ derive off F1; real Betway F2 odds repopulate them when
+   priced. `--factor-gw M` / `--source archive` sources from a different archived week instead.
+
+`betway.py` then upserts each market **Betway-authoritative per match**: real odds replace synthetic
+for every match Betway prices, a player Betway omits from a priced match goes NA, and wholly-unpriced
+matches keep synthetic — so real odds override automatically, no manual merge. The archive guard
+(`guard_synthetic_archive`, driven entirely by the provenance manifest — there is **no**
+`SYNTHETIC_NOTE.txt` any more) records **match odds only** while any player market is synthetic, so
+synthetic prices can't poison the trailing-median factors; it self-clears to full archiving once
+`odds_status.py` shows every player market real. `--force-archive` overrides.
+
+Next gameweek it's just `roll_gameweek.py --gw N+1`. The pre-season sibling is
+`build_preseason_data.py`; use that only before the season starts.
 
 **Transfer-market check, every curation pass.** Before committing to a player, research
 whether he is being sold or is close to it — a move away from the league, or to a club where
@@ -305,12 +316,13 @@ Things known to be provisional, with what would settle them:
   model would be sharper. (2) constants are 2025-26; re-measure as 2026-27 accrues. (3) draw
   home/away asymmetry (2.96/3.51) was averaged to 3.24.
 
-- **The synthetic assist ratio — low materiality now.** Used in `betway.py` only to fill
-  fixtures Betway has NOT priced assists for; it recalibrated unstably early (0.836 → 1.215 in a
-  day) and now falls back to a 1.132 convention. Betway prices assists directly for almost every
-  fixture (e.g. this GW 357/361 real, ~4 synthetic), so the ratio touches only the rare unpriced
-  fixture — the instability barely reaches XP. Still worth measuring per market source if the
-  synthetic-fill count grows.
+- **The synthetic assist ratio — REMOVED (2026-08-31).** `betway.py` used to fill unpriced
+  fixtures' assists as `goalscorer × ratio`, which over-projected strikers badly (that ratio, ~1.0,
+  makes a striker's assist as likely as his goal — real forwards sit near 0.4). It no longer invents
+  assist at all: unpriced assist fixtures keep the synthetic F2 carry, and **when the assist market
+  isn't real the pipeline builds F1 assist from the trailing-median factor of the real-odds archive
+  weeks** (`players.py`, gated on the provenance manifest) instead of any scrape-time ratio. Assist
+  is the one stat that stays single-week when its market *is* real (backtested better there).
 
 - **`SYNTHETIC_NOTE.txt` — RETIRED (2026-08-30).** The file no longer exists and nothing reads it.
   The `--gw` archive guard is now driven entirely by the provenance manifest (`provenance.is_real`
@@ -345,6 +357,7 @@ Things known to be provisional, with what would settle them:
 | `historical_player_data.csv` | pipeline (`--gw` runs) | season-keyed training archive, full F1–F8 forecast block; never edit |
 | `historical_fixture_odds.csv` | pipeline (`--gw` runs) | per-gameweek match + season odds; never edit. Records more than the pipeline consumes (draw odds, `Gameweek` stamp, per-team clean-sheet and over-1.5/over-3.5 goal odds) because odds can't be backfilled — see task #19. Rows before 2026-27 predate those columns and carry NA, and the archive starts ~GW12 2025-26, so it describes the mid-season regime only |
 | `historical_expected_points.csv` | you, optional | legacy tracking log, nothing reads it |
+| `historical_outright_odds.csv` | `tools/betway_outrights.py` (weekly) | week-by-week archive of the full team outright board (Winner/Top 2/4/5/6/Top Half/Bottom Half/Bottom/Relegation); long format, GW-keyed; a data lake for future modelling — nothing reads it yet |
 | `f2_yellow_card.csv` | vestigial | second-source F2 card odds; empty since that pipeline was retired |
 
 ## Odds sources
@@ -370,10 +383,10 @@ real prices for the same fixtures:
 
 - **2+ goals** — a derivation, not an estimate: P(2+) follows from P(1+) through the same
   `model.poisson_score2` curve the projections already use.
-- **Assists** — where Betway prices both assists and goalscorer, the real assist:score
-  ratio is measured and applied to fixtures still missing assists. On 2026-08-17 that
-  calibrated to **0.841** from 36 real pairs, against the **1.132** convention constant
-  measured pre-season from another book — a 35% difference, so prefer the calibration.
+- **Assists** — no longer derived here (removed 2026-08-31). Betway prices anytime-assist late, so
+  `betway.py` writes only genuinely-priced assists; unpriced fixtures keep the synthetic F2 carry,
+  and the pipeline fills F1 assist from the trailing-median factor of the real-odds archive weeks
+  when the market isn't real. The old `goalscorer × ratio` fill over-projected strikers.
 - **Goalkeeper saves** — derived by `derive_saves()` from the shots-on-target ladders,
   de-margined against a market anchor. **Betway carries no saves market at all** (confirmed
   2026-08-17 against every market group), but it prices ~43 players per match for 1+…4+
@@ -455,8 +468,9 @@ docstring for everything ruled out).
 
 ### sportsbet/ — always script-written
 
-`tools/betway.py` (real markets) or `tools/build_preseason_data.py` (synthetic placeholders,
-flagged by `SYNTHETIC_NOTE.txt`). Never edit by hand.
+`tools/betway.py` (real markets), `tools/build_synthetic_gw.py` (in-season roll) or
+`tools/build_preseason_data.py` (pre-season) — synthetic placeholders are stamped synthetic in the
+provenance manifest (`tools/odds_status.py`). Never edit by hand.
 
 ### outputs/ — regenerated every run, safe to delete
 
@@ -473,8 +487,8 @@ write to `outputs/parity/` so they never clobber the live master. The backtest w
 | `python weekly_update.py [--resume --gw N]` | the whole weekly routine in two phases, with preflights and a curation pause |
 | `python tools/build_fixtures.py --gw N` | regenerate the rolling fixture window from the season list |
 | `python tools/roll_gameweek.py --gw N` | **roll to a new gameweek**: shift the window to GW N, then seed synthetic F1 markets from GW N-1's actual factors (chains the two tools below). Update outright odds + lineups first; run `betway.py` after |
-| `python tools/betway_outrights.py [--har F]` | scrape Betway PL **outright** markets → `title_odds.csv` / `top6_odds.csv` / `relegation_odds.csv`. Title & Top-6 = raw team odds (winners=K, de-margined by `MARGIN_SEASON=1.08` which matches Betway's ~8%); relegation = per-team Yes/No markets (more current than the stale main market), main-market fallback for the safe teams with no two-way. `--har` parses a saved capture |
-| `python tools/build_synthetic_gw.py --gw N [--factor-gw M]` | seed synthetic **F1-only** (GW N) markets = GW M's (default N-1) archived actual factors × the new fixtures' win probs; **F2+ derive off F1** (synthetic never seeds F2 — the `_f2` files are cleared so F2 projects via the model / factor × baseline); drops `SYNTHETIC_NOTE.txt`. In-season sibling of `build_preseason_data` |
+| `python tools/betway_outrights.py [--har F]` | scrape Betway PL **outright** markets → `title_odds.csv` / `top6_odds.csv` / `relegation_odds.csv`. Title & Top-6 = raw team odds (winners=K, de-margined by `MARGIN_SEASON=1.08` which matches Betway's ~8%); relegation = per-team Yes/No markets (more current than the stale main market), main-market fallback for the safe teams with no two-way. **Also archives the full team outright board (Winner/Top 2/4/5/6/Top Half/Bottom Half/Bottom/Relegation) week-by-week to `inputs/historical_outright_odds.csv`** (GW-keyed data lake for future modelling; pipeline doesn't read it). `--har` parses a saved capture |
+| `env\Scripts\python tools/build_synthetic_gw.py --gw N` | seed synthetic **F1-only** (GW N) markets by carrying the current master's **F2 projection** onto GW N's fixtures (default `--source master-f2`; `--source archive` / `--factor-gw M` uses an archived week instead). **Refuses if the master's F2 isn't GW N** (double-shift guard). **F2+ derive off F1** (the `_f2` files are cleared). Stamps every market synthetic in the provenance manifest. In-season sibling of `build_preseason_data` |
 | `python tools/fill_synthetic_gaps.py [--source-gw M]` | backfill the current F1 player-prop markets (goalscorer/2+/assist/booking) from GW M's archived F2 projection, **only for matches Betway hasn't priced** — so attackers in unpriced fixtures aren't stuck on appearance points. Non-destructive; Betway-authoritative per match (a team is "priced" = a majority team of some priced match, robust to loan players) |
 | `python tools/build_preseason_data.py` | pre-season bootstrap: estimated lineups, factor rebuild, synthetic odds (real GW1 markets used when `gw1_match_odds.csv` exists) |
 | `python tools/injury_check.py` | curated start probs vs FPL's own availability flags (weekly, step 3a) |
@@ -535,8 +549,12 @@ on the current season as it accumulates.
 Both optimisers configure via their `__main__` blocks (edit and run):
 
 - **`optimisation.py`** (weekly transfers): `max_transfers`, `num_fixtures`,
-  `additional_budget` (money in the bank), `force_transfer_out=[names]`,
-  `force_transfer_in=[names]` (pin a player into every squad to see its XP cost),
+  `additional_budget` (money in the bank), `force_exclude_players=[names]`
+  (must NOT be in the squad — sold if owned, never bought) / `force_include_players=[names]`
+  (must BE in the squad — kept if owned, bought if not; pin a player in to see its XP cost),
+  `min_f1_gain` / `min_total_gain` (default 0 = off; a "worth-it" gate — only transfer if the
+  Next-GW starting XI improves by ≥ `min_f1_gain` **and** the weighted total incl bench improves by
+  ≥ `min_total_gain`, else the optimiser holds with 0 transfers),
   `compute_solutions` / `num_solutions_display` (solution pool + frequency analysis
   showing how often each player appears across near-optimal solutions),
   `max_defensive_players_per_team` (GK+DEF cap per club). **Optional two-stage tie-break**
@@ -601,7 +619,7 @@ Documented with rationale in `fpl_pipeline/players.py`; all are disabled in pari
 | Poisson score curves | Smooth P(score 2+/3+) from P(score 1+) instead of step ladders (which had an exact `p == 0.3` branch) |
 | Generic F2 score model | The workbook's Coefficients-sheet F2 score formula mixed model families (factor calibrated on one model, applied to another): backtested MAE 0.063 even with perfect odds vs 0.019 for the generic factor × baseline now used |
 | Persistence blend | Modelled F2–F6 score/assist/saves probabilities blended with the player's current F1 odds-implied probability at backtested weights (`config.PROJECTION_BLEND`: 0.70/0.85/0.85) — ~10% error reduction on score projections |
-| F7–F8 horizon | Two extra fully-modelled fixtures (the fixture data always went to F8) so the optimisers can plan two months out with `num_fixtures=8`; decay the tail harder (e.g. …0.5, 0.35, 0.25). Start probabilities come from curated F7/F8 columns in `starting_lineups.csv` (F6 fallback if absent); Total XP stays the 6-fixture blend |
+| F7–F8 horizon | Two extra fully-modelled fixtures (the fixture data always went to F8) so the optimisers can plan two months out with `num_fixtures=8`; decay the tail harder (e.g. …0.5, 0.35, 0.25). Start probabilities come from curated F7/F8 columns in `starting_lineups.csv` (F6 fallback if absent). The optimisers weight the horizon themselves (`Weighted_Total_XP`); the master's old "Total XP" blend column was removed 2026-08-31 |
 
 ### Projection quality (backtested)
 

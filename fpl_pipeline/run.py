@@ -112,17 +112,24 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
     # The master must stay snapshot #13 — the optimisers read outputs/13_players_master.csv
     # by name, so variable-count stages (reconciliation) come after it.
     factor_history = None
+    assist_real = provenance.is_real("sportsbet_assist_odds.csv")
     if improved:
-        factor_history = {stat: h for stat in config.MEDIAN_FACTOR_STATS
+        # assist normally stays single-week (backtested better on real weeks), but it needs its
+        # archive history available so players.build can fall back to the trailing median when the
+        # assist market ISN'T real. Every other stat medians unconditionally (MEDIAN_FACTOR_STATS).
+        hist_stats = tuple(config.MEDIAN_FACTOR_STATS) + ("assist",)
+        factor_history = {stat: h for stat in hist_stats
                           if (h := history.season_weekly_factors(stat))}
         if factor_history:
             print(f"  trailing-median factors active for {len(factor_history)} stats "
-                  f"({len(next(iter(factor_history.values())))} players with archive weeks)")
+                  f"({len(next(iter(factor_history.values())))} players with archive weeks)"
+                  + ("" if assist_real else "; assist market not real -> assist on trailing median"))
 
     master = snapshot(
         players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
                       inputs["fallback_factors"], dc_stats, inputs["dc_params"],
-                      improved=improved, factor_history=factor_history, gameweek=gameweek),
+                      improved=improved, factor_history=factor_history, gameweek=gameweek,
+                      assist_real=assist_real),
         "players_master")
 
     if improved:
@@ -151,16 +158,14 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
             hint = f" (FPL data suggests GW{guess})" if guess else ""
             print(f"Archives not updated - rerun with --gw N to record this run{hint}")
 
-    cols = ["Player Name", "Position", "Team", "Cost", "F1 XP", "Total XP"]
+    cols = ["Player Name", "Position", "Team", "Cost", "F1 XP"]
     print("\nTop 5 by F1 XP:")
     print(master.nlargest(5, "F1 XP")[cols].to_string(index=False))
-    print("\nTop 5 by Total XP:")
-    print(master.nlargest(5, "Total XP")[cols].to_string(index=False))
 
     val = master[master["Cost"] > 0].copy()
-    val["XP/£"] = (val["Total XP"] / val["Cost"]).round(3)
-    topv = val.nlargest(5, "XP/£")[["Player Name", "Position", "Team", "Cost", "Total XP", "XP/£"]]
-    print("\nTop 5 by value (Total XP per £):")
+    val["XP/£"] = (val["F1 XP"] / val["Cost"]).round(3)
+    topv = val.nlargest(5, "XP/£")[["Player Name", "Position", "Team", "Cost", "F1 XP", "XP/£"]]
+    print("\nTop 5 by value (F1 XP per £):")
     print(topv.to_string(index=False))
     return master
 

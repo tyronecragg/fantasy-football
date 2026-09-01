@@ -91,7 +91,7 @@ def _our_xp():
     if "player_id" not in m.columns:
         return {}
     f1 = "F1 XP" if "F1 XP" in m.columns else None
-    tot = "Total XP" if "Total XP" in m.columns else None
+    tot = None  # Total XP retired; horizon value now comes from the optimiser, not the master
     return {int(r["player_id"]): (r.get(f1), r.get(tot)) for _, r in m.iterrows()}
 
 

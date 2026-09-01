@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
 """Roll the pipeline to a new gameweek and seed synthetic F1 markets — one command per week.
 
-    python tools/roll_gameweek.py --gw N [--factor-gw M]
+    env/Scripts/python tools/roll_gameweek.py --gw N [--factor-gw M]
+
+RUN THIS FIRST, before scraping or editing anything, and NEVER hand-edit inputs/fixtures.csv or
+shift the master yourself: build_synthetic_gw's guard checks that the master's F2 really is GW N,
+and a manual shift desyncs that and breaks the roll (leaving last week's / fabricated player markets
+in place). Precondition: GW N-1 was archived on real odds and nothing was hand-shifted since.
 
 Runs, in order (each a subprocess; a failure stops the roll):
   1. tools/build_fixtures.py --gw N        shift the F1-F8 window to GW N
-  2. tools/build_synthetic_gw.py --gw N    seed synthetic F1 markets = GW N-1 actual factors
-                                           re-cast onto GW N's fixtures (win probs from win_pred)
+  2. tools/build_synthetic_gw.py --gw N    carry the master's F2 projection (its forecast for GW N)
+                                           onto GW N's F1; every market stamped synthetic in the
+                                           provenance manifest. Refuses if master F2 isn't GW N.
 
-BEFORE running: if you have fresh outright odds, update inputs/title_odds.csv / relegation_odds.csv /
-top6_odds.csv first — the synthetic win probs are computed from them (they move slowly, so most weeks
-you can skip this). Also curate inputs/starting_lineups.csv for GW N team news.
+BEFORE running: update inputs/title_odds.csv / relegation_odds.csv / top6_odds.csv only if outrights
+moved materially (they feed the synthetic win probs; most weeks skip). Curate
+inputs/starting_lineups.csv for GW N team news.
 
-AFTER running: `python -m fpl_pipeline.run` to see GW N projections on the synthetic markets; then
-run tools/betway.py when the real markets open (it overwrites each market it prices, leaving the rest
-synthetic); finally `python -m fpl_pipeline.run --gw N` to project and archive on the real odds.
+AFTER running: `python -m fpl_pipeline.run` to see GW N projections on the synthetic markets; run
+tools/betway.py + card scrape as the real markets open (each overwrites the markets it prices,
+leaving the rest synthetic); `tools/odds_status.py` to check real vs synthetic + fixtures; finally
+`python -m fpl_pipeline.run --gw N` at the deadline to project and archive on the real odds.
 """
 import argparse
 import os

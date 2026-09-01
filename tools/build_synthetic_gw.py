@@ -33,6 +33,7 @@ from tools.build_preseason_data import (  # noqa: E402  (reuse the tested helper
     FACTOR_STATS, PLAYER_MARGIN, WDW_MARGIN, fixture_win_probs)
 
 HIST = os.path.join(config.INPUTS_DIR, "historical_player_data.csv")
+MASTER = os.path.join(config.OUTPUTS_DIR, "13_players_master.csv")
 EPOCH = 1788030000  # ~28 Aug 2026, informational (the pipeline keys markets by player/team, not date)
 
 
@@ -99,8 +100,12 @@ def _wdw_rows(frame):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gw", type=int, required=True, help="the new F1 gameweek (F2 = gw+1)")
+    ap.add_argument("--source", choices=["master-f2", "archive"], default="master-f2",
+                    help="master-f2 (default): carry the CURRENT master's F2 projection (the GW N "
+                         "forecast we already computed - model-served + blended) forward as the new "
+                         "F1. archive: recast GW N-1's actual market factors onto GW N (the old way).")
     ap.add_argument("--factor-gw", type=int, default=None,
-                    help="archived gameweek to source player factors from (default: gw-1, the last played week)")
+                    help="archive source only: archived gameweek to source factors from (default: gw-1)")
     ap.add_argument("--factor-season", default=config.SEASON)
     a = ap.parse_args()
     if a.factor_gw is None:
@@ -109,13 +114,31 @@ def main():
 
     roster = ingest.load_fpl_players()
     season = team_model.season_probs(ingest.load_inputs())      # uses the UPDATED outright odds
-    fb = gw_factors(a.factor_season, a.factor_gw).set_index("Player Name")
-    med = fb.median(numeric_only=True)                          # for players with no factor-gw row
+    mf = None
+    if a.source == "master-f2":
+        mf = pd.read_csv(MASTER).set_index("Player Name")       # F2 = the GW N projection to carry to F1
+    else:
+        fb = gw_factors(a.factor_season, a.factor_gw).set_index("Player Name")
+        med = fb.median(numeric_only=True)                      # for players with no factor-gw row
     lineups = normalize_start_probs(pd.read_csv(os.path.join(config.INPUTS_DIR, "starting_lineups.csv")))
     sf = pd.read_csv(os.path.join(config.INPUTS_DIR, "season_fixtures.csv"))
     gw1 = fixture_win_probs(season, sf[sf["gameweek"] == a.gw])        # F1 = new gameweek
     if gw1.empty:
         raise SystemExit(f"no fixtures for GW{a.gw} in season_fixtures.csv")
+
+    if a.source == "master-f2":                                # guard against a double-roll
+        want = {}                                              # each team's GW N opponent
+        for _, r in gw1.iterrows():
+            want[r["home_team"]] = r["away_team"]
+            want[r["away_team"]] = r["home_team"]
+        mopp = (mf.reset_index().dropna(subset=["Team", "F2 Opponent"])
+                .groupby("Team")["F2 Opponent"].first().to_dict())
+        hits = sum(1 for t, o in want.items() if mopp.get(t) == o)
+        if hits < 0.7 * len(want):                             # the master's F2 must BE the GW N forecast
+            raise SystemExit(
+                f"master's F2 fixtures are not GW{a.gw} ({hits}/{len(want)} teams match) — its F2 is not the "
+                f"GW{a.gw} forecast, so shifting it into F1 would be WRONG (already rolled+ran to GW{a.gw}?). "
+                f"Refusing to double-shift. Target the correct --gw, rebuild the pre-roll master, or use --source archive.")
 
     # --- win/draw/win: F1 ONLY. Synthetic seeds F1 markets exclusively; F2+ are DERIVED off the F1
     # synthetic data (model / factor x baseline), so no synthetic F2 block is written — a NaN F2 in the
@@ -131,18 +154,24 @@ def main():
     mid = 90000000 + ctx.index
     outfield = pos != "GK"
 
-    def fac(col):
-        return ctx["Player"].map(fb[col]).fillna(med[col])
-
-    p_score = (fac("Score 1+ Factor") * model.baseline("score1", win, opp, pos, home)).clip(0.01, 0.9)
-    p_assist = (fac("Assist Factor") * model.baseline("assist", win, opp, pos, home)).clip(0.01, 0.9)
-    p_yellow = fac("F1 Yellow Card Factor") * model.baseline("yellow", win, opp, pos, home)
+    if a.source == "master-f2":
+        def seed(col, cap=0.95):                       # carry the master's F2 (GW N) projection to F1
+            return ctx["Player"].map(mf[col]).fillna(0.01).clip(0.01, cap)
+        p_score, p_score2 = seed("F2 Score 1+", 0.9), seed("F2 Score 2+", 0.9)
+        p_assist, p_yellow = seed("F2 Assist", 0.9), seed("F2 Yellow Card")
+    else:
+        def fac(col):
+            return ctx["Player"].map(fb[col]).fillna(med[col])
+        p_score = (fac("Score 1+ Factor") * model.baseline("score1", win, opp, pos, home)).clip(0.01, 0.9)
+        p_score2 = model.poisson_score2(p_score)
+        p_assist = (fac("Assist Factor") * model.baseline("assist", win, opp, pos, home)).clip(0.01, 0.9)
+        p_yellow = fac("F1 Yellow Card Factor") * model.baseline("yellow", win, opp, pos, home)
 
     pd.DataFrame({"player_name": ctx["Player"], "match_id": mid,
                   "odds_decimal": _to_odds(p_score)})[outfield].to_csv(
         os.path.join(sb, "sportsbet_goalscorer_odds.csv"), index=False)
     pd.DataFrame({"player_name": ctx["Player"], "match_id": mid,
-                  "odds_decimal": _to_odds(model.poisson_score2(p_score))})[outfield].to_csv(
+                  "odds_decimal": _to_odds(p_score2)})[outfield].to_csv(
         os.path.join(sb, "sportsbet_two_goals_odds.csv"), index=False)
     pd.DataFrame({"player_name": ctx["Player"], "match_id": mid,
                   "odds_decimal": _to_odds(p_assist)})[outfield].to_csv(
@@ -152,18 +181,41 @@ def main():
         os.path.join(sb, "sportsbet_booking_odds.csv"), index=False)
 
     gk = ctx[pos == "GK"]
-    ghome = gk["venue"] == "H"
-    p3 = (gk["Player"].map(fb["F1 3+ Saves Factor"]).fillna(med["F1 3+ Saves Factor"])
-          * model.baseline("saves3", gk["p"], gk["po"], pd.Series("GK", index=gk.index), ghome))
-    p6 = (gk["Player"].map(fb["F1 6+ Saves Factor"]).fillna(med["F1 6+ Saves Factor"])
-          * model.baseline("saves6", gk["p"], gk["po"], pd.Series("GK", index=gk.index), ghome))
+    if a.source == "master-f2":
+        p3 = gk["Player"].map(mf["F2 3+ Saves"]).fillna(0.01)      # model-served saves carried from F2
+        p6 = gk["Player"].map(mf["F2 6+ Saves"]).fillna(0.01)
+    else:
+        ghome = gk["venue"] == "H"
+        p3 = (gk["Player"].map(fb["F1 3+ Saves Factor"]).fillna(med["F1 3+ Saves Factor"])
+              * model.baseline("saves3", gk["p"], gk["po"], pd.Series("GK", index=gk.index), ghome))
+        p6 = (gk["Player"].map(fb["F1 6+ Saves Factor"]).fillna(med["F1 6+ Saves Factor"])
+              * model.baseline("saves6", gk["p"], gk["po"], pd.Series("GK", index=gk.index), ghome))
     pd.DataFrame({"Match": gk["Team"] + " v " + gk["opp"], "Date": EPOCH, "Team": gk["Team"],
                   "Goalkeeper": gk["Player"], "3+ Saves": _to_odds(p3), "6+ Saves": _to_odds(p6)}).to_csv(
         os.path.join(sb, "sportsbet_goalkeeper_saves_odds.csv"), index=False)
 
-    # --- team markets: F1 only. The _f2 files are CLEARED (header-only) so F2 clean-sheet/team-goals
-    # are model-derived off F1 rather than synthetic; real Betway F2 odds repopulate them when priced.
-    cs1, tg1 = _team_block(gw1, EPOCH)
+    # --- team markets: F1 only. The _f2 files are CLEARED (header-only) so the pipeline re-derives F2
+    # off the new F1; real Betway F2 odds repopulate them when priced.
+    if a.source == "master-f2":
+        # Carry the master's F2 clean-sheet + concede (GBM-served) into F1. A team scores 2+/4+ exactly
+        # when its OPPONENT concedes 2+/4+, so team-goals map off the opponent's F2 concede.
+        pt = (mf.reset_index().dropna(subset=["Team"])
+              .groupby("Team")[["F2 Clean Sheet", "F2 Concede 2+ Goals", "F2 Concede 4+ Goals"]].first())
+        rows = _team_side_view(gw1)
+        p_cs = rows["Team"].map(pt["F2 Clean Sheet"]).fillna(0.10).clip(0.03, 0.7)
+        p2 = rows["opp"].map(pt["F2 Concede 2+ Goals"]).fillna(0.30).clip(0.05, 0.9)
+        p4 = rows["opp"].map(pt["F2 Concede 4+ Goals"]).fillna(0.05).clip(0.01, 0.6)
+        cs1 = pd.DataFrame({"match_name": rows["Team"] + " v " + rows["opp"], "date": EPOCH,
+                            "team_name": rows["Team"],
+                            "clean_sheet_yes": _to_odds(p_cs), "clean_sheet_no": _to_odds(1 - p_cs)})
+        tg1 = pd.DataFrame({"Match": rows["Team"] + " v " + rows["opp"], "Date": EPOCH,
+                            "Team": rows["Team"], "Opponent": rows["opp"],
+                            "Team_Over_1.5": _to_odds(p2), "Team_Under_1.5": _to_odds(1 - p2),
+                            "Team_Over_3.5": _to_odds(p4), "Team_Under_3.5": _to_odds(1 - p4)})
+        for c in ("Over_1.5", "Under_1.5", "Over_3.5", "Under_3.5"):
+            tg1[f"Opponent_Concedes_{c}"] = tg1[f"Team_{c}"]
+    else:
+        cs1, tg1 = _team_block(gw1, EPOCH)
     cs1.to_csv(os.path.join(sb, "sportsbet_clean_sheet_odds.csv"), index=False)
     tg1.to_csv(os.path.join(sb, "sportsbet_team_goals_odds.csv"), index=False)
     cs1.iloc[0:0].to_csv(os.path.join(sb, "sportsbet_clean_sheet_odds_f2.csv"), index=False)

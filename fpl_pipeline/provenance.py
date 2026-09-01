@@ -26,7 +26,9 @@ FRIENDLY = {
     "sportsbet_two_assists_odds.csv": "two assists",
     "sportsbet_booking_odds.csv": "bookings (yellow)",
     "sportsbet_clean_sheet_odds.csv": "clean sheet",
+    "sportsbet_clean_sheet_odds_f2.csv": "clean sheet (F2)",
     "sportsbet_team_goals_odds.csv": "team goals",
+    "sportsbet_team_goals_odds_f2.csv": "team goals (F2)",
     "sportsbet_goalkeeper_saves_odds.csv": "gk saves",
 }
 
@@ -63,6 +65,15 @@ def mark(file, state, source, detail=""):
     """Stamp one market (by sportsbet filename). state is 'real' or 'synthetic'."""
     doc = _load()
     doc["markets"][file] = {"state": state, "source": source, "detail": detail, "ts": _now()}
+    return _save(doc)
+
+
+def set_gameweek(gw):
+    """Update just the manifest's gameweek stamp (markets untouched). Lets a scrape that isn't
+    preceded by a synthetic reset (e.g. betway.py after a bare build_fixtures roll) keep the
+    displayed GW honest."""
+    doc = _load()
+    doc["gw"] = gw
     return _save(doc)
 
 

@@ -30,8 +30,7 @@ Improved mode (build(..., improved=True); parity mode = improved=False is workbo
    odds; F1 Score 3+ (no market exists) uses the same smooth curve.
 8. F7/F8 fixture projections: same machinery as F3-F6, extending the optimiser's
    horizon to eight gameweeks (start probabilities come from curated F7/F8 columns
-   in starting_lineups.csv, falling back to the F6 belief if absent; Total XP
-   remains the workbook's 6-fixture blend).
+   in starting_lineups.csv, falling back to the F6 belief if absent).
 9. F2 score uses the generic factor x baseline instead of the workbook's
    Coefficients-sheet score model. Backtested (tools/backtest_projections.py): the
    sheet model's MAE is 0.063 even given the fixture's actual odds, vs 0.019 for the
@@ -170,7 +169,7 @@ def _assist2_ratio(mkts, floor_p1=0.02, min_pairs=20):
 
 
 def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params,
-          improved=True, factor_history=None, gameweek=None):
+          improved=True, factor_history=None, gameweek=None, assist_real=True):
     if improved:
         lineups = normalize_start_probs(lineups)
     m = pd.DataFrame({
@@ -273,11 +272,18 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         ("F1 6+ Saves Factor", "F1 6+ Saves", "saves6", 7),
     ]
     def _median_with_history(stat, computed):
-        """Trailing-median factor: this season's archived weekly factors + the current
-        week (backtested better than single-week for every stat except assist)."""
+        """Trailing-median factor: this season's archived weekly factors + the current week
+        (backtested better than single-week; also robust to a one-off outlier week, e.g. a
+        premium creator's assist priced low for a single tough away fixture)."""
         hist = (factor_history or {}).get(stat)
         if not (improved and hist):
             return computed
+        # assist joins the median-always stats (2026-09-01): single-week backtested marginally
+        # sharper on real-odds weeks, but pins the whole F2-F8 assist line to ONE week's real
+        # print - so a tough-fixture low (Palmer 6.7% away at Arsenal) halved his F2-F8 vs the
+        # GW1/GW2 snapshots. The median over the real-odds archive weeks rejects that outlier.
+        # F1 itself stays the real single-week odds (the vlookup below is untouched when real);
+        # only the FORWARD factor is smoothed, exactly like score1/yellow.
         return pd.Series(
             [np.median(np.append(hist[p], c)) if (p in hist and np.isfinite(c)) else c
              for p, c in zip(name, computed)], index=computed.index)
@@ -291,6 +297,18 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     m["Clean Sheet Factor"] = _median_with_history(
         "clean_sheet", m["F1 Clean Sheet"] / model.baseline(
             "clean_sheet", m["F1 Win"], m["F1 Opponent Win"], pos, home1))
+
+    # When there is no real assist market, this week's F1 Assist came from a synthetic carry that
+    # the longshot calibration shrinks (Haaland 0.135 -> 0.083). The Assist Factor above has now
+    # been medianed against the real-odds archive weeks, so rebuild F1 Assist from that robust
+    # factor x baseline - exactly as F2-F8 do - instead of the calibrated carry. Real assist odds
+    # keep their single-week value untouched (byte-identical to before).
+    if improved and not assist_real:
+        m["F1 Assist"] = m["Assist Factor"] * model.baseline(
+            "assist", m["F1 Win"], m["F1 Opponent Win"], pos, home1)
+        clip01(["F1 Assist"])
+        real_a2 = vlookup(name, mkts["assist2"], "player", "prob")
+        m["F1 Assist 2+"] = real_a2.where(real_a2.notna(), assist2_ratio * m["F1 Assist"])
 
     def xp_block(prefix, start, stats):
         pre = model.xp_pre(pos, start, stats)
@@ -321,15 +339,21 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
 
     # Trained forward-projection models override factor x baseline for the defensive markets in
     # F3-F8 (the only components that beat the real pipeline value on walk-forward). Needs the
-    # current gameweek + the on-disk archive (trailing form); silently stays off otherwise.
+    # current gameweek + the on-disk archive (trailing form). Off (factor x baseline) for bare or
+    # parity runs; but a --gw run that is meant to use them and CAN'T load them now FAILS loudly
+    # rather than silently degrading (set config.USE_PROJECTION_MODEL=False to opt out on purpose).
     server = None
     if improved and config.USE_PROJECTION_MODEL and gameweek:
         try:
             from . import history, projection_serving
             _archive = pd.read_csv(history.PLAYER_HISTORY_CSV, low_memory=False)
             server = projection_serving.make_server(m, _archive, config.SEASON, gameweek)
-        except Exception as exc:  # never let serving break the core pipeline
-            warnings.warn(f"projection-model serving disabled: {exc}")
+        except Exception as exc:  # projection models are REQUIRED here - fail, don't silently degrade
+            raise RuntimeError(
+                f"projection-model serving is required for this --gw run but failed: {exc}. "
+                f"Run with the venv (env/Scripts/python) so lightgbm etc. are available, or set "
+                f"config.USE_PROJECTION_MODEL=False to deliberately accept factor x baseline."
+            ) from exc
 
     # ---- F2: partial odds, otherwise factor x baseline ----
     m["F2 Start"] = m["_start2"]
@@ -416,7 +440,7 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     # ---- F3..F6 (parity) / F3..F8 (improved): fully model-driven ----
     # F7/F8 exist only in improved mode: the workbook never computed them, and the
     # fixture data (opponents/venues through F8) has always been available. They give
-    # the transfer optimiser a two-month horizon; Total XP stays the 6-fixture blend.
+    # the transfer optimiser a two-month horizon.
     for k in range(3, 9 if improved else 7):
         p = f"F{k}"
         m[f"{p} Start"] = m[f"_start{k}"]
@@ -473,8 +497,5 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             **({"saves_tail": model.saves_tail(m[f"{p} 3+ Saves"], m[f"{p} 6+ Saves"])} if improved else {}),
             "dc_def": m[f"{p} Defensive Contribution - DEF"], "dc_mid": m[f"{p} Defensive Contribution - MID"],
         })
-
-    weights = model.COEFS["total_xp_weights"]
-    m["Total XP"] = sum(wt * m[f"F{k} XP"] for k, wt in zip(range(1, 7), weights))
 
     return m.drop(columns=[c for c in m.columns if c.startswith("_start")])

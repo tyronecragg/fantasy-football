@@ -565,39 +565,33 @@ def fill_gaps(frames, verbose=True):
     if "score1" in frames:
         s1 = frames["score1"]
         have = frames.get("score2", pd.DataFrame(columns=s1.columns))
+        frames["_score2_real"] = len(have)     # real 2+ prices Betway returned; 0 => file is fully Poisson-derived
         priced = set(zip(have["player_name"], have["match_id"]))
         gap = s1[~pd.Series(list(zip(s1["player_name"], s1["match_id"])),
                             index=s1.index).isin(priced)]
         if not gap.empty:
             p2 = model.poisson_score2(implied(gap["odds_decimal"], margin).clip(1e-6, 0.95))
-            frames["score2"] = pd.concat([have, pd.DataFrame({
+            derived_df = pd.DataFrame({
                 "player_name": gap["player_name"], "match_id": gap["match_id"],
-                "odds_decimal": (margin / p2.clip(1e-6, 0.95)).round(2)})], ignore_index=True)
+                "odds_decimal": (margin / p2.clip(1e-6, 0.95)).round(2)})
+            frames["score2"] = pd.concat([f for f in (have, derived_df) if not f.empty], ignore_index=True)
             derived.append(f"score2 <- Poisson curve for {len(gap)} players Betway did not "
                            f"price at 2+ ({len(have)} real prices kept)")
 
-    # --- assists for fixtures Betway has not priced yet ---
+    # --- assists: betway.py no longer INVENTS assist odds ---
+    # The old flat "goalscorer x ratio" over-projected strikers badly (Haaland 0.68 vs a real
+    # ~0.13) because a striker's anytime-assist is far LESS likely than his goal, not ~equal.
+    # When Betway hasn't priced a fixture's assists we now leave them to the pipeline, which
+    # carries the F2 projection forward (roll_gameweek / build_synthetic_gw seed the file) and
+    # backs it with the per-player Assist Factor x baseline - the same machinery as F2-F8.
+    # Only genuinely-priced assist rows go through; write() keeps the synthetic carry for the
+    # rest, and _assist_real drives the provenance real/derived stamp.
     if "score1" in frames:
         have = frames.get("assist", pd.DataFrame(columns=["player_name", "match_id", "odds_decimal"]))
-        # fixture-level here (unlike score2): Betway either prices a fixture's assists or
-        # does not, so a partially-priced fixture is not the failure mode to guard against
-        priced = set(have["match_id"])
-        missing = sorted(set(frames["score1"]["match_id"]) - priced)
-        if missing:
-            both = frames["score1"].merge(have, on=["player_name", "match_id"],
-                                          suffixes=("_s", "_a"))
-            if len(both) >= 20:
-                ratio = float((implied(both["odds_decimal_a"], margin) /
-                               implied(both["odds_decimal_s"], margin).clip(1e-6)).median())
-                how = f"ratio {ratio:.3f} calibrated on {len(both)} real pairs"
-            else:
-                ratio, how = 1.132, "1.132 convention ratio (too few real pairs to calibrate)"
-            src = frames["score1"][frames["score1"]["match_id"].isin(missing)]
-            p_assist = (implied(src["odds_decimal"], margin) * ratio).clip(1e-6, 0.9)
-            frames["assist"] = pd.concat([have, pd.DataFrame({
-                "player_name": src["player_name"], "match_id": src["match_id"],
-                "odds_decimal": (margin / p_assist).round(2)})], ignore_index=True)
-            derived.append(f"assist <- {len(src)} rows for {len(missing)} unpriced fixtures, {how}")
+        frames["_assist_real"] = len(have)     # real assist prices Betway returned this scrape
+        if have.empty and verbose:
+            print("  assist: Betway priced none - kept as the carried-forward F2 projection "
+                  "(no scrape-time derivation)")
 
     if verbose:
         print("\nderived from the real odds above (never scraped, never presented as such):")
@@ -774,8 +768,18 @@ def write(frames, dry_run=False):
             if not dry_run:
                 out.to_csv(path, index=False)
                 kept_n = len(out) - len(frames[key])
-                provenance.mark(fname, "real", "betway",
-                                f"{len(frames[key])} priced" + (f", {kept_n} synthetic kept" if kept_n > 0 else ""))
+                # score2 (2+ goals) is Poisson-derived off the goalscorer price when Betway hasn't
+                # priced it (it rarely does early). Flag it 'derived' until a genuine 2+ market
+                # appears, at which point _score2_real > 0 flips it back to real automatically.
+                # (assist is no longer invented here - unpriced fixtures keep the synthetic carry,
+                # stamped by the roll/reseed, so assist only reaches write() when genuinely priced.)
+                if key == "score2" and not frames.get("_score2_real", 0):
+                    provenance.mark(fname, "derived", "betway",
+                                    f"Poisson curve off goalscorer ({len(out)} players); "
+                                    "flips to real when Betway prices 2+")
+                else:
+                    provenance.mark(fname, "real", "betway",
+                                    f"{len(frames[key])} priced" + (f", {kept_n} synthetic kept" if kept_n > 0 else ""))
             kept_n = len(out) - len(frames[key])
             note = f"  ({len(frames[key])} priced, {kept_n} synthetic kept)" if kept_n > 0 else ""
             print(f"  WRITE  {fname:<40} {len(out):>5} rows{note}")
@@ -787,6 +791,7 @@ def write(frames, dry_run=False):
         if key in frames:
             if not dry_run:
                 frames[key].to_csv(path, index=False)
+                provenance.mark(fname, "real", "betway", f"{len(frames[key])} priced (F2 / next gameweek)")
             print(f"  WRITE  {fname:<40} {len(frames[key]):>5} rows  (next gameweek)")
         else:
             print(f"  keep   {fname:<40} header-only — F2 model-projected")
@@ -799,6 +804,13 @@ def write(frames, dry_run=False):
             p = os.path.join(config.OUTPUTS_DIR, fname)
             frames[key].to_csv(p, index=False)
             print(f"  dump   {fname:<40} {len(frames[key]):>5} rows  ({note})")
+
+    if not dry_run:                                 # keep the provenance GW honest even without a roll
+        fxcols = pd.read_csv(os.path.join(config.ROOT, "inputs", "fixtures.csv"), nrows=0).columns
+        gwm = re.match(r"GW(\d+)", str(fxcols[1])) if len(fxcols) > 1 else None
+        if gwm:                                     # first fixtures.csv column (after Team) = current F1 GW
+            provenance.set_gameweek(int(gwm.group(1)))
+            print(f"  provenance GW stamped GW{gwm.group(1)} (from fixtures.csv first column)")
 
 
 def write_kickoffs(fx_rows, gw_of, dry_run=False):

@@ -71,9 +71,6 @@ SENTINEL_RELEGATION = 2001
 SAVES3_DEFAULT = 0.6
 SAVES6_DEFAULT = 0.0
 
-# Total XP = sum(weight_k * F_k XP)
-TOTAL_XP_WEIGHTS = [1.0, 0.85, 0.7, 0.7, 0.7, 0.7]
-
 # Projection blend (improved mode): modelled F2-F6 probability = w * model + (1-w) * the
 # player's current F1 odds-implied probability. Weights fitted per stat by
 # tools/backtest_projections.py on 2025-26 GW16-29 forecast-vs-actual pairs; stats
