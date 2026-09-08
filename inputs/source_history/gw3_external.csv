@@ -1,0 +1,441 @@
+Source,Team,Player
+FFS,Arsenal,Raya
+FFS,Arsenal,White
+FFS,Arsenal,Konsa
+FFS,Arsenal,Gabriel
+FFS,Arsenal,Calafiori
+FFS,Arsenal,Rice
+FFS,Arsenal,Lewis-Skelly
+FFS,Arsenal,Saka
+FFS,Arsenal,Odegaard
+FFS,Arsenal,Eze
+FFS,Arsenal,Havertz
+FFS,Aston Villa,Suzuki
+FFS,Aston Villa,Cash
+FFS,Aston Villa,Lindelof
+FFS,Aston Villa,Pau Torres
+FFS,Aston Villa,Maatsen
+FFS,Aston Villa,Barkley
+FFS,Aston Villa,Kamara
+FFS,Aston Villa,McGinn
+FFS,Aston Villa,Buendia
+FFS,Aston Villa,Hemmings
+FFS,Aston Villa,Jackson
+FFS,Bournemouth,Petrovic
+FFS,Bournemouth,Smith
+FFS,Bournemouth,Hill
+FFS,Bournemouth,Silva
+FFS,Bournemouth,Truffert
+FFS,Bournemouth,Cook
+FFS,Bournemouth,Scott
+FFS,Bournemouth,Rayan
+FFS,Bournemouth,Kluivert
+FFS,Bournemouth,Tavernier
+FFS,Bournemouth,Evanilson
+FFS,Brentford,Kelleher
+FFS,Brentford,Kayode
+FFS,Brentford,Ajer
+FFS,Brentford,Collins
+FFS,Brentford,Lewis-Potter
+FFS,Brentford,Janelt
+FFS,Brentford,Sangare
+FFS,Brentford,Ouattara
+FFS,Brentford,Damsgaard
+FFS,Brentford,Schade
+FFS,Brentford,Thiago
+FFS,Brighton,Verbruggen
+FFS,Brighton,Kadioglu
+FFS,Brighton,Vuskovic
+FFS,Brighton,Dunk
+FFS,Brighton,Boscagli
+FFS,Brighton,Ayari
+FFS,Brighton,Gross
+FFS,Brighton,Gomez
+FFS,Brighton,Yalcouye
+FFS,Brighton,De Cuyper
+FFS,Brighton,Kostoulas
+FFS,Chelsea,Emiliano Martinez
+FFS,Chelsea,Fofana
+FFS,Chelsea,Lacroix
+FFS,Chelsea,Colwill
+FFS,Chelsea,Gusto
+FFS,Chelsea,James
+FFS,Chelsea,Lavia
+FFS,Chelsea,Hato
+FFS,Chelsea,Palmer
+FFS,Chelsea,Joao Pedro
+FFS,Chelsea,Rogers
+FFS,Coventry City,Rushworth
+FFS,Coventry City,van Ewijk
+FFS,Coventry City,Thomas
+FFS,Coventry City,Amenda
+FFS,Coventry City,Dasilva
+FFS,Coventry City,Yirenkyi
+FFS,Coventry City,Grimes
+FFS,Coventry City,Tchaouna
+FFS,Coventry City,Onyeka
+FFS,Coventry City,Mason-Clark
+FFS,Coventry City,Awoniyi
+FFS,Crystal Palace,Henderson
+FFS,Crystal Palace,Richards
+FFS,Crystal Palace,Disasi
+FFS,Crystal Palace,Canvot
+FFS,Crystal Palace,Khalaili
+FFS,Crystal Palace,Kamada
+FFS,Crystal Palace,Wharton
+FFS,Crystal Palace,Mitchell
+FFS,Crystal Palace,Pino
+FFS,Crystal Palace,Nketiah
+FFS,Crystal Palace,Strand Larsen
+FFS,Everton,Pickford
+FFS,Everton,Rohl
+FFS,Everton,Tarkowski
+FFS,Everton,Branthwaite
+FFS,Everton,Mykolenko
+FFS,Everton,Hackney
+FFS,Everton,Garner
+FFS,Everton,Armstrong
+FFS,Everton,Dewsbury-Hall
+FFS,Everton,George
+FFS,Everton,Barry
+FFS,Fulham,Leno
+FFS,Fulham,Castagne
+FFS,Fulham,Andersen
+FFS,Fulham,Bassey
+FFS,Fulham,Robinson
+FFS,Fulham,Berge
+FFS,Fulham,Iwobi
+FFS,Fulham,Bobb
+FFS,Fulham,King
+FFS,Fulham,Palacios
+FFS,Fulham,Gonzalo Garcia
+FFS,Hull City,Tzolakis
+FFS,Hull City,Coyle
+FFS,Hull City,Ajayi
+FFS,Hull City,Egan
+FFS,Hull City,Mendy
+FFS,Hull City,Gourna-Douath
+FFS,Hull City,Slater
+FFS,Hull City,Giles
+FFS,Hull City,Belloumi
+FFS,Hull City,Stroud
+FFS,Hull City,McBurnie
+FFS,Ipswich Town,Scherpen
+FFS,Ipswich Town,O'Shea
+FFS,Ipswich Town,Diop
+FFS,Ipswich Town,Greaves
+FFS,Ipswich Town,Davis
+FFS,Ipswich Town,Lukic
+FFS,Ipswich Town,Nunez
+FFS,Ipswich Town,Fatawu
+FFS,Ipswich Town,Enciso
+FFS,Ipswich Town,Maeda
+FFS,Ipswich Town,Emersonn
+FFS,Leeds,Trafford
+FFS,Leeds,Elvedi
+FFS,Leeds,Bijol
+FFS,Leeds,Muharemovic
+FFS,Leeds,Bogle
+FFS,Leeds,Ampadu
+FFS,Leeds,Stach
+FFS,Leeds,Justin
+FFS,Leeds,Aaronson
+FFS,Leeds,Okafor
+FFS,Leeds,Calvert-Lewin
+FFS,Liverpool,Alisson
+FFS,Liverpool,Szoboszlai
+FFS,Liverpool,Jacquet
+FFS,Liverpool,Van Dijk
+FFS,Liverpool,Kerkez
+FFS,Liverpool,Gravenberch
+FFS,Liverpool,Mac Allister
+FFS,Liverpool,Gakpo
+FFS,Liverpool,Wirtz
+FFS,Liverpool,Victor Munoz
+FFS,Liverpool,Isak
+FFS,Man City,Donnarumma
+FFS,Man City,Khusanov
+FFS,Man City,Dias
+FFS,Man City,Guehi
+FFS,Man City,Gvardiol
+FFS,Man City,O'Reilly
+FFS,Man City,Anderson
+FFS,Man City,Foden
+FFS,Man City,Cherki
+FFS,Man City,Semenyo
+FFS,Man City,Haaland
+FFS,Man Utd,Lammens
+FFS,Man Utd,Dalot
+FFS,Man Utd,Maguire
+FFS,Man Utd,Martinez
+FFS,Man Utd,Shaw
+FFS,Man Utd,Tielemans
+FFS,Man Utd,Mainoo
+FFS,Man Utd,Mbeumo
+FFS,Man Utd,Bruno Fernandes
+FFS,Man Utd,Rashford
+FFS,Man Utd,Cunha
+FFS,Newcastle,Hornicek
+FFS,Newcastle,Dedic
+FFS,Newcastle,Thiaw
+FFS,Newcastle,Botman
+FFS,Newcastle,Hall
+FFS,Newcastle,Miley
+FFS,Newcastle,Gonzalez
+FFS,Newcastle,Elanga
+FFS,Newcastle,Willock
+FFS,Newcastle,Barnes
+FFS,Newcastle,Wissa
+FFS,Nott'm Forest,Sels
+FFS,Nott'm Forest,Jair
+FFS,Nott'm Forest,Milenkovic
+FFS,Nott'm Forest,Murillo
+FFS,Nott'm Forest,Aina
+FFS,Nott'm Forest,Sangare
+FFS,Nott'm Forest,McAtee
+FFS,Nott'm Forest,Williams
+FFS,Nott'm Forest,Gibbs-White
+FFS,Nott'm Forest,Ndoye
+FFS,Nott'm Forest,Igor Jesus
+FFS,Spurs,Kinsky
+FFS,Spurs,Gray
+FFS,Spurs,Van Hecke
+FFS,Spurs,Van de Ven
+FFS,Spurs,Udogie
+FFS,Spurs,Bentancur
+FFS,Spurs,Tonali
+FFS,Spurs,Porro
+FFS,Spurs,Mateus Fernandes
+FFS,Spurs,Tel
+FFS,Spurs,Marmoush
+FFS,Sunderland,Roefs
+FFS,Sunderland,Meunier
+FFS,Sunderland,Mukiele
+FFS,Sunderland,Ballard
+FFS,Sunderland,Reinildo
+FFS,Sunderland,Xhaka
+FFS,Sunderland,Sadiki
+FFS,Sunderland,Hume
+FFS,Sunderland,Le Fee
+FFS,Sunderland,Nilson Angulo
+FFS,Sunderland,Brobbey
+FantasyFootballPundit,Arsenal,Raya
+FantasyFootballPundit,Arsenal,White
+FantasyFootballPundit,Arsenal,Calafiori
+FantasyFootballPundit,Arsenal,Gabriel
+FantasyFootballPundit,Arsenal,Konsa
+FantasyFootballPundit,Arsenal,Rice
+FantasyFootballPundit,Arsenal,Lewis-Skelly
+FantasyFootballPundit,Arsenal,Odegaard
+FantasyFootballPundit,Arsenal,Saka
+FantasyFootballPundit,Arsenal,Havertz
+FantasyFootballPundit,Arsenal,Tzolis
+FantasyFootballPundit,Aston Villa,Suzuki
+FantasyFootballPundit,Aston Villa,Cash
+FantasyFootballPundit,Aston Villa,Maatsen
+FantasyFootballPundit,Aston Villa,Pau Torres
+FantasyFootballPundit,Aston Villa,Lindelof
+FantasyFootballPundit,Aston Villa,Barkley
+FantasyFootballPundit,Aston Villa,Kamara
+FantasyFootballPundit,Aston Villa,Buendia
+FantasyFootballPundit,Aston Villa,McGinn
+FantasyFootballPundit,Aston Villa,Hemmings
+FantasyFootballPundit,Aston Villa,Jackson
+FantasyFootballPundit,Bournemouth,Petrovic
+FantasyFootballPundit,Bournemouth,Smith
+FantasyFootballPundit,Bournemouth,Truffert
+FantasyFootballPundit,Bournemouth,Hill
+FantasyFootballPundit,Bournemouth,Silva
+FantasyFootballPundit,Bournemouth,Cook
+FantasyFootballPundit,Bournemouth,Scott
+FantasyFootballPundit,Bournemouth,Kluivert
+FantasyFootballPundit,Bournemouth,Rayan
+FantasyFootballPundit,Bournemouth,Tavernier
+FantasyFootballPundit,Bournemouth,Evanilson
+FantasyFootballPundit,Brentford,Kelleher
+FantasyFootballPundit,Brentford,Kayode
+FantasyFootballPundit,Brentford,Lewis-Potter
+FantasyFootballPundit,Brentford,Ajer
+FantasyFootballPundit,Brentford,Collins
+FantasyFootballPundit,Brentford,Sangare
+FantasyFootballPundit,Brentford,Janelt
+FantasyFootballPundit,Brentford,Ouattara
+FantasyFootballPundit,Brentford,Schade
+FantasyFootballPundit,Brentford,Thiago
+FantasyFootballPundit,Brentford,Jensen
+FantasyFootballPundit,Brighton,Verbruggen
+FantasyFootballPundit,Brighton,Wieffer
+FantasyFootballPundit,Brighton,Kadioglu
+FantasyFootballPundit,Brighton,Vuskovic
+FantasyFootballPundit,Brighton,Dunk
+FantasyFootballPundit,Brighton,Gross
+FantasyFootballPundit,Brighton,Ayari
+FantasyFootballPundit,Brighton,Yalcouye
+FantasyFootballPundit,Brighton,Gomez
+FantasyFootballPundit,Brighton,De Cuyper
+FantasyFootballPundit,Brighton,Rutter
+FantasyFootballPundit,Chelsea,Emiliano Martinez
+FantasyFootballPundit,Chelsea,Neto
+FantasyFootballPundit,Chelsea,Hato
+FantasyFootballPundit,Chelsea,Colwill
+FantasyFootballPundit,Chelsea,Lacroix
+FantasyFootballPundit,Chelsea,Fofana
+FantasyFootballPundit,Chelsea,Lavia
+FantasyFootballPundit,Chelsea,James
+FantasyFootballPundit,Chelsea,Palmer
+FantasyFootballPundit,Chelsea,Rogers
+FantasyFootballPundit,Chelsea,Joao Pedro
+FantasyFootballPundit,Coventry City,Rushworth
+FantasyFootballPundit,Coventry City,van Ewijk
+FantasyFootballPundit,Coventry City,Dasilva
+FantasyFootballPundit,Coventry City,Amenda
+FantasyFootballPundit,Coventry City,Thomas
+FantasyFootballPundit,Coventry City,Grimes
+FantasyFootballPundit,Coventry City,Yirenkyi
+FantasyFootballPundit,Coventry City,Onyeka
+FantasyFootballPundit,Coventry City,Tchaouna
+FantasyFootballPundit,Coventry City,Thomas-Asante
+FantasyFootballPundit,Coventry City,Awoniyi
+FantasyFootballPundit,Crystal Palace,Henderson
+FantasyFootballPundit,Crystal Palace,Khalaili
+FantasyFootballPundit,Crystal Palace,Mitchell
+FantasyFootballPundit,Crystal Palace,Disasi
+FantasyFootballPundit,Crystal Palace,Richards
+FantasyFootballPundit,Crystal Palace,Canvot
+FantasyFootballPundit,Crystal Palace,Kamada
+FantasyFootballPundit,Crystal Palace,Wharton
+FantasyFootballPundit,Crystal Palace,Pino
+FantasyFootballPundit,Crystal Palace,McNeil
+FantasyFootballPundit,Crystal Palace,Strand Larsen
+FantasyFootballPundit,Everton,Pickford
+FantasyFootballPundit,Everton,Rohl
+FantasyFootballPundit,Everton,Mykolenko
+FantasyFootballPundit,Everton,Branthwaite
+FantasyFootballPundit,Everton,Tarkowski
+FantasyFootballPundit,Everton,Armstrong
+FantasyFootballPundit,Everton,Garner
+FantasyFootballPundit,Everton,Dewsbury-Hall
+FantasyFootballPundit,Everton,George
+FantasyFootballPundit,Everton,Grealish
+FantasyFootballPundit,Everton,Barry
+FantasyFootballPundit,Fulham,Leno
+FantasyFootballPundit,Fulham,Castagne
+FantasyFootballPundit,Fulham,Robinson
+FantasyFootballPundit,Fulham,Andersen
+FantasyFootballPundit,Fulham,Bassey
+FantasyFootballPundit,Fulham,Berge
+FantasyFootballPundit,Fulham,Iwobi
+FantasyFootballPundit,Fulham,King
+FantasyFootballPundit,Fulham,Bobb
+FantasyFootballPundit,Fulham,Palacios
+FantasyFootballPundit,Fulham,Gonzalo Garcia
+FantasyFootballPundit,Hull City,Tzolakis
+FantasyFootballPundit,Hull City,Coyle
+FantasyFootballPundit,Hull City,Giles
+FantasyFootballPundit,Hull City,Mendy
+FantasyFootballPundit,Hull City,Egan
+FantasyFootballPundit,Hull City,Ajayi
+FantasyFootballPundit,Hull City,Slater
+FantasyFootballPundit,Hull City,Crooks
+FantasyFootballPundit,Hull City,Belloumi
+FantasyFootballPundit,Hull City,Stroud
+FantasyFootballPundit,Hull City,McBurnie
+FantasyFootballPundit,Ipswich Town,Scherpen
+FantasyFootballPundit,Ipswich Town,O'Shea
+FantasyFootballPundit,Ipswich Town,Davis
+FantasyFootballPundit,Ipswich Town,Greaves
+FantasyFootballPundit,Ipswich Town,Diop
+FantasyFootballPundit,Ipswich Town,Lukic
+FantasyFootballPundit,Ipswich Town,Nunez
+FantasyFootballPundit,Ipswich Town,Enciso
+FantasyFootballPundit,Ipswich Town,Fatawu
+FantasyFootballPundit,Ipswich Town,Maeda
+FantasyFootballPundit,Ipswich Town,Emersonn
+FantasyFootballPundit,Leeds,Trafford
+FantasyFootballPundit,Leeds,Bogle
+FantasyFootballPundit,Leeds,Justin
+FantasyFootballPundit,Leeds,Muharemovic
+FantasyFootballPundit,Leeds,Bijol
+FantasyFootballPundit,Leeds,Elvedi
+FantasyFootballPundit,Leeds,Stach
+FantasyFootballPundit,Leeds,Ampadu
+FantasyFootballPundit,Leeds,Wilson
+FantasyFootballPundit,Leeds,Okafor
+FantasyFootballPundit,Leeds,Calvert-Lewin
+FantasyFootballPundit,Liverpool,Alisson
+FantasyFootballPundit,Liverpool,Frimpong
+FantasyFootballPundit,Liverpool,Kerkez
+FantasyFootballPundit,Liverpool,Van Dijk
+FantasyFootballPundit,Liverpool,Jacquet
+FantasyFootballPundit,Liverpool,Mac Allister
+FantasyFootballPundit,Liverpool,Szoboszlai
+FantasyFootballPundit,Liverpool,Wirtz
+FantasyFootballPundit,Liverpool,Gakpo
+FantasyFootballPundit,Liverpool,Victor Munoz
+FantasyFootballPundit,Liverpool,Isak
+FantasyFootballPundit,Man City,Donnarumma
+FantasyFootballPundit,Man City,Khusanov
+FantasyFootballPundit,Man City,Gvardiol
+FantasyFootballPundit,Man City,Dias
+FantasyFootballPundit,Man City,Guehi
+FantasyFootballPundit,Man City,O'Reilly
+FantasyFootballPundit,Man City,Anderson
+FantasyFootballPundit,Man City,Cherki
+FantasyFootballPundit,Man City,Foden
+FantasyFootballPundit,Man City,Semenyo
+FantasyFootballPundit,Man City,Haaland
+FantasyFootballPundit,Man Utd,Lammens
+FantasyFootballPundit,Man Utd,Dalot
+FantasyFootballPundit,Man Utd,Shaw
+FantasyFootballPundit,Man Utd,Martinez
+FantasyFootballPundit,Man Utd,Maguire
+FantasyFootballPundit,Man Utd,Tielemans
+FantasyFootballPundit,Man Utd,Mainoo
+FantasyFootballPundit,Man Utd,Bruno Fernandes
+FantasyFootballPundit,Man Utd,Mbeumo
+FantasyFootballPundit,Man Utd,Rashford
+FantasyFootballPundit,Man Utd,Cunha
+FantasyFootballPundit,Newcastle,Hornicek
+FantasyFootballPundit,Newcastle,Dedic
+FantasyFootballPundit,Newcastle,Hall
+FantasyFootballPundit,Newcastle,Botman
+FantasyFootballPundit,Newcastle,Thiaw
+FantasyFootballPundit,Newcastle,Miley
+FantasyFootballPundit,Newcastle,Gonzalez
+FantasyFootballPundit,Newcastle,Willock
+FantasyFootballPundit,Newcastle,Elanga
+FantasyFootballPundit,Newcastle,Barnes
+FantasyFootballPundit,Newcastle,Wissa
+FantasyFootballPundit,Nott'm Forest,Sels
+FantasyFootballPundit,Nott'm Forest,Aina
+FantasyFootballPundit,Nott'm Forest,Williams
+FantasyFootballPundit,Nott'm Forest,Murillo
+FantasyFootballPundit,Nott'm Forest,Milenkovic
+FantasyFootballPundit,Nott'm Forest,Jair
+FantasyFootballPundit,Nott'm Forest,Schlager
+FantasyFootballPundit,Nott'm Forest,McAtee
+FantasyFootballPundit,Nott'm Forest,Ndoye
+FantasyFootballPundit,Nott'm Forest,Gibbs-White
+FantasyFootballPundit,Nott'm Forest,Igor Jesus
+FantasyFootballPundit,Spurs,Kinsky
+FantasyFootballPundit,Spurs,Porro
+FantasyFootballPundit,Spurs,Robertson
+FantasyFootballPundit,Spurs,Van de Ven
+FantasyFootballPundit,Spurs,Van Hecke
+FantasyFootballPundit,Spurs,Bentancur
+FantasyFootballPundit,Spurs,Tonali
+FantasyFootballPundit,Spurs,Mateus Fernandes
+FantasyFootballPundit,Spurs,Savio
+FantasyFootballPundit,Spurs,Tel
+FantasyFootballPundit,Spurs,Marmoush
+FantasyFootballPundit,Sunderland,Roefs
+FantasyFootballPundit,Sunderland,Meunier
+FantasyFootballPundit,Sunderland,Reinildo
+FantasyFootballPundit,Sunderland,Ballard
+FantasyFootballPundit,Sunderland,Mukiele
+FantasyFootballPundit,Sunderland,Xhaka
+FantasyFootballPundit,Sunderland,Sadiki
+FantasyFootballPundit,Sunderland,Le Fee
+FantasyFootballPundit,Sunderland,Hume
+FantasyFootballPundit,Sunderland,Nilson Angulo
+FantasyFootballPundit,Sunderland,Brobbey

@@ -20,6 +20,7 @@ All functions take explicit paths so tests can run against temporary files.
 """
 import os
 
+import numpy as np
 import pandas as pd
 
 from . import config
@@ -46,9 +47,18 @@ def infer_gameweek():
     return gw if 1 <= gw <= 38 else None
 
 
-def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV, season=None):
+def withheld_columns(columns, withhold):
+    """Columns whose name contains any of the `withhold` fragments (e.g. 'Yellow Card' -> F1 Yellow
+    Card, F1 Yellow Card Factor, F2..F8 Yellow Card). Used to blank a synthetic market's columns."""
+    return [c for c in columns if any(frag in c for frag in withhold)]
+
+
+def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV, season=None, withhold=()):
     """Upsert this gameweek's F1 block into the player history archive, keyed by
-    (Season, Gameweek) so gameweek numbers can recur across seasons."""
+    (Season, Gameweek) so gameweek numbers can recur across seasons.
+
+    withhold: name fragments of markets that are NOT real this week (see run.guard_synthetic_archive);
+    their columns are written as NaN so a synthetic carry never enters the factor history."""
     season = season or config.SEASON
     hist = pd.read_csv(path, low_memory=False)
     hist = hist.loc[:, ~hist.columns.str.startswith("Unnamed")]  # legacy sheet padding
@@ -59,6 +69,10 @@ def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV, season=None
         raise ValueError(f"master is missing history columns: {missing}")
 
     snapshot = master[snapshot_cols].copy()
+    blanked = withheld_columns(snapshot.columns, withhold)
+    if blanked:
+        snapshot[blanked] = np.nan
+        print(f"  history: {len(blanked)} columns withheld as synthetic ({', '.join(withhold)})")
     snapshot.insert(0, "Gameweek", gameweek)
     snapshot.insert(0, "Season", season)
 
@@ -74,7 +88,7 @@ def update_player_history(master, gameweek, path=PLAYER_HISTORY_CSV, season=None
 
 
 def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=None,
-                           gameweek=None, sportsbet=None):
+                           gameweek=None, sportsbet=None, fixtures=None):
     """Upsert the upcoming gameweek's fixtures (first 10 scraped matches) with their
     match odds and both teams' season odds, keyed by (Season, home_team, away_team).
 
@@ -92,6 +106,23 @@ def update_fixture_history(wdw, season_probs, path=FIXTURE_HISTORY_CSV, season=N
     season_idx = season_probs.set_index("team")
 
     f1 = wdw.iloc[:10]
+    if fixtures is not None and gameweek is not None:
+        # The upsert key is (home, away), and the Gameweek stamp is whatever --gw said - so a run
+        # against last week's W/D/W file would relabel those fixtures (GW2 archived as GW3 on
+        # 2026-08-31). Refuse unless the F1 block is the fixtures.csv window for this gameweek.
+        col = f"GW{gameweek} Opponent"
+        if col not in fixtures.columns:
+            print(f"  history: fixtures.csv has no '{col}' column - fixture history NOT archived "
+                  f"(roll the window to GW{gameweek} first)")
+            return hist
+        expected = {frozenset((t, o)) for t, o in zip(fixtures.iloc[:, 0], fixtures[col])
+                    if isinstance(o, str)}
+        got = [frozenset((h, a)) for h, a in zip(f1.iloc[:, 0], f1.iloc[:, 1])]
+        overlap = sum(p in expected for p in got) / max(len(got), 1)
+        if overlap < 0.7:
+            print(f"  history: W/D/W F1 block matches only {overlap:.0%} of the GW{gameweek} fixtures "
+                  f"- fixture history NOT archived (stale odds file? re-scrape)")
+            return hist
     rows = pd.DataFrame({
         "Season": season,
         "Gameweek": gameweek,
@@ -160,16 +191,21 @@ def season_weekly_factors(stat="score1", season=None, path=PLAYER_HISTORY_CSV):
     f = hist[prob_col] / model.baseline(stat, hist["F1 Win"], hist["F1 Opponent Win"],
                                         hist["Position"], hist["F1 Venue"] == "H")
     frame = pd.DataFrame({"player": hist["Player Name"], "factor": f}).dropna()
+    # A zero factor means P(stat) = 0 - never a real price (it was the IFERROR(...,0) concede-4+
+    # artefact); it would pin the median at 0, so it is not history.
+    frame = frame[frame["factor"] > 0]
     return {p: g["factor"].to_numpy() for p, g in frame.groupby("player")}
 
 
-def refresh_fallback_factors(master, path=FALLBACK_FACTORS_CSV):
+def refresh_fallback_factors(master, path=FALLBACK_FACTORS_CSV, withhold=()):
     """Update stored per-player factors from the latest run. Only players with F1 odds
     contribute, and only their non-NaN factors overwrite existing values, so a player
-    with a missing market this week keeps last week's factor."""
+    with a missing market this week keeps last week's factor. Factors of withheld
+    (synthetic) markets are left untouched."""
     existing = pd.read_csv(path).drop_duplicates(subset="Player Name").set_index("Player Name")
 
-    fresh = (master.loc[master["F1 Win"].notna(), ["Player Name"] + FACTOR_COLUMNS]
+    cols = [c for c in FACTOR_COLUMNS if c not in withheld_columns(FACTOR_COLUMNS, withhold)]
+    fresh = (master.loc[master["F1 Win"].notna(), ["Player Name"] + cols]
              .drop_duplicates(subset="Player Name").set_index("Player Name"))
 
     existing.update(fresh)  # overwrites only where fresh is non-NaN

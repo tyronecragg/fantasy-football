@@ -19,40 +19,80 @@ import sys
 import pandas as pd
 
 from . import (config, curation_check, history, ingest, markets, model, names, players,
-               provenance, reconcile, team_model)
+               provenance, rating as rating_mod, reconcile, team_model)
 from .io_utils import reset_counter, snapshot
 
 
-# Scraped per-player markets that feed the trailing-median PLAYER factors — if any is still
-# synthetic, archiving player history would poison those factors. (two_assists is runtime-derived
-# from assist, not independently scraped, so it does not gate.)
+# Scraped markets that feed the per-player factors (player props AND the per-team clean-sheet /
+# team-goals markets, which drive the clean-sheet and concede factors). A market still synthetic
+# has its columns withheld from the player archive (see _MARKET_COLUMNS). two_assists is
+# runtime-derived from assist, not independently scraped, so it does not gate.
 _PLAYER_MARKETS = ["sportsbet_goalscorer_odds.csv", "sportsbet_two_goals_odds.csv",
                    "sportsbet_assist_odds.csv", "sportsbet_booking_odds.csv",
+                   "sportsbet_clean_sheet_odds.csv", "sportsbet_team_goals_odds.csv",
                    "sportsbet_goalkeeper_saves_odds.csv"]
+
+
+# Player-market file -> the master/history column fragments it feeds (every column whose name
+# contains the fragment: F1 value, its factor, F2-F8 projections). A market that is not grounded
+# (a synthetic carry) has these withheld from the player snapshot and the fallback refresh, so a
+# partial scrape archives what IS real instead of nothing - and never needs --force-archive.
+_MARKET_COLUMNS = {
+    "sportsbet_goalscorer_odds.csv": ("Score 1+", "Score 2+", "Score 3+"),
+    "sportsbet_two_goals_odds.csv": ("Score 2+", "Score 3+"),
+    "sportsbet_assist_odds.csv": ("Assist",),
+    "sportsbet_booking_odds.csv": ("Yellow Card",),
+    "sportsbet_clean_sheet_odds.csv": ("Clean Sheet",),
+    "sportsbet_team_goals_odds.csv": ("Concede",),
+    "sportsbet_goalkeeper_saves_odds.csv": ("Saves",),
+}
+_WDW = "sportsbet_win_draw_win_odds.csv"
+
+
+def withheld_player_columns(force=False):
+    """Column-name fragments to blank in this week's player archive: those of every player market
+    that is not grounded (real or derived-from-real) in the provenance manifest."""
+    if force:
+        return ()
+    return tuple(sorted({frag for f in _PLAYER_MARKETS if not provenance.is_grounded(f)
+                         for frag in _MARKET_COLUMNS[f]}))
 
 
 def guard_synthetic_archive(gameweek, force=False):
     """Decide what may be archived, driven by the odds provenance manifest (fpl_pipeline/provenance.py).
 
-    Returns "all" | "fixtures_only" | "none". The two archives carry different risk: synthetic PLAYER
-    odds would poison the trailing-median factors, so player history is withheld until EVERY scraped
-    player market is real. MATCH odds can be real while some player markets are still closed, and they
-    are unbackfillable, so fixture history is still recorded - losing real match odds is the worse
-    mistake. The manifest is stamped by the writers (betway=real, synthetic seed/card partials=synthetic),
-    so this self-clears when the last market goes real - no hand-deleting a note. `tools/odds_status.py`
-    shows the current state; --force-archive overrides.
+    Returns "all" | "fixtures_only" | "none".
+      - "none" when the manifest is stamped for a different gameweek than --gw: the sportsbet files
+        are not this week's odds, so archiving them under this gameweek would mislabel the fixture
+        archive and record a stale carry as player history (both happened on 2026-08-31).
+      - "fixtures_only" when EVERY player market is still the synthetic seed (right after a roll).
+      - "all" otherwise. Player markets that are still synthetic don't block the rest: their columns
+        are withheld from the snapshot (see withheld_player_columns) while everything grounded -
+        real, or derived at scrape time from real prices (2+ goals, GK saves) - is archived.
+    The manifest is stamped by the writers (betway=real/derived, synthetic seed and partial card
+    scrapes=synthetic), so this self-clears as markets land. `tools/odds_status.py` shows the
+    current state; --force-archive records everything regardless.
     """
     if not gameweek:
         return "none"
     if force:
         return "all"
-    synthetic = [provenance.FRIENDLY.get(f, f) for f in _PLAYER_MARKETS if not provenance.is_real(f)]
+    manifest_gw = provenance.status().get("gw")
+    if manifest_gw is not None and int(manifest_gw) != int(gameweek):
+        print(f"  Odds provenance is stamped GW{manifest_gw} but this run is --gw {gameweek}: the sportsbet\n"
+              f"  files are not this gameweek's odds. NOTHING archived - roll/scrape first, or --force-archive.")
+        return "none"
+    synthetic = [provenance.FRIENDLY.get(f, f) for f in _PLAYER_MARKETS if not provenance.is_grounded(f)]
     if not synthetic:
         return "all"
+    if len(synthetic) == len(_PLAYER_MARKETS):
+        print(f"  Every player market is still synthetic (see tools/odds_status.py).\n"
+              f"  Archiving MATCH odds only (unbackfillable); player history withheld.")
+        return "fixtures_only"
     print(f"  Player markets still synthetic: {', '.join(synthetic)} (see tools/odds_status.py).\n"
-          f"  Archiving MATCH odds only (unbackfillable); player history withheld so the\n"
-          f"  trailing-median factors stay clean. Use --force-archive to record both.")
-    return "fixtures_only"
+          f"  Archiving everything else; their columns ({', '.join(withheld_player_columns())}) are\n"
+          f"  withheld from the player snapshot and the fallback-factor refresh.")
+    return "all"
 
 
 def run(parity_mode=False, gameweek=None, force_archive=False):
@@ -73,12 +113,12 @@ def run(parity_mode=False, gameweek=None, force_archive=False):
         model.load_coefficients()
 
     try:
-        return _run(parity_mode, gameweek, improved, archive_mode)
+        return _run(parity_mode, gameweek, improved, archive_mode, force_archive)
     finally:
         config.FPL_DATA_DIR = live_data_dir
 
 
-def _run(parity_mode, gameweek, improved, archive_mode="none"):
+def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=False):
     print("Loading sources...")
     if parity_mode:
         inputs = ingest.load_inputs(config.PARITY_INPUTS_DIR)
@@ -125,11 +165,17 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
                   f"({len(next(iter(factor_history.values())))} players with archive weeks)"
                   + ("" if assist_real else "; assist market not real -> assist on trailing median"))
 
+    rating = None
+    if improved and config.USE_ROLLING_RATING:
+        rating = rating_mod.load()
+        if rating is not None:
+            print(f"  {rating.summary()}")
+
     master = snapshot(
         players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
                       inputs["fallback_factors"], dc_stats, inputs["dc_params"],
                       improved=improved, factor_history=factor_history, gameweek=gameweek,
-                      assist_real=assist_real),
+                      assist_real=assist_real, rating=rating),
         "players_master")
 
     if improved:
@@ -145,14 +191,21 @@ def _run(parity_mode, gameweek, improved, archive_mode="none"):
     # happen with an explicit --gw. Inference is a suggestion, never acted on: the FPL
     # data can lag or predate the season, silently corrupting the wrong gameweek.
     if improved:
-        if gameweek:
+        if gameweek and archive_mode != "none":
             print(f"Updating historical archives for GW{gameweek}...")
-            # Match odds are archived whenever we have them - they cannot be backfilled.
-            history.update_fixture_history(sportsbet["wdw"], season, gameweek=gameweek,
-                                           sportsbet=sportsbet)
+            # Match odds are archived whenever we have them - they cannot be backfilled - unless
+            # the W/D/W file is still the synthetic seed (the roll writes one before Betway prices).
+            if force_archive or provenance.state(_WDW) != "synthetic":
+                history.update_fixture_history(sportsbet["wdw"], season, gameweek=gameweek,
+                                               sportsbet=sportsbet, fixtures=inputs["fixtures"])
+            else:
+                print("  match odds are still the synthetic seed - fixture history not archived")
             if archive_mode == "all":
-                history.update_player_history(master, gameweek)
-                history.refresh_fallback_factors(master)
+                withheld = withheld_player_columns(force_archive)
+                history.update_player_history(master, gameweek, withhold=withheld)
+                history.refresh_fallback_factors(master, withhold=withheld)
+        elif gameweek:
+            print(f"Archives NOT updated for GW{gameweek} (see guard message above)")
         else:
             guess = history.infer_gameweek()
             hint = f" (FPL data suggests GW{guess})" if guess else ""

@@ -213,3 +213,4 @@ outputs/
 # raw odds captures (regenerate on demand, never track)
 *.har
 odds_raw/
+inputs/league_cache/

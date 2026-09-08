@@ -15,6 +15,7 @@ uses shift(1), so the placeholder's own (empty) values never enter the form.
 import os
 
 import joblib
+import numpy as np
 import pandas as pd
 
 from . import config
@@ -48,8 +49,8 @@ class Server:
     """Holds the models + the trailing-form lookups (computed once per run) and predicts a
     horizon on demand from the master's current F{k} columns."""
 
-    def __init__(self, master, archive, season, gameweek, models, meta):
-        self.models, self.meta = models, meta
+    def __init__(self, master, archive, season, gameweek, models, meta, rating=None):
+        self.models, self.meta, self.rating = models, meta, rating
         STATS, FEATURES, add_diffs, dense, prep = _imports()
         self.STATS, self.FEATURES, self.add_diffs, self._prep = STATS, FEATURES, add_diffs, prep
         self.CATEGORICAL = meta.get("categorical", ["position", "venue"])
@@ -65,12 +66,16 @@ class Server:
             ph[c] = float("nan")
         ext = pd.concat([a, ph], ignore_index=True)
 
+        self.windows = (3, 6, 10)
         self._form = {}                                              # per-stat own form at M
         for s in models:
-            lut = dense(ext, STATS[s], (3,)).xs(gameweek, level="Gameweek")
-            self._form[s] = lut.groupby(level="Player Name").last()  # (mean3, count3) by player
-        self._win = dense(ext, "F1 Win", (3,)).xs(gameweek, level="Gameweek").groupby(level="Player Name").last()
-        self._loss = dense(ext, "F1 Opponent Win", (3,)).xs(gameweek, level="Gameweek").groupby(level="Player Name").last()
+            lut = dense(ext, STATS[s], self.windows).xs(gameweek, level="Gameweek")
+            self._form[s] = lut.groupby(level="Player Name").last()  # (mean{w}, count{w}) by player
+        self._win = dense(ext, "F1 Win", self.windows).xs(gameweek, level="Gameweek").groupby(level="Player Name").last()
+        self._loss = dense(ext, "F1 Opponent Win", self.windows).xs(gameweek, level="Gameweek").groupby(level="Player Name").last()
+        # real archived weeks of this season before M - gates the stacks (config.PROJECTION_STACK_MIN_WEEKS)
+        gws = pd.to_numeric(a["Gameweek"], errors="coerce")
+        self.weeks = int(gws[gws < gameweek].nunique())
 
     def predict_horizon(self, m, k):
         """dict {stat: Series aligned to m.index} of model predictions for fixture F{k}."""
@@ -79,10 +84,11 @@ class Server:
         for s, model in self.models.items():
             df = pd.DataFrame(index=m.index)
             df["persistence"] = pd.to_numeric(m[self.STATS[s]], errors="coerce").values
-            df["form3"] = name.map(self._form[s]["mean3"]).values
-            df["form_n3"] = name.map(self._form[s]["count3"]).values
-            df["form_win3"] = name.map(self._win["mean3"]).values
-            df["form_loss3"] = name.map(self._loss["mean3"]).values
+            for w in self.windows:
+                df[f"form{w}"] = name.map(self._form[s][f"mean{w}"]).values
+                df[f"form_n{w}"] = name.map(self._form[s][f"count{w}"]).values
+                df[f"form_win{w}"] = name.map(self._win[f"mean{w}"]).values
+                df[f"form_loss{w}"] = name.map(self._loss[f"mean{w}"]).values
             df["own_title"], df["own_releg"], df["own_top6"] = m["Title"].values, m["Relegation"].values, m["Top 6"].values
             df["opp_title"] = pd.to_numeric(m[f"F{k} Opponent Title"], errors="coerce").values
             df["opp_releg"] = pd.to_numeric(m[f"F{k} Opponent Relegation"], errors="coerce").values
@@ -92,6 +98,24 @@ class Server:
             df["horizon"] = k - 1                                    # F{k} predicts M+(k-1)
             df = self.add_diffs(df)                                  # title_diff.../strength_diff/momentum
             feats = self._feats.get(s, self.FEATURES)
+            if "rating_win" in feats:
+                # the rolling rating's win / opponent-win for the F{k} fixture (fpl_pipeline/rating.py)
+                # - the identical call the training builder makes (rating_backtest.rating_win_fn)
+                if self.rating is not None:
+                    rw, ro = self.rating.win_probs(m["Team"], m[f"F{k} Opponent"],
+                                                   m[f"F{k} Venue"] == "H", k - 1)
+                    df["rating_win"], df["rating_opp"] = rw.values, ro.values
+                    if "rating_xg_for" in feats:
+                        xf, xa = self.rating.expected_goals(m["Team"], m[f"F{k} Opponent"],
+                                                            m[f"F{k} Venue"] == "H", k - 1)
+                        df["rating_xg_for"], df["rating_xg_against"] = xf.values, xa.values
+                else:                                            # no rating: the master's Lasso fallback
+                    wc = f"F{k} Win" if f"F{k} Win" in m else f"F{k} Win Pred"
+                    oc = f"F{k} Opponent Win" if f"F{k} Opponent Win" in m else f"F{k} Opponent Win Pred"
+                    df["rating_win"] = pd.to_numeric(m[wc], errors="coerce").values
+                    df["rating_opp"] = pd.to_numeric(m[oc], errors="coerce").values
+                    if "rating_xg_for" in feats:
+                        df["rating_xg_for"] = df["rating_xg_against"] = np.nan
             if "predicted" in feats:
                 # the pipeline's F{k} baseline (factor x baseline(win_pred)) is exactly the training
                 # `predicted`; read it BEFORE this override replaces it (players.py sets it just above)
@@ -108,8 +132,8 @@ class Server:
         return out
 
 
-def make_server(master, archive, season, gameweek, models_dir=MODELS_DIR):
+def make_server(master, archive, season, gameweek, models_dir=MODELS_DIR, rating=None):
     models, meta = load_models(models_dir)
     if models is None:
         return None
-    return Server(master, archive, season, gameweek, models, meta)
+    return Server(master, archive, season, gameweek, models, meta, rating=rating)

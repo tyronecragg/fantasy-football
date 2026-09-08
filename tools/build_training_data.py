@@ -41,9 +41,9 @@ sys.path.insert(0, ROOT)
 from fpl_pipeline import config  # noqa: E402
 from tools.backtest_projections import STATS, build_pairs, load_archive  # noqa: E402
 
-WINDOWS = (3,)   # ODDS-form horizon(s). Kept to 3 so a 3-week train/val embargo can fully
-                 # de-correlate the walk-forward selector (a 10-GW window would need ~10; infeasible
-                 # on ~12 weeks of data). Re-add 10 here to restore long odds-form context features.
+WINDOWS = (3, 6, 10)   # ODDS-form windows. 6/10 re-added 2026-09-02: they carry ~30% of the goals /
+                 # yellow GBM signal (tools/assist_walkforward.py). The old embargo concern (a long
+                 # window correlates val with the newest train weeks) is accepted - Tyrone's call.
 REAL_WINDOWS = (3, 10)   # REAL on-pitch trailing gets its own window set (incl. 10): the market's
                  # weekly odds move little week-to-week (hence the embargo pressure), but real
                  # performance is noisier and a longer window may carry more signal worth testing.
@@ -77,6 +77,12 @@ _WINHAT = os.environ.get("WINHAT_FEATURES") == "1"
 # No tree beats the fitted F1-blend for the attacking stats (goals/assists) — the odds already price
 # them and the F1 anchor does the work. Confirms score1/assist stay on the blend. Left gated.
 _BLEND = os.environ.get("BLEND_FEATURE") == "1"
+# The ROLLING odds-implied rating's win / opponent-win for the M+k fixture (fpl_pipeline/rating.py via
+# tools/rating_backtest.rating_win_fn - the same RatingSource serving uses) as features. ON by default
+# since 2026-09-02: walk-forward + player bootstrap showed the defensive GBMs gain (clean_sheet +2%,
+# concede2 +3%, saves3 +4%, P>=0.99; tools/rating_gbm_check.py). RATING_FEATURES=0 disables. Also
+# writes `predicted_r` = factor x baseline fed the rating (for tools/rating_backtest-style comparisons).
+_RATING = os.environ.get("RATING_FEATURES", "1") != "0"
 FEATURES = (["persistence", "momentum"]
             + [f"form{w}" for w in WINDOWS] + [f"form_n{w}" for w in WINDOWS]
             + [f"form_win{w}" for w in WINDOWS] + [f"form_loss{w}" for w in WINDOWS]
@@ -89,6 +95,7 @@ FEATURES = (["persistence", "momentum"]
             # + [f"rmin{w}" for w in REAL_WINDOWS]
             + ([f"xg_form{w}" for w in XG_WINDOWS] + [f"xa_form{w}" for w in XG_WINDOWS] if _XG else [])
             + (["predicted"] if _PRED else [])   # baseline-as-feature (env PRED_FEATURE=1)
+            + (["rating_win", "rating_opp", "rating_xg_for", "rating_xg_against"] if _RATING else [])   # rolling rating (default on; RATING_FEATURES=0 off)
             # peer_avg / rel_peer (add_peer_form) are OFF for now — re-add here + call it in main() to enable
             + ["own_title", "own_releg", "own_top6", "opp_title", "opp_releg", "opp_top6",
                "title_diff", "releg_diff", "top6_diff", "strength_diff",
@@ -276,6 +283,13 @@ def _mae(a, b):
 def main():
     archive = load_archive()
     pairs = build_pairs(archive)
+    if _RATING:
+        from tools.rating_backtest import rating_win_fn
+        rated = build_pairs(archive, win_fn=rating_win_fn(archive))
+        key = ["season", "stat", "horizon", "gw_from", "gw_to", "player"]
+        rated = rated[key + ["win_hat", "opp_hat", "predicted", "rating_xg_for", "rating_xg_against"]].rename(
+            columns={"win_hat": "rating_win", "opp_hat": "rating_opp", "predicted": "predicted_r"})
+        pairs = pairs.merge(rated, on=key, how="left")
     pairs = add_form(pairs, archive)
     # pairs = add_real_form(pairs, load_real_gw())   # OFF — real form/minutes added nothing (see FEATURES)
     if _XG:                                          # env XG_FEATURES=1: test trailing xG/xA
@@ -294,7 +308,8 @@ def main():
             w = config.PROJECTION_BLEND.get(stat, 1.0)
             sub["blend"] = (w * pd.to_numeric(sub["predicted"], errors="coerce")
                             + (1 - w) * pd.to_numeric(sub["persistence"], errors="coerce"))
-        extra = [c for c in ["predicted", "actual"] if c not in FEATURES]   # avoid dup when predicted is a feature
+        extra = [c for c in ["predicted", "actual"] + (["predicted_r"] if _RATING else [])
+                 if c not in FEATURES]   # avoid dup when predicted is a feature
         out = sub[KEYS + FEATURES + extra]
         path = os.path.join(outdir, f"train_{stat}.csv")
         out.to_csv(path, index=False)

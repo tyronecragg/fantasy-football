@@ -741,7 +741,7 @@ def _priced_teams(priced_df, keycol, tmap):
     return out
 
 
-def write(frames, dry_run=False):
+def write(frames, dry_run=False, current_matches=None):
     print("\nmarkets found and written (everything else keeps its current file):")
     tmap = _player_team_map() if any(k in PLAYER_PROP for k in frames) else None
     for key, fname in FILES.items():
@@ -751,17 +751,37 @@ def write(frames, dry_run=False):
             # Keep synthetic rows for matches Betway didn't price; Betway-authoritative per match.
             if os.path.exists(path):
                 old = pd.read_csv(path)
-                if key in PLAYER_PROP and "player_name" in old.columns and tmap is not None:
-                    priced_teams = _priced_teams(out, PLAYER_PROP[key], tmap)   # majority teams of priced matches
-                    # Resolve legacy spellings before the team lookup: an old row written under an
-                    # unmapped name (e.g. 'Dayann Methalie' before the accent mapping existed) is
-                    # absent from the roster tmap, so it would look 'unknown team -> kept' and
-                    # accumulate a fresh copy every run. Map to canonical first so a priced team's
-                    # stale rows are dropped, then dedupe so the fresh Betway row wins any collision.
-                    old_team = names.apply_player_names(old["player_name"]).map(tmap)
-                    kept = old[~old_team.isin(priced_teams)]  # genuinely-unpriced teams stay (safe)
-                    out = pd.concat([out, kept], ignore_index=True)
-                    out = out.drop_duplicates(subset=["player_name", PLAYER_PROP[key]], keep="first")
+                if key in PLAYER_PROP and "player_name" in old.columns:
+                    mcol = PLAYER_PROP[key]
+                    fresh_matches = set(out[mcol]) if mcol in out.columns else set()
+                    if current_matches is not None:
+                        # Keep ONLY a genuine synthetic carry: a current-GW fixture Betway did NOT
+                        # price THIS run. Drops (a) stale prior-GW match_ids and (b) old rows for a
+                        # match Betway just priced — REGARDLESS of whether the player's name resolves
+                        # to a team. (Unmapped fringe names used to slip past the per-team check and
+                        # pile a stale copy up every week; keying off the match_id is exhaustive.)
+                        carry_prior = old[mcol].isin(current_matches) & ~old[mcol].isin(fresh_matches)
+                        carry = old[carry_prior]
+                        # PLUS the roll's synthetic seed: build_synthetic_gw stamps NUMERIC match_ids
+                        # (90000000+idx), which never match Betway's string ids, so the clause above
+                        # drops them wholesale on the first partial scrape. Keep a synthetic row when
+                        # its team got ZERO prices this run — so a fixture Betway hasn't priced at all
+                        # in THIS market stays synthetic instead of going NaN. Team must resolve (so an
+                        # unmapped name can't survive as a duplicate of a real, priced row).
+                        if tmap is not None:
+                            is_synth = pd.to_numeric(old[mcol], errors="coerce").notna()
+                            priced_teams = _priced_teams(out, mcol, tmap)
+                            old_team = names.apply_player_names(old["player_name"]).map(tmap)
+                            carry_synth = is_synth & old_team.notna() & ~old_team.isin(priced_teams)
+                            carry = old[carry_prior | carry_synth]
+                    elif tmap is not None:                                      # no fixture list -> fall back
+                        priced_teams = _priced_teams(out, mcol, tmap)
+                        old_team = names.apply_player_names(old["player_name"]).map(tmap)
+                        carry = old[~old_team.isin(priced_teams)]
+                    else:
+                        carry = old.iloc[0:0]
+                    out = pd.concat([out, carry], ignore_index=True)
+                    out = out.drop_duplicates(subset=["player_name", mcol], keep="first")
                 elif key in TEAM_KEY and TEAM_KEY[key] in old.columns and TEAM_KEY[key] in out.columns:
                     kcol = TEAM_KEY[key]
                     out = pd.concat([out, old[~old[kcol].isin(set(out[kcol]))]], ignore_index=True)
@@ -777,6 +797,12 @@ def write(frames, dry_run=False):
                     provenance.mark(fname, "derived", "betway",
                                     f"Poisson curve off goalscorer ({len(out)} players); "
                                     "flips to real when Betway prices 2+")
+                elif key == "gk_saves":
+                    # Betway has no saves market: derive_saves() builds these from the real
+                    # shots-on-target ladders + clean-sheet anchor. Grounded in real prices, so the
+                    # archive accepts them, but 'derived' keeps the manifest honest.
+                    provenance.mark(fname, "derived", "betway",
+                                    f"{len(out)} keepers, Poisson off shots-on-target + clean-sheet anchor")
                 else:
                     provenance.mark(fname, "real", "betway",
                                     f"{len(frames[key])} priced" + (f", {kept_n} synthetic kept" if kept_n > 0 else ""))
@@ -906,4 +932,7 @@ if __name__ == "__main__":
     if not args.no_fill:
         frames = fill_gaps(frames)
         frames = derive_saves(frames, conversion=args.conversion)
-    write(frames, args.dry_run)
+    # Current-GW (F1) fixture labels — the ONLY match_ids a player-prop file may carry from a prior
+    # write. Passed to write() so stale prior-GW / re-priced rows are dropped by match_id.
+    current_matches = {m for m, g in gw_of.items() if g == "f1"}
+    write(frames, args.dry_run, current_matches=current_matches)

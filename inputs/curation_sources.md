@@ -29,6 +29,8 @@ The file is `Player, Team, F1 … F8` (F7/F8 curated since 2026-08-21 — the op
 player **starts** that fixture. It is **curated by hand from the sources below** — not generated —
 and it stores **raw beliefs**; the pipeline normalises at consumption time.
 
+> ⛔ **IT IS P(NAMED IN THE STARTING XI) — a SELECTION probability. NOT "will they get minutes", NOT "what share of the match".** A player the manager won't start is **0.0**, every column F1–F8. "Bench level" = **0.0**, never 0.15/0.3/0.4. A value between 0 and 1 is only for (a) a genuine competition for a starting slot (the 2–3 candidates split ~1.0 between them) or (b) a fitness doubt on a would-be starter — never a "squad depth / might feature" hedge. So each team is ~11 starters (1.0s or split-pairs) + the contested slots, and **everyone else 0.0**.
+
 > ✅ **TWO DISCRETE CROSS-CHECKS EVERY PASS** (added 2026-08-27 — each was skipped once and left the wrong players starting; normalisation will NOT save you, it only rescales existing values and has no idea who's injured or newly-signed):
 > 1. **Zero the entire out-list, as its own step.** Take the full SportsGambler + FPL-API availability list and set F1≈0 for EVERY player out/suspended for this GW — do not rely on targeted edits to surface injuries. A stale high F1 on an injured player sails straight through a sum-normalisation. *(Caught starting despite being out: Riad, Kovačić [red], Ajayi, Coyle, Osula.)*
 > 2. **Reconcile the file against the LIVE roster, as its own step.** Diff every club's `outputs/01_fpl_players.csv` squad vs the file: **ADD** starter-level new signings the file is missing (they belong in the roster now and carry a real F1), and drop players who left. *(Caught: Sávio — a £50m signing both RotoWire & All About FPL named in the XI — was entirely ABSENT from the file while the youth Mikey Moore sat at 0.42.)*
@@ -44,8 +46,8 @@ and it stores **raw beliefs**; the pipeline normalises at consumption time.
   a contested slot, an active fitness game-time decision (manager says "we decide tomorrow"), or
   thin sourcing (e.g. only 2 current XIs exist for the team). With most of an XI declared, clear
   bench players must drop to ~0 so the contested slots keep their intended shares.
-- **F2-F6 move off F1 ONLY for a NAMED reason — no generic time-decay.** The pipeline already
-  discounts the future (Total XP weights fixtures 1.0 / 0.85 / 0.7 …), so tapering a nailed
+- **F2-F8 move off F1 ONLY for a NAMED reason — no generic time-decay.** The pipeline already
+  discounts the future (the optimiser weights fixtures by ownership × reliability, ~1.0 / 0.85 / 0.7 …), so tapering a nailed
   starter "because the future is uncertain" double-counts it. A player expected to start
   long-term stays at **1.0 (or close) across the whole horizon**. The only legitimate reasons to
   shade a later week: a **named returning rival** (and then it's the *displaced* player who fades,
@@ -100,7 +102,10 @@ Alternatives if one is thin: [Never Manage Alone / Yahoo "FPL GW Predicted Lineu
 club"](https://www.nevermanagealone.com/) (all 20 XIs on one page — a fast whole-league
 cross-check), [Fantasy Football Hub](https://www.fantasyfootballhub.co.uk/premier-league-predicted-lineups)
 (press-conference round-ups), [FPL Edits](https://fpledits.com/predicted-lineups-pl)
-(XIs + subs), [Squawka per-match previews](https://www.squawka.com).
+(all 20 XIs + subs + injury updates, own prediction/no source attribution; also an
+[injury-updates roundup](https://fpledits.com/injury-updates-roundup)),
+[Fantasy Football Pundit](https://www.fantasyfootballpundit.com/fantasy-premier-league-team-news/)
+(all 20 XIs with a per-player **Start %**, own prediction incl. "leaks"; no explicit injury list).
 
 **Keep it to three.** More sources add noise and conflicting signals, not clarity.
 
@@ -127,6 +132,8 @@ rule applies: run every name past the current roster (stale-squad trap).
 | **Yahoo Sports** — [PL/FPL lineups](https://sports.yahoo.com) | All-20 aggregator + per-match | Runs the all-20 "FPL GW Predicted Lineups" one-pager (with Never Manage Alone) *and* per-fixture "confirmed team news + predicted XI" articles; verified current in the audit. |
 
 > ❌ **WhoScored — REMOVED (Aug 2026).** It is **Cloudflare-403 blocked on every fetch**, for all 20 clubs — unusable in this workflow. Do not reinstate unless the block clears; use FotMob/Sports Mole for the stats-backed non-FPL read instead.
+>
+> ❌ **Squawka — REMOVED (2026-09-03).** Doubly unusable: **403/405-blocked** on every fetch in the GW3 sweep, *and* a stale-squad trap (`league_state_2026-27.md` caught it serving 2025-26 squads/managers). Same GW3 sweep, also 403/405-blocked and not worth retrying: **Sportskeeda, BetMGM, Tips.gg**. Sports Mole / Goal / Yahoo cover the per-match read.
 
 ---
 

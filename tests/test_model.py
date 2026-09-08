@@ -66,3 +66,70 @@ def test_load_coefficients_reload():
     before = model.COEFS["_source"]
     model.load_coefficients()
     assert model.COEFS["_source"] == before
+
+
+def test_xp_pre_concede_penalty_follows_fpl_rule_in_improved_mode():
+    from fpl_pipeline import model
+    pos = pd.Series(["DEF", "MID"])
+    start = pd.Series([1.0, 1.0])
+    stats = {k: pd.Series([0.0, 0.0]) for k in ("score1", "score2", "score3", "assist", "yellow",
+                                                "clean_sheet", "saves3", "saves6", "dc_def", "dc_mid")}
+    stats["concede2"] = pd.Series([0.5, 0.5])
+    stats["concede4"] = pd.Series([0.1, 0.1])
+    workbook = model.xp_pre(pos, start, stats)                                  # 2 - 2*(0.5+0.1)
+    fpl = model.xp_pre(pos, start, stats, concede_points=model.CONCEDE_POINTS_FPL)  # 2 - 1*(0.5+0.1)
+    assert abs(workbook[0] - 0.8) < 1e-9 and abs(fpl[0] - 1.4) < 1e-9
+    assert workbook[1] == fpl[1] == 2.0                                          # MID: no concede penalty
+
+
+def test_poisson_tail_shift_round_trips_and_extends():
+    from fpl_pipeline import model
+    p4 = pd.Series([0.35, 0.05, float("nan")])
+    same = model.poisson_tail_shift(p4, 4, 4)
+    assert abs(same[0] - 0.35) < 1e-6 and abs(same[1] - 0.05) < 1e-6 and pd.isna(same[2])
+    p6 = model.poisson_tail_shift(p4, 4, 6)
+    assert 0.05 < p6[0] < 0.15 and 0.001 < p6[1] < 0.01 and pd.isna(p6[2])
+
+
+def test_xp_pre_forward_dc_and_concede6_are_improved_only():
+    from fpl_pipeline import model
+    pos = pd.Series(["FWD", "DEF"])
+    start = pd.Series([1.0, 1.0])
+    stats = {k: pd.Series([0.0, 0.0]) for k in ("score1", "score2", "score3", "assist", "yellow",
+                                                "clean_sheet", "concede2", "concede4", "saves3",
+                                                "saves6", "dc_def", "dc_mid")}
+    base = model.xp_pre(pos, start, stats, concede_points=1.0)
+    assert base.tolist() == [2.0, 2.0]
+    extra = dict(stats, dc_fwd=pd.Series([0.05, 0.9]), concede6=pd.Series([0.9, 0.02]))
+    out = model.xp_pre(pos, start, extra, concede_points=1.0)
+    assert abs(out[0] - 2.1) < 1e-9     # forward: +2 x 0.05 DC, no concede penalty
+    assert abs(out[1] - 1.98) < 1e-9    # defender: -1 x 0.02 six-conceded, no forward DC
+
+
+def test_score_tail_is_expected_goals_beyond_a_hat_trick():
+    from fpl_pipeline import model
+    p1 = pd.Series([1 - np.exp(-1.0), 0.3, 0.0, float("nan")])   # lam = 1, ~0.36, 0, missing
+    tail = model.score_tail(p1)
+    assert abs(tail[0] - 0.0234) < 5e-4          # lam=1: 1 - (0.6321 + 0.2642 + 0.0803) = P(4+)+P(5+)+...
+    assert 0 < tail[1] < 0.002 and tail[2] == 0.0 and tail[3] == 0.0
+    pos, start = pd.Series(["FWD", "FWD"]), pd.Series([1.0, 1.0])
+    stats = {k: pd.Series([0.0, 0.0]) for k in ("score1", "score2", "score3", "assist", "yellow",
+                                                "clean_sheet", "concede2", "concede4", "saves3",
+                                                "saves6", "dc_def", "dc_mid")}
+    base = model.xp_pre(pos, start, stats)
+    with_tail = model.xp_pre(pos, start, dict(stats, score_tail=pd.Series([0.02, 0.0])))
+    assert abs((with_tail[0] - base[0]) - 0.08) < 1e-9 and with_tail[1] == base[1]   # 4 pts x 0.02
+
+
+def test_bonus_keeper_reserve_comes_off_the_pot_and_outfield_weights_reshape_the_share():
+    from fpl_pipeline import config, model
+    team = pd.Series(["A", "A", "A"])
+    pwin, ploss = pd.Series([0.5] * 3), pd.Series([0.3] * 3)
+    pos = pd.Series(["GK", "MID", "FWD"])
+    weight = pd.Series([1.0, 1.0, 1.0]) * pos.map(config.BONUS_POSITION_WEIGHT).fillna(0.0)
+    gk = pd.Series([config.BONUS_GK_PER_START, 0.0, 0.0])
+    out = model.bonus_points_odds(weight, team, pwin, ploss, reserve=gk)
+    pot = 0.5 * 5.62 + 0.2 * 3.24 + 0.3 * 0.78
+    assert out[0] == 0.0                                            # keeper takes no share
+    assert abs(out.sum() - (pot - config.BONUS_GK_PER_START)) < 1e-9   # outfielders share the remainder
+    assert out[2] > out[1]                                          # forward weighted above midfielder

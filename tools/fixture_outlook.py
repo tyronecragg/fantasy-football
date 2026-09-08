@@ -6,8 +6,10 @@
 Unlike the player XP pipeline (which stops at F8 because per-player projections that far out are
 noise), TEAM strength is stable all season, so a team's win probability per fixture is a reliable,
 useful signal well beyond F8. This reads `inputs/season_fixtures.csv` (the full 380-fixture list)
-and the same season-strength model the pipeline uses (`team_model.season_probs` -> `model.win_pred`
-off title/relegation/top-6 odds) to score every upcoming fixture for every team.
+and the same fixture-strength source the pipeline uses — the rolling odds-implied rating
+(`fpl_pipeline/rating.py`, since 2026-09-02; fixtures beyond 8 weeks use the 8-week map) with the
+outrights Lasso (`team_model.season_probs` -> `model.win_pred`) as the fallback — to score every
+upcoming fixture for every team.
 
 Output: teams ranked by their average win probability over the window (best RUNS at the top), plus a
 ticker grid — each cell is the opponent (CAPS = home, lower = away) + an ease tier 1(hardest)-5(easiest).
@@ -21,7 +23,7 @@ import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from fpl_pipeline import ingest, team_model, model, config  # noqa: E402
+from fpl_pipeline import ingest, team_model, model, config, rating as rating_mod  # noqa: E402
 from fpl_pipeline.names import apply_team_names  # noqa: E402
 
 # Explicit 3-letter club codes — the last-word heuristic collapses "... City"/"... Town" teams.
@@ -65,6 +67,20 @@ def build(start_gw, window):
     fx = fx.assign(
         win_home=model.win_pred(ht, hr, h6, at, ar, a6, yes),
         win_away=model.win_pred(at, ar, a6, ht, hr, h6, ~yes))
+    rating = rating_mod.load() if config.USE_ROLLING_RATING else None
+    if rating is not None:
+        print(f"  {rating.summary()}")
+        weeks = (fx["gameweek"] - start_gw).clip(lower=1)     # F1 of the window = this week's fixture
+        wh, wa = [], []
+        for k in sorted(weeks.unique()):                        # one map per horizon (8+ share the 8-week map)
+            sel = weeks == k
+            w, o = rating.win_probs(fx.loc[sel, "home_team"], fx.loc[sel, "away_team"],
+                                    pd.Series(True, index=fx.index[sel]), int(k))
+            wh.append(w)
+            wa.append(o)
+        wh, wa = pd.concat(wh).reindex(fx.index), pd.concat(wa).reindex(fx.index)
+        fx["win_home"] = wh.where(wh.notna(), fx["win_home"])   # unrated team -> outrights model
+        fx["win_away"] = wa.where(wa.notna(), fx["win_away"])
 
     rows = []                                      # one row per team-fixture (win = this team's, opp_win = opponent's)
     for _, r in fx.iterrows():
@@ -104,7 +120,8 @@ def main():
                 cells += f"{'--':<6}"
         print(f"  {team:<16}{order[team]*100:>4.0f}%  {cells}")
     print("\n  cell number = the TEAM's own modelled win probability % for that fixture (higher = easier; strength x")
-    print("  fixture x venue). avg% = mean over the window, drives the ranking. Not real odds beyond F1/F2.")
+    print("  fixture x venue; rolling odds-implied rating). avg% = mean over the window, drives the ranking."
+          " Not real odds beyond F1/F2.")
 
 
 if __name__ == "__main__":

@@ -54,6 +54,16 @@ TEAMS_RE = re.compile(r"^([^<]+)</span><span>([^<]+)</span>")
 PLAYER_RE = re.compile(r'title="([^"]+)"[\s\S]*?<div class="quota"><div>([0-9]+(?:\.[0-9]+)?)</div>')
 
 
+def _f1_fixture_count():
+    """Number of F1 fixtures this gameweek from inputs/fixtures.csv (teams with an opponent / 2);
+    10 when the file can't be read."""
+    try:
+        fx = pd.read_csv(os.path.join(config.INPUTS_DIR, "fixtures.csv"))
+        return max(int(fx.iloc[:, 1].notna().sum()) // 2, 1)
+    except (OSError, IndexError, ValueError):
+        return 10
+
+
 def candidates(raw):
     """Plausible 'Given Surname' orderings of a Ladbrokes 'Surname Given...' name."""
     toks = raw.split()
@@ -216,10 +226,22 @@ def main():
     out = pd.concat([kept, new], ignore_index=True)
     out.to_csv(BOOKING_CSV, index=False)
     n_matches = sum(1 for m in matches if len({resolve(r) for r, _ in m[2]} - {None}) >= MIN_PLAYERS)
-    provenance.mark(BOOKING_FILE, "real", "ladbrokes",
-                    f"{len(new)} players over {n_matches} priced matches (game-max fill)")
+    n_fixtures = _f1_fixture_count()
+    if n_matches >= n_fixtures:
+        provenance.mark(BOOKING_FILE, "real", "ladbrokes",
+                        f"{len(new)} players over {n_matches} priced matches (game-max fill)")
+        state_msg = "Bookings marked REAL (provenance)."
+    else:
+        # The other matches' rows are still the synthetic seed. Stamping the file 'real' here put
+        # 8 synthetic matches into the yellow-card archive on 2026-09-01; stay synthetic and the
+        # --gw archive withholds the Yellow Card columns (everything else still archives).
+        provenance.mark(BOOKING_FILE, "synthetic", "ladbrokes (partial)",
+                        f"{n_matches}/{n_fixtures} matches priced ({len(new)} players); "
+                        "other matches keep the synthetic seed")
+        state_msg = (f"Bookings stay SYNTHETIC in provenance ({n_matches}/{n_fixtures} matches priced): "
+                     "the --gw archive withholds the yellow-card columns until every match is priced.")
     print(f"\nWrote {len(new)} players ({len(existing) - len(kept)} replaced); {len(out)} rows total. "
-          f"Bookings marked REAL (provenance).")
+          f"{state_msg}")
 
 
 if __name__ == "__main__":

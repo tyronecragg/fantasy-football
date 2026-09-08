@@ -60,6 +60,48 @@ def test_fixture_history_upserts_by_season_and_pair(tmp_path):
     assert out[out["Season"] == "2025-2026"].iloc[0]["home_win_odds"] == 2.0
 
 
+def test_player_history_withholds_synthetic_market_columns(tmp_path):
+    path = tmp_path / "hist.csv"
+    pd.DataFrame(columns=["Season", "Gameweek", "Player Name", "F1 Yellow Card",
+                          "F1 Yellow Card Factor", "F2 Yellow Card", "F1 Score 1+"]).to_csv(path, index=False)
+    master = pd.DataFrame({"Player Name": ["A"], "F1 Yellow Card": [0.3], "F1 Yellow Card Factor": [1.1],
+                           "F2 Yellow Card": [0.25], "F1 Score 1+": [0.4]})
+    out = history.update_player_history(master, gameweek=3, path=path, season="2026-2027",
+                                        withhold=("Yellow Card",))
+    row = out.iloc[0]
+    assert pd.isna(row["F1 Yellow Card"]) and pd.isna(row["F1 Yellow Card Factor"]) and pd.isna(row["F2 Yellow Card"])
+    assert row["F1 Score 1+"] == 0.4
+
+
+def test_fixture_history_refuses_a_stale_wdw_block(tmp_path):
+    path = tmp_path / "fix.csv"
+    pd.DataFrame(columns=["Season", "Gameweek", "home_team", "away_team", "home_win_odds",
+                          "away_win_odds"]).to_csv(path, index=False)
+    wdw = pd.DataFrame({"home_team": ["A", "C"], "away_team": ["B", "D"],
+                        "home_win_odds": [2.0, 2.0], "away_win_odds": [3.0, 3.0]})
+    season_probs = pd.DataFrame({"team": list("ABCD"), "title_odds": 10.0,
+                                 "relegation_odds": 10.0, "top6_odds": 10.0})
+    # fixtures.csv says GW5 is A-C / B-D, but the W/D/W block is A-B / C-D (last week's) -> refuse
+    fixtures = pd.DataFrame({"Team": list("ABCD"), "GW5 Opponent": ["C", "D", "A", "B"]})
+    out = history.update_fixture_history(wdw, season_probs, path=path, season="2026-2027",
+                                         gameweek=5, fixtures=fixtures)
+    assert out.empty
+    fixtures = pd.DataFrame({"Team": list("ABCD"), "GW5 Opponent": ["B", "A", "D", "C"]})
+    out = history.update_fixture_history(wdw, season_probs, path=path, season="2026-2027",
+                                         gameweek=5, fixtures=fixtures)
+    assert len(out) == 2 and set(out["Gameweek"]) == {5}
+
+
+def test_season_weekly_factors_ignore_zero_factors(tmp_path):
+    path = tmp_path / "hist.csv"
+    pd.DataFrame({"Season": ["2026-2027"] * 2, "Gameweek": [1, 2], "Player Name": ["A", "A"],
+                  "Position": ["DEF", "DEF"], "F1 Venue": ["H", "H"], "F1 Win": [0.5, 0.5],
+                  "F1 Opponent Win": [0.25, 0.25],
+                  "F1 Concede 4+ Goals": [0.0, 0.08]}).to_csv(path, index=False)
+    out = history.season_weekly_factors("concede4", season="2026-2027", path=path)
+    assert len(out["A"]) == 1 and out["A"][0] > 0
+
+
 def test_fallback_factors_only_overwrite_with_real_values(tmp_path):
     path = str(tmp_path / "fallback.csv")
     cols = ["Player Name"] + history.FACTOR_COLUMNS

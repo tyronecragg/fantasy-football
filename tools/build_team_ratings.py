@@ -38,13 +38,8 @@ CACHE = os.path.join(config.ROOT, "fpl_data", "football_data")
 OUT = os.path.join(config.INPUTS_DIR, "team_ratings.csv")
 DEFAULT_SEASONS = ["2122", "2223", "2324", "2425", "2526"]
 
-# football-data's team spellings that differ from ours. Everything else matches; the
-# reconciliation printout at the end flags any newcomer so this stays honest.
-FOOTBALL_DATA_NAMES = {
-    "Man United": "Man Utd", "Tottenham": "Spurs", "Sheffield United": "Sheffield Utd",
-    "Ipswich": "Ipswich Town", "Coventry": "Coventry City", "Hull": "Hull City",
-    "Nott'm Forest": "Nott'm Forest", "Newcastle": "Newcastle", "Leeds": "Leeds",
-}
+# football-data's team spellings that differ from ours live with the served rating module.
+from fpl_pipeline.rating import FOOTBALL_DATA_NAMES  # noqa: E402
 
 
 def season_label(yy):

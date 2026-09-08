@@ -128,6 +128,36 @@ def _poisson_lambda(p1):
     return -np.log(1.0 - p1.clip(0.0, 0.999999))
 
 
+def poisson_tail(lam, k):
+    """P(Poisson(lam) >= k), vectorised over a numpy array of rates."""
+    lam = np.asarray(lam, dtype=float)
+    cdf = np.zeros_like(lam)
+    term = np.exp(-lam)
+    for i in range(k):
+        cdf = cdf + term
+        term = term * lam / (i + 1)
+    return 1.0 - cdf
+
+
+def poisson_lambda_from_tail(p, k):
+    """Rate lam with P(Poisson(lam) >= k) = p, by vectorised bisection. NaN in -> NaN out."""
+    p = pd.to_numeric(p, errors="coerce").clip(1e-6, 1 - 1e-6)
+    lo, hi = np.zeros(len(p)), np.full(len(p), 25.0)
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        below = poisson_tail(mid, k) < p.values
+        lo, hi = np.where(below, mid, lo), np.where(below, hi, mid)
+    return pd.Series((lo + hi) / 2, index=p.index).where(p.notna())
+
+
+def poisson_tail_shift(p, k_from, k_to):
+    """P(X >= k_to) implied by P(X >= k_from) under Poisson goals - e.g. the concede-4+ tail from
+    the priced over-1.5 line, or concede-6+ from 4+. Used wherever a market ladder stops short of
+    the FPL threshold that still scores. NaN in -> NaN out."""
+    lam = poisson_lambda_from_tail(p, k_from)
+    return pd.Series(poisson_tail(lam.values, k_to), index=lam.index).where(lam.notna())
+
+
 def poisson_score2(p1):
     """Smooth P(score 2+) from P(score 1+), Poisson-consistent (improved mode's
     replacement for the ladder_score2 step function)."""
@@ -139,6 +169,17 @@ def poisson_score3(p1):
     """Smooth P(score 3+) from P(score 1+), Poisson-consistent."""
     lam = _poisson_lambda(p1)
     return (1.0 - np.exp(-lam) * (1.0 + lam + lam ** 2 / 2.0)).where(p1.notna())
+
+
+def score_tail(p1):
+    """Expected goals beyond a hat-trick: P(4+) + P(5+) + ... under the Poisson curve implied by
+    P(score 1+). Since E[goals] = lam = sum_k P(N >= k), the tail is lam minus the three tail
+    probabilities the XP formula already counts. Only Haaland-tier rates register (lam ~1 -> 0.02
+    goals, ~0.09 XP); everyone else rounds to zero. Improved mode only; NaN/zero-safe."""
+    lam = _poisson_lambda(p1)
+    e = np.exp(-lam)
+    counted = (1.0 - e) + (1.0 - e * (1.0 + lam)) + (1.0 - e * (1.0 + lam + lam ** 2 / 2.0))
+    return (lam - counted).clip(lower=0.0).where(p1.notna()).fillna(0.0)
 
 
 def reconcile_win_draw(win, opp):
@@ -200,19 +241,31 @@ def saves_tail(p3, p6):
 GOAL_POINTS = {"GK": 10, "DEF": 6, "MID": 5, "FWD": 4}
 
 
-def xp_pre(pos, start, s):
-    """Expected points before bonus, exactly as the workbook's AJ2-style formula:
+# FPL: -1 for every 2 goals conceded (GK/DEF), so the expected penalty is 1 x P(2+) + 1 x P(4+)
+# (+ P(6+), not priced). The workbook charged 2 per threshold - double the rule - and parity mode
+# keeps that; improved mode uses the rule (fixed 2026-09-01, ~0.5 XP per fixture on every GK/DEF).
+CONCEDE_POINTS_WORKBOOK = 2.0
+CONCEDE_POINTS_FPL = 1.0
+
+
+def xp_pre(pos, start, s, concede_points=CONCEDE_POINTS_WORKBOOK):
+    """Expected points before bonus, as the workbook's AJ2-style formula:
     every component is IFERROR(...,0) so missing stats contribute 0, the appearance 2
     is unconditional, and the whole thing scales by start probability.
 
     `s` maps stat name -> Series: score1..score3, assist, yellow, clean_sheet,
-    concede2, concede4, saves3, saves6, dc_def, dc_mid.
+    concede2, concede4, saves3, saves6, dc_def, dc_mid; improved mode also passes
+    assist2, saves_tail, score_tail (goals beyond a hat-trick), concede6 (third -1 at six
+    conceded) and dc_fwd (forwards score the 12-threshold DC too - the workbook only modelled DEF/MID).
+    `concede_points`: points lost per conceded-goals threshold (2+ and 4+) for GK/DEF -
+    CONCEDE_POINTS_FPL (1, the rule) in improved mode, the workbook's 2 for parity.
     """
     def z(x):
         return x.fillna(0.0)
 
     goals = pd.Series([GOAL_POINTS.get(p, 0) for p in pos], index=pos.index, dtype=float)
-    goal_pts = goals * (z(s["score1"]) + z(s["score2"]) + z(s["score3"]))
+    goal_pts = goals * (z(s["score1"]) + z(s["score2"]) + z(s["score3"])
+                        + (z(s["score_tail"]) if "score_tail" in s else 0.0))   # 4+ goals (improved)
     # Assists mirror goals: sum 1+ and 2+ so a player's occasional two-assist game counts.
     # 'assist2' is improved-mode only; when it is absent the term is 0, so parity is unchanged.
     assist_pts = 3.0 * (z(s["assist"]) + (z(s["assist2"]) if "assist2" in s else 0.0))
@@ -221,15 +274,20 @@ def xp_pre(pos, start, s):
     is_gk = pos == "GK"
     is_def = pos == "DEF"
     is_mid = pos == "MID"
+    is_fwd = pos == "FWD"
 
     pts = common.copy()
     pts = pts + np.where(is_gk | is_def, 4.0 * z(s["clean_sheet"]), 0.0)
     pts = pts + np.where(is_mid, 1.0 * z(s["clean_sheet"]), 0.0)
-    pts = pts - np.where(is_gk | is_def, 2.0 * z(s["concede2"]) + 2.0 * z(s["concede4"]), 0.0)
+    pts = pts - np.where(is_gk | is_def,
+                         concede_points * (z(s["concede2"]) + z(s["concede4"])
+                                           + (z(s["concede6"]) if "concede6" in s else 0.0)), 0.0)
     pts = pts + np.where(is_gk, z(s["saves3"]) + z(s["saves6"])
                          + (z(s["saves_tail"]) if "saves_tail" in s else 0.0), 0.0)
     pts = pts + np.where(is_def, 2.0 * z(s["dc_def"]), 0.0)
     pts = pts + np.where(is_mid, 2.0 * z(s["dc_mid"]), 0.0)
+    if "dc_fwd" in s:
+        pts = pts + np.where(is_fwd, 2.0 * z(s["dc_fwd"]), 0.0)
 
     return start.fillna(0.0) * pts
 
@@ -248,19 +306,23 @@ def xp_with_bonus(xp, bonus):
 BONUS_BY_RESULT = {"win": 5.62, "draw": 3.24, "lose": 0.78}
 
 
-def bonus_points_odds(weight, team, pwin, ploss):
+def bonus_points_odds(weight, team, pwin, ploss, reserve=None):
     """Expected bonus POINTS per player, anchored to bookmaker win/draw/loss odds.
 
     Each team's bonus pot = P(win)*5.62 + P(draw)*3.24 + P(lose)*0.78, distributed within the team
     in proportion to `weight` (a bonus-worthiness score — pass XP above the appearance floor, so a
-    goalscorer or clean-sheet keeper takes most and a player who merely appears ~0). Replaces the
-    flat linear P(bonus) uplift, which under-allocated total bonus ~2.2x and, being a straight line,
-    handed fodder bonus while starving the elite. All args are aligned Series over every player.
+    goalscorer takes most and a player who merely appears ~0). Replaces the flat linear P(bonus)
+    uplift, which under-allocated total bonus ~2.2x and, being a straight line, handed fodder bonus
+    while starving the elite. `reserve`: bonus already promised per row outside the share (the
+    keepers' flat expectation, config.BONUS_GK_PER_START) - summed per team and taken off its pot,
+    while those rows carry zero weight. All args are aligned Series over every player.
     """
     pwin = pwin.fillna(0.0).clip(0.0, 1.0)
     ploss = ploss.fillna(0.0).clip(0.0, 1.0)
     pdraw = (1.0 - pwin - ploss).clip(0.0, 1.0)
     pot = pwin * BONUS_BY_RESULT["win"] + pdraw * BONUS_BY_RESULT["draw"] + ploss * BONUS_BY_RESULT["lose"]
+    if reserve is not None:
+        pot = (pot - reserve.fillna(0.0).groupby(team).transform("sum")).clip(lower=0.0)
     w = weight.clip(lower=0.0)
     denom = w.groupby(team).transform("sum")
     share = (w / denom).where(denom > 0, 0.0)

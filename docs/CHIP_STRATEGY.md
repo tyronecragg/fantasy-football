@@ -2,6 +2,17 @@
 
 *Living document. Started 2026-08-26 (at GW2). Build on it as fixtures, form and the squad evolve.*
 
+## Chips used (first half)
+
+| Chip | Status |
+|---|---|
+| 🎟️ **Free Hit** | **SPENT — GW3** (played 2026-09-04). One-week team; squad reverts to the GW2 XV for GW4. FTs retained but no new one added that week (net one FT short vs holding). |
+| 🃏 Wildcard | live |
+| 🪑 Bench Boost | live |
+| ©️ Triple Captain | live |
+
+> **Plan impact (2026-09-04):** the FH is gone, so every "**Free Hit → GW18–19**" / "GW9 Ars–Liv trough" line below is **void for the first half**. The remaining first-half plan is **WC + BB + TC only**. The immediate live question is now **GW4**: the thin GW2 squad returns, so the Wildcard's window-close anchor (~GW4) is more attractive than before — decide WC-now vs a couple of targeted transfers once GW3 has played.
+
 ## Framework
 
 - **First-half chips — Wildcard, Free Hit, Bench Boost, Triple Captain — expire at the GW19 deadline (Sat 2 Jan 2027).** Use them or lose them; no carry-over into the second half (a second set unlocks from GW20).
@@ -151,7 +162,7 @@ Chip weeks are **bold**; everything else is normal transfers. Chip GWs are ancho
 - [ ] Re-run `tools/fixture_horizon.py` weekly (F1/F2 real odds roll forward, extension updates) and after any Wildcard.
 - [ ] Revisit after ~GW6 once form/fixtures settle — re-rank team strength from real results, not just pre-season odds.
 - [ ] Decide the Haaland question before GW3 if going Strategy C.
-- [ ] Track which chips are still live and update the lean each week.
+- [x] Track which chips are still live and update the lean each week. **2026-09-04: FH spent GW3; WC/BB/TC live** (see Chips used).
 - [ ] Note: strength ranks here are pre-season odds-implied; promoted/weak sides may over- or under-perform their price early.
 
 ## Sources

@@ -123,7 +123,7 @@ def load_defensive_contributions():
     df["nineties"] = (evidence / 90).round(2)
 
     out = {}
-    for pos in ("DEF", "MID"):
+    for pos in ("DEF", "MID", "FWD"):      # FWD: same 12 threshold as MID (improved mode only)
         out[pos] = (
             df[df["position"] == pos][["name", "nineties", "dc90"]]
             .sort_values("name")

@@ -35,3 +35,16 @@ def test_gk_saves_defaults():
     assert np.isclose(out["prob3"][0], 1 / 1.62 / 1.05)
     assert out["prob3"][1] == 0.6   # IFERROR default
     assert (out["prob6"] == 0.0).all()
+
+
+def test_concede_market_derives_missing_over_3_5_in_improved_mode():
+    from fpl_pipeline.markets import concede_market
+    df = pd.DataFrame({"Match": ["x", "y"], "Date": [0, 0], "Team": ["A", "B"], "Opponent": ["B", "A"],
+                       "Team_Over_1.5": [1.5, 1.5], "Team_Under_1.5": [2.5, 2.5],
+                       "Team_Over_3.5": [4.0, None], "Team_Under_3.5": [1.25, None]})
+    parity = concede_market(df)
+    assert parity["prob4"].tolist()[1] == 0.0                     # workbook IFERROR(...,0)
+    improved = concede_market(df, derive_missing4=True)
+    assert abs(improved["prob4"][0] - parity["prob4"][0]) < 1e-12  # real price untouched
+    # p2 = (1/1.5)/(1/1.5+1/2.5) = 0.625 -> Poisson lam ~2.12 -> P(4+) ~0.165
+    assert 0.15 < improved["prob4"][1] < 0.18

@@ -9,8 +9,11 @@ writer stamps the markets it touches, keyed by the sportsbet FILENAME (the one i
   betway.py          -> mark(file, "real", "betway", ...)    each priced market = real
   bet365/ladbrokes   -> mark(file, "synthetic"|"real", ...)  bookings source (kept synthetic for now)
 
-Read it with `state(file)` (real / synthetic / unknown) or `status()` (the whole dict). The --gw
-archiver refuses to snapshot any market whose state is not "real" (see is_real)."""
+Read it with `state(file)` (real / derived / synthetic / unknown) or `status()` (the whole dict).
+"derived" = computed at scrape time FROM this week's real prices (2+ goals off the goalscorer price,
+GK saves off shots-on-target) - anchored to real odds, unlike a synthetic carry. The --gw archiver
+records real and derived markets and withholds the columns of any market that is not (see
+is_grounded and run.guard_synthetic_archive)."""
 import datetime
 import json
 import os
@@ -62,7 +65,7 @@ def reset_synthetic(gw, files, source="build_synthetic_gw"):
 
 
 def mark(file, state, source, detail=""):
-    """Stamp one market (by sportsbet filename). state is 'real' or 'synthetic'."""
+    """Stamp one market (by sportsbet filename). state is 'real', 'derived' or 'synthetic'."""
     doc = _load()
     doc["markets"][file] = {"state": state, "source": source, "detail": detail, "ts": _now()}
     return _save(doc)
@@ -83,6 +86,12 @@ def state(file):
 
 def is_real(file):
     return state(file) == "real"
+
+
+def is_grounded(file):
+    """Real, or derived at scrape/run time from real odds. Either is anchored to this week's
+    bookmaker prices, so the archive guard accepts both; only a synthetic carry is withheld."""
+    return state(file) in ("real", "derived")
 
 
 def status():

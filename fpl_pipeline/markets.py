@@ -6,7 +6,7 @@ renamed CSV header can't silently shift a lookup.
 import numpy as np
 import pandas as pd
 
-from . import config, names
+from . import config, model, names
 
 
 def implied(odds, margin):
@@ -100,14 +100,25 @@ def clean_sheet_market(df):
     })
 
 
-def concede_market(df):
+def concede_market(df, derive_missing4=False):
     """Team-goals CSV keyed by *opponent*: the workbook looks up a player's team in the
-    Opponent column, so 'prob2/prob4' are P(team concedes 2+/4+) = the row team's goals."""
+    Opponent column, so 'prob2/prob4' are P(team concedes 2+/4+) = the row team's goals.
+
+    derive_missing4 (improved mode): Betway prices Over 3.5 for only a couple of teams a week, and
+    the workbook's IFERROR(...,0) turned every unpriced team into P(concede 4+) = 0 - which became a
+    0 factor, poisoned the fallback sheet and locked the trailing median at 0 (found 2026-09-01).
+    Derive the missing tail from the always-priced over-1.5 line instead: Poisson-consistent, and
+    within 0.008 MAE of the real 4+ price across 260 team-weeks of the 2025-26 archive."""
+    p2 = two_sided(df.iloc[:, 4], df.iloc[:, 5])            # no IFERROR in the sheet
     p4 = two_sided(df.iloc[:, 6], df.iloc[:, 7])
+    if derive_missing4:
+        p4 = p4.where(p4.notna(), model.poisson_tail_shift(p2, 2, 4))
+    else:
+        p4 = p4.fillna(0.0)                                 # IFERROR(...,0)
     return pd.DataFrame({
         "team": df.iloc[:, 3],                              # Opponent column
-        "prob2": two_sided(df.iloc[:, 4], df.iloc[:, 5]),   # no IFERROR in the sheet
-        "prob4": p4.fillna(0.0),                            # IFERROR(...,0)
+        "prob2": p2,
+        "prob4": p4,
     })
 
 
@@ -155,9 +166,9 @@ def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None, roster_names=Non
         "assist2": player_market(sportsbet["assist2"], calibrate, roster_names),
         "yellow": yellow_market(sportsbet["yellow"], roster_names, improved=calibrate),
         "clean_sheet": clean_sheet_market(sportsbet["clean_sheet"]),
-        "concede": concede_market(sportsbet["team_goals"]),
+        "concede": concede_market(sportsbet["team_goals"], derive_missing4=dedup_f2),
         "gk_saves": gk_saves_market(sportsbet["gk_saves"]),
         "f2_clean_sheet": clean_sheet_market(f2_cs),
-        "f2_concede": concede_market(f2_tg),
+        "f2_concede": concede_market(f2_tg, derive_missing4=dedup_f2),
         "f2_yellow": f2_yellow_market(inputs["f2_yellow"]),
     }

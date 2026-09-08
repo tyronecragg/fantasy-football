@@ -2,6 +2,63 @@
 
 **Purpose.** A durable snapshot of who manages whom, who moved where, and who's injured — the facts that go stale fastest and cause the most predicted-XI errors. Load this first when refreshing lineups so you don't re-derive (and re-hallucinate) the landscape. Last compiled **2026-08-20** from multi-source research (team-by-team, ≥5 club-focused sources each). Transfer window shuts **~1 Sept 2026**, so the "live threads" below can still change.
 
+---
+
+## ⚑ TRANSFER WINDOW CLOSED — FINAL reconciliation (2026-09-02)
+
+**The window shut 1 Sept 2026. The live FPL roster is now COMPLETE and is the single source of truth** — the "mirror lags late in-transfers" caveat below (and the roster_overrides lag-patching) no longer applies; every deal has landed in `players.csv`. Built by diffing the 2025-26 vs 2026-27 FPL rosters (authoritative for WHO is where) + multi-source web research for overseas source-clubs/fees. **Where the older prose below conflicts with this block, THIS WINS.** Promotions (Coventry, Hull, Ipswich) and relegations (Burnley, West Ham, Wolves) reconfirmed.
+
+### Corrections to the mid-window body (sagas that resolved differently)
+- **Emi Martínez → CHELSEA** (from Villa, ~£7.5m) — the body guessed *Juventus*. Suzuki is Villa's #1.
+- **Enzo Fernández → MAN CITY** (from Chelsea, ~£125m) — the body said the deal *COLLAPSED / staying at Chelsea*. It COMPLETED.
+- **Bradley Barcola → LIVERPOOL** (from PSG, ~£100m+) — DONE and in the roster (body had "can't register GW1").
+- **Jack Grealish → EVERTON** (roster has him at Everton) — the body said his loan ended and he went *back to Man City*. Wrong: he's an Everton player.
+- **Ismaïla Sarr STAYED at Crystal Palace** (body's "→ Galatasaray/Fenerbahçe" exit did NOT happen; he's in the squad, currently injured). **Ben White stayed at Arsenal.** **Jadon Sancho LEFT the league** (not in any PL roster).
+
+### Signings the body MISSED (confirmed in the final roster)
+- **Spurs:** Mykhailo Mudryk (Chelsea, loan ~£75m option) + Tosin Adarabioyo (Chelsea ~£10m) + Mateus Fernandes (West Ham ~£85m) — on top of Tonali/Marmoush/Sávio/Senesi/Robertson/van Hecke.
+- **Man City:** Iliman Ndiaye (Everton ~£60m, beat Spurs deadline day) + Enzo Fernández (above).
+- **Aston Villa:** Nicolas Jackson (Chelsea ~£48m up front) — permanent striker, alongside the Garnacho loan.
+- **Nott'm Forest:** Liam Delap (Chelsea ~£45-50m, record) — the striker/CM the body said they "failed to sign".
+- **Chelsea (ins):** + Jordan Henderson (Brentford, free), Maxence Lacroix (Palace ~£52m), Emi Martínez — alongside Rogers/Welbeck/Palestra/Quenda/Barco.
+- **Sunderland:** Kevin Danso (Spurs, loan w/ ~£25m obligation). **Brentford:** El Hadji Malick Diouf (West Ham ~£35m). **Man Utd:** Karl Darlow (Leeds, free GK). **Arsenal:** Reiss Nelson (from Brentford, returned). **Newcastle:** Matías Fernández-Pardo (Lille ~£51m, deadline day).
+
+### Overseas arrivals — source clubs & fees (data can't record these; web-sourced)
+| Player | To | From | Fee |
+|---|---|---|---|
+| Bradley Barcola | Liverpool | PSG (Fra) | ~£100m+ |
+| Jérémy Jacquet | Liverpool | Rennes (Fra) | ~£60m |
+| Ronald Araújo | Liverpool | Barcelona (Spa) | loan, €55m opt |
+| Christos Tzolis | Arsenal | Club Brugge (Bel) | £34m |
+| Ayyoub Bouaddi | Man City | Lille (Fra) | ~£81m |
+| Leon Goretzka | Aston Villa | Bayern (Ger) | free |
+| Johan Manzambi | Aston Villa | Freiburg (Ger) | ~£51-59m |
+| Ibrahim Mbaye | Aston Villa | PSG (Fra) | ~£47m |
+| Zion Suzuki | Aston Villa | Parma (Ita) | ~£30m |
+| Mamadou Sangaré | Brentford | Lens (Fra) | ~£41m |
+| Valentín Barco | Chelsea | Strasbourg (Fra) | ~£34m |
+| Geovany Quenda | Chelsea | Sporting CP (Por) | ~£43m |
+| Marco Palestra | Chelsea | Atalanta (Ita) | ~£47m |
+| Ousmane Diomandé | Nott'm Forest | Sporting CP (Por) | ~£34m |
+| Xaver Schlager | Nott'm Forest | RB Leipzig (Ger) | free |
+| Matías Fernández-Pardo | Newcastle | Lille (Fra) | ~£51m |
+| Bazoumana Touré | Newcastle | Hoffenheim (Ger) | ~£43m |
+| Amar Dedić | Newcastle | Benfica (Por) | ~£30m |
+| Gonzalo García | Fulham | Real Madrid (Spa) | ~£34m |
+
+Promoted clubs' overseas spend (reference): **Hull** — Tzolakis (GK, Olympiacos), Mendy (CB, Rayo), Cho (Nice); **Ipswich** — Enciso (Strasbourg), Emersonn (Toulouse), Ex. Palacios (Leverkusen), Maeda (Celtic), Scherpen (Union SG); **Coventry** — Cherif (Fenerbahçe), Yirenkyi (Nordsjælland), Rushworth (Brighton).
+
+### Notable DEPARTURES from the league
+- **Liverpool:** Salah, Luis Díaz, Darwin Núñez (huge attacking turnover). **Chelsea:** Cucurella (Real Madrid), Nkunku. **Spurs:** Son Heung-min, Kolo Muani, Palhinha. **Man Utd:** Højlund, Antony, Casemiro. **Man City:** Gündoğan, Bernardo Silva. **Newcastle:** Gordon. **Arsenal:** Trossard. **Fulham:** Raúl Jiménez.
+
+### Data-vs-web conflicts (roster WINS)
+- **Jaden Philogene → IPSWICH** per the roster (web said Hull) — trust Ipswich.
+- **Douglas Luiz** — web said Forest (ex-Juventus); **NOT in the PL roster** — excluded.
+- **Garnacho** — roster has him arriving from **Chelsea** (his 25-26 club in this data); real-world trackers say Man Utd. Immaterial — use the roster.
+- Hincapié / Adli / Bizot / Enes Ünal show in web "signings" lists but were already in the 25-26 roster (Jan-2026 or loan-made-permanent) — NOT fresh 26-27 incomings.
+
+> Managers NOT re-verified this pass (not in the roster data) — the table below is the 20-Aug research; treat with the usual stale-source caution.
+
 > ⚠️ **This body is the 20-Aug snapshot. The 28-Aug reconciliation below OVERRIDES it where they conflict.** The LIVE FPL roster (`players.csv` / bootstrap) is the tie-breaker for "is player X at club Y" — **but only in ONE direction.** It reliably kills stale-2025-26 phantoms (a source naming a player **not in the roster**). It does **NOT** reliably confirm the newest moves: the FPL-Core-Insights mirror **LAGS deadline-day / late-window IN-transfers by hours-to-days**, so a player can already have moved while the mirror still shows the old club. **So: never say "X is still at Y, the move isn't done" on the strength of the mirror alone near a deadline.** When ≥2 current sources (or Tyrone) confirm a completed move the mirror hasn't caught, treat it as DONE and record it in **`inputs/roster_overrides.csv`** (name→team), which `ingest.py` applies on top of the mirror until it catches up. (Caught 27 Aug: Tomiyasu/Elanga wrongly flagged as phantoms — both real. Caught 28 Aug the OPPOSITE failure: Nico González→Newcastle and Marmoush→Spurs both dismissed as "rumours" because the mirror still had them at Man City — both were actually done.)
 
 ---

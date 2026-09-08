@@ -49,10 +49,11 @@ XI_MIN = {"GK": 1, "DEF": 3, "MID": 2, "FWD": 1}
 XI_MAX = {"GK": 1, "DEF": 5, "MID": 5, "FWD": 3}
 SQUAD = {"GK": 2, "DEF": 5, "MID": 5, "FWD": 3}
 FIX_COLS = [f"F{k} XP" for k in range(1, 9)]
-# Optimiser's 8-fixture weights (ownership × reliability, F1-normalised) — replicated from
+# Optimiser's 8-fixture weights (ownership × reliability, F1-normalised; reliability measured in
+# points space 2026-09-02, see optimisation.RELIABILITY_WEIGHTS) — replicated from
 # optimisation.py rather than imported, because importing that module fires its top-level run.
 _OWN = (1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558)
-_REL = (1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472)
+_REL = (1.0, 0.850, 0.710, 0.630, 0.550, 0.470, 0.400, 0.330)   # points-measured 2026-09-02
 HORIZON_W = [(o * r) / (_OWN[0] * _REL[0]) for o, r in zip(_OWN, _REL)]
 
 
@@ -206,18 +207,20 @@ def bench_value(pool, squad_idx, xi_idx, col, slots, gk_bench=0.0):
     return float(v)
 
 
-def gated_best_squad(pool, budget, current_idx, ft, min_f1_gain, min_total_gain, bench_slots, gk_bench):
+def gated_best_squad(pool, budget, current_idx, ft, min_f1_gain, min_total_gain, min_remaining_gain,
+                     bench_slots, gk_bench):
     """The REALISTIC baseline: best team reachable with `ft` transfers, but the transfer(s) are kept
     ONLY if they clear the min-gain gate over HOLDING (0 transfers) - the F1 XI (incl captain) improves
-    by >= min_f1_gain AND the weighted 8-fixture total (incl bench) improves by >= min_total_gain; else
-    the held squad is returned. Mirrors the optimiser's transfer gate, so chip deltas are measured
-    against the team you'd ACTUALLY field rather than one that made a marginal transfer. `bool` second
-    return = whether the transfer was kept. Returns (squad_set, xi_set, kept) or None."""
+    by >= min_f1_gain AND the F2-onward (tail) weighted XI+captain improves by >= min_remaining_gain AND
+    the weighted 8-fixture total (incl bench) improves by >= min_total_gain; else the held squad is
+    returned. Mirrors the optimiser's transfer gate, so chip deltas are measured against the team you'd
+    ACTUALLY field rather than one that made a marginal (or rent-shaped) transfer. `bool` second return
+    = whether the transfer was kept. Returns (squad_set, xi_set, kept) or None."""
     move = best_squad(pool, budget, "_htotal", current_idx, ft, want="both",
                       bench_slots=bench_slots, gk_bench=gk_bench)
     if move is None:
         return None
-    if not (min_f1_gain > 0 or min_total_gain > 0) or ft <= 0:
+    if not (min_f1_gain > 0 or min_total_gain > 0 or min_remaining_gain > 0) or ft <= 0:
         return (*move, True)
     hold = best_squad(pool, budget, "_htotal", current_idx, 0, want="both",
                       bench_slots=bench_slots, gk_bench=gk_bench)
@@ -227,8 +230,10 @@ def gated_best_squad(pool, budget, current_idx, ft, min_f1_gain, min_total_gain,
     h15, hxi = hold
     tot_gain = ((horizon_total(pool, mxi) + bench_value(pool, m15, mxi, "_htotal", bench_slots, gk_bench))
                 - (horizon_total(pool, hxi) + bench_value(pool, h15, hxi, "_htotal", bench_slots, gk_bench)))
-    f1_gain = f1_total(pool, mxi) - f1_total(pool, hxi)
-    if tot_gain >= min_total_gain and f1_gain >= min_f1_gain:
+    f1_move, f1_hold = f1_total(pool, mxi), f1_total(pool, hxi)
+    f1_gain = f1_move - f1_hold
+    rem_gain = (horizon_total(pool, mxi) - f1_move) - (horizon_total(pool, hxi) - f1_hold)  # weighted tail
+    if tot_gain >= min_total_gain and f1_gain >= min_f1_gain and rem_gain >= min_remaining_gain:
         return (*move, True)
     return (*hold, False)
 
@@ -236,45 +241,124 @@ def gated_best_squad(pool, budget, current_idx, ft, min_f1_gain, min_total_gain,
 MAX_FT = 5   # FPL caps banked free transfers at 5
 
 
-def chip_radar(m, squad, current_idx, budget, ft, min_f1_gain=0.0, min_total_gain=0.0):
-    """Forward radar: treat EACH of F1..F8 as a standalone, full-weight one-off and value a Bench
-    Boost / Triple Captain / Free Hit there — so a spike anywhere in the 8-fixture window is visible
-    in advance, not only when it becomes F1. Bench Boost/Triple Captain read the current squad;
-    Free Hit is the per-fixture 15-transfer rebuild (optimised for THAT fixture) minus the NORMAL
-    team you'd otherwise field — the horizon-optimised (`_htotal`) team reachable with your
-    ACCUMULATED free transfers by then (`ft` at F1, ft+1 at F2, ... capped at MAX_FT) — evaluated on
-    that fixture. So the baseline is the realistic team you'd have, not one myopically built for the
-    fixture. Note: Ff slots are per-FIXTURE (not calendar), so double/blank GWs map only approximately."""
-    # Bench Boost / Triple Captain read the team you hold NOW — the carried-in squad plus your `ft` free
-    # transfers (horizon-optimised) — held fixed and valued on each fixture. So F1 matches the headline,
-    # and later weeks show which upcoming fixture YOUR bench spikes on (not a fodder-bench rebuild).
-    _g = gated_best_squad(m, budget, current_idx, ft, min_f1_gain, min_total_gain,
-                          WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)
-    now15 = _g[0] if _g else None
-    now = m.loc[list(now15)] if now15 else squad
-    rows, base_by_ft = [], {}
-    for k in range(1, 9):
+def _obj_value(m, squad_set, xi_set, col, slots, gk):
+    """Value of a squad on `col`: starting-XI sum + weighted bench (the best_squad objective)."""
+    return float(m.loc[list(xi_set), col].sum()) + bench_value(m, squad_set, xi_set, col, slots, gk)
+
+
+def _hz_value(m, squad_set, xi_set, hw_col, fwd_cols, wts, slots, gk):
+    """Weighted forward-horizon value of a squad: XI sum on the horizon column + per-fixture captaincy
+    (best starter each week, weighted) + weighted bench. Mirrors horizon_total+bench for any window."""
+    xi = list(xi_set)
+    cap = float(sum(w * m.loc[xi, c].max() for w, c in zip(wts, fwd_cols)))
+    return float(m.loc[xi, hw_col].sum()) + cap + bench_value(m, squad_set, xi_set, hw_col, slots, gk)
+
+
+def simulate_weekly_squads(m, budget, current_idx, ft, min_f1_gain, min_remaining_gain, min_total_gain,
+                           bench_slots, gk_bench):
+    """Play the weekly free-transfer drip FORWARD: each fixture-week make the best transfer, but keep it
+    ONLY if it clears the SAME 3-gate the optimiser/`gated_best_squad` uses (measured over HOLDING),
+    with week w as that week's "F1": the F_w XI+captain improves >= min_f1_gain AND the weighted tail
+    (F_{w+1}..F_{w+7}) improves >= min_remaining_gain AND the weighted window total (incl bench) improves
+    >= min_total_gain; else BANK (the FT carries, capped at MAX_FT). The squad EVOLVES week to week.
+    Returns ({w: (squad_set, xi_set)}, {w: ft_available}) for w=1..HORIZON = the realistic team you'd
+    HOLD each week under YOUR real transfer discipline (so the GW-w baseline matches `gated_best_squad`
+    for w=1). Greedy/myopic per week, as the weekly game forces."""
+    n, W = config.HORIZON, HORIZON_W
+    fwd_of = {}
+    for w in range(1, n + 1):                                    # rolling weighted horizon from each week
+        cols = [f"F{w + j} XP" for j in range(len(W)) if w + j <= n and f"F{w + j} XP" in m.columns]
+        m[f"_hw{w}"] = sum(wt * m[c] for wt, c in zip(W, cols))
+        fwd_of[w] = cols
+    gated = min_f1_gain > 0 or min_remaining_gain > 0 or min_total_gain > 0
+    evolved, ft_avail = {}, {}
+    idx, avail = list(current_idx), float(ft)
+    for w in range(1, n + 1):
+        a = min(int(round(avail)), MAX_FT)
+        col, fwd = f"_hw{w}", fwd_of[w]
+        wts = W[:len(fwd)]
+        hold = best_squad(m, budget, col, idx, 0, want="both", bench_slots=bench_slots, gk_bench=gk_bench)
+        if hold is None:                                        # PuLP missing / infeasible -> freeze
+            hold = (set(idx), set(list(idx)[:11]))
+        chosen, used = hold, 0
+        if a > 0:
+            move = best_squad(m, budget, col, idx, a, want="both", bench_slots=bench_slots, gk_bench=gk_bench)
+
+            def _gains(sq, xi):                                 # (F_w XI+cap, weighted tail, weighted total incl bench)
+                xl = list(xi)
+                f1v = fk_total(m, xi, f"F{w} XP")
+                xicap = float(m.loc[xl, col].sum()) + sum(wt * m.loc[xl, c].max() for wt, c in zip(wts, fwd))
+                totv = xicap + bench_value(m, sq, xi, col, bench_slots, gk_bench)
+                return f1v, xicap - f1v, totv
+
+            if move is not None:
+                if not gated:
+                    chosen, used = move, 15 - len(set(move[0]) & set(idx))
+                else:
+                    mf1, mrem, mtot = _gains(*move)
+                    hf1, hrem, htot = _gains(*hold)
+                    if (mtot - htot >= min_total_gain and mf1 - hf1 >= min_f1_gain
+                            and mrem - hrem >= min_remaining_gain):
+                        chosen, used = move, 15 - len(set(move[0]) & set(idx))
+        evolved[w], ft_avail[w] = chosen, a
+        idx = list(chosen[0])
+        avail = min(a - used + 1, MAX_FT)                       # spent `used`, gain +1 next week
+    return evolved, ft_avail
+
+
+def chip_radar(m, squad, current_idx, budget, ft, min_f1_gain=0.0, min_total_gain=0.0, min_remaining_gain=0.0):
+    """Forward radar: treat EACH of F1..F{HORIZON} as a standalone, full-weight one-off and value a
+    Bench Boost / Triple Captain / Free Hit there — so a chip spike anywhere in the horizon is visible
+    in advance, not only when it becomes F1. The baseline is the team you'd REALISTICALLY HOLD at each
+    fixture, from `simulate_weekly_squads` (play the weekly FT drip forward, gated by min_total_gain):
+    Bench Boost = that week's 4 subs, Triple Captain = that week's best starter, Free Hit = the
+    per-fixture 15-transfer rebuild MINUS that week's evolved squad, Wildcard = the PERMANENT rebuild
+    over that week's forward 8-fixture window MINUS the evolved squad ("worth wildcarding here, GIVEN
+    I keep making regular transfers?" — so it decays as the drip fixes the squad). So far-week Free Hit
+    and Wildcard deltas shrink honestly (your evolved team has already transferred toward those
+    fixtures). The `(sim FTs)` column
+    is the free transfers available that week in the simulation (spent/banked). Note: Ff slots are
+    per-FIXTURE (not calendar), so double/blank GWs map only approximately."""
+    # Simulate the weekly FT drip: the squad you'd actually HOLD at each fixture, having made your
+    # best gated transfer (or banked) every week. Bench Boost / Triple Captain / the Free Hit baseline
+    # all read THAT week's evolved squad, so far-week values reflect a team that's transferred toward
+    # those fixtures - not a one-shot bulk rebuild of the current squad.
+    evolved, ft_avail = simulate_weekly_squads(m, budget, current_idx, ft, min_f1_gain,
+                                               min_remaining_gain, min_total_gain,
+                                               WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)
+    rows = []
+    for k in range(1, config.HORIZON + 1):
         col = f"F{k} XP"
-        _, xi = best_xi(now, col)
-        bb = float(now.loc[~now.index.isin(xi), col].sum())
-        tc = float(now.loc[list(xi), col].max())
-        bt = min(ft + (k - 1), MAX_FT)                          # accumulated free transfers by F{k}
-        if bt not in base_by_ft:                                # normal permanent team for this FT count
-            _gb = gated_best_squad(m, budget, current_idx, bt, min_f1_gain, min_total_gain,
-                                   WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)
-            base_by_ft[bt] = _gb[:2] if _gb else None
-        base_k = base_by_ft[bt]
+        ev15 = evolved[k][0]
+        ev = m.loc[list(ev15)]
+        _, bxi = best_xi(ev, col)                               # the XI you'd field that week
+        bb = float(ev.loc[~ev.index.isin(bxi), col].sum())      # Bench Boost = the 4 subs that week
+        tc = float(ev.loc[list(bxi), col].max())                # Triple Captain = best starter that week
         fh_k = best_squad(m, budget, col, current_idx, 15, want="both",     # one-week rebuild (thin bench)
                           bench_slots=FREE_HIT_BENCH_SLOTS, gk_bench=FREE_HIT_GK_BENCH)
-        if base_k and fh_k:                                     # FH value = XI + captain + (thin) bench, both sides
-            b15, bxi = base_k
+        if fh_k:                                                # FH delta = one-week best team - your evolved team
             f15, fxi = fh_k
             fh = round((fk_total(m, fxi, col) + bench_value(m, f15, fxi, col, FREE_HIT_BENCH_SLOTS, FREE_HIT_GK_BENCH))
-                       - (fk_total(m, bxi, col) + bench_value(m, b15, bxi, col, FREE_HIT_BENCH_SLOTS, FREE_HIT_GK_BENCH)), 2)
+                       - (fk_total(m, bxi, col) + bench_value(m, ev15, bxi, col, FREE_HIT_BENCH_SLOTS, FREE_HIT_GK_BENCH)), 2)
         else:
             fh = None
-        rows.append({"f": k, "ft": bt, "bench_boost": round(bb, 2),
-                     "triple_captain": round(tc, 2), "free_hit": fh})
+        # WILDCARD delta at week k: PERMANENT rebuild over the forward 8-fixture window (F_k..F_{k+7},
+        # `_hw{k}` from the sim) MINUS your evolved squad held over it. "Is it worth wildcarding here,
+        # given I've been making regular transfers?" Both sides carry per-fixture captaincy + bench.
+        hw = f"_hw{k}"
+        fwd = [f"F{k + j} XP" for j in range(len(HORIZON_W)) if k + j <= config.HORIZON and f"F{k + j} XP" in m.columns]
+        wts = HORIZON_W[:len(fwd)]
+        _, ev_hxi = best_xi(ev, hw)                             # evolved squad's XI over the forward window
+        wc_k = best_squad(m, budget, hw, current_idx, 15, want="both",      # unlimited => global-optimal window team
+                          bench_slots=WILDCARD_BENCH_SLOTS, gk_bench=WILDCARD_GK_BENCH)
+        if wc_k:
+            w15, wxi = wc_k
+            wc = round(max(0.0, _hz_value(m, w15, wxi, hw, fwd, wts, WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)
+                           - _hz_value(m, ev15, ev_hxi, hw, fwd, wts, WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)), 2)
+        else:                                                  # unlimited transfers can't lower value; a small
+            wc = None                                          # negative is the captaincy-scoring approximation
+        rows.append({"f": k, "ft": ft_avail[k], "bench_boost": round(bb, 2),
+                     "triple_captain": round(tc, 2), "free_hit": fh, "wildcard": wc})
     return rows
 
 
@@ -282,12 +366,12 @@ def _print_radar(rows, gw):
     def mark(rows, key):                       # '*' on the standout week for this chip
         vals = [r[key] for r in rows if r[key] is not None]
         return max(vals) if vals else None
-    best = {k: mark(rows, k) for k in ("bench_boost", "triple_captain", "free_hit")}
-    print("\nchip radar — each of the next 8 gameweeks as a full-weight one-off (`*` = standout week):")
-    print(f"  {'gameweek':<11}{'bench boost':>13}{'triple capt':>13}{'free hit':>11}{'(FT base)':>11}")
+    best = {k: mark(rows, k) for k in ("bench_boost", "triple_captain", "free_hit", "wildcard")}
+    print(f"\nchip radar — each of the next {len(rows)} gameweeks as a full-weight one-off (`*` = standout week):")
+    print(f"  {'gameweek':<11}{'bench boost':>13}{'triple capt':>13}{'free hit':>11}{'wildcard':>11}{'(sim FTs)':>11}")
     for r in rows:
         cells = ""
-        for key, w in (("bench_boost", 13), ("triple_captain", 13), ("free_hit", 11)):
+        for key, w in (("bench_boost", 13), ("triple_captain", 13), ("free_hit", 11), ("wildcard", 11)):
             v = r[key]
             s = "-" if v is None else f"{v:.2f}"
             s += "*" if v is not None and v == best[key] else " "
@@ -312,14 +396,18 @@ def main():
     ap.add_argument("--min-total-gain", type=float, default=1.0,
                     help="baseline keeps its free transfer only if the weighted 8-fixture total (incl "
                          "bench) improves by >= this (default 1.0; 0 = always transfer)")
+    ap.add_argument("--min-remaining-gain", type=float, default=1.0,
+                    help="baseline keeps its free transfer only if the F2-onward (tail) weighted XI+"
+                         "captain improves by >= this (default 1.0; blocks rent-shaped moves; 0 = off)")
     a = ap.parse_args()
     gw = a.gw or history.infer_gameweek()
     if not gw:
         raise SystemExit("could not infer gameweek — pass --gw N")
     ft = a.free_transfers
 
-    m = pd.read_csv(MASTER)[["Player Name", "Position", "Team", "Cost"] + FIX_COLS].copy()
-    m["_htotal"] = sum(w * m[c] for w, c in zip(HORIZON_W, FIX_COLS))   # optimiser's 8-fixture total
+    radar_cols = [f"F{k} XP" for k in range(1, config.HORIZON + 1) if f"F{k} XP" in pd.read_csv(MASTER, nrows=0).columns]
+    m = pd.read_csv(MASTER)[["Player Name", "Position", "Team", "Cost"] + radar_cols].copy()
+    m["_htotal"] = sum(w * m[c] for w, c in zip(HORIZON_W, FIX_COLS))   # optimiser's 8-fixture total (F1-F8)
     names = current_squad_names(gw)          # the squad you carried INTO this GW (GW-1)
     squad = m[m["Player Name"].isin(names)]
     current_idx = list(squad.index)
@@ -334,7 +422,7 @@ def main():
     # rebuild on F1. Captaincy is on both sides.
     budget = a.budget if a.budget is not None else float(squad["Cost"].sum()) + a.bank
     _gbase = gated_best_squad(m, budget, current_idx, ft, a.min_f1_gain, a.min_total_gain,  # gated normal team
-                              WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)
+                              a.min_remaining_gain, WILDCARD_BENCH_SLOTS, WILDCARD_GK_BENCH)
     base = _gbase[:2] if _gbase else None
     base_kept = _gbase[2] if _gbase else True
     wc = best_squad(m, budget, "_htotal", current_idx, 15, want="both",         # wildcard: horizon rebuild
@@ -389,9 +477,10 @@ def main():
     h = h.sort_values(["Season", "Gameweek"]).reset_index(drop=True)
     h.to_csv(HIST, index=False)
 
-    if a.min_f1_gain > 0 or a.min_total_gain > 0:
+    if a.min_f1_gain > 0 or a.min_total_gain > 0 or a.min_remaining_gain > 0:
         print(f"\nBaseline gate: keep the free transfer only if F1 XI improves >= +{a.min_f1_gain} AND "
-              f"weighted total (incl bench) improves >= +{a.min_total_gain} — "
+              f"F2-onward (tail) weighted XI improves >= +{a.min_remaining_gain} AND weighted total "
+              f"(incl bench) improves >= +{a.min_total_gain} — "
               f"{'baseline MADE its transfer' if base_kept else 'baseline HELD (0 transfers)'}")
     print(f"\nGW{gw} {a.season} (baseline = {ft} free transfer{'s' if ft != 1 else ''}):"
           f"\n  bench boost    = {bench_boost:.2f} (F1)"
@@ -405,7 +494,8 @@ def main():
     print(h.to_string(index=False, na_rep=""))
 
     if a.radar:
-        _print_radar(chip_radar(m, squad, current_idx, budget, ft, a.min_f1_gain, a.min_total_gain), gw)
+        _print_radar(chip_radar(m, squad, current_idx, budget, ft, a.min_f1_gain, a.min_total_gain,
+                                a.min_remaining_gain), gw)
 
 
 if __name__ == "__main__":

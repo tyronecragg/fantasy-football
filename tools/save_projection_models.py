@@ -27,7 +27,9 @@ from tools.build_training_data import FEATURES  # noqa: E402
 # (2026-08) — `predicted` beats the RAW baseline but the deployed 0.85 blend of the MODEL loses to
 # the 0.85 blend of the BASELINE (-2.1% walk-forward), so assist stays on the blended baseline. The
 # per-stat-feature machinery is kept for the next candidate. `predicted` is leak-free (audited).
-PREDICTED_STATS = set()
+PREDICTED_STATS = {"score1", "yellow"}   # the stacked stats take the raw baseline as a feature
+LONG_FORM = [f for f in FEATURES if f.startswith("form") and (f.endswith("6") or f.endswith("10"))]
+DEFENSIVE = {"clean_sheet", "concede2", "saves3"}   # validated WITHOUT the long windows - keep that set
 
 # Walk-forward-selected common hyperparameters per deployable component (defensive markets only —
 # the attacking stats are better served by their F1-blend than by any tree; see memory).
@@ -38,12 +40,18 @@ DEPLOY = {
                      min_split_gain=0.0, min_child_weight=5.0, reg_alpha=0.1),
     "saves3": dict(max_depth=3, subsample=1.0, colsample_bytree=0.6,
                    min_split_gain=0.0, min_child_weight=5.0, reg_alpha=0.1),
+    # stacked attacking stats (config.PROJECTION_STACK): tuned 2026-09-02 on set E, pooled VAL
+    "score1": dict(max_depth=5, subsample=0.6, colsample_bytree=0.5, min_split_gain=0.0,
+                   min_child_weight=1.0, reg_alpha=0.0, reg_lambda=5.0, learning_rate=0.05),
+    "yellow": dict(max_depth=5, subsample=0.6, colsample_bytree=0.5, min_split_gain=0.0,
+                   min_child_weight=1.0, reg_alpha=0.0, reg_lambda=5.0, learning_rate=0.05),
 }
 VAL_WEEKS = 2   # last N prediction-weeks held out to early-stop the tree count
 
 
 def features_for(stat):
-    return FEATURES + (["predicted"] if stat in PREDICTED_STATS else [])
+    base = [f for f in FEATURES if f not in LONG_FORM] if stat in DEFENSIVE else list(FEATURES)
+    return base + (["predicted"] if stat in PREDICTED_STATS else [])
 
 
 def _prep(df, feats):

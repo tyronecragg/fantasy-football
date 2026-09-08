@@ -19,6 +19,7 @@ is tools/seed_gw1_sources.py, kept as a worked example.
 """
 import argparse
 import os
+import re
 import sys
 import unicodedata
 
@@ -31,6 +32,11 @@ from fpl_pipeline import config, ingest, names  # noqa: E402
 HIST = os.path.join(ROOT, "inputs", "source_history", "predicted_xis.csv")
 COLS = ["Season", "Gameweek", "Source", "Team", "Player"]
 
+# Sources the archive expects every gameweek — Curated is ours (--seed-ours); FFS + RotoWire are the
+# standing externals captured at each deadline ("compile the teams"). score() flags any that are
+# missing so a source can't silently fall out of the ledger the way RotoWire did through GW2.
+MAIN_SOURCES = ["Curated", "FFS", "RotoWire"]
+
 
 def _norm(s):
     s = unicodedata.normalize("NFKD", str(s))
@@ -40,6 +46,16 @@ def _norm(s):
 def _squash(s):
     """Fold accents/case and drop everything but letters/digits — 'Lewis-Skelly' -> 'lewisskelly'."""
     return "".join(c for c in _norm(s) if c.isalnum())
+
+
+_INITIAL = re.compile(r"^[A-Za-z]\.?$")
+
+
+def _strip_initials(label):
+    """Drop leading forename initials from a source label — RotoWire prints 'E. Haaland',
+    'V. van Dijk', 'M. Lewis-Skelly', so match on the surname portion ('Haaland', 'van Dijk')."""
+    parts = [p for p in str(label).split() if not _INITIAL.match(p)]
+    return " ".join(parts) if parts else str(label)
 
 
 # Source team labels -> roster/FPL-canonical, so every source aligns to the actual-XI vocabulary
@@ -95,16 +111,19 @@ class Resolver:
     def resolve(self, team, player, player_mapped=None):
         if (team, player) in ALIASES:
             return ALIASES[(team, player)]
-        for cand in (player_mapped, player):     # try the mapper's spelling, then the raw one
-            if cand is not None:
-                full = self.by_norm.get(_norm(cand))
-                if full is not None:
-                    return full
+        # Try the mapper's spelling, then the raw one, then each with leading initials stripped
+        # ('E. Haaland' -> 'Haaland') so RotoWire-style labels resolve too.
+        raw = [c for c in (player_mapped, player) if c is not None]
+        cand_list = raw + [s for s in (_strip_initials(c) for c in raw) if s not in raw]
+        for cand in cand_list:
+            full = self.by_norm.get(_norm(cand))
+            if full is not None:
+                return full
         cands = self.by_team.get(_norm(team), [])
-        for cand in (player_mapped, player):
-            if cand is None:
-                continue
+        for cand in cand_list:
             aq = _squash(cand)
+            if not aq:
+                continue
             hits = [c for c, sq, toks in cands if aq == sq or aq in toks]        # exact token / full
             if not hits:
                 hits = [c for c, sq, toks in cands if len(aq) >= 4 and aq in sq]  # substring fallback
@@ -174,6 +193,41 @@ def capture_csv(season, gw, path):
         capture(season, gw, source, list(zip(g["Team"], g["Player"])), resolver=resolver)
 
 
+def _actual_xis(gw_dir):
+    """{team_name: {normalised starter names}} for a played GW. Prefers lineups.csv (is_starting);
+    falls back to player_gameweek_stats.csv `starts==1` keyed to the FPL roster — the layout the
+    current FPL-Core-Insights dumps use (they ship no lineups.csv, but a `starts` column instead)."""
+    lp = os.path.join(gw_dir, "lineups.csv")
+    if os.path.exists(lp):
+        tmap = pd.read_csv(os.path.join(gw_dir, "teams.csv"))
+        code2name = dict(zip(tmap.iloc[:, 0], tmap[[c for c in tmap.columns if "name" in c.lower()][0]]))
+        matches = pd.read_csv(os.path.join(gw_dir, "matches.csv"), usecols=["match_id", "tournament"])
+        pl = set(matches[matches.tournament == "prem"].match_id)
+        lu = pd.read_csv(lp, usecols=["match_id", "team_code", "player_name", "is_starting"])
+        lu = lu[lu.match_id.isin(pl) & lu.is_starting & lu.player_name.notna()]
+        actual = {}
+        for _, r in lu.iterrows():
+            actual.setdefault(str(code2name.get(r.team_code, r.team_code)), set()).add(_norm(r.player_name))
+        return actual
+    pgs_path = os.path.join(gw_dir, "player_gameweek_stats.csv")
+    if not os.path.exists(pgs_path):
+        return {}
+    pgs = pd.read_csv(pgs_path)
+    if "starts" not in pgs.columns:
+        return {}
+    started = set(pd.to_numeric(pgs.loc[pd.to_numeric(pgs["starts"], errors="coerce").fillna(0) == 1, "id"],
+                                errors="coerce").dropna().astype(int))
+    roster = ingest.load_fpl_players().dropna(subset=["player_id"]).copy()
+    roster["player_id"] = roster["player_id"].astype(int)
+    roster = roster.set_index("player_id")
+    actual = {}
+    for pid in started:
+        if pid in roster.index:
+            r = roster.loc[pid]
+            actual.setdefault(str(r["team"]), set()).add(_norm(r["name"]))
+    return actual
+
+
 def score(season, gw):
     """Score every frozen source for (season, gw) against the actual XIs in the FPL data."""
     if not os.path.exists(HIST):
@@ -184,19 +238,10 @@ def score(season, gw):
         raise SystemExit(f"no captured sources for {season} GW{gw}")
 
     gw_dir = os.path.join(config.FPL_DATA_DIR, "By Gameweek", f"GW{gw}")
-    lp = os.path.join(gw_dir, "lineups.csv")
-    if not os.path.exists(lp):
-        raise SystemExit(f"actual lineups not available yet ({lp}) — score after the gameweek plays")
-    teams = ingest.load_fpl_players()  # (unused directly, but ensures data present)
-    tmap = pd.read_csv(os.path.join(gw_dir, "teams.csv"))
-    code2name = dict(zip(tmap.iloc[:, 0], tmap[[c for c in tmap.columns if "name" in c.lower()][0]]))
-    matches = pd.read_csv(os.path.join(gw_dir, "matches.csv"), usecols=["match_id", "tournament"])
-    pl = set(matches[matches.tournament == "prem"].match_id)
-    lu = pd.read_csv(lp, usecols=["match_id", "team_code", "player_name", "is_starting"])
-    lu = lu[lu.match_id.isin(pl) & lu.is_starting & lu.player_name.notna()]
-    actual = {}
-    for _, r in lu.iterrows():
-        actual.setdefault(str(code2name.get(r.team_code, r.team_code)), set()).add(_norm(r.player_name))
+    actual = _actual_xis(gw_dir)
+    if not actual:
+        raise SystemExit(f"actual lineups not available yet for GW{gw} "
+                         "(no lineups.csv and no player_gameweek_stats `starts`) — score after it plays")
 
     print(f"\nSOURCE ACCURACY — {season} GW{gw} (predicted XI vs who actually started)")
     print(f"{'Source':<12}{'teams':>7}{'predicted':>11}{'correct':>9}{'hit rate':>10}")
@@ -216,6 +261,10 @@ def score(season, gw):
     for s, nt, tot, hit, hr in sorted(rows, key=lambda x: (-(x[4] if x[4] == x[4] else -1))):
         print(f"{s:<12}{nt:>7}{tot:>11}{hit:>9}{hr:>9.1%}")
     print("\n(hit rate = of the players a source predicted to start, the fraction who actually did)")
+    missing = [s for s in MAIN_SOURCES if s not in set(h.Source)]
+    if missing:
+        print(f"NOTE: main source(s) not captured for GW{gw}: {', '.join(missing)} "
+              "(capture at the deadline — see docs/SOURCE_ACCURACY_CAPTURE.md)")
 
 
 def main():

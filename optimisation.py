@@ -333,18 +333,23 @@ BENCH_SLOT_WEIGHTS = (0.30, 0.10, 0.05)
 #    players = 8%/gameweek, i.e. 0.92 ** (k - 1). Roughly constant across a season.
 OWNERSHIP_WEIGHTS = (1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558)
 
-# 2. RELIABILITY ("how much do we trust the projection?"). MEASURED from the backtest
-#    archive as skill vs a positional-mean baseline (tools/backtest_projections.py,
-#    horizon k -> F(k+1)): F2 0.468, F3 0.339, F4 0.318, F5 0.277, F6 0.274, then flat
-#    because everything from F3 on shares one static team model. Normalised to F2 and
-#    scaled by F2_VS_F1 below. The steep F2 -> F3 step is real: that is where the input
-#    changes from market odds to model projection, so the curve is a CLIFF, not a ramp.
-#    CAVEATS: the archive starts ~GW12, so these describe the mid-season regime only -
-#    August outright markets are more diffuse and are not represented yet. F7/F8 are
-#    extrapolated from the flat tail. F2's level rests on F2_VS_F1, an assumption, not a
-#    measurement: if F2 usually has real odds scraped, raise it toward 1.0.
-F2_VS_F1 = 0.85
-RELIABILITY_WEIGHTS = (1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472)
+# 2. RELIABILITY ("how much do we trust the projection?"). MEASURED IN POINTS SPACE
+#    (tools/reliability_check.py, 2026-09-02): for every archived week M, the XP projected at M
+#    for fixture F{k} vs the FPL points the player actually scored in that gameweek; skill = 1 -
+#    MAE(XP)/MAE(positional-mean XP), normalised to F1. 2025-26 GW16-29, ~9,800 forecasts per
+#    horizon: F1 0.358, F2 0.305, F3 0.255, F4 0.224, F5 0.195, F6 0.169 -> relative 1.00,
+#    0.85, 0.71, 0.63, 0.55, 0.47. So F2_VS_F1 = 0.85 is now a measurement, not an assumption
+#    (it was assumed at exactly that for a year), F3-F5 were undervalued by the old vector and
+#    the old flat F6-F8 tail (~0.48) was optimistic: the decline is a steady ~0.08 per week.
+#    F7/F8 could not be measured (the 2025-26 archive carried no F7/F8 XP) and continue that
+#    slope. Points-space is the right yardstick: it includes rotation, injuries and blanks,
+#    which an odds-space skill never has to face (odds-space reads ~0.73 -> 0.64 over F3-F8).
+#    CAVEATS: measured on the projections as archived at the time (older models; the 2026-09
+#    rating/GBM/stack changes should lift F3-F6 a little) and in the mid-season regime only.
+#    Re-measure once the 2026-27 archive holds ~10 weeks. Old vector, for reference:
+#    (1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472).
+F2_VS_F1 = 0.85                    # measured 0.853 (see above)
+RELIABILITY_WEIGHTS = (1.0, 0.850, 0.710, 0.630, 0.550, 0.470, 0.400, 0.330)
 
 
 def combine_fixture_weights(ownership=None, reliability=None, num_fixtures=8):
@@ -469,7 +474,8 @@ def _tc_best_squad_rich(d, budget, fcols, w, g, current_idx, max_transfers,
 
 def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additional_budget=0.0,
                           free_transfers=1, max_per_gw=2, max_ft=5,
-                          bench_slot_weights=None, gk_bench_weights=None, max_def_per_team=2):
+                          bench_slot_weights=None, gk_bench_weights=None, max_def_per_team=2,
+                          num_fixtures=None, ownership_weights=None, reliability_weights=None):
     """Transfer PLAN valued over the FULL 8-fixture horizon, where `lookahead_gws` only bounds WHEN
     transfers may be made (the timing window), NOT the evaluation window. It decides how many transfers
     to make each GW in F1..F{lookahead_gws} (0..max_per_gw, free-transfer accrual +1/GW capped at
@@ -486,9 +492,10 @@ def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additio
     K = int(lookahead_gws)
     if K < 2:
         return                                                          # =1 (or less) -> off
-    N = len(OWNERSHIP_WEIGHTS)                                           # FULL horizon (8 fixtures)
+    # Same horizon and weight lists as the main run (falls back to the module tuples when not passed)
+    N = int(num_fixtures or len(OWNERSHIP_WEIGHTS))                      # FULL horizon
     K = min(K, N)                                                        # transfers allowed only in GWs 0..K-1
-    w = combine_fixture_weights(num_fixtures=N)
+    w = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures=N)
     bsw = _normalise_slot_weights(bench_slot_weights or BENCH_SLOT_WEIGHTS, N)   # (s1,s2,s3) per fixture
     gkbw = list(gk_bench_weights or [0.10] * N)[:N]
     gkbw += [gkbw[-1] if gkbw else 0.10] * (N - len(gkbw))              # pad short lists
@@ -780,17 +787,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                              force_include_players=None, tie_breaker=None,
                              tie_break_mode='differential', xp_tolerance=0.5, value_weight=0.0,
                              plan_bench_boost=False, plan_triple_captain=False,
-                             min_f1_gain=0.0, min_total_gain=0.0):
-    # Set default weights
-    if fixture_weights is None:
-        fixture_weights = [1.0, 0.85, 0.7, 0.55, 0.4, 0.25]
-
-    # Outfield bench weights by sub order (slot 1/2/3); GK bench stays per-fixture
-    if bench_slot_weights is None:
-        bench_slot_weights = BENCH_SLOT_WEIGHTS
-
-    if gk_bench_weights is None:
-        gk_bench_weights = [0.10, 0.10, 0.08, 0.06, 0.04, 0.02]
+                             min_f1_gain=0.0, min_total_gain=0.0, min_remaining_gain=0.0,
+                             wildcard_f1=False):
 
     weights = fixture_weights[:num_fixtures]
     gk_bench_weights = gk_bench_weights[:num_fixtures]
@@ -810,18 +808,19 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         print(f"Value preference: {value_weight:.2f} weighted XP per £1.0m of squad value "
               f"(accepts {value_weight * 0.1:.2f} lower XP per £0.1m saved)")
     if len(set(bench_slot_weights)) == 1:
-        print(f"Bench slot weights (sub order 1/2/3): {[f'{w:.2f}' for w in bench_slot_weights[0]]}")
+        print(f"Bench slot weights (sub order 1/2/3): {[f'{w:g}' for w in bench_slot_weights[0]]}")
     else:
         print(f"Bench slot weights (sub order 1/2/3, per fixture): {bench_slot_weights}")
-    print(f"GK bench weights: {[f'{w:.2f}' for w in gk_bench_weights]}")
+    print(f"GK bench weights: {[f'{w:g}' for w in gk_bench_weights]}")
     print(f"Max defensive players (GK+DEF) per team: {max_defensive_players_per_team}")
     if force_exclude_players:
         print(f"Force EXCLUDE (must NOT be in squad): {force_exclude_players}")
     if force_include_players:
         print(f"Force INCLUDE (must be in squad): {force_include_players}")
-    if min_f1_gain or min_total_gain:
-        print(f"Min-gain gate: only transfer if F1 XI improves >= +{min_f1_gain} AND total "
-              f"(weighted, incl bench) improves >= +{min_total_gain}; else hold")
+    if min_f1_gain or min_total_gain or min_remaining_gain:
+        print(f"Min-gain gate: only transfer if F1 XI improves >= +{min_f1_gain} AND F2-onward "
+              f"(tail, weighted XI) improves >= +{min_remaining_gain} AND total (weighted, incl bench) "
+              f"improves >= +{min_total_gain}; else hold")
 
     # Load player data
     df = load_sheet(excel_file, players_sheet)
@@ -979,13 +978,17 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # z <= M_f*chip[f] (binary), z maximised => z = raw value on the one chosen week, 0 elsewhere;
         # Sum(chip) <= 1 picks a single week. M_f is TIGHT (the most any captain/bench-of-4 can score
         # that fixture) - a loose M weakens the LP relaxation and blows up branch-and-bound.
-        tc_vars = {f: pulp.LpVariable(f"tc_{f}_{solution_num}", cat='Binary') for f in fixtures} \
+        # A Wildcard/Free Hit occupies F1, and FPL forbids two chips in one gameweek, so when
+        # wildcard_f1 is set the Bench Boost / Triple Captain timing is planned over F2..FN only
+        # (never F1, the chip week). Without it, planning spans the whole window.
+        chip_fixtures = fixtures[1:] if (wildcard_f1 and len(fixtures) > 1) else fixtures
+        tc_vars = {f: pulp.LpVariable(f"tc_{f}_{solution_num}", cat='Binary') for f in chip_fixtures} \
             if plan_triple_captain else {}
-        bb_vars = {f: pulp.LpVariable(f"bb_{f}_{solution_num}", cat='Binary') for f in fixtures} \
+        bb_vars = {f: pulp.LpVariable(f"bb_{f}_{solution_num}", cat='Binary') for f in chip_fixtures} \
             if plan_bench_boost else {}
         chip_terms = []
         if plan_triple_captain:
-            for fixture in fixtures:
+            for fixture in chip_fixtures:
                 col = df[f'{fixture} XP'].fillna(0.0)
                 M = float(col.max())                                    # tightest bound: the top scorer
                 raw_cap = pulp.lpSum(col[i] * captain_vars[fixture][i] for i in df.index)
@@ -995,7 +998,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 chip_terms.append(z)
             prob += pulp.lpSum(tc_vars.values()) <= 1
         if plan_bench_boost:
-            for fixture in fixtures:
+            for fixture in chip_fixtures:
                 col = df[f'{fixture} XP'].fillna(0.0)
                 M = float(col.nlargest(4).sum())                        # tightest bound: the top 4
                 raw_bench = pulp.lpSum(col[i] * bench_vars[fixture][i] for i in df.index)
@@ -1005,7 +1008,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 chip_terms.append(z)
             prob += pulp.lpSum(bb_vars.values()) <= 1
         if plan_triple_captain and plan_bench_boost:
-            for fixture in fixtures:
+            for fixture in chip_fixtures:
                 prob += tc_vars[fixture] + bb_vars[fixture] <= 1        # one chip per gameweek
         if chip_terms:
             xp_expr = xp_expr + pulp.lpSum(chip_terms)
@@ -1172,15 +1175,17 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 prob += pulp.lpSum(matching_transfers) <= len(matching_transfers) - 1
 
         # Minimum-gain gate: only ALLOW transfers that clear the improvement thresholds, else the
-        # optimiser HOLDS (0 transfers). `made`=1 iff any transfer is made; when made, the F1 XI gain
-        # and the total (weighted, incl bench) gain over the CURRENT squad must clear the thresholds
-        # (a big-M relaxes them when made=0). Both 0 (default) => nothing added, behaviour unchanged.
-        # Metrics match the displayed "Next GW Starting XI Improvement" / "Total Squad Improvement".
-        if min_f1_gain > 0 or min_total_gain > 0:
+        # optimiser HOLDS (0 transfers). `made`=1 iff any transfer is made; when made, the F1 XI gain,
+        # the F2..F_last ("remaining"/tail) XI gain, and the total (weighted, incl bench) gain over the
+        # CURRENT squad must each clear their threshold (a big-M relaxes them when made=0). All three 0
+        # (default) => nothing added, behaviour unchanged. min_f1_gain = RAW F1 XI+captain; min_remaining
+        # _gain = WEIGHTED F2..F_last XI+captain (the tail - catches rent-shaped moves); min_total_gain =
+        # WEIGHTED total incl bench (= the objective). Metrics match the displayed improvement lines.
+        if min_f1_gain > 0 or min_total_gain > 0 or min_remaining_gain > 0:
             gate_base = calculate_optimised_baseline(
                 df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights)
             if gate_base is not None:
-                base_total, _, _, base_f1 = gate_base    # (weighted+bench, starting, f1+bench, f1 starting)
+                base_total, base_start_all, _, base_f1 = gate_base   # wtd+bench, wtd XI+cap, f1+bench, f1 XI+cap
                 made = pulp.LpVariable(f"gate_made_{solution_num}", cat='Binary')
                 n_in = pulp.lpSum(transfer_in_vars[i] for i in transfer_in_vars)
                 prob += n_in >= made                     # made=1 => at least one transfer
@@ -1193,6 +1198,15 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                     f1_expr = pulp.lpSum(df.loc[i, f'{f1} XP'] * (starting_vars[f1][i] + captain_vars[f1][i])
                                          for i in df.index)
                     prob += f1_expr - base_f1 >= min_f1_gain - bigM * (1 - made)
+                if min_remaining_gain > 0 and len(fixtures) > 1:
+                    # F2..F_last only: weighted starting-XI + captain gain (the "tail"). Baseline tail =
+                    # weighted-all XI+cap minus the weight[0]-scaled F1 XI+cap.
+                    base_remaining = base_start_all - weights[0] * base_f1
+                    remaining_expr = pulp.lpSum(
+                        weights[k] * df.loc[i, f'{fixtures[k]} XP']
+                        * (starting_vars[fixtures[k]][i] + captain_vars[fixtures[k]][i])
+                        for k in range(1, len(fixtures)) for i in df.index)
+                    prob += remaining_expr - base_remaining >= min_remaining_gain - bigM * (1 - made)
             else:
                 print("  WARNING: min-gain gate skipped (baseline optimiser unavailable)")
 
@@ -2149,7 +2163,8 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
               ("1 Asst", f"{fixture} Assist"), ("2 Asst", f"{fixture} Assist 2+"),
               ("CleanSh", f"{fixture} Clean Sheet")]
     _dc = {"DEF": f"{fixture} Defensive Contribution - DEF",
-           "MID": f"{fixture} Defensive Contribution - MID"}
+           "MID": f"{fixture} Defensive Contribution - MID",
+           "FWD": f"{fixture} Defensive Contribution - FWD"}
     if all(c in final_squad.columns for _, c in _pcols):
         def _prob_row(player):
             pos = str(player['Position'])
@@ -2183,7 +2198,8 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   ownership_weights=None, reliability_weights=None,
                                   bank_lookahead_gws=None, value_weight=0.0,
                                   plan_bench_boost=False, plan_triple_captain=False,
-                                  min_f1_gain=0.0, min_total_gain=0.0):
+                                  min_f1_gain=0.0, min_total_gain=0.0, min_remaining_gain=0.0,
+                                  wildcard_f1=False):
     # Fixture weights come from the two components unless one is passed explicitly
     # (an explicit fixture_weights still wins, so old call sites keep working).
     derived = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures)
@@ -2237,7 +2253,8 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             force_include_players=force_include_players, tie_breaker=tie_breaker,
             tie_break_mode=tie_break_mode, xp_tolerance=xp_tolerance, value_weight=value_weight,
             plan_bench_boost=plan_bench_boost, plan_triple_captain=plan_triple_captain,
-            min_f1_gain=min_f1_gain, min_total_gain=min_total_gain
+            min_f1_gain=min_f1_gain, min_total_gain=min_total_gain, min_remaining_gain=min_remaining_gain,
+            wildcard_f1=wildcard_f1
         )
         all_solutions, df = result if result else (None, None)
 
@@ -2295,7 +2312,9 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   additional_budget, max_transfers,
                                   bench_slot_weights=bench_slot_weights,
                                   gk_bench_weights=gk_bench_weights_used,
-                                  max_def_per_team=max_defensive_players_per_team)
+                                  max_def_per_team=max_defensive_players_per_team,
+                                  num_fixtures=num_fixtures, ownership_weights=ownership_weights,
+                                  reliability_weights=reliability_weights)
 
         return all_solutions
 
@@ -2311,37 +2330,44 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 
 result = main_multi_transfer_optimiser(
     excel_file="outputs/13_players_master.csv",
-    max_transfers=1,
-    additional_budget=0.5,
-    num_fixtures=8,
+    max_transfers=15,
+    additional_budget=7.1,
+    num_fixtures=12,
     compute_solutions=1,
-    bank_lookahead_gws=1,
+    # bank_lookahead_gws=1,
     # Weighted-XP charged per £1.0m of squad value: prefers cheaper squads/transfers, trading XP for
     # bank at this rate. 0.0 = pure XP (off). e.g. 1.0 -> accept 0.5 lower weighted XP to save £0.5m.
     value_weight=0,
-    # How fast the squad churns / how fixable a bad far fixture is - independent of forecast quality
-    ownership_weights=[1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558],
-    # How much the projection is trusted - re-measure from the backtest as the archive grows
-    reliability_weights=[1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472],
-    bench_slot_weights=(0.25, 0.05, 0.01),   # sub order 1/2/3, applied every fixture
+    # How fast the squad churns
+    ownership_weights=[1.0, 0.92, 0.846, 0.78, 0.716, 0.66, 0.606, 0.558, 0.513, 0.472, 0.434, 0.4, 0.368, 0.338, 0.31],
+    # ownership_weights=[1.0, 0.95, 0.90, 0.86, 0.81, 0.77, 0.74, 0.70, 0.66, 0.63, 0.60, 0.57, 0.54, 0.51, 0.49],
+    # How much the projection is trusted
+    reliability_weights=[1.0, 0.85, 0.71, 0.63, 0.55, 0.47, 0.4, 0.34, 0.29, 0.25, 0.22, 0.19, 0.16, 0.14, 0.12],
+    # bench_slot_weights=(0.25, 0.05, 0.01),
+    # bench_slot_weights=[(0.35, 0.10, 0.02)] * 2 + [(0.40, 0.20, 0.05)] * 2 + [(0.45, 0.25, 0.08)] * 11,
+    bench_slot_weights=[(0.25, 0.05, 0.01)] * 2 + [(0.3, 0.1, 0.05)] * 2 + [(0.35, 0.15, 0.1)] * 11,
     # bench_slot_weights=(0.15, 0.001, 0.001),
-    # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*7,
-    gk_bench_weights=[0.001]*8,
-    # gk_bench_weights=[1.0] + [0.01]*7,
+    # bench_slot_weights=(0.001, 0.001, 0.001),
+    # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*14,
+    # gk_bench_weights=[0.001]*15,
+    gk_bench_weights=[0.05]*15,
+    # gk_bench_weights=[1.0] + [0.01]*14,
     max_defensive_players_per_team=2,
     num_solutions_display=1,
     show_all_details=False,
     show_detailed_f1=False,
     show_current_analysis=False,
-    min_f1_gain=0.1,
-    min_total_gain=1.0,
-    # force_exclude_players=["Rodrigo Muniz"],
-    # force_include_players=["Cole Palmer", "Bruno Fernandes"],
+    # min_f1_gain=0.1,
+    # min_total_gain=1.0,
+    # min_remaining_gain=1.0,
+    # force_exclude_players=[],
+    # force_include_players=['Alexander Isak', 'Erling Haaland', 'Bruno Fernandes', 'Cole Palmer', 'Cody Gakpo', 'Morgan Rogers'],
     # tie_breaker="ownership",
     # tie_break_mode="differential",
     # xp_tolerance=1.0,
-    # plan_bench_boost=True,
-    # plan_triple_captain=True,
+    plan_bench_boost=True,
+    plan_triple_captain=True,
+    wildcard_f1=True,
 )
 
 if __name__ == "__main__":

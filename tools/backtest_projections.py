@@ -63,19 +63,22 @@ def team_probs_by_gw(archive):
     return {gw: sub.set_index("Team") for gw, sub in t.groupby("Gameweek")}
 
 
-def build_pairs(archive, factor_overrides=None):
+def build_pairs(archive, factor_overrides=None, win_fn=None):
     """Forecast-vs-actual pairs, built within each season (gameweek numbers recur).
 
     factor_overrides: optional {stat: {(player, gameweek): factor}} — replaces the
     default single-week odds/baseline factor where a value exists (used by
-    tools/factor_experiment.py to evaluate alternative factor constructions)."""
+    tools/factor_experiment.py to evaluate alternative factor constructions).
+    win_fn: optional (pair, m, n, home_n, season) -> (win, opp) Series, replacing the incumbent
+    win_pred / opp_win_pred for the M+k fixture where it returns values (used by
+    tools/rating_backtest.py to test alternative fixture-strength models downstream)."""
     out = []
     for _, season_archive in archive.groupby("Season"):
-        out.extend(_build_season_pairs(season_archive, factor_overrides))
+        out.extend(_build_season_pairs(season_archive, factor_overrides, win_fn))
     return pd.concat(out, ignore_index=True)
 
 
-def _build_season_pairs(archive, factor_overrides=None):
+def _build_season_pairs(archive, factor_overrides=None, win_fn=None):
     gws = sorted(archive["Gameweek"].dropna().unique())
     team_probs = team_probs_by_gw(archive)
     season = archive["Season"].iloc[0] if "Season" in archive.columns and len(archive) else "unknown"
@@ -117,6 +120,14 @@ def _build_season_pairs(archive, factor_overrides=None):
                 pd.Series(opp_at_m["Title"].values, index=pair.index),
                 pd.Series(opp_at_m["Relegation"].values, index=pair.index), home_n)
             win_hat, opp_hat = model.reconcile_win_draw(win_hat.clip(0, 1), opp_hat.clip(0, 1))
+            extras = {}
+            if win_fn is not None:
+                alt = win_fn(pair, m, n, home_n, season)
+                if alt is not None:
+                    w_alt, o_alt = alt[0], alt[1]
+                    extras = alt[2] if len(alt) > 2 else {}       # extra per-row columns (e.g. expected goals)
+                    win_hat = w_alt.where(w_alt.notna(), win_hat)
+                    opp_hat = o_alt.where(o_alt.notna(), opp_hat)
 
             for stat, col in STATS.items():
                 prob_m = pair[f"{col}_m"]
@@ -150,6 +161,7 @@ def _build_season_pairs(archive, factor_overrides=None):
                     "position_mean": pos_mean.values, "f2_formula": f2_formula,
                     "f2_oracle": f2_oracle, "actual": actual.values,
                     "valid_opp": known_opp.values,
+                    "actual_win": pair["F1 Win_n"].values,                    # the win prob that materialised at N
                     # FEATURES for training a forward-projection model (all known at gameweek M):
                     "factor": factor.values,                                  # trailing per-player factor
                     "win_hat": win_hat.values, "opp_hat": opp_hat.values,     # predicted win/opp for the future fixture
@@ -157,6 +169,7 @@ def _build_season_pairs(archive, factor_overrides=None):
                     "own_top6": pair["Top 6"].values,
                     "opp_title": opp_at_m["Title"].values, "opp_releg": opp_at_m["Relegation"].values,
                     "opp_top6": opp_at_m["Top 6"].values,
+                    **{c: v.values for c, v in extras.items()},
                 })
                 out.append(rows[rows["actual"].notna() & rows["persistence"].notna()])
 

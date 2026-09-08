@@ -110,7 +110,8 @@ def main():
             print(f"       {label:<28} {where}")
     else:
         print(f"\n  fixture check: every market matches its gameweek (F1 = GW{cur_gw}, F2 = GW{cur_gw + 1}).")
-    print("  --gw archiving should record only real markets (provenance.is_real).\n")
+    print("  --gw archiving records real + derived markets; a synthetic market's columns are withheld\n"
+          "  from the player archive (run.guard_synthetic_archive). Manifest GW must equal --gw.\n")
 
 
 if __name__ == "__main__":

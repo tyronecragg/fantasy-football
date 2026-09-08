@@ -41,9 +41,17 @@ Bookmaker odds (Sportsbet scrape + manual entry) and FPL data (FPL-Core-Insights
 staging sheets. The **Players** sheet (818 rows × 161 cols, ~131k formulas) converts odds into
 per-player probabilities for 6 upcoming fixtures (F1–F6), turns them into expected FPL points (XP)
 per fixture using the official scoring rules, and blends them into **Total XP**
-(`F1 + 0.85·F2 + 0.7·(F3+F4+F5+F6)`). The two PuLP optimisers read Players + GW Teams and print
+(`F1 + 0.85·F2 + 0.7·(F3+F4+F5+F6)`). *(That's the legacy workbook; the Python pipeline projects
+F1–F`config.HORIZON` and retired the Total XP column — the optimiser now weights the horizon itself.)*
+The two PuLP optimisers read Players + GW Teams and print
 optimal squads / transfer plans to the console. Results are manually recorded back into
 tracking sheets (GW Teams, Historical Expected Points).
+
+The projection horizon is **`config.HORIZON`** (default **17** → a GW3 run projects F1..F17 = GW3–GW19,
+for chip-window planning). F1/F2 use real odds; **F3..HORIZON are fully modelled** by the same machinery
+(extended from a hard-coded 8 on 2026-09-02 — purely additive, F1–F8 unchanged). Past F8, start-probs are
+held flat at F8 and the GBM's `horizon` feature saturates. The **archive stays F1–F8** and the **optimiser
+keeps its own `num_fixtures` (default 8)**, so both are unaffected.
 
 Where real odds exist (F1, partially F2) they are used directly. Where they don't (F3–F6), the
 model predicts them: each stat has a **regression baseline** (probability as a function of
@@ -132,6 +140,9 @@ F2 uses real odds where available (Clean Sheet, Team Total Goals, Yellow Card vi
 Coefficients rows 1–5 model × factor; Score 2+/3+ via threshold ladder on Score 1+).
 
 ### 4. Win probability for F3–F6 (no odds yet)
+- **Since 2026-09-02 (improved mode):** a rolling odds-implied team rating (`fpl_pipeline/rating.py`,
+  weighted least squares on football-data closing prices, 30-day half-life) mapped to three-way
+  probabilities per horizon. The Lasso below is the workbook/parity path and the runtime fallback.
 - Team: hardcoded Lasso (from `predict_match_win.py`): features from title/releg/top6 probs of both teams + venue.
 - Opponent: Coefficients rows 41–46 (`max(0, intercept + b·title + c·opp_title + d·releg + e·opp_releg + f·away)`).
 
@@ -139,9 +150,9 @@ Coefficients rows 1–5 model × factor; Score 2+/3+ via threshold ladder on Sco
 `XP_pre = P(start) × Σ position-weighted points`:
 appearance 2; goals = P(1+)·g + P(2+)·g + P(3+)·g with g = 10/6/5/4 for GK/DEF/MID/FWD
 (tail-sum trick ≈ E[goals]·g); assist ·3; yellow −1; clean sheet +4 (GK/DEF, +1 MID);
-concede 2+/4+ −1 each (GK/DEF); saves 3+/6+ +1 each (GK); DC 2 pts at position threshold.
+concede 2+/4+ −2 each in the workbook (GK/DEF) — double the FPL rule; improved mode charges −1 each since 2026-09-01; saves 3+/6+ +1 each (GK); DC 2 pts at position threshold.
 Bonus: `P(bonus) = clamp(−0.021039 + 0.023522·XP_pre, 0, 1)`; `XP = XP_pre + 2·P(bonus)`.
-`Total XP = F1 + 0.85·F2 + 0.7·(F3+F4+F5+F6)` (start-probability weighted already).
+`Total XP` (the workbook's `F1 + 0.85·F2 + 0.7·(F3+F4+F5+F6)` blend) was **RETIRED 2026-08-31** — the master no longer carries it; each optimiser now weights the horizon itself (ownership × reliability) into its own `Weighted_Total_XP`.
 `F1 Pred XP` (col AM) = pure-regression XP sanity check, not used downstream.
 
 ### 6. Optimisation

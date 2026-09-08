@@ -82,11 +82,32 @@ PROJECTION_BLEND = {"score1": 0.70, "assist": 0.85, "saves3": 0.85}
 # walk-forward (2025-26); score1's F1-blend already wins, assist/yellow never do. saves3 keeps
 # its PROJECTION_BLEND. See tools/save_projection_models.py + fpl_pipeline/projection_serving.py.
 USE_PROJECTION_MODEL = True
+
+# Rolling odds-implied team rating as the F3-F8 (and F2-fallback) win / opponent-win source,
+# replacing the season-outrights Lasso (model.win_pred) in improved mode. fpl_pipeline/rating.py;
+# tested 2026-09-02 (tools/rolling_rating.py): match-odds MAE 0.045 vs 0.052 outrights / 0.066
+# static rating, 0.025 vs 0.035 on live GW4 prices. Falls back to the outrights model when the
+# maps or football-data prices are unavailable. The outrights still feed the GBM features, the
+# fixture-outlook tool and chip planning.
+USE_ROLLING_RATING = True
+RATING_HALFLIFE_DAYS = 30.0        # a match's weight halves every 30 days (grid-best; 20-45 similar)
+RATING_PROMOTED_WEIGHT = 2.0       # promoted side's prior = 2 matches' worth at the three-lowest level
+RATING_MAPS_JSON = os.path.join(DATA_DIR, "rating_maps.json")   # tools/fit_rating_maps.py
 # assist is NOT here: the model beats the RAW baseline (+2%) but the deployed serving blends 0.85
 # with the current odds, and the blended BASELINE beats the blended MODEL (-2.1% walk-forward,
 # 2026-08). The F1 anchor is what helps attacking stats, not the tree. score1 same. See memory.
 PROJECTION_MODEL_STATS = {"clean_sheet": "Clean Sheet", "concede2": "Concede 2+ Goals",
                           "saves3": "3+ Saves"}
+# STACKED stats (2026-09-02): the GBM does not beat the F1-blend on its own for goals / yellow, but
+# w*model + (1-w)*blend does - like-for-like walk-forward with player bootstrap
+# (tools/assist_walkforward.py, set E: rating win/opp + expected goals + the baseline as a feature +
+# 6/10-week odds form): goals stack -4.5% error (P=1.00, and -6.6% on the 2026-27 cross-season fold),
+# yellow stack -7.1% (P=1.00). Weights = the VAL-fitted stack weights. Assists are NOT stacked: the
+# in-season gain (~+2.5%) reversed on the cross-season fold (-4% to -18%).
+PROJECTION_STACK = {"score1": ("Score 1+", 0.65), "yellow": ("Yellow Card", 0.70)}
+# A stack is only applied once the season archive holds this many real weeks (yellow leans on
+# 10-week odds form and had no cross-season fold to prove itself; goals passed that fold, so 0).
+PROJECTION_STACK_MIN_WEEKS = {"score1": 0, "yellow": 6}
 
 # Stats whose live factor is the trailing MEDIAN of this season's weekly factors
 # (factor experiment 2026-08: median beat single-week on holdout for all of these —
@@ -105,6 +126,15 @@ POSITION_MAP = {
 POSITION_ORDER = ["GK", "DEF", "MID", "FWD"]
 
 N_FIXTURES = 6
+
+# Projection horizon (improved mode): how many fixtures F1..HORIZON the pipeline projects. F1/F2 use
+# real odds; F3..HORIZON are fully model-driven (win_pred/rating + factor x baseline + GBM). Set to 17
+# so a GW3 run reaches GW19 (first half) for chip-window planning. Beyond F8 there's no team news, so
+# start-probs are held flat at the F8 belief; the GBM's `horizon` feature saturates at its trained max
+# (F8), so its far-out horizon-decay plateaus while the per-fixture (opponent/venue/rating) signal
+# still varies. The OPTIMISER keeps its own num_fixtures (default 8) and the ARCHIVE stays F1-F8
+# (history.py only writes columns already in historical_player_data.csv), so both are unaffected.
+HORIZON = 17
 
 # Defensive-contribution blending: prior-season DC-per-90 is blended with the current
 # season minutes-weighted, with the prior's weight capped at this many minutes (19 full
@@ -163,3 +193,15 @@ DRAW_FLOOR = 0.15         # min plausible draw (also replaces the old sum>1 -> z
 # team by XP above the appearance floor (model.bonus_points_odds). Measured to fix the ~2.2x
 # under-allocation and the fodder-vs-elite mis-shape. OFF until validated on the backtest harness.
 BONUS_ODDS_MODEL = True
+# KEEPERS get a flat expected bonus per start, taken off the team pot before the outfielders share
+# it. Measured 2026-09-02 (tools/bonus_check.py, 2025-26 GW16-29): keeper bonus is 0.32 per start
+# and NOTHING we price predicts it - expected saves has a zero coefficient, clean-sheet chance a
+# slightly negative one, and the XP weight had it BACKWARDS (favourites' keepers 0.68 expected vs
+# 0.26 actual, underdogs' 0.13 vs 0.47: saves earn BPS, scorers outrank a quiet keeper). A flat
+# rate is the best out-of-sample model with 259 keeper rows; re-fit ~GW12.
+BONUS_GK_PER_START = 0.32
+# Outfield: per-position multiplier on the bonus-worthiness weight (XP above the appearance floor)
+# before the remaining pot is shared - relative weights only, fitted leave-one-GW-out so each
+# position's expected bonus matches its actual total (BPS pays midfielders' XP less than forwards').
+# Without it DEF expected 0.24 vs actual 0.17, MID 0.38 vs 0.28, FWD 0.36 vs 0.43.
+BONUS_POSITION_WEIGHT = {"DEF": 0.56, "MID": 0.61, "FWD": 1.0}

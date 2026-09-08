@@ -18,7 +18,7 @@ from fpl_pipeline import config  # noqa: E402
 
 SEASON_FIXTURES_CSV = os.path.join(config.INPUTS_DIR, "season_fixtures.csv")
 FIXTURES_CSV = os.path.join(config.INPUTS_DIR, "fixtures.csv")
-WINDOW = 8  # the Team Fixture Odds view reads up to F8
+WINDOW = config.HORIZON  # projection horizon: F1..HORIZON (17 => GW3 reaches GW19)
 
 
 def build_window(season_fixtures, start_gw, window=WINDOW):

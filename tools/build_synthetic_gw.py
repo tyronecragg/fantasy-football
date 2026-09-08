@@ -220,6 +220,12 @@ def main():
     tg1.to_csv(os.path.join(sb, "sportsbet_team_goals_odds.csv"), index=False)
     cs1.iloc[0:0].to_csv(os.path.join(sb, "sportsbet_clean_sheet_odds_f2.csv"), index=False)
     tg1.iloc[0:0].to_csv(os.path.join(sb, "sportsbet_team_goals_odds_f2.csv"), index=False)
+    # Two-assists is F1-only and Betway prices it rarely, so a copy from an earlier gameweek would
+    # sit here and be read as THIS week's F1 Assist 2+ (players.py takes a real row before the
+    # ratio - GW1 prices were still feeding GW3 on 2026-09-01). Clear it; the runtime
+    # ASSIST2_RATIO derivation applies until Betway prices it, when betway.py rewrites the file.
+    pd.DataFrame(columns=["player_name", "match_id", "odds_decimal"]).to_csv(
+        os.path.join(sb, "sportsbet_two_assists_odds.csv"), index=False)
 
     # Provenance is the single source of truth for what's synthetic vs real (self-updating, never
     # goes stale) - no companion note file. betway.py / ladbrokes_cards.py flip each market to real
@@ -228,6 +234,8 @@ def main():
         "sportsbet_win_draw_win_odds.csv", "sportsbet_goalscorer_odds.csv", "sportsbet_two_goals_odds.csv",
         "sportsbet_assist_odds.csv", "sportsbet_booking_odds.csv", "sportsbet_goalkeeper_saves_odds.csv",
         "sportsbet_clean_sheet_odds.csv", "sportsbet_team_goals_odds.csv"])
+    provenance.mark("sportsbet_two_assists_odds.csv", "derived", "pipeline",
+                    "assist2 = ASSIST2_RATIO x assist at runtime (file cleared by the roll)")
 
     print(f"\nSynthetic GW{a.gw} F1 markets written to sportsbet/*.csv (F1 only - F2 derived off F1); "
           f"_f2 files cleared; provenance reset (all synthetic - see tools/odds_status.py). Run "

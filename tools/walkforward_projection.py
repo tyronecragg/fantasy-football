@@ -36,7 +36,8 @@ from tools.backtest_projections import STATS  # noqa: E402
 from tools.train_projection_model import (  # noqa: E402
     SEASON, SPACE, _fit, _mae, _predict, _prep, _sample_params)
 
-N_TRIALS, SEED, MIN_TRAIN = 60, 0, 300   # 60 (was 30): the widened SPACE has 2 more dims to cover
+N_TRIALS = int(os.environ.get("N_TRIALS", 60))   # 60 (was 30): the widened SPACE has 2 more dims to cover
+SEED, MIN_TRAIN = 0, 300
 
 
 def make_folds(df, embargo=0):
@@ -87,6 +88,11 @@ def run_component(stat, path, candidates, embargo=0):
     test = eval_on_test(best, df, X, y, folds)                        # score on TEST
 
     base, model = _mae(test["predicted"], test["actual"]), _mae(test["model"], test["actual"])
+    if "predicted_r" in test.columns:      # rating-fed factor x baseline (RATING_FEATURES build), same rows
+        ok = test["predicted"].notna()
+        print(f"{stat:<12} rating-fed baseline on the same rows: {_mae(test.loc[ok, 'predicted_r'], test.loc[ok, 'actual']):.4f} "
+              f"(vs incumbent baseline {_mae(test.loc[ok, 'predicted'], test.loc[ok, 'actual']):.4f}, "
+              f"model {_mae(test.loc[ok, 'model'], test.loc[ok, 'actual']):.4f})")
     # For blended stats the real bar isn't the raw baseline but the DEPLOYED blend. Compare the
     # blended baseline (old serving: w*baseline+(1-w)*odds) with the blended model (deployed:
     # w*model+(1-w)*odds) — the latter is what actually serves, so blM<blB is what justifies it.
@@ -125,6 +131,7 @@ def show_best(results):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--stats", default=None, help="comma-separated subset of components to run")
     ap.add_argument("--embargo", type=int, default=0,
                     help="weeks of gap held out between newest TRAIN label and VAL/TEST")
     args = ap.parse_args()
@@ -139,6 +146,8 @@ def main():
     print("-" * 68)
     results = []
     for stat in STATS:
+        if args.stats and stat not in args.stats.split(","):
+            continue
         path = os.path.join(tdir, f"train_{stat}.csv")
         if os.path.exists(path):
             r = run_component(stat, path, candidates, args.embargo)

@@ -109,7 +109,7 @@ def team_fixture_view(inputs, sportsbet, draw_aware=False):
     out["f1_venue"] = fixture_col(2).values
     out["f2_opponent"] = fixture_col(3).values
     out["f2_venue"] = fixture_col(4).values
-    for k in range(3, 9):
+    for k in range(3, config.HORIZON + 1):
         out[f"f{k}_opponent"] = fixture_col(5 + (k - 3) * 2).values
         out[f"f{k}_venue"] = fixture_col(6 + (k - 3) * 2).values
 
