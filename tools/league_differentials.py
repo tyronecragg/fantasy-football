@@ -67,6 +67,13 @@ def _entries_path(league):
     return os.path.join(CACHE_DIR, f"entries_{league}.json")
 
 
+def _meta_path(gw):
+    return os.path.join(CACHE_DIR, f"meta_gw{gw}.json")
+
+
+CHIP_ABBR = {"wildcard": "WC", "bboost": "BB", "3xc": "TC", "freehit": "FH"}
+
+
 def _get(session, path, retries=4):
     """GET the FPL API with retry+backoff — the API is flaky and times out intermittently, and a run
     makes 100+ calls (bootstrap + one per manager), so a single transient timeout must not kill it.
@@ -101,6 +108,45 @@ def _bootstrap(session):
 
 def _squad(session, entry, gw):
     return {p["element"] for p in _get(session, f"entry/{entry}/event/{gw}/picks/")["picks"]}
+
+
+def _free_transfers(current, chip_by_ev, upto_gw):
+    """FT available for the deadline AFTER upto_gw, reconstructed from transfer history.
+
+    FPL doesn't publish FT, but the rule is deterministic: GW1 accrues nothing (unlimited
+    setup); each later normal GW accrues +1 (banked, capped 5) then spends event_transfers;
+    Wildcard/Free Hit weeks accrue nothing and spend nothing (chip moves are free). The
+    upcoming GW then adds its own +1 (assumes it isn't chipped)."""
+    leftover = 0
+    for ev in sorted(current, key=lambda r: r["event"]):
+        g = ev["event"]
+        if g > upto_gw:
+            break
+        is_transfer_chip = chip_by_ev.get(g) in ("wildcard", "freehit")
+        added = 0 if (g == 1 or is_transfer_chip) else 1
+        avail = min(5, leftover + added)
+        used = 0 if is_transfer_chip else ev.get("event_transfers", 0)
+        leftover = max(0, avail - used)
+    return min(5, leftover + 1)                               # +1 for the upcoming GW
+
+
+def _entry_meta(session, entry, upto_gw):
+    """Per-manager meta from entry/{id}/ + entry/{id}/history/: team value & bank (£m),
+    total transfers, chips used (abbrev + GW, alphabetical), and free transfers available
+    for the deadline after upto_gw (reconstructed - see _free_transfers).
+
+    total_transfers counts non-chip transfers only (chip-week moves don't count)."""
+    e = _get(session, f"entry/{entry}/")
+    h = _get(session, f"entry/{entry}/history/")
+    value = e.get("last_deadline_value", 0) / 10.0            # squad value INCL bank (selling prices)
+    bank = e.get("last_deadline_bank", 0) / 10.0
+    total_tr = e.get("last_deadline_total_transfers", 0)
+    chip_by_ev = {c["event"]: c["name"] for c in h.get("chips", [])}
+    chips = " ".join(sorted(f"{CHIP_ABBR.get(c['name'], c['name'])}({c['event']})"
+                            for c in h.get("chips", []))) or "-"
+    ft = _free_transfers(h.get("current", []), chip_by_ev, upto_gw)
+    return {"value": value, "bank": bank, "team": value - bank,
+            "total_tr": total_tr, "chips": chips, "ft": ft}
 
 
 def _league_entries(session, league, top):
@@ -222,6 +268,9 @@ def main():
                     help="--xp sort key: f1 | total (raw) | wtotal (ownership x reliability weighted) | "
                          "wbench (weighted incl bench). Default total")
     ap.add_argument("--horizon", type=int, default=8, help="--xp: fixtures to show, F1..Fn (default 8)")
+    ap.add_argument("--meta", action="store_true",
+                    help="--xp: also fetch each manager's squad value, bank, total transfers, chips used "
+                         "and inferred free transfers (one extra API call each; cached per GW)")
     ap.add_argument("--refresh", action="store_true",
                     help="ignore the local cache and re-fetch squads + league entries from the API")
     args = ap.parse_args()
@@ -261,6 +310,21 @@ def main():
         _fetched[0] += 1
         return pids
 
+    # manager meta (value/bank/transfers/chips/FT): cached per GW, like squads
+    meta_path = _meta_path(gw)
+    meta_cache = {} if args.refresh else _cache_load(meta_path)
+    _meta_fetched = [0]
+
+    def meta_of(entry):
+        """Cached per-manager meta dict (fetches + stores on a miss)."""
+        k = str(entry)
+        if k in meta_cache:
+            return meta_cache[k]
+        m = _entry_meta(s, entry, gw)               # may raise requests.RequestException
+        meta_cache[k] = m
+        _meta_fetched[0] += 1
+        return m
+
     scope = (f"top {len(entries)} by rank (league is larger; raise --top for more)" if capped
              else f"all {len(entries)} managers")
     src = "cached" if (ent_cached and not args.refresh) else "live"
@@ -282,25 +346,41 @@ def main():
             per = [v[0] for v in xi_b]
             wtot = sum(fw[k] * per[k] for k in range(len(fcols)))             # ownership x reliability weighted
             wben = sum(fw[k] * (per[k] + xi_b[k][1]) for k in range(len(fcols)))  # + weighted bench
-            teams.append((eid, ename, per, sum(per), wtot, wben))
+            meta = None
+            if args.meta:
+                try:
+                    meta = meta_of(eid)
+                except requests.RequestException:
+                    meta = None
+            teams.append((eid, ename, per, sum(per), wtot, wben, meta, rank))
         _cache_save(sq_path, sq_cache)
-        if _fetched[0]:
-            print(f"  (fetched {_fetched[0]} squad(s) from the API, cached to {os.path.relpath(sq_path)})\n")
+        if args.meta:
+            _cache_save(meta_path, meta_cache)
+        if _fetched[0] or _meta_fetched[0]:
+            note = f"{_fetched[0]} squad(s)" + (f" + {_meta_fetched[0]} meta" if _meta_fetched[0] else "")
+            print(f"  (fetched {note} from the API, cached under {os.path.relpath(CACHE_DIR)})\n")
         keyfn = {"f1": lambda t: -t[2][0], "total": lambda t: -t[3],
                  "wtotal": lambda t: -t[4], "wbench": lambda t: -t[5]}[args.sort]
         teams.sort(key=keyfn)
         hdr = "".join(f"{c.replace(' XP', ''):>7}" for c in fcols)
         sort_lbl = {"f1": "F1", "total": "TOTAL", "wtotal": "wTOT", "wbench": "wTOT+B"}[args.sort]
+        meta_hdr = f"{'Value':>7}{'Bank':>6}{'FT':>4}  chips" if args.meta else ""
         print(f"Team projected XP (best XI + optimal captain per fixture), sorted by {sort_lbl}:\n")
-        print(f"  {'#':>3}  {'manager':<24}{hdr}{'TOTAL':>8}{'wTOT':>8}{'wTOT+B':>9}")
-        print("  " + "-" * (29 + 7 * len(fcols) + 25))
-        for i, (eid, ename, per, tot, wtot, wben) in enumerate(teams, 1):
-            mark = "  <- you" if eid == args.entry else ""
-            print(f"  {i:>3}  {ename[:24]:<24}" + "".join(f"{v:>7.1f}" for v in per)
-                  + f"{tot:>8.1f}{wtot:>8.1f}{wben:>9.1f}{mark}")
-        print(f"\n  {len(teams)} teams. TOTAL = raw sum of F1..F{len(fcols)} (each = best XI + captain). "
-              f"\n  wTOT = same, weighted by ownership x reliability {tuple(round(w, 3) for w in fw)}."
-              f"\n  wTOT+B = wTOT plus weighted bench (slots {XP_BENCH_SLOT_WEIGHTS}, GK {XP_GK_BENCH_WEIGHT}).")
+        header = f"  {'#':>3}{'Pos':>5}  {'manager':<24}{hdr}{'TOTAL':>8}{'wTOT':>8}{'wTOT+B':>9}{meta_hdr}"
+        rows = []                                                # (body-without-mark, mark) to size the rule
+        for i, (eid, ename, per, tot, wtot, wben, m, rank) in enumerate(teams, 1):
+            meta_str = ""
+            if args.meta:
+                meta_str = (f"{m['team']:>6.1f}m{m['bank']:>5.1f}m{m.get('ft', '-'):>4}  {m['chips']}"
+                            if m else f"{'-':>7}{'-':>6}{'-':>4}  -")
+            body = (f"  {i:>3}{rank:>5}  {ename[:24]:<24}" + "".join(f"{v:>7.1f}" for v in per)
+                    + f"{tot:>8.1f}{wtot:>8.1f}{wben:>9.1f}{meta_str}")
+            rows.append((body, "  <- you" if eid == args.entry else ""))
+        width = max([len(header)] + [len(b) for b, _ in rows])   # rule spans the widest line (3-chip case)
+        print(header)
+        print("  " + "-" * (width - 2))
+        for body, mark in rows:
+            print(body + mark)
         return
 
     mine = squad_of(args.entry)

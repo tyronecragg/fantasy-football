@@ -36,6 +36,13 @@ python weekly_update.py --resume --gw N       # phase 2: fixtures + projections 
 > visible in advance, not only when it becomes the next fixture. The Free Hit column uses an
 > **accumulating** free-transfer baseline (`FT` at F1, +1 per week, capped at 5), so it decays
 > further out (by then you'd have transferred into those fixtures anyway).
+>
+> **Baseline squad:** `--gw N` scores chips against the squad you carried *into* GW N — i.e. your
+> **GW N-1** column in `gw_teams.csv` — to avoid double-counting the transfer you already made. So in a
+> **wildcard week** the Bench Boost / Triple Captain "current squad" figures reflect **last week's team**,
+> not the freshly-built one; lean on the forward radar and the Wildcard/Free Hit lenses (which rebuild
+> from the full pool). To evaluate BB/TC on the new squad, run it after the next roll (then GW N is the
+> carried-in baseline).
 
 Or step by step. **To move to a new gameweek use `roll_gameweek.py`** (see "Rolling to a new
 gameweek" below) — never a bare `build_fixtures.py`, which would leave every F1 market empty until
@@ -154,11 +161,12 @@ own too, not just incoming picks** — a player bought last week can become wort
 and the pipeline will keep projecting points for him until his start probability is edited by
 hand in `inputs/starting_lineups.csv`.
 
-Step 3b: the FFS scrape only **stages** its output — predicted XIs to
-`inputs/ffs_predicted_lineups.csv` (with a printed diff vs the curated lineups, accent-folded
-so only real disagreements show) and the per-team write-ups (next match, out/doubts with FFS
-percentages, bans, latest-news paragraphs) to `inputs/ffs_team_news.md`. It never overwrites
-the curated file. The curated `starting_lineups.csv` (graded probabilities, the pipeline's
+Step 3b: **FFS predicted XIs are now compiled by hand at the deadline** (the automated FFS
+scrape/staging was retired — `weekly_update.py` no longer stages them). The deadline panel
+sweep refreshes `inputs/ffs_predicted_lineups.csv` (and, when captured, the per-team write-ups
+in `inputs/ffs_team_news.md`) from the trusted panel; these are staging inputs only and never
+overwrite the curated file. ⚠️ Because it's manual, `ffs_predicted_lineups.csv` can be stale —
+**check its date before trusting `--seed-ffs`** (see `docs/SOURCE_ACCURACY_CAPTURE.md`). The curated `starting_lineups.csv` (graded probabilities, the pipeline's
 actual input) is maintained weekly in conversation with Claude, who folds together the FFS
 predictions, the staged write-ups, wider team news, and your feedback files. FFS is a signal,
 not an authority.
@@ -169,9 +177,12 @@ every team, an injury/availability layer, and club-specific escalation reserved 
 teams (promoted sides, new managers, injury clouds) where the base panel disagrees. Trust in
 each source is *provisional* — the **source-history ledger** (`tools/source_history.py`) freezes
 each source's predicted XI per gameweek and scores it against the actual lineups once they play,
-so trust is a hit rate, not a reputation. It's wired into `weekly_update.py`: phase 2 freezes
-FFS + our own curated XI automatically and scores last week's frozen predictions. See the
-"Earning trust" section of `inputs/curation_sources.md`.
+so trust is a hit rate, not a reputation. It's wired into `weekly_update.py`: phase 2 runs
+`--seed-ffs --seed-ours` and scores last week's frozen predictions. Note `--seed-ffs` reads the
+**manually-maintained** `ffs_predicted_lineups.csv`, so it only freezes a real FFS prediction if
+that file was refreshed for this GW; external sources (RotoWire, All About FPL) are captured by
+hand via `--capture-csv`. See `docs/SOURCE_ACCURACY_CAPTURE.md` and the "Earning trust" section of
+`inputs/curation_sources.md`.
 
 Steps 1–5 use plain Python; only step 6 needs the repo virtualenv. Omit `--gw N` for a
 build that touches nothing.
@@ -228,6 +239,17 @@ markets (goalscorer, 2+ goals, assists). Applied in `markets.py::longshot_calibr
 after `implied()` converts odds to probabilities — **the scraped CSVs stay raw**, so a
 different curve can be fitted later without re-scraping. Off in parity mode, since the
 workbook applied a flat margin. `LONGSHOT_CALIBRATION = None` disables it.
+
+**Assists use their own, gentler curve since 2026-09-09** (`config.LONGSHOT_CALIBRATION_ASSIST`,
+the goal knots with multipliers square-rooted, i.e. half strength in log space; `build_all`
+passes it for the assist and two-assist markets, goals keep the full curve). The goal knots were
+fitted on Sportsbet goalscorer outcomes and had been applied to every attacking market; on Betway
+this season (GW1-3, minutes>=60, `tools/calibration.py --season 2026-2027`) goals pool at 1.06x
+but assists at 0.69x, the two lowest bands projecting 13 assists and getting 28. Re-scored under
+the half curve the pool reads 0.84x (raw prices 1.07x). Effect: every player with assist odds
+moves up, mean F1 assist chance 8.6% -> 10.3%, ~+0.05 F1 XP per starter, most for mid-priced
+creators (Marmoush/Xhaka/Enciso ~+0.5 over eight fixtures), premiums barely (Bruno +0.02).
+Re-fit both curves on Betway outcomes ~GW9.
 
 **Why.** `MARGIN_PLAYER = 1.05` removes the same 5% at every price. Two measurements say
 that is wrong in a specific way. From prices: the total load on Betway's goalscorer market
@@ -294,6 +316,27 @@ Things known to be provisional, with what would settle them:
   forecasts *worse* (−0.39% MAE), and even with perfect possession knowledge the ceiling is
   +0.85%. The effect is ~1% of match-to-match variance — significant, not useful. `dc90`
   stays flat.
+  **Reopened 2026-09-16 — partly superseded.** That test measured the *mean* rate with a straight
+  line; what the pipeline sells is P(clearing the threshold | starts), and testing that on the
+  archive (2,983 DEF/MID starts, both seasons) found two things it missed. (1) **Substitutions**,
+  now fixed: the probability was P(hit | plays 90) applied to every start, but 46% of midfield
+  starts end before 90 and a midfielder subbed at 60–74 hits 2% of the time against ~20% priced;
+  P(hit | started) was 0.75× the model for DEF and 0.67× for MID. `config.DC_MINUTES_PER_START`
+  scales the rate by the player's expected minutes per start (this season's starts + ≤10 prior,
+  mover-discounted, this season 2×, shrunk to the position average DEF 85 / MID 80 / FWD 79 with 7 pseudo-starts).
+  Simulated Brier MID 0.127 → 0.115, DEF 0.188 → 0.180; live effect DEF −0.06 / MID −0.11 F1 XP
+  for likely starters, 90-minute centre-backs barely move, substitution-prone midfielders
+  (Sangaré, Bentancur, Christie) lose 0.15–0.4. (2) **Heavy favourites — applied for DEFENDERS
+  only** (`config.DC_FAVOURITE_CURVE`, same day). Player-fixed-effects test, home and minutes
+  controlled, 1,354 defender starts: a defender's DC rate in games where his team is a 70%+
+  favourite is ×0.82 his own norm (t = −3.1, within-player permutation p = 0.007, replicates in
+  2025-26 alone; the 0.55–0.70 band ×0.93). Midfielders ×0.91, t = −1.8, p = 0.14 — not applied,
+  re-test ~GW12. The multiplier runs linearly from 1.0 at a 0.55 win probability to 0.82 at 0.85
+  and is applied to the per-start rate for EACH fixture from that fixture's win probability
+  (F1/F2 odds, F3+ predicted), so **DefCon is no longer a flat F1 copy across the horizon**.
+  Effect: nothing for most defenders; top-side centre-backs lose 0.05–0.13 in hit probability
+  (0.1–0.25 XP) in the fixtures they're expected to dominate — Gabriel −0.7 over eight fixtures
+  (Arsenal at 0.72–0.84 in three of them), Guéhi −0.5, Konsa/Dias/Gvardiol −0.3.
 
 - **The DefCon prior weight** — `DC_PRIOR_CAP_MINUTES = 1710` caps last season's *weight* at
   19 matches (the rate itself uses all 38): pure prior at GW1, ~50/50 after 19 current

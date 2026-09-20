@@ -17,6 +17,12 @@ Runs, in order (each a subprocess; a failure stops the roll):
                                            curated beliefs realign to the new window. The new F1 is a
                                            STARTING POINT — re-curate it with GW N team news before
                                            consuming. Skip with --keep-lineups.
+  4. tools/sync_lineups_roster.py          reconcile starting_lineups.csv to the live FPL roster:
+                                           add new signings/call-ups as 0.0 rows, drop departed
+                                           players, re-key every name to the exact roster spelling
+                                           (the master's VLOOKUP is exact-match, so drift silently
+                                           zeroes a player). Keeps the file exhaustive + name-safe.
+                                           Skip with --no-roster-sync.
 
 BEFORE running: update inputs/title_odds.csv / relegation_odds.csv / top6_odds.csv only if outrights
 moved materially (they feed the synthetic win probs; most weeks skip). Curate
@@ -71,19 +77,26 @@ def main():
                     help="archived gameweek to source synthetic player factors from (default: gw-1)")
     ap.add_argument("--keep-lineups", action="store_true",
                     help="do NOT shift starting_lineups.csv (default: slide F2->F1 ... F8->F7)")
+    ap.add_argument("--no-roster-sync", action="store_true",
+                    help="do NOT reconcile starting_lineups.csv to the live FPL roster")
     a = ap.parse_args()
 
-    step(f"1/3  Shift fixture window to GW{a.gw}",
+    step(f"1/4  Shift fixture window to GW{a.gw}",
          PY + [os.path.join(ROOT, "tools", "build_fixtures.py"), "--gw", str(a.gw)])
     synth = PY + [os.path.join(ROOT, "tools", "build_synthetic_gw.py"), "--gw", str(a.gw)]
     if a.factor_gw is not None:
         synth += ["--factor-gw", str(a.factor_gw)]
-    step(f"2/3  Seed synthetic F1 markets for GW{a.gw}", synth)
+    step(f"2/4  Seed synthetic F1 markets for GW{a.gw}", synth)
     if a.keep_lineups:
         print("\n(skipping starting_lineups.csv shift; --keep-lineups)")
     else:
-        print(f"\n{'=' * 70}\n3/3  Shift starting_lineups.csv one GW left\n{'=' * 70}")
+        print(f"\n{'=' * 70}\n3/4  Shift starting_lineups.csv one GW left\n{'=' * 70}")
         shift_lineups()
+    if a.no_roster_sync:
+        print("\n(skipping roster sync; --no-roster-sync)")
+    else:
+        step(f"4/4  Reconcile starting_lineups.csv to the live FPL roster",
+             PY + [os.path.join(ROOT, "tools", "sync_lineups_roster.py")])
 
     print(f"\n{'=' * 70}\nRolled to GW{a.gw}. Next:\n"
           f"  - RE-CURATE inputs/starting_lineups.csv F1 for GW{a.gw} team news (the shift gave you last\n"

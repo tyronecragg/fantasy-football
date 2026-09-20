@@ -1,336 +1,583 @@
 player_name,match_id,odds_decimal
-Chris Wood,Aston Villa vs. Nottingham Forest,9.6
-Ross Barkley,Aston Villa vs. Nottingham Forest,7.4
-Victor Lindelof,Aston Villa vs. Nottingham Forest,18.0
-John McGinn,Aston Villa vs. Nottingham Forest,5.6
-Ola Aina,Aston Villa vs. Nottingham Forest,9.4
-Tyrone Mings,Aston Villa vs. Nottingham Forest,21.0
-Xaver Schlager,Aston Villa vs. Nottingham Forest,12.0
-Emiliano Buendia,Aston Villa vs. Nottingham Forest,6.0
-Boubacar Kamara,Aston Villa vs. Nottingham Forest,10.0
-Pau Torres,Aston Villa vs. Nottingham Forest,21.0
-Matty Cash,Aston Villa vs. Nottingham Forest,6.2
-Nikola Milenkovic,Aston Villa vs. Nottingham Forest,27.0
-Ibrahim Sangare,Aston Villa vs. Nottingham Forest,13.0
-Morgan Gibbs-White,Aston Villa vs. Nottingham Forest,7.0
-Daniel Munoz,Aston Villa vs. Nottingham Forest,6.4
-Neco Williams,Aston Villa vs. Nottingham Forest,7.0
-Dan Ndoye,Aston Villa vs. Nottingham Forest,6.6
-Ian Maatsen,Aston Villa vs. Nottingham Forest,5.2
-Taylor Harwood-Bellis,Aston Villa vs. Nottingham Forest,17.0
-Luca Netz,Aston Villa vs. Nottingham Forest,13.0
-Igor Jesus,Aston Villa vs. Nottingham Forest,8.8
-Liam Delap,Aston Villa vs. Nottingham Forest,7.8
-Nicolas Jackson,Aston Villa vs. Nottingham Forest,5.8
-James McAtee,Aston Villa vs. Nottingham Forest,5.2
-Murillo dos Santos,Aston Villa vs. Nottingham Forest,26.0
-Jair Paula da Cunha Filho,Aston Villa vs. Nottingham Forest,24.0
-Ibrahim Mbaye,Aston Villa vs. Nottingham Forest,3.85
-Modou Keba Cisse,Aston Villa vs. Nottingham Forest,25.0
-George Hemmings,Aston Villa vs. Nottingham Forest,7.0
-Adam Smith,AFC Bournemouth vs. Brentford FC,9.6
-Lewis Cook,AFC Bournemouth vs. Brentford FC,9.2
-Kristoffer Ajer,AFC Bournemouth vs. Brentford FC,20.0
-Tyler Adams,AFC Bournemouth vs. Brentford FC,11.0
-Vitaly Janelt,AFC Bournemouth vs. Brentford FC,7.0
-Justin Kluivert,AFC Bournemouth vs. Brentford FC,5.2
-Marcus Tavernier,AFC Bournemouth vs. Brentford FC,4.9
-David Brooks,AFC Bournemouth vs. Brentford FC,4.0
-Mikkel Damsgaard,AFC Bournemouth vs. Brentford FC,4.3
-Evanilson,AFC Bournemouth vs. Brentford FC,6.2
-Kevin Schade,AFC Bournemouth vs. Brentford FC,6.0
-Aaron Hickey,AFC Bournemouth vs. Brentford FC,10.0
-James Hill,AFC Bournemouth vs. Brentford FC,17.0
-Keane Lewis-Potter,AFC Bournemouth vs. Brentford FC,6.2
-Yehor Yarmoliuk,AFC Bournemouth vs. Brentford FC,9.4
-Adrien Truffert,AFC Bournemouth vs. Brentford FC,6.6
-António João Pereira de Albuquerque Tavares da Silva,AFC Bournemouth vs. Brentford FC,21.0
-Juanlu Sánchez,AFC Bournemouth vs. Brentford FC,4.9
-Mamadou Sangaré,AFC Bournemouth vs. Brentford FC,6.0
-Jaidon Anthony,AFC Bournemouth vs. Brentford FC,4.1
-Alex Scott,AFC Bournemouth vs. Brentford FC,7.0
-Michael Kayode,AFC Bournemouth vs. Brentford FC,8.4
-Dango Ouattara,AFC Bournemouth vs. Brentford FC,4.5
-Igor Thiago,AFC Bournemouth vs. Brentford FC,7.4
-Rayan,AFC Bournemouth vs. Brentford FC,4.6
-Kim Ji-soo,AFC Bournemouth vs. Brentford FC,28.0
-Gustavo Nunes,AFC Bournemouth vs. Brentford FC,5.6
-El Hadji Malick Diouf,AFC Bournemouth vs. Brentford FC,6.0
-Benjamin Fredrick,AFC Bournemouth vs. Brentford FC,14.0
-Jannik Schuster,AFC Bournemouth vs. Brentford FC,21.0
-John Egan,Chelsea vs. Hull City,35.0
-Matt Crooks,Chelsea vs. Hull City,13.0
-Semi Ajayi,Chelsea vs. Hull City,35.0
-Oli McBurnie,Chelsea vs. Hull City,8.8
-Lewie Coyle,Chelsea vs. Hull City,9.6
-Pedro Neto,Chelsea vs. Hull City,2.33
-Maxence Lacroix,Chelsea vs. Hull City,11.0
-Reece James,Chelsea vs. Hull City,4.0
-Sorba Thomas,Chelsea vs. Hull City,6.8
-Regan Slater,Chelsea vs. Hull City,11.0
-Wesley Fofana,Chelsea vs. Hull City,12.0
-Ryan Giles,Chelsea vs. Hull City,7.0
-Joe Gelhardt,Chelsea vs. Hull City,7.8
-Morgan Rogers,Chelsea vs. Hull City,2.16
-Joao Pedro,Chelsea vs. Hull City,3.3
-Cole Palmer,Chelsea vs. Hull City,3.1
-Moises Caicedo,Chelsea vs. Hull City,5.4
-Levi Samuels Colwill,Chelsea vs. Hull City,15.0
-Malo Gusto,Chelsea vs. Hull City,4.2
-Lucas Gourna-Douath,Chelsea vs. Hull City,12.0
-Pep Chavarría,Chelsea vs. Hull City,3.9
-Emmanuel Emegha,Chelsea vs. Hull City,4.6
-Tim Iroegbunam,Chelsea vs. Hull City,12.0
-Roméo Lavia,Chelsea vs. Hull City,6.8
-Jorrel Hato,Chelsea vs. Hull City,5.6
-Brooke Norton-Cuffy,Chelsea vs. Hull City,9.0
-Elliot Stroud,Chelsea vs. Hull City,8.0
-Josh Acheampong,Chelsea vs. Hull City,8.6
-Nobel Mendy,Chelsea vs. Hull City,30.0
-Mohamed Belloumi,Chelsea vs. Hull City,7.2
-Christos Mouzakitis,Chelsea vs. Hull City,7.6
-Ilyas Ansah,Chelsea vs. Hull City,7.6
-Sasa Lukic,Crystal Palace vs. Ipswich Town,11.0
-Issa Diop,Crystal Palace vs. Ipswich Town,28.0
-Takehiro Tomiyasu,Crystal Palace vs. Ipswich Town,17.0
-Darnell Furlong,Crystal Palace vs. Ipswich Town,11.0
-Daichi Kamada,Crystal Palace vs. Ipswich Town,5.2
-Exequiel Palacios,Crystal Palace vs. Ipswich Town,9.6
-Dara O'Shea,Crystal Palace vs. Ipswich Town,18.0
-Florentino,Crystal Palace vs. Ipswich Town,12.0
-Eddie Nketiah,Crystal Palace vs. Ipswich Town,4.2
-Axel Disasi,Crystal Palace vs. Ipswich Town,19.0
-Zian Flemming,Crystal Palace vs. Ipswich Town,8.0
-Daizen Maeda,Crystal Palace vs. Ipswich Town,6.8
-Quinten Timber,Crystal Palace vs. Ipswich Town,5.8
-Jorgen Strand Larsen,Crystal Palace vs. Ipswich Town,7.6
-Cédric Kipré,Crystal Palace vs. Ipswich Town,27.0
-Jack Clarke,Crystal Palace vs. Ipswich Town,4.9
-Dwight McNeil,Crystal Palace vs. Ipswich Town,4.7
-Chris Richards,Crystal Palace vs. Ipswich Town,16.0
-Yeremy Pino,Crystal Palace vs. Ipswich Town,3.7
-Leif Davis,Crystal Palace vs. Ipswich Town,7.0
-Julio Enciso,Crystal Palace vs. Ipswich Town,6.4
-Jacob Greaves,Crystal Palace vs. Ipswich Town,20.0
-Tyrick Mitchell,Crystal Palace vs. Ipswich Town,6.0
-Marcelino Núñez,Crystal Palace vs. Ipswich Town,5.4
-Abdul Fatawu,Crystal Palace vs. Ipswich Town,5.2
-Emersonn Correia da Silva,Crystal Palace vs. Ipswich Town,8.4
-Anan Khalaili,Crystal Palace vs. Ipswich Town,4.6
-Adam Wharton,Crystal Palace vs. Ipswich Town,6.0
-Honest Ahanor,Crystal Palace vs. Ipswich Town,18.0
-Jaydee Canvot,Crystal Palace vs. Ipswich Town,18.0
-Virgil van Dijk,Liverpool FC vs. Fulham FC,12.0
-Timothy Castagne,Liverpool FC vs. Fulham FC,7.6
-Alex Iwobi,Liverpool FC vs. Fulham FC,6.2
-Joachim Andersen,Liverpool FC vs. Fulham FC,27.0
-Sander Berge,Liverpool FC vs. Fulham FC,12.0
-Antonee Robinson,Liverpool FC vs. Fulham FC,6.8
-Alexander Isak,Liverpool FC vs. Fulham FC,5.0
-Emile Smith Rowe,Liverpool FC vs. Fulham FC,8.0
-Ryan Sessegnon,Liverpool FC vs. Fulham FC,7.6
-Calvin Bassey,Liverpool FC vs. Fulham FC,25.0
-Cody Gakpo,Liverpool FC vs. Fulham FC,2.95
-Dominik Szoboszlai,Liverpool FC vs. Fulham FC,2.6
-Jorge Cuenca,Liverpool FC vs. Fulham FC,26.0
-Alexis Mac Allister,Liverpool FC vs. Fulham FC,5.4
-Jeremie Frimpong,Liverpool FC vs. Fulham FC,2.6
-Ryan Gravenberch,Liverpool FC vs. Fulham FC,5.8
-Ronald Araujo,Liverpool FC vs. Fulham FC,4.7
-Rodrigo Muniz,Liverpool FC vs. Fulham FC,9.6
-David Affengruber,Liverpool FC vs. Fulham FC,24.0
-Bradley Barcola,Liverpool FC vs. Fulham FC,2.55
-Oscar Bobb,Liverpool FC vs. Fulham FC,4.8
-Josh King,Liverpool FC vs. Fulham FC,7.4
-Milos Kerkez,Liverpool FC vs. Fulham FC,4.4
-Florian Wirtz,Liverpool FC vs. Fulham FC,3.4
-Shea Charles,Liverpool FC vs. Fulham FC,8.4
-Gonzalo García,Liverpool FC vs. Fulham FC,7.6
-César Palacios,Liverpool FC vs. Fulham FC,8.4
-Jeremy Jacquet,Liverpool FC vs. Fulham FC,11.0
-Victor Munoz,Liverpool FC vs. Fulham FC,2.3
-Rio Ngumoha,Liverpool FC vs. Fulham FC,2.65
-Granit Xhaka,Sunderland AFC vs. Arsenal,10.0
-Thomas Meunier,Sunderland AFC vs. Arsenal,12.0
-Alan Browne,Sunderland AFC vs. Arsenal,11.0
-Luke O'Nien,Sunderland AFC vs. Arsenal,24.0
-Martin Odegaard,Sunderland AFC vs. Arsenal,4.0
-Mikel Merino,Sunderland AFC vs. Arsenal,6.8
-Nordi Mukiele,Sunderland AFC vs. Arsenal,16.0
-Omar Alderete,Sunderland AFC vs. Arsenal,35.0
-Kevin Danso,Sunderland AFC vs. Arsenal,35.0
-Viktor Gyokeres,Sunderland AFC vs. Arsenal,5.8
-Reinildo Mandava,Sunderland AFC vs. Arsenal,14.0
-Declan Rice,Sunderland AFC vs. Arsenal,4.8
-Kai Havertz,Sunderland AFC vs. Arsenal,4.5
-Ezri Konsa,Sunderland AFC vs. Arsenal,21.0
-Ben White,Sunderland AFC vs. Arsenal,5.4
-Dan Ballard,Sunderland AFC vs. Arsenal,28.0
-Jurrien Timber,Sunderland AFC vs. Arsenal,7.0
-Eberechi Eze,Sunderland AFC vs. Arsenal,6.4
-Gabriel Magalhaes,Sunderland AFC vs. Arsenal,15.0
-Wilson Isidor,Sunderland AFC vs. Arsenal,14.0
-Bruno Guimaraes,Sunderland AFC vs. Arsenal,6.2
-Riccardo Calafiori,Sunderland AFC vs. Arsenal,6.0
-Brian Brobbey,Sunderland AFC vs. Arsenal,11.0
-Bukayo Saka,Sunderland AFC vs. Arsenal,2.9
-Trai Hume,Sunderland AFC vs. Arsenal,12.0
-Christos Tzolis,Sunderland AFC vs. Arsenal,2.65
-Martin Zubimendi,Sunderland AFC vs. Arsenal,7.6
-Enzo Le Fee,Sunderland AFC vs. Arsenal,8.0
-Piero Hincapie,Sunderland AFC vs. Arsenal,9.2
-Nilson Angulo,Sunderland AFC vs. Arsenal,9.8
-Cristhian Mosquera,Sunderland AFC vs. Arsenal,12.0
-Noah Sadiki,Sunderland AFC vs. Arsenal,15.0
-Malick Fofana,Sunderland AFC vs. Arsenal,7.4
-Myles Lewis-Skelly,Sunderland AFC vs. Arsenal,7.8
-Evan Mooney,Sunderland AFC vs. Arsenal,5.2
-Dayann Méthalie,Sunderland AFC vs. Arsenal,12.0
-Jules Ahoka,Sunderland AFC vs. Arsenal,18.0
-Juan Angulo,Sunderland AFC vs. Arsenal,9.2
-Pascal Gross,Coventry City vs. Brighton,4.0
-Lewis Dunk,Coventry City vs. Brighton,22.0
-Matt Grimes,Coventry City vs. Brighton,9.2
-Taiwo Awoniyi,Coventry City vs. Brighton,8.8
-Olivier Boscagli,Coventry City vs. Brighton,8.8
-Jay Dasilva,Coventry City vs. Brighton,8.8
-Ferdi Kadioglu,Coventry City vs. Brighton,6.6
-Victor Torp,Coventry City vs. Brighton,6.8
-Frank Onyeka,Coventry City vs. Brighton,14.0
-Brandon Thomas-Asante,Coventry City vs. Brighton,8.8
-Ethan Pinnock,Coventry City vs. Brighton,16.0
-Ephron Mason-Clark,Coventry City vs. Brighton,5.6
-Michael Svoboda,Coventry City vs. Brighton,23.0
-Yann Gboho,Coventry City vs. Brighton,6.2
-Georginio Rutter,Coventry City vs. Brighton,5.0
-Milan van Ewijk,Coventry City vs. Brighton,9.0
-Maxim De Cuyper,Coventry City vs. Brighton,3.45
-Tatsuhiro Sakamoto,Coventry City vs. Brighton,7.2
-Jack Rudoni,Coventry City vs. Brighton,5.4
-Josh Eccles,Coventry City vs. Brighton,9.0
-Aurèle Amenda,Coventry City vs. Brighton,29.0
-Loum Tchaouna,Coventry City vs. Brighton,6.8
-Bobby Thomas,Coventry City vs. Brighton,23.0
-Yasin Ayari,Coventry City vs. Brighton,7.6
-Ellis Simms,Coventry City vs. Brighton,9.8
-Jaouen Hadjam,Coventry City vs. Brighton,6.0
-Diego Gomez,Coventry City vs. Brighton,6.6
-Luka Vušković,Coventry City vs. Brighton,19.0
-Chema Andres,Coventry City vs. Brighton,7.0
-Charalampos Kostoulas,Coventry City vs. Brighton,4.8
-Malick Yalcouyé,Coventry City vs. Brighton,5.0
-Caleb Yirenkyi,Coventry City vs. Brighton,10.0
-Mateo Kovačić,Manchester United vs. Manchester City,7.0
-Harry Maguire,Manchester United vs. Manchester City,24.0
-Luke Shaw,Manchester United vs. Manchester City,10.0
-Bruno Fernandes,Manchester United vs. Manchester City,2.85
-Ruben Dias,Manchester United vs. Manchester City,19.0
-Youri Tielemans,Manchester United vs. Manchester City,7.6
-Diogo Dalot,Manchester United vs. Manchester City,7.8
-Marcus Rashford,Manchester United vs. Manchester City,3.25
-Marc Guehi,Manchester United vs. Manchester City,12.0
-Mason Mount,Manchester United vs. Manchester City,7.0
-Noussair Mazraoui,Manchester United vs. Manchester City,10.0
-Erling Haaland,Manchester United vs. Manchester City,7.6
-Phil Foden,Manchester United vs. Manchester City,3.6
-Lisandro Martinez,Manchester United vs. Manchester City,24.0
-Matheus Cunha,Manchester United vs. Manchester City,5.0
-Bryan Mbeumo,Manchester United vs. Manchester City,4.8
-Antoine Semenyo,Manchester United vs. Manchester City,4.8
-Matheus Nunes,Manchester United vs. Manchester City,6.0
-Rayan Cherki,Manchester United vs. Manchester City,2.65
-Benjamin Sesko,Manchester United vs. Manchester City,11.0
-Elliot Anderson,Manchester United vs. Manchester City,4.9
-Josko Gvardiol,Manchester United vs. Manchester City,9.4
-Enzo Fernandez,Manchester United vs. Manchester City,5.8
-Iliman Ndiaye,Manchester United vs. Manchester City,4.2
-Rico Lewis,Manchester United vs. Manchester City,5.8
-Leny Yoro,Manchester United vs. Manchester City,25.0
-Kobbie Mainoo,Manchester United vs. Manchester City,9.8
-Nico O'Reilly,Manchester United vs. Manchester City,6.6
-Andrey Santos,Manchester United vs. Manchester City,7.8
-Abduqodir Khusanov,Manchester United vs. Manchester City,12.0
-Allan Andrade Elias,Manchester United vs. Manchester City,5.2
-Patrick Dorgu,Manchester United vs. Manchester City,6.8
-Ayden Heaven,Manchester United vs. Manchester City,26.0
-Tynan Thompson,Manchester United vs. Manchester City,4.5
-Kiernan Dewsbury-Hall,90000161,9.59
-Vitalii Mykolenko,90000163,29.86
-James Tarkowski,90000164,95.24
-Jarrad Branthwaite,90000166,95.24
-Thierno Barry,90000167,27.3
-Hayden Hackney,90000168,21.04
-Tyrique George,90000169,7.04
-Merlin Röhl,90000170,16.07
-Harrison Armstrong,90000171,24.14
-Jake O'Brien,90000172,39.0
-Tyler Dibling,90000173,95.24
-Christian Norgaard,90000174,95.24
-Brennan Johnson,90000175,9.59
-James Garner,90000176,11.47
-Charly Alcaraz,90000177,95.24
-Beto,90000178,95.24
-Michael Keane,90000180,95.24
-Ethan Ampadu,90000249,35.23
-Jayden Bogle,90000251,24.81
-Dominic Calvert-Lewin,90000252,24.61
-Joe Rodon,90000253,95.24
-Jaka Bijol,90000254,95.24
-Tarik Muharemović,90000255,95.24
-James Justin,90000256,29.46
-Anton Stach,90000257,11.65
-Harry Wilson,90000258,9.46
-Brenden Aaronson,90000259,11.0
-Noah Okafor,90000260,13.95
-Ao Tanaka,90000261,20.96
-Nico Elvedi,90000262,95.24
-Sean Longstaff,90000263,95.24
-Gabriel Gudmundsson,90000264,25.03
-Wilfried Gnonto,90000265,95.24
-Malick Thiaw,90000322,95.24
-Lewis Hall,90000323,10.78
-Sven Botman,90000325,93.21
-Amar Dedic,90000326,12.77
-Anthony Elanga,90000327,6.67
-Yoane Wissa,90000328,15.18
-Nick Woltemade,90000329,95.24
-Harvey Barnes,90000330,7.25
-Jacob Ramsey,90000331,11.05
-Lewis Miley,90000332,12.45
-Sean Steur,90000333,18.35
-Bazoumana Touré,90000334,95.24
-Aladji Bamba,90000335,95.24
-Dan Burn,90000336,95.24
-Jacob Murphy,90000337,5.03
-Fabian Schar,90000338,95.24
-Tino Livramento,90000339,95.24
-Joe Willock,90000340,9.26
-Nico Gonzalez,90000341,22.55
-Joelinton,90000342,95.24
-William Osula,90000344,95.24
-Sandro Tonali,90000367,16.28
-Jan Paul van Hecke,90000369,92.83
-Pedro Porro,90000370,8.03
-Sávio,90000371,6.46
-Mateus Fernandes,90000372,6.06
-Andrew Robertson,90000373,12.47
-Conor Gallagher,90000374,16.28
-Richarlison,90000375,95.24
-Mathys Tel,90000376,5.71
-Micky van de Ven,90000377,95.24
-Marcos Senesi,90000378,56.04
-Archie Gray,90000379,27.43
-Dominic Solanke,90000380,95.24
-Pape Matar Sarr,90000381,95.24
-Omar Marmoush,90000382,8.28
-Lucas Bergvall,90000383,95.24
-Destiny Udogie,90000384,20.23
-Rodrigo Bentancur,90000385,25.21
-Mikey Moore,90000386,95.24
-Ben Davies,90000387,95.24
-James Maddison,90000388,95.24
-Mohammed Kudus,90000389,5.67
-Xavi Simons,90000390,95.24
-Jack Grealish,90000411,6.15
-Matias Fernandez-Pardo,90000415,6.4
-Lukas Nmecha,90000416,17.15
+Bukayo Saka,90000000,3.26
+Christos Tzolis,90000001,2.95
+Declan Rice,90000003,5.66
+Ezri Konsa,90000004,39.26
+Gabriel Magalhaes,90000005,39.72
+Kai Havertz,90000006,5.52
+Martin Odegaard,90000007,4.2
+Myles Lewis-Skelly,90000008,13.62
+Riccardo Calafiori,90000009,11.65
+Ben White,90000010,10.77
+Jurrien Timber,90000011,8.59
+Bruno Guimaraes,90000012,7.84
+Cristhian Mosquera,90000013,28.16
+Eberechi Eze,90000014,5.38
+Ethan Nwaneri,90000015,95.24
+Fabio Vieira,90000016,95.24
+Gabriel Jesus,90000017,95.24
+Gabriel Martinelli,90000018,95.24
+Martin Zubimendi,90000021,13.14
+Max Dowman,90000022,95.24
+Mikel Merino,90000023,95.24
+Noni Madueke,90000024,95.24
+Piero Hincapie,90000025,15.55
+Reiss Nelson,90000026,95.24
+Viktor Gyokeres,90000027,7.73
+William Saliba,90000028,95.24
+Boubacar Kamara,90000029,23.78
+Emiliano Buendia,90000030,8.22
+George Hemmings,90000031,13.22
+Ian Maatsen,90000032,95.24
+Joao Gomes,90000033,16.86
+John McGinn,90000034,9.99
+Nicolas Jackson,90000035,8.97
+Victor Lindelof,90000036,74.82
+Matty Cash,90000038,16.55
+Tyrone Mings,90000039,72.96
+Aaron Wan-Bissaka,90000040,19.83
+Pau Torres,90000041,95.24
+Ross Barkley,90000042,10.99
+Johan Manzambi,90000043,8.83
+Alejandro Garnacho,90000044,95.24
+Alysson Edward Franco da Rocha dos Santos,90000045,10.37
+Amadou Onana,90000046,95.24
+Andrés García,90000047,95.24
+Bradley Burrowes,90000048,95.24
+Brian Madjo,90000049,95.24
+Ibrahim Mbaye,90000050,6.22
+Kosta Nedeljkovic,90000051,95.24
+Lamare Bogarde,90000052,95.24
+Leon Bailey,90000053,95.24
+Leon Goretzka,90000054,95.24
+Lucas Digne,90000055,95.24
+Luka Lynch,90000056,95.24
+Matteo Ruggeri,90000058,13.44
+Ollie Watkins,90000059,95.24
+Samuel Iling-Junior,90000060,95.24
+Tammy Abraham,90000061,17.36
+Taylor Harwood-Bellis,90000062,49.66
+Triston Rowe,90000063,95.24
+Adam Smith,90000064,28.59
+Adrien Truffert,90000065,12.56
+Alex Scott,90000066,15.96
+António João Pereira de Albuquerque Tavares da Silva,90000067,71.24
+Evanilson,90000069,15.11
+James Hill,90000070,58.86
+Justin Kluivert,90000071,7.45
+Marcus Tavernier,90000072,7.86
+Rayan,90000073,7.49
+Tyler Adams,90000074,28.15
+Ryan Christie,90000075,10.72
+Alex Tóth,90000076,95.24
+Amine Adli,90000077,95.24
+Bafode Diakite,90000078,95.24
+Ben Gannon-Doak,90000079,95.24
+Daniel Jebbison,90000080,9.3
+David Brooks,90000081,95.24
+Enes Ünal,90000082,95.24
+Juanlu Sánchez,90000084,10.12
+Julian Araujo,90000085,95.24
+Julio Soler Barreto,90000086,95.24
+Junior Kroupi,90000087,95.24
+Lewis Cook,90000088,15.65
+Veljko Milosavljevic,90000090,95.24
+Álvaro Rodríguez,90000092,8.8
+Dango Ouattara,90000094,5.68
+Igor Thiago,90000095,15.26
+Keane Lewis-Potter,90000096,11.39
+Kevin Schade,90000097,9.29
+Kristoffer Ajer,90000098,43.15
+Mamadou Sangaré,90000099,11.57
+Michael Kayode,90000100,18.81
+Mikkel Damsgaard,90000101,5.13
+Vitaly Janelt,90000102,9.98
+Jannik Schuster,90000103,49.75
+Nathan Collins,90000104,95.24
+Aaron Hickey,90000105,23.02
+Antoni Milambo,90000106,95.24
+Callum Wilson,90000107,12.92
+El Hadji Malick Diouf,90000108,10.02
+Fabio Carvalho,90000109,95.24
+Jaidon Anthony,90000111,6.69
+Josh Dasilva,90000112,95.24
+Kaye Furo,90000113,95.24
+Kim Ji-soo,90000114,73.25
+Mathias Jensen,90000115,95.24
+Rico Henry,90000116,95.24
+Sepp van den Berg,90000117,95.24
+Yehor Yarmoliuk,90000118,17.27
+Diego Gomez,90000120,12.88
+Ferdi Kadioglu,90000121,18.7
+Lewis Dunk,90000122,94.11
+Luka Vušković,90000123,77.36
+Malick Yalcouyé,90000124,10.38
+Olivier Boscagli,90000125,28.09
+Pascal Gross,90000126,7.13
+Yasin Ayari,90000127,17.13
+Maxim De Cuyper,90000128,6.27
+Georginio Rutter,90000129,95.24
+Charalampos Kostoulas,90000130,9.1
+Jaouen Hadjam,90000131,15.1
+Amario Cozier-Duberry,90000132,95.24
+Costinha,90000133,12.28
+Diego Coppola,90000134,95.24
+Evan Ferguson,90000135,95.24
+Facundo Buonanotte,90000136,95.24
+Femi Azeez,90000137,4.67
+Harry Howell,90000138,95.24
+Ibrahim Osman,90000139,7.26
+Igor Julio,90000140,95.24
+Jack Hinshelwood,90000141,95.24
+José María Andrés Baixauli,90000143,95.24
+Kaoru Mitoma,90000144,95.24
+Mats Wieffer,90000145,95.24
+Matt O'Riley,90000146,95.24
+Michael Svoboda,90000147,95.24
+Nehemiah Oriola,90000148,95.24
+Pascal Struijk,90000149,95.24
+Promise David,90000150,12.03
+Stefanos Tzimas,90000151,95.24
+Tom Watson,90000152,95.24
+Yankuba Minteh,90000153,95.24
+Zadok Yohanna,90000154,95.24
+Cole Palmer,90000155,4.27
+Joao Pedro,90000157,95.24
+Jorrel Hato,90000158,12.33
+Maxence Lacroix,90000159,50.93
+Morgan Rogers,90000160,4.37
+Pedro Neto,90000161,4.55
+Roméo Lavia,90000162,14.85
+Reece James,90000163,6.62
+Wesley Fofana,90000164,38.8
+Josh Acheampong,90000165,18.43
+Levi Samuels Colwill,90000166,53.87
+Valentín Barco,90000167,6.13
+Moises Caicedo,90000168,16.24
+Jordan Henderson,90000169,7.79
+Aaron Anselmino,90000170,32.68
+Benoit Badiashile,90000171,95.24
+Danny Welbeck,90000172,10.77
+Dário Luís Essugo,90000173,95.24
+Emmanuel Emegha,90000174,11.4
+Estevao,90000175,95.24
+Geovany Quenda,90000177,95.24
+Jamie Gittens,90000178,95.24
+Malang Sarr,90000179,95.24
+Malo Gusto,90000180,9.22
+Marc Guiu,90000181,95.24
+Marco Palestra,90000182,8.26
+Pep Chavarría,90000184,9.67
+Shumaira Mheuka,90000186,95.24
+Trevoh Chalobah,90000187,95.24
+Aurèle Amenda,90000188,95.19
+Bobby Thomas,90000189,59.13
+Ephron Mason-Clark,90000191,7.51
+Frank Onyeka,90000192,26.48
+Jack Rudoni,90000193,6.45
+Jay Dasilva,90000194,19.29
+Matt Grimes,90000195,15.92
+Milan van Ewijk,90000196,18.19
+Taiwo Awoniyi,90000197,95.24
+Ethan Pinnock,90000198,55.73
+Jake Bidwell,90000199,95.24
+Ellis Simms,90000200,18.78
+Brandon Thomas-Asante,90000202,14.09
+Caleb Yirenkyi,90000203,18.75
+George Shepherd,90000205,95.24
+Gustavo Hamer,90000206,6.64
+Haji Wright,90000207,95.24
+Jahnoah Markelo,90000208,95.24
+Joel Latibeaudiere,90000209,95.24
+Josh Eccles,90000210,95.24
+Kai Andrews,90000211,95.24
+Kaine Kesler-Hayden,90000212,95.24
+Liam Kitching,90000213,95.24
+Loum Tchaouna,90000214,11.66
+Luke Woolfenden,90000215,95.24
+Miguel Brau,90000216,95.24
+Norman Bassette,90000217,95.24
+Raphael Borges Rodrigues,90000219,95.24
+Sidiki Cherif,90000220,16.74
+Stephen Mfuni,90000221,95.24
+Tatsuhiro Sakamoto,90000222,10.11
+Victor Torp,90000223,9.64
+Yann Gboho,90000224,8.71
+Adam Wharton,90000225,10.46
+Anan Khalaili,90000226,10.78
+Axel Disasi,90000227,95.24
+Chris Richards,90000228,66.22
+Daichi Kamada,90000229,14.15
+Jaydee Canvot,90000231,57.45
+Quinten Timber,90000232,14.34
+Tyrick Mitchell,90000233,18.33
+Yeremy Pino,90000234,6.71
+Eddie Nketiah,90000235,9.4
+Jorgen Strand Larsen,90000236,15.67
+Ben Chilwell,90000237,14.68
+Borna Sosa,90000238,95.24
+Chadi Riad,90000239,95.24
+Cheick Doucoure,90000240,95.24
+Christantus Uche,90000241,95.24
+Darío Osorio,90000242,10.3
+Dwight McNeil,90000243,8.33
+Evann Guessand,90000244,95.24
+Honest Ahanor,90000245,53.93
+Ismaila Sarr,90000246,10.6
+Jean-Philippe Mateta,90000247,95.24
+Jefferson Lerma,90000248,95.24
+Jesurun Rak-Sakyi,90000249,95.24
+Joél Drakes-Thomas,90000250,95.24
+Justin Devenny,90000251,95.24
+Matheus França de Oliveira,90000252,95.24
+Oscar Mingueza,90000253,13.3
+Rio Cardines,90000255,95.24
+Romain Esse,90000256,95.24
+Takehiro Tomiyasu,90000257,39.59
+Will Hughes,90000259,95.24
+Zavier Gozo,90000260,9.52
+Harrison Armstrong,90000261,12.29
+James Tarkowski,90000262,57.25
+Jarrad Branthwaite,90000263,40.53
+Kiernan Dewsbury-Hall,90000265,5.89
+Thierno Barry,90000266,15.52
+Tyrique George,90000267,5.67
+Vitalii Mykolenko,90000268,18.78
+Merlin Röhl,90000269,10.06
+James Garner,90000270,7.83
+Brennan Johnson,90000271,8.1
+Jack Grealish,90000272,4.31
+Hayden Hackney,90000273,8.52
+Ainsley Maitland-Niles,90000274,9.78
+Christian Norgaard,90000275,95.24
+Adam Aznou,90000276,95.24
+Beto,90000277,95.24
+Braiden Graham,90000278,95.24
+Charly Alcaraz,90000279,95.24
+Jake O'Brien,90000280,24.01
+Michael Keane,90000282,64.47
+Nathan Patterson,90000283,95.24
+Tyler Dibling,90000285,95.24
+Alex Iwobi,90000286,6.68
+Antonee Robinson,90000287,10.58
+Calvin Bassey,90000289,80.63
+Gonzalo García,90000290,13.65
+Joachim Andersen,90000291,49.0
+Josh King,90000292,9.25
+Oscar Bobb,90000293,6.86
+Shea Charles,90000294,13.55
+Timothy Castagne,90000295,18.17
+César Palacios,90000296,8.31
+Sander Berge,90000297,19.86
+David Affengruber,90000300,71.32
+Emile Smith Rowe,90000301,11.06
+Harrison Reed,90000302,95.24
+Hugo Larsson,90000303,13.27
+Jonah Kusi-Asare,90000304,95.24
+Jorge Cuenca,90000305,95.24
+Kenny Tete,90000306,17.97
+Kevin,90000307,6.46
+Luc De Fougerolles,90000308,95.24
+Macaulay Zepa,90000309,95.24
+Manuel Ángel Morán Ibáñez,90000310,95.24
+Rodrigo Muniz,90000311,95.24
+Ryan Sessegnon,90000312,95.24
+Tom Cairney,90000313,95.24
+Elliot Stroud,90000314,10.92
+John Egan,90000315,95.24
+Lewie Coyle,90000317,18.99
+Lucas Gourna-Douath,90000318,24.4
+Mohamed Belloumi,90000319,9.86
+Nobel Mendy,90000320,95.24
+Oli McBurnie,90000321,14.4
+Regan Slater,90000322,19.08
+Ryan Giles,90000323,9.83
+Semi Ajayi,90000324,95.24
+Abdülkadir Ömür,90000325,11.15
+Abu Kamara,90000326,95.24
+Brooke Norton-Cuffy,90000327,15.99
+Cathal McCarthy,90000328,95.24
+Charlie Hughes,90000329,95.24
+Christos Mouzakitis,90000330,15.1
+Cody Drameh,90000331,95.24
+Darko Gyabi,90000332,95.24
+David Akintola,90000333,95.24
+Eliot Matazo,90000335,95.24
+Enis Destan,90000336,95.24
+Hidemasa Morita,90000338,95.24
+Ilyas Ansah,90000339,95.24
+Jens Hjertø-Dahl,90000341,19.0
+Joe Gelhardt,90000342,10.31
+Kieran Dowell,90000343,95.24
+Liam Millar,90000344,95.24
+Lucas Herrington,90000345,95.24
+Mason Burstow,90000346,95.24
+Matt Crooks,90000347,20.69
+Matt Targett,90000348,15.99
+Matty Jacob,90000349,95.24
+Mohamed-Ali Cho,90000350,10.72
+Paddy McNair,90000351,39.65
+Robinio Vaz,90000352,95.24
+Sorba Thomas,90000353,6.45
+Tim Iroegbunam,90000355,22.19
+Óscar Zambrano,90000356,95.24
+Abdul Fatawu,90000357,8.32
+Daizen Maeda,90000358,11.83
+Dara O'Shea,90000359,60.31
+Exequiel Palacios,90000360,15.08
+Issa Diop,90000361,95.24
+Jacob Greaves,90000362,53.06
+Julio Enciso,90000363,8.32
+Leif Davis,90000365,9.16
+Sasa Lukic,90000366,16.49
+Zian Flemming,90000367,10.68
+Emersonn Correia da Silva,90000368,13.74
+Abdoul Ouattara,90000369,21.23
+Ali Al-Hamadi,90000371,95.24
+Anis Mehmeti,90000372,9.45
+Azor Matusiwa,90000373,23.66
+Ben Johnson,90000374,95.24
+Cameron Humphreys,90000375,95.24
+Chiedozie Ogbene,90000376,95.24
+Chuba Akpom,90000378,95.24
+Cédric Kipré,90000379,55.17
+Darnell Furlong,90000380,18.61
+Florentino,90000382,28.74
+George Hirst,90000383,95.24
+Jack Clarke,90000384,7.0
+Jack Taylor,90000385,95.24
+Jaden Philogene,90000386,10.16
+Kasey McAteer,90000387,95.24
+Marcelino Núñez,90000389,9.16
+Sam Szmodics,90000390,95.24
+Sindre Walle Egeli,90000391,95.24
+Wes Burns,90000392,95.24
+Anton Stach,90000393,9.39
+Ao Tanaka,90000394,16.87
+Dominic Calvert-Lewin,90000395,19.48
+Ethan Ampadu,90000396,29.25
+Gabriel Gudmundsson,90000397,16.65
+James Justin,90000398,23.68
+Jayden Bogle,90000400,20.93
+Noah Okafor,90000401,9.2
+Tarik Muharemović,90000402,64.52
+Jaka Bijol,90000403,73.67
+Nico Elvedi,90000404,64.2
+Alfie Cresswell,90000406,95.24
+Brenden Aaronson,90000407,10.69
+Daniel James,90000408,95.24
+Harry Wilson,90000409,8.54
+Ilia Gruev,90000410,95.24
+Jack Harrison,90000411,95.24
+Jayden Lienou,90000412,95.24
+Jean-Mattéo Bahoya,90000413,8.91
+Joe Rodon,90000414,95.24
+Joel Piroe,90000415,95.24
+Lukas Nmecha,90000417,13.91
+Mateo Joseph Fernández-Regatillo,90000418,95.24
+Melvin Bard,90000419,16.41
+Sean Longstaff,90000421,95.24
+Sebastiaan Bornauw,90000422,95.24
+Wilfried Gnonto,90000423,95.24
+Alexander Isak,90000424,8.41
+Alexis Mac Allister,90000425,11.43
+Dominik Szoboszlai,90000427,5.52
+Florian Wirtz,90000428,5.65
+Jeremy Jacquet,90000429,41.02
+Milos Kerkez,90000430,13.95
+Ronald Araujo,90000431,21.54
+Virgil van Dijk,90000432,37.47
+Cody Gakpo,90000433,5.84
+Bradley Barcola,90000434,5.11
+Victor Munoz,90000435,5.91
+Rio Ngumoha,90000436,5.31
+Ryan Gravenberch,90000437,15.2
+Calvin Ramsay,90000439,95.24
+Conor Bradley,90000440,95.24
+Curtis Jones,90000441,95.24
+Endo Wataru,90000442,95.24
+Federico Chiesa,90000443,95.24
+Giovanni Leoni,90000446,95.24
+Harvey Elliott,90000448,95.24
+Hugo Ekitike,90000449,95.24
+James McConnell,90000450,95.24
+Jayden Danns,90000451,95.24
+Jeremie Frimpong,90000452,5.87
+Joe Gomez,90000453,95.24
+Kostas Tsimikas,90000454,11.76
+Lewis Koumas,90000455,95.24
+Stefan Bajčetić Maquieira,90000456,95.24
+Trey Nyoni,90000457,95.24
+Wellity Lucky,90000459,95.24
+Antoine Semenyo,90000460,5.63
+Elliot Anderson,90000461,6.21
+Enzo Fernandez,90000462,6.56
+Erling Haaland,90000463,8.4
+Josko Gvardiol,90000465,20.17
+Marc Guehi,90000466,25.07
+Ruben Dias,90000467,41.33
+Abduqodir Khusanov,90000468,34.93
+Rayan Cherki,90000469,2.84
+Phil Foden,90000470,95.24
+Matheus Nunes,90000471,8.69
+Jeremy Doku,90000472,95.24
+Nico O'Reilly,90000473,9.12
+Iliman Ndiaye,90000474,5.38
+Allan Andrade Elias,90000475,5.08
+Ayyoub Bouaddi,90000476,7.93
+Claudio Echeverri,90000477,95.24
+Divine Mukasa,90000478,95.24
+Floyd Samba,90000479,95.24
+Jeremy Monga,90000481,95.24
+Kaden Braithwaite,90000482,95.24
+Kalvin Phillips,90000483,95.24
+Mateo Kovačić,90000485,9.01
+Max Alleyne,90000486,95.24
+Rayan Ait Nouri,90000487,95.24
+Rico Lewis,90000488,7.55
+Rodri,90000489,95.24
+Ryan McAidoo,90000490,95.24
+Vitor de Oliveira Nunes dos Reis,90000491,48.96
+Bruno Fernandes,90000492,2.7
+Bryan Mbeumo,90000493,4.63
+Diogo Dalot,90000494,10.3
+Lisandro Martinez,90000495,51.8
+Matheus Cunha,90000496,4.44
+Kobbie Mainoo,90000498,16.85
+Youri Tielemans,90000499,8.0
+Harry Maguire,90000500,57.11
+Luke Shaw,90000501,13.06
+Marcus Rashford,90000502,3.64
+Noussair Mazraoui,90000503,18.08
+Benjamin Sesko,90000504,10.96
+Carlos Baleba,90000505,95.24
+Leny Yoro,90000506,95.24
+Amad Diallo,90000507,95.24
+Andrey Santos,90000508,15.23
+Ayden Heaven,90000510,48.98
+Bendito Mantato,90000511,95.24
+Chido Obi,90000512,95.24
+Harry Amass,90000513,95.24
+Jack Fletcher,90000514,95.24
+Joshua Zirkzee,90000515,95.24
+Manuel Ugarte,90000517,95.24
+Mason Mount,90000518,95.24
+Matthijs de Ligt,90000519,95.24
+Patrick Dorgu,90000520,6.77
+Shea Lacey,90000521,95.24
+Toby Collyer,90000522,95.24
+Tyler Fletcher,90000524,95.24
+Tyler Fredricson,90000525,95.24
+Anthony Elanga,90000526,95.24
+Harvey Barnes,90000527,6.19
+Lewis Hall,90000528,8.52
+Lewis Miley,90000529,10.86
+Malick Thiaw,90000531,67.21
+Nico Gonzalez,90000532,15.31
+Sven Botman,90000533,47.16
+Yoane Wissa,90000534,12.46
+Joe Willock,90000535,8.64
+Amar Dedic,90000536,11.02
+Tino Livramento,90000537,10.01
+Matias Fernandez-Pardo,90000538,5.71
+Aladji Bamba,90000539,9.89
+Alex Murphy,90000540,95.24
+Bazoumana Touré,90000541,4.47
+Dan Burn,90000542,95.24
+Fabian Schar,90000544,95.24
+Jacob Murphy,90000545,4.64
+Jacob Ramsey,90000546,8.67
+Joelinton,90000547,95.24
+Leo Shahar,90000548,95.24
+Sean Neave,90000551,95.24
+Sean Steur,90000552,13.85
+William Osula,90000553,95.24
+Dan Ndoye,90000554,8.31
+Jair Paula da Cunha Filho,90000555,62.05
+James McAtee,90000556,6.99
+Liam Delap,90000557,13.04
+Morgan Gibbs-White,90000559,6.13
+Murillo dos Santos,90000560,66.27
+Neco Williams,90000561,11.49
+Nikola Milenkovic,90000562,78.2
+Xaver Schlager,90000563,17.96
+Ola Aina,90000564,20.05
+Daniel Munoz,90000565,10.06
+Ibrahim Sangare,90000566,21.59
+Nicolo Savona,90000567,95.24
+Arnaud Kalimuendo,90000568,9.52
+Callum Hudson-Odoi,90000569,95.24
+Chris Wood,90000570,95.24
+Dilane Bakwa,90000571,95.24
+Felipe Rodrigues da Silva,90000572,95.24
+Igor Jesus,90000573,11.08
+Luca Netz,90000575,95.24
+Nicolas Dominguez,90000576,95.24
+Omar Richards,90000577,95.24
+Omari Hutchinson,90000578,95.24
+Ousmane Diomande,90000579,66.59
+Ryan Yates,90000580,95.24
+Tyler Bindon,90000582,95.24
+Zach Abbott,90000583,95.24
+Jan Paul van Hecke,90000585,46.57
+Micky van de Ven,90000586,73.22
+Pedro Porro,90000587,7.63
+Rodrigo Bentancur,90000588,24.65
+Sandro Tonali,90000589,15.64
+Sávio,90000590,5.35
+Mathys Tel,90000591,6.81
+Omar Marmoush,90000592,7.96
+Destiny Udogie,90000593,19.42
+Conor Gallagher,90000594,12.63
+Andrew Robertson,90000595,12.46
+Mateus Fernandes,90000596,7.6
+Mohammed Kudus,90000597,5.68
+Dominic Solanke,90000598,12.14
+James Maddison,90000599,95.24
+Archie Gray,90000600,20.54
+Ashley Phillips,90000601,95.24
+Ben Davies,90000602,95.24
+Callum Olusesi,90000604,95.24
+Dane Scarlett,90000605,95.24
+Dejan Kulusevski,90000606,95.24
+Djed Spence,90000607,95.24
+James Rowswell,90000609,95.24
+Joao Souza,90000610,95.24
+Jun'ai Byfield,90000611,95.24
+Luca Williams-Barnett,90000612,95.24
+Lucas Bergvall,90000613,16.19
+Marcos Senesi,90000614,55.32
+Mikey Moore,90000616,95.24
+Mykhailo Mudryk,90000617,95.24
+Pape Matar Sarr,90000618,95.24
+Richarlison,90000619,95.24
+Tosin Adarabioyo,90000620,95.24
+Wilson Odobert,90000621,95.24
+Xavi Simons,90000622,95.24
+Brian Brobbey,90000623,14.78
+Dan Ballard,90000624,72.4
+Enzo Le Fee,90000625,9.94
+Granit Xhaka,90000626,12.3
+Kevin Danso,90000627,74.37
+Noah Sadiki,90000628,28.37
+Nordi Mukiele,90000629,16.76
+Reinildo Mandava,90000630,95.24
+Thomas Meunier,90000632,17.64
+Malick Fofana,90000633,8.61
+Nilson Angulo,90000634,15.11
+Arthur Masuaku,90000636,95.24
+Chemsdine Talbi,90000637,95.24
+Chris Rigg,90000638,95.24
+Dayann Méthalie,90000639,18.71
+Djiamgone Jocelin Ta Bi,90000640,95.24
+Habib Diarra,90000641,95.24
+Jenson Seelt,90000642,95.24
+Juan Angulo,90000643,95.24
+Jules Ahoka,90000644,22.64
+Leo Fuhr Hjelde,90000645,95.24
+Luke O'Nien,90000646,71.85
+Omar Alderete,90000648,95.24
+Romaine Mundle,90000649,95.24
+Simon Adingra,90000650,95.24
+Trai Hume,90000651,22.6
+Wilson Isidor,90000652,22.72

@@ -230,6 +230,9 @@ def _parse_gw(argv):
 
 
 if __name__ == "__main__":
+    for _stream in (sys.stdout, sys.stderr):      # Windows consoles default to cp1252; names carry accents
+        if hasattr(_stream, "reconfigure"):
+            _stream.reconfigure(encoding="utf-8", errors="replace")
     parity = "--validate" in sys.argv
     master = run(parity_mode=parity, gameweek=_parse_gw(sys.argv),
                  force_archive="--force-archive" in sys.argv)

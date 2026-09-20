@@ -53,12 +53,36 @@ def _prior_season(season):
     return f"{int(a) - 1}-{int(b) - 1}"
 
 
+def _start_minutes(data_dir):
+    """Per player id: starts and the minutes played IN those starts, from the per-gameweek dumps
+    (By Gameweek/GW*/player_gameweek_stats.csv, `starts` == 1; PL-only files). Empty frame when the
+    dumps are absent (tests, parity fixtures) - callers then fall back to the position average."""
+    import glob as _glob
+    paths = _glob.glob(os.path.join(data_dir, "By Gameweek", "GW*", "player_gameweek_stats.csv"))
+    frames = []
+    for p in paths:
+        try:
+            g = pd.read_csv(p, usecols=["id", "gw", "minutes", "starts"])
+        except (ValueError, pd.errors.EmptyDataError):
+            continue
+        if len(g):
+            frames.append(g)
+    if not frames:
+        return pd.DataFrame(columns=["id", "starts", "start_minutes"])
+    g = pd.concat(frames).drop_duplicates(subset=["id", "gw"])
+    g = g[g["starts"] == 1]
+    return g.groupby("id").agg(starts=("minutes", "size"), start_minutes=("minutes", "sum")).reset_index()
+
+
 def _dc_source(data_dir):
     players = pd.read_csv(os.path.join(data_dir, "players.csv"))
     player_stats = pd.read_csv(os.path.join(data_dir, "playerstats.csv"))
     player_stats = player_stats.sort_values("gw").drop_duplicates(subset="id", keep="last")
     df = players.merge(player_stats[["id", "minutes", "defensive_contribution_per_90"]],
                        left_on="player_id", right_on="id", how="left")
+    df = df.merge(_start_minutes(data_dir), on="id", how="left")
+    df["starts"] = df["starts"].fillna(0.0).astype(float)
+    df["start_minutes"] = df["start_minutes"].fillna(0.0).astype(float)
     df["name"] = _apply_name_changes(df["first_name"] + " " + df["second_name"])
     df["nineties"] = (df["minutes"] / 90).round(2)
     df["position"] = df["position"].map(config.POSITION_MAP)
@@ -77,7 +101,8 @@ def _merge_external_prior(prior):
         return prior
     ext = pd.read_csv(path).dropna(subset=["dc90"]).drop_duplicates(subset="name").set_index("name")
     new = ext[~ext.index.isin(prior.index)][["minutes", "team", "dc90"]]
-    return pd.concat([prior[["minutes", "team", "dc90"]], new]) if len(new) else prior
+    keep = [c for c in ["minutes", "team", "dc90", "starts", "start_minutes"] if c in prior.columns]
+    return pd.concat([prior[keep], new]) if len(new) else prior
 
 
 def load_defensive_contributions():
@@ -115,17 +140,32 @@ def load_defensive_contributions():
         num = num + prior_rate * df["name"].map(prior["dc90"]).fillna(0.0)
         rate_denom = w * m_cur + prior_rate   # recency- and mover-tilted, for the dc90 weighted average
         evidence = m_cur + m_pri              # true minutes (mover discount does NOT touch evidence)
+        # minutes per start: prior starts capped at DC_MINUTES_PRIOR_CAP_STARTS (their minutes scaled
+        # with them) and discounted for movers exactly like the rate
+        zero = pd.Series(0.0, index=df.index)
+        ps = df["name"].map(prior["starts"]).fillna(0.0) if "starts" in prior.columns else zero
+        pm = df["name"].map(prior["start_minutes"]).fillna(0.0) if "start_minutes" in prior.columns else zero
+        cap = ps.clip(upper=config.DC_MINUTES_PRIOR_CAP_STARTS)
+        pm = (pm * cap / ps).where(ps > 0, 0.0)
+        disc = mover.map({True: config.DC_MOVER_PRIOR_WEIGHT, False: 1.0}).astype(float)
+        s_pri, sm_pri = cap * disc, pm * disc
     else:
         rate_denom = w * m_cur
         evidence = m_cur
+        s_pri = sm_pri = pd.Series(0.0, index=df.index)
 
     df["dc90"] = (num / rate_denom).where(rate_denom > 0)
     df["nineties"] = (evidence / 90).round(2)
+    # expected minutes per start: this season's starts at the recency weight, prior starts as above,
+    # shrunk toward the position average with k pseudo-starts (config.DC_MINUTES_PER_START)
+    k = float(config.DC_MINUTES_SHRINK_STARTS)
+    avg = df["position"].map(config.DC_MINUTES_POSITION_AVG).astype(float)
+    df["mps"] = ((w * df["start_minutes"] + sm_pri + k * avg) / (w * df["starts"] + s_pri + k)).round(1)
 
     out = {}
     for pos in ("DEF", "MID", "FWD"):      # FWD: same 12 threshold as MID (improved mode only)
         out[pos] = (
-            df[df["position"] == pos][["name", "nineties", "dc90"]]
+            df[df["position"] == pos][["name", "nineties", "dc90", "mps"]]
             .sort_values("name")
             .reset_index(drop=True)
         )

@@ -207,6 +207,19 @@ def reconcile_win_draw(win, opp):
     return live * r, live * (1.0 - r)
 
 
+def dc_favourite_multiplier(win_prob, position):
+    """Per-fixture multiplier on the DC rate from the team's win probability (config.DC_FAVOURITE_CURVE):
+    1.0 below the start of the curve, linear to the end multiplier at the end win prob, flat beyond.
+    Positions without a curve, and rows with no win probability, get 1.0."""
+    curve = getattr(config, "DC_FAVOURITE_CURVE", None) or {}
+    w = pd.to_numeric(win_prob, errors="coerce")
+    out = pd.Series(1.0, index=w.index)
+    for pos, (lo, hi, mult) in curve.items():
+        t = ((w - lo) / (hi - lo)).clip(0.0, 1.0)
+        out = out.where(position != pos, (1.0 - (1.0 - mult) * t).fillna(1.0))
+    return out
+
+
 def dc_probability(dc90, sd, threshold):
     """P(defensive contribution >= threshold) = 1 - NormCDF(threshold; dc90, sd).
 

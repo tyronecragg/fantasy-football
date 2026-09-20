@@ -27,6 +27,9 @@ def sell_price(purchase, current):
     return (p + (c - p) // 2) / 10.0
 
 
+_LAST_SELL_MSG = None
+
+
 def apply_sell_prices(df, current_team_names, purchase_csv=PURCHASE_PRICES_CSV):
     """Replace the Cost of currently-owned players with their SELL price, in place.
 
@@ -54,5 +57,11 @@ def apply_sell_prices(df, current_team_names, purchase_csv=PURCHASE_PRICES_CSV):
             df.loc[rows[0], "Cost"] = sp
             adjustments.append(f"{name} {market:.1f}->{sp:.1f}")
     if adjustments:
-        print(f"  sell prices applied: {', '.join(adjustments)}")
+        msg = f"  sell prices applied: {', '.join(adjustments)}"
+        # Several callers run per optimiser invocation (main optimise + timing plan); print the
+        # identical line once, but reprint if the adjustments actually change.
+        global _LAST_SELL_MSG
+        if msg != _LAST_SELL_MSG:
+            print(msg)
+            _LAST_SELL_MSG = msg
     return df

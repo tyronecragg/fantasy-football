@@ -149,6 +149,18 @@ out. These gate every F3+ injury ramp and the zeroing of unavailable players in
   writing any injury ramp.
 - **Plus the FPL API availability feed** (`chance_of_playing_next_round` + `news`) — authoritative
   outs / doubts / return-dates, pulled every sweep; covers most of what the removed tables did.
+- **[Premier Fantasy Tools — press conferences](https://www.premierfantasytools.com/premier-league-press-conferences/)**
+  (added 2026-09-11; **verified fetchable + current that day** — not blocked, carries a last-updated
+  date and manager quotes). Aggregates each manager's pre-match presser into per-club **OUT / DOUBT /
+  IN** lists — the freshest availability read ahead of a deadline. ⚠️ **Read the labels precisely:**
+  - **"IN" = AVAILABLE, NOT a confirmed starter.** It only clears an availability doubt; a player
+    can be "In" and still benched/rotated, so it does **not** by itself justify `F1 = 1.0` — you
+    still need the predicted-XI panel (Tier 1) for the start call.
+  - **"OUT" = NOT available** → hard `F1 = 0.0` (a named reason, so it also gates F2+ until return).
+  - **"DOUBT"** = a live fitness game-time decision → the one legitimate case to shade a would-be
+    starter's F1 *below* 1.0 (a split/fractional), per the "F1 models selection" rule above.
+  Example seen 2026-09-11 (Arsenal): OUT Saliba · DOUBT Mosquera, Timber · IN White, Konsa — matched
+  our data. Use it to MOVE doubts, not to declare starters.
 
 _(Removed 2026-08-27 — unfetchable by automated tools, so useless here: Premier Injuries (403),
 Official PL injury list & Sky Sports table (both JS-rendered). Use SportsGambler + the FPL API feed.)_
@@ -172,7 +184,8 @@ better than a national outlet filling in 20 XIs quickly.
   two-fan-site + one-local-press-beat set (with the writer to follow) for every club. Best for
   injury depth and "who deputises" on a decimated squad.
 - **Manager pre-match pressers** — the ground truth for "who's fit / who rotates". Official
-  club channels report these.
+  club channels report these; **[Premier Fantasy Tools](https://www.premierfantasytools.com/premier-league-press-conferences/)**
+  (Tier 2) aggregates them into per-club In/Out lists (remember: In = available, not starting).
 
 Don't escalate for settled teams. Any three sources agree on Arsenal; the effort is wasted.
 

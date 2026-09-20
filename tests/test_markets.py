@@ -1,5 +1,16 @@
 import numpy as np
 import pandas as pd
+import numpy as np
+
+
+def test_assist_curve_is_gentler_than_goals_and_ranks_preserved():
+    from fpl_pipeline import config, markets
+    p = pd.Series([0.03, 0.06, 0.10, 0.20, 0.40])
+    goals = markets.longshot_calibrate(p)
+    assists = markets.longshot_calibrate(p, knots=config.LONGSHOT_CALIBRATION_ASSIST)
+    assert (assists >= goals).all() and (assists <= p).all()          # between the goals shrink and raw
+    assert (np.diff(assists) > 0).all()                                 # monotone
+    assert abs(assists[0] / p[0] - (goals[0] / p[0]) ** 0.5) < 1e-3     # half strength in log space (knots rounded to 3dp)
 
 from fpl_pipeline import markets
 

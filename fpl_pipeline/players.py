@@ -121,6 +121,10 @@ def _dc_table(dc_stats, params_row, improved=True):
         w = w.where(n >= config.DC_SHRINK_MIN_NINETIES, 0.0)   # under ~59 min played: no evidence
         df["dc_weight"] = w
         blended = w * df["dc90"].fillna(avg_dc90) + (1.0 - w) * avg_dc90   # blend the RATE
+        if getattr(config, "DC_MINUTES_PER_START", False) and "mps" in df.columns:
+            # per-90 rate -> expected count in the minutes he actually plays when he starts
+            blended = blended * df["mps"].astype(float).fillna(90.0) / 90.0
+        df["rate_eff"] = blended                     # per-start expected count, before any fixture effect
         df["prob_filled"] = model.dc_probability(blended, params_row["sd"], params_row["threshold"])
     else:
         df["prob_filled"] = df["prob"].where(n >= 4, params_row["average_dc90"])
@@ -240,6 +244,30 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     def dc_fwd_stat(prefix):
         return {"dc_fwd": m[f"{prefix} Defensive Contribution - FWD"]} if dc_fwd_on else {}
 
+    # Improved mode: DefCon per FIXTURE. Each player's effective per-start rate (own rate blended,
+    # x minutes per start) is re-priced for every fixture with the heavy-favourite multiplier from
+    # THAT fixture's win probability (config.DC_FAVOURITE_CURVE), then converted to a probability.
+    # Parity keeps the F1 table value copied across the horizon.
+    dc_tables = {"DEF": dc_def, "MID": dc_mid}
+    if dc_fwd_on:
+        dc_tables["FWD"] = dc_fwd
+    if improved:
+        m["_dc_rate"] = 0.0
+        for _pos, _tab in dc_tables.items():
+            m["_dc_rate"] = m["_dc_rate"].where(pos != _pos, vlookup(name, _tab, "name", "rate_eff"))
+
+    def dc_fixture(prefix, win):
+        """Write {prefix} Defensive Contribution - DEF/MID(/FWD) from _dc_rate x favourite multiplier."""
+        if not improved:
+            for _pos in dc_tables:
+                m[f"{prefix} Defensive Contribution - {_pos}"] = m[f"F1 Defensive Contribution - {_pos}"]
+            return
+        mult = model.dc_favourite_multiplier(win, pos)
+        for _pos in dc_tables:
+            row = prm.loc[_pos]
+            p = model.dc_probability(m["_dc_rate"] * mult, row["sd"], row["threshold"])
+            m[f"{prefix} Defensive Contribution - {_pos}"] = p.where(pos == _pos, 0.0).fillna(0.0)
+
     def concede6_stat(prefix):
         return {"concede6": m[f"{prefix} Concede 6+ Goals"]} if improved else {}
 
@@ -247,6 +275,8 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     m["F1 Start"] = m["_start1"]
     m["F1 Win"] = vlookup(team, teamview, "team", "f1_win")
     m["F1 Opponent Win"] = vlookup(team, teamview, "team", "f1_opponent_win")
+    if improved:
+        dc_fixture("F1", m["F1 Win"])                 # heavy-favourite discount on this week's odds
     m["F1 Diff"] = m["F1 Win"] - m["F1 Opponent Win"]
     m["F1 Opponent"] = vlookup(team, teamview, "team", "f1_opponent")
     m["F1 Venue"] = vlookup(team, teamview, "team", "f1_venue")
@@ -476,10 +506,7 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     else:
         m["F2 3+ Saves"] = m["F1 3+ Saves Factor"] * model.baseline("saves3", w2, ow2, pos, home2)
     m["F2 6+ Saves"] = m["F1 6+ Saves Factor"] * model.baseline("saves6", w2, ow2, pos, home2)
-    m["F2 Defensive Contribution - DEF"] = m["F1 Defensive Contribution - DEF"]
-    m["F2 Defensive Contribution - MID"] = m["F1 Defensive Contribution - MID"]
-    if dc_fwd_on:
-        m["F2 Defensive Contribution - FWD"] = m["F1 Defensive Contribution - FWD"]
+    dc_fixture("F2", w2)                              # F2 odds, or the predicted win prob when unpriced
     clip01(["F2 Assist", "F2 Yellow Card", "F2 Clean Sheet", "F2 Concede 2+ Goals",
             "F2 Concede 4+ Goals", "F2 3+ Saves", "F2 6+ Saves"])
     if improved:
@@ -550,10 +577,7 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
                 m[f"{p} {_label}"] = preds[_stat].values
             apply_stacks(p, {"score1": score_raw, "yellow": yellow_raw}, {}, k)
         m[f"{p} Score 2+"], m[f"{p} Score 3+"] = score_curves(m[f"{p} Score 1+"])
-        m[f"{p} Defensive Contribution - DEF"] = m["F1 Defensive Contribution - DEF"]
-        m[f"{p} Defensive Contribution - MID"] = m["F1 Defensive Contribution - MID"]
-        if dc_fwd_on:
-            m[f"{p} Defensive Contribution - FWD"] = m["F1 Defensive Contribution - FWD"]
+        dc_fixture(p, w)                              # this fixture's predicted win prob
         clip01([f"{p} Assist", f"{p} Yellow Card", f"{p} Clean Sheet", f"{p} Concede 2+ Goals",
                 f"{p} Concede 4+ Goals", f"{p} 3+ Saves", f"{p} 6+ Saves"])
         if improved:
@@ -575,4 +599,4 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             **dc_fwd_stat(p), **concede6_stat(p),
         })
 
-    return m.drop(columns=[c for c in m.columns if c.startswith("_start")])
+    return m.drop(columns=[c for c in m.columns if c.startswith("_start") or c == "_dc_rate"])

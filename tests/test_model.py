@@ -1,6 +1,24 @@
 import numpy as np
 import pandas as pd
 
+
+def test_dc_favourite_multiplier_shape():
+    from fpl_pipeline import config, model
+    config_curve = {"DEF": (0.55, 0.85, 0.82)}
+    saved = getattr(config, "DC_FAVOURITE_CURVE", None)
+    config.DC_FAVOURITE_CURVE = config_curve
+    try:
+        w = pd.Series([0.2, 0.55, 0.70, 0.85, 0.95, float("nan")])
+        pos = pd.Series(["DEF"] * 6)
+        out = model.dc_favourite_multiplier(w, pos)
+        assert out.tolist()[:2] == [1.0, 1.0]                     # nothing below the start
+        assert abs(out[2] - 0.91) < 1e-9                          # halfway
+        assert abs(out[3] - 0.82) < 1e-9 and abs(out[4] - 0.82) < 1e-9   # full, and clamped
+        assert out[5] == 1.0                                      # no win prob -> untouched
+        assert (model.dc_favourite_multiplier(w, pd.Series(["MID"] * 6)) == 1.0).all()   # no MID curve
+    finally:
+        config.DC_FAVOURITE_CURVE = saved
+
 from fpl_pipeline import model
 
 

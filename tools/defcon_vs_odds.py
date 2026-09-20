@@ -62,6 +62,9 @@ def per_match(season):
                          key=lambda p: int(re.search(r"GW(\d+)", p).group(1))):
         try:
             stats = pd.read_csv(os.path.join(gw_dir, "playermatchstats.csv"))
+            # the per-match file lists EVERY competition in the gameweek window (League Cup, Europe);
+            # match ids carry the competition, keep the Premier League only (2026-09-09)
+            stats = stats[stats["match_id"].astype(str).str.contains("-prem-")]
             matches = pd.read_csv(os.path.join(gw_dir, "matches.csv"))
             lineups = pd.read_csv(os.path.join(gw_dir, "lineups.csv"))
         except FileNotFoundError:

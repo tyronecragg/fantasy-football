@@ -25,7 +25,7 @@ def two_sided(over, under):
     return out.where(np.isfinite(out))
 
 
-def longshot_calibrate(prob, enabled=True):
+def longshot_calibrate(prob, enabled=True, knots=None):
     """Shrink over-stated long prices toward their observed frequency.
 
     MARGIN_PLAYER removes a flat 5% at every price. Measured against outcomes that is about
@@ -37,7 +37,7 @@ def longshot_calibrate(prob, enabled=True):
     Interpolates in LOG probability because the distortion grows multiplicatively as the
     price lengthens, and floors the multiplier so no player is declared impossible.
     """
-    knots = getattr(config, "LONGSHOT_CALIBRATION", None)
+    knots = getattr(config, "LONGSHOT_CALIBRATION", None) if knots is None else knots
     if not enabled or not knots:
         return prob
     xs = np.log([k[0] for k in knots])
@@ -47,7 +47,7 @@ def longshot_calibrate(prob, enabled=True):
     return (p * mult).clip(0, 1).where(p.notna())
 
 
-def player_market(df, calibrate=False, roster_names=None):
+def player_market(df, calibrate=False, roster_names=None, knots=None):
     """Goalscorer / 2+ goals / assist CSVs: player_name, match_id, odds_decimal.
 
     `calibrate` is improved-mode only. Parity mode must reproduce the workbook exactly, and
@@ -66,7 +66,7 @@ def player_market(df, calibrate=False, roster_names=None):
             players = names.resolve_to_roster(players, roster_names)
     return pd.DataFrame({
         "player": players,
-        "prob": longshot_calibrate(implied(df.iloc[:, 2], config.MARGIN_PLAYER), calibrate),
+        "prob": longshot_calibrate(implied(df.iloc[:, 2], config.MARGIN_PLAYER), calibrate, knots),
     })
 
 
@@ -162,8 +162,8 @@ def build_all(sportsbet, inputs, dedup_f2=True, calibrate=None, roster_names=Non
     return {
         "score1": player_market(sportsbet["score1"], calibrate, roster_names),
         "score2": player_market(sportsbet["score2"], calibrate, roster_names),
-        "assist": player_market(sportsbet["assist"], calibrate, roster_names),
-        "assist2": player_market(sportsbet["assist2"], calibrate, roster_names),
+        "assist": player_market(sportsbet["assist"], calibrate, roster_names, config.LONGSHOT_CALIBRATION_ASSIST),
+        "assist2": player_market(sportsbet["assist2"], calibrate, roster_names, config.LONGSHOT_CALIBRATION_ASSIST),
         "yellow": yellow_market(sportsbet["yellow"], roster_names, improved=calibrate),
         "clean_sheet": clean_sheet_market(sportsbet["clean_sheet"]),
         "concede": concede_market(sportsbet["team_goals"], derive_missing4=dedup_f2),

@@ -60,6 +60,13 @@ LONGSHOT_CALIBRATION = [
     (0.29, 0.93),
     (0.42, 0.96),
 ]
+# ASSISTS get their own, gentler curve (2026-09-09): the knots above were fitted on Sportsbet
+# goalscorer outcomes and applied to every attacking market. On Betway this season (GW1-3,
+# minutes>=60, tools/calibration.py) goals pool at 1.06x but assists at 0.69x, with the two
+# lowest bands projecting 13 assists and getting 28 (~4 s.e.); the 1xBet two-way cross-check
+# put Betway's raw assist prices within 8% of a de-margined book. Half strength in log space
+# (multipliers square-rooted) lifts those bands to ~0.8x of actual. Re-fit ~GW9 on outcomes.
+LONGSHOT_CALIBRATION_ASSIST = [(p, round(m ** 0.5, 3)) for p, m in LONGSHOT_CALIBRATION]
 MARGIN_WDW = 1.03      # win-draw-win
 MARGIN_SEASON = 1.08   # title / relegation / top-6
 
@@ -176,6 +183,32 @@ DC_SHRINK_NINETIES = 4.0
 # played-most-of-the-match appearance) the weight is zero (straight population average). At or
 # above it, weight = nineties/4 as above, so 0.65 nineties -> 0.65/4 own, 3.35/4 average.
 DC_SHRINK_MIN_NINETIES = 0.65
+# Improved mode: MINUTES PER START. dc90 is a per-90 rate, so dc_probability is P(hit | plays 90) - but
+# 46% of midfield starts and 21% of defender starts end before 90, and a midfielder subbed at 60-74
+# hits the 12 threshold 2% of the time against ~20% priced (2025-26 + 2026-27 starts, measured
+# 2026-09-16). P(hit | started) was 0.75x the model for DEF and 0.67x for MID; full-90 starters were
+# calibrated. So the rate is scaled by the player's expected minutes per start / 90 before it becomes
+# a probability. Minutes per start = his starts this season (weighted DC_CURRENT_SEASON_WEIGHT x, like
+# the rate) + up to DC_MINUTES_PRIOR_CAP_STARTS from last season (prior-club starts at
+# DC_MOVER_PRIOR_WEIGHT for movers, like the rate), shrunk toward the position average with
+# DC_MINUTES_SHRINK_STARTS pseudo-starts. At 7 pseudo-starts and 2x recency a new signing is 53% his own
+# number after four starts, 67% after seven; a full prior season 59% at GW1 and 81% after ten starts
+# (calibration slope ~0.85 no-prior / ~1.05 with-prior on 2025-27 starts; 5 over-trusted new signings). Position
+# averages over all 2025-26 starts (DEF 85.2, MID 80.1, FWD 78.5; 2026-27 to date 84.7 / 78.5 / 79.4).
+# False = price the full 90.
+DC_MINUTES_PER_START = True
+DC_MINUTES_POSITION_AVG = {"DEF": 85.0, "MID": 80.0, "FWD": 79.0}
+DC_MINUTES_SHRINK_STARTS = 7
+DC_MINUTES_PRIOR_CAP_STARTS = 10
+# Improved mode: HEAVY-FAVOURITE DISCOUNT, per fixture. A defender's DC rate in games where his team is
+# a 70%+ favourite runs x0.82 his own norm (player fixed effects, home + minutes controlled, 2025-26 +
+# 2026-27, 1,354 DEF starts / 55 heavy: t = -3.1, within-player permutation p = 0.007; replicates in
+# 2025-26 alone; 0.55-0.70 band x0.93). Midfielders: x0.91, t = -1.8, p = 0.14 - NOT applied, re-test
+# ~GW12. Position -> (win prob where the discount starts, win prob where it is fully on, multiplier
+# there); linear between, 1.0 below the start, clamped above the end. The multiplier scales the RATE
+# (after minutes per start) for EACH fixture from that fixture's win probability (F1/F2 odds,
+# F3+ predicted), so DefCon is no longer a flat copy of F1 across the horizon. Measured 2026-09-16.
+DC_FAVOURITE_CURVE = {"DEF": (0.55, 0.85, 0.82)}
 
 # Predicted match odds (F2 fallback + F3-F8): win_pred and opp_win_pred are fitted INDEPENDENTLY,
 # so the implied draw (1 - win - opp) is an unconstrained residual that balloons when both fits

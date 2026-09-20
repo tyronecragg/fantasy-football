@@ -16,8 +16,9 @@ a provisional/empty XI, which rots the ledger. So: compile at the deadline, not 
   deadline while it still says "Predicted Lineup"; it flips to *confirmed* near kickoff and scoring a
   confirmed XI as a "prediction" is dishonest.** Uses `Initial. Surname` labels (`E. Haaland`,
   `V. van Dijk`) — the `Resolver` strips the initial, so they resolve fine.
-- **FFS** — already scraped to `inputs/ffs_predicted_lineups.csv`; use `--seed-ffs` **only if that
-  file is fresh for this GW** (it can be stale — check its date first), else read the live site.
+- **FFS** — compiled by hand into `inputs/ffs_predicted_lineups.csv` at the deadline (the automated
+  scrape/staging was retired). Use `--seed-ffs` **only if that file is fresh for this GW** (check its
+  date first — a stale file freezes a pre-season XI, as happened at GW4), else refresh it from the live site.
 
 **On trial (capture when populated, promote once they earn it):**
 - **Fantasy Football Pundit** — https://www.fantasyfootballpundit.com/fantasy-premier-league-team-news/
@@ -56,6 +57,20 @@ dumps ship no `lineups.csv`).
 - **GW3** — **RotoWire wired in as a main source (2026-09-03)**: its 20 predicted XIs captured pre-deadline
   (`inputs/source_history/gw3_rotowire.csv`), 220/220 resolved after teaching the `Resolver` to strip
   `Initial. Surname` leading initials. Score after GW3 plays.
+- **GW4** — captured 2026-09-13: **FFS + RotoWire**, 220 rows each (20 teams × 11), 0 UNMATCHED after
+  adding `name_mappings` rows for António Silva (BOU) and Angulo (SUN). `ffs_predicted_lineups.csv` was
+  refreshed for GW4 first (it had been the Aug-18 pre-season file). All About FPL had no GW4 all-team
+  article, so it was not captured (not substituted). Sources were gathered via a panel-restricted
+  agent (Tier-1 URLs only, roster-checked) rather than the browser. Score after GW4 plays.
+- **GW4 scored (2026-09-18):** FFS **89.1%**, RotoWire **88.2%**. ⚠️ **Curated NOT captured** — `--seed-ours` was skipped at the GW4 deadline and the roll then shifted `starting_lineups.csv`, so our own XI is lost/unscoreable for GW4 (git HEAD was a stale 427-row pre-final state). **Fix: seed-ours at the deadline BEFORE rolling** (now in the rollover memory).
 - Per-source *ranking* was deprioritised 2026-08-28 (the odds price in form; the panel is hand-curated),
   so this is mainly (a) calibration of our own XI and (b) a one-off validation of a new source like FPL
   Edits before promoting it — not a heavy weekly obligation.
+
+## Agent-sweep contract — evidence, not verdicts (added 2026-09-18)
+Lineup/team-news research (sub-agents or direct) must **return raw per-source evidence, not a synthesized IN/OUT call**. Three agent syntheses overstated a single source and got relayed as fact (Bijol "named starter"; Maddison "shoulder" — FPL said 100%; Porro/Tonali "out" — both 75% FPL doubts, only Sports Mole's cautious XI benched them).
+- **Output = per-player × per-source grid, verbatim + dated** (FFS / RotoWire / Sports Mole / SportsGambler each quoted). Agent flags **source SPLITS**; the reconciliation (vs the FPL flag) is done by the caller, not the agent.
+- **Cross-check every call vs the FPL `chance_of_playing`/`status` flag.** A 75% flag + one predicted-XI omission = DOUBT leaning start (~0.7), NOT "out".
+- **Never cite a source not present in the return.** Label single-source claims "one source only".
+- **Squad-critical players: fetch directly (no agent).**
+See memory `agent-sweep-evidence-not-verdicts`.

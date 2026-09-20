@@ -52,6 +52,34 @@ def test_minutes_weighted_blend(seasons):
     assert dc.loc["D X", "nineties"] == 0.0
 
 
+def test_minutes_per_start_is_shrunk_and_scales_the_rate(seasons, monkeypatch):
+    """A's starts: 4 this season at 70 min (recency-weighted), 20 last season at 90 (capped at 10).
+    Shrunk toward the DEF average with k pseudo-starts. B has no starts anywhere -> the position average."""
+    from fpl_pipeline import players, model
+    for season, rows in [("2026-2027", [(0, 4, 70)]), ("2025-2026", [(0, 20, 90)])]:
+        d = seasons / season / "By Gameweek" / "GW1"
+        d.mkdir(parents=True)
+        recs = []
+        for pid, n, mins in rows:
+            recs += [{"id": pid, "gw": i + 1, "minutes": mins, "starts": 1} for i in range(n)]
+        pd.DataFrame(recs).to_csv(d / "player_gameweek_stats.csv", index=False)
+    dc = ingest.load_defensive_contributions()["DEF"].set_index("name")
+    k, cap, avg = config.DC_MINUTES_SHRINK_STARTS, config.DC_MINUTES_PRIOR_CAP_STARTS, config.DC_MINUTES_POSITION_AVG["DEF"]
+    W = config.DC_CURRENT_SEASON_WEIGHT                      # this season's starts count W x, like the rate
+    assert abs(dc.loc["A X", "mps"] - (W * 4 * 70 + cap * 90 + k * avg) / (W * 4 + cap + k)) < 0.06
+    assert abs(dc.loc["B X", "mps"] - avg) < 1e-9
+    # and the table scales the (blended) rate by mps/90 before converting to a probability
+    prm = pd.Series({"threshold": 10, "sd": 3.86, "average_dc90": 0.44})
+    tab = pd.DataFrame({"name": ["p", "q"], "dc90": [12.0, 12.0], "nineties": [10.0, 10.0], "mps": [90.0, 72.0]})
+    out = players._dc_table(tab, prm, improved=True).set_index("name")
+    P = lambda mu: model.dc_probability(pd.Series([mu]), 3.86, 10).iloc[0]
+    assert abs(out.loc["p", "prob_filled"] - P(12.0)) < 1e-9
+    assert abs(out.loc["q", "prob_filled"] - P(12.0 * 0.8)) < 1e-9
+    monkeypatch.setattr(config, "DC_MINUTES_PER_START", False)
+    off = players._dc_table(tab, prm, improved=True).set_index("name")
+    assert abs(off.loc["q", "prob_filled"] - P(12.0)) < 1e-9
+
+
 def test_external_prior_fills_gaps_only(tmp_path, monkeypatch):
     """External DefCon prior backfills players with NO FPL history; never overrides one who has it."""
     ext = pd.DataFrame({"name": ["new_signing", "has_pl_history"], "team": ["Hull City", "Arsenal"],

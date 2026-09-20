@@ -54,6 +54,24 @@ def season_label(code):
     return f"20{code[:2]}-20{code[2:]}"
 
 
+def _read_football_data(text):
+    """Parse a football-data E0 CSV, repairing stray in-field line breaks first. Their served file
+    occasionally injects a \\r\\n inside a cell (seen 2026-09: 'Brentford,To\\r\\nttenham,3,...'),
+    splitting one match across two physical lines so a stat lands in the Date column and the whole
+    parse fails. Every real data row starts with the division code 'E0,'; any other line is a
+    continuation, so glue it back onto the previous one (no separator — the break was mid-field)."""
+    lines = text.splitlines()
+    if not lines:
+        return pd.read_csv(io.StringIO(text))
+    out = [lines[0]]                                    # header (Div,Date,Time,...)
+    for ln in lines[1:]:
+        if ln.startswith("E0,") or not out:
+            out.append(ln)
+        else:
+            out[-1] += ln                              # rejoin a mid-field newline
+    return pd.read_csv(io.StringIO("\n".join(out)))
+
+
 def fetch_season(code, refresh=False, max_age_days=None):
     """Season CSV from the cache; (re)downloaded when missing, when `refresh`, or when the cached
     file is older than `max_age_days`. A failed download falls back to the cache."""
@@ -62,19 +80,21 @@ def fetch_season(code, refresh=False, max_age_days=None):
     stale = (max_age_days is not None and os.path.exists(path)
              and (datetime.datetime.now() - datetime.datetime.fromtimestamp(os.path.getmtime(path))).days >= max_age_days)
     if os.path.exists(path) and not refresh and not stale:
-        return pd.read_csv(path)
+        with open(path, encoding="utf-8-sig") as fh:
+            return _read_football_data(fh.read())
     try:
         import requests
         r = requests.get(URL.format(season=code), timeout=30)
         r.raise_for_status()
-        d = pd.read_csv(io.StringIO(r.content.decode("utf-8-sig")))
-        d.to_csv(path, index=False)
+        d = _read_football_data(r.content.decode("utf-8-sig"))
+        d.to_csv(path, index=False)                     # cache the repaired version
         print(f"  rating: downloaded football-data {season_label(code)} ({len(d)} matches)")
         return d
     except Exception as exc:  # network / parse - keep serving from the cache
         if os.path.exists(path):
             print(f"  rating: football-data {season_label(code)} refresh failed ({exc}); using cache")
-            return pd.read_csv(path)
+            with open(path, encoding="utf-8-sig") as fh:
+                return _read_football_data(fh.read())
         raise
 
 

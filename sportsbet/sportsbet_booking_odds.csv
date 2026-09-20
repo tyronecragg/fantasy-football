@@ -1,401 +1,583 @@
 match_name,date,player_name,odds_decimal
-Arsenal v Sunderland,1788030000,Gabriel Magalhaes,6.19
-Arsenal v Sunderland,1788030000,Martin Odegaard,8.07
-Arsenal v Sunderland,1788030000,Christos Tzolis,6.26
-Arsenal v Sunderland,1788030000,Bukayo Saka,6.52
-Arsenal v Sunderland,1788030000,Declan Rice,6.3
-Arsenal v Sunderland,1788030000,Ben White,5.07
-Arsenal v Sunderland,1788030000,Riccardo Calafiori,4.07
-Arsenal v Sunderland,1788030000,Cristhian Mosquera,5.25
-Arsenal v Sunderland,1788030000,Myles Lewis-Skelly,4.11
-Arsenal v Sunderland,1788030000,Kai Havertz,4.84
-Arsenal v Sunderland,1788030000,Viktor Gyokeres,5.68
-Arsenal v Sunderland,1788030000,Bruno Guimaraes,3.76
-Arsenal v Sunderland,1788030000,Martin Zubimendi,4.14
-Arsenal v Sunderland,1788030000,Noni Madueke,10.27
-Arsenal v Sunderland,1788030000,Ezri Konsa,6.06
-Arsenal v Sunderland,1788030000,Piero Hincapie,4.34
-Arsenal v Sunderland,1788030000,Eberechi Eze,10.27
-Arsenal v Sunderland,1788030000,Gabriel Martinelli,10.27
-Arsenal v Sunderland,1788030000,Max Dowman,6.61
-Arsenal v Sunderland,1788030000,Ethan Nwaneri,8.9
-Arsenal v Sunderland,1788030000,Jurrien Timber,10.04
-Aston Villa v Nott'm Forest,1788030000,John McGinn,4.31
-Aston Villa v Nott'm Forest,1788030000,Pau Torres,9.62
-Aston Villa v Nott'm Forest,1788030000,Boubacar Kamara,3.73
-Aston Villa v Nott'm Forest,1788030000,Emiliano Buendia,3.94
-Aston Villa v Nott'm Forest,1788030000,Ian Maatsen,4.37
-Aston Villa v Nott'm Forest,1788030000,Ross Barkley,5.33
-Aston Villa v Nott'm Forest,1788030000,Victor Lindelof,7.86
-Aston Villa v Nott'm Forest,1788030000,Alejandro Garnacho,8.74
-Aston Villa v Nott'm Forest,1788030000,Matty Cash,4.21
-Aston Villa v Nott'm Forest,1788030000,Aaron Wan-Bissaka,4.59
-Aston Villa v Nott'm Forest,1788030000,Nicolas Jackson,9.1
-Aston Villa v Nott'm Forest,1788030000,George Hemmings,4.37
-Aston Villa v Nott'm Forest,1788030000,Tyrone Mings,9.57
-Aston Villa v Nott'm Forest,1788030000,Tammy Abraham,7.17
-Aston Villa v Nott'm Forest,1788030000,Matteo Ruggeri,4.59
-Aston Villa v Nott'm Forest,1788030000,Lamare Bogarde,4.26
-Aston Villa v Nott'm Forest,1788030000,Johan Manzambi,6.35
-Aston Villa v Nott'm Forest,1788030000,Ollie Watkins,9.55
-Aston Villa v Nott'm Forest,1788030000,Joao Gomes,3.84
-Bournemouth v Brentford,1788030000,Adrien Truffert,4.62
-Bournemouth v Brentford,1788030000,Evanilson,5.71
-Bournemouth v Brentford,1788030000,António João Pereira de Albuquerque Tavares da Silva,4.36
-Bournemouth v Brentford,1788030000,Alex Scott,2.84
-Bournemouth v Brentford,1788030000,Justin Kluivert,4.93
-Bournemouth v Brentford,1788030000,Marcus Tavernier,5.46
-Bournemouth v Brentford,1788030000,Rayan,5.48
-Bournemouth v Brentford,1788030000,James Hill,5.02
-Bournemouth v Brentford,1788030000,Lewis Cook,4.84
-Bournemouth v Brentford,1788030000,Adam Smith,3.47
-Bournemouth v Brentford,1788030000,Tyler Adams,3.06
-Bournemouth v Brentford,1788030000,Bafode Diakite,4.02
-Bournemouth v Brentford,1788030000,Juanlu Sánchez,4.7
-Bournemouth v Brentford,1788030000,Álvaro Rodríguez,2.88
-Bournemouth v Brentford,1788030000,Junior Kroupi,11.51
-Bournemouth v Brentford,1788030000,Ryan Christie,4.03
-Brentford v Bournemouth,1788030000,Michael Kayode,3.96
-Brentford v Bournemouth,1788030000,Kevin Schade,4.63
-Brentford v Bournemouth,1788030000,Dango Ouattara,5.15
-Brentford v Bournemouth,1788030000,Nathan Collins,8.28
-Brentford v Bournemouth,1788030000,Keane Lewis-Potter,5.33
-Brentford v Bournemouth,1788030000,Kristoffer Ajer,4.76
-Brentford v Bournemouth,1788030000,Mamadou Sangaré,4.26
-Brentford v Bournemouth,1788030000,Igor Thiago,4.64
-Brentford v Bournemouth,1788030000,Mathias Jensen,6.75
-Brentford v Bournemouth,1788030000,Vitaly Janelt,3.61
-Brentford v Bournemouth,1788030000,Mikkel Damsgaard,7.51
-Brentford v Bournemouth,1788030000,Yehor Yarmoliuk,4.63
-Brentford v Bournemouth,1788030000,Jaidon Anthony,8.53
-Brentford v Bournemouth,1788030000,Callum Wilson,5.8
-Brentford v Bournemouth,1788030000,Sepp van den Berg,8.46
-Brighton v Coventry City,1788030000,Mats Wieffer,5.14
-Brighton v Coventry City,1788030000,Diego Gomez,4.0
-Brighton v Coventry City,1788030000,Georginio Rutter,6.27
-Brighton v Coventry City,1788030000,Maxim De Cuyper,5.3
-Brighton v Coventry City,1788030000,Luka Vušković,4.52
-Brighton v Coventry City,1788030000,Lewis Dunk,3.91
-Brighton v Coventry City,1788030000,Pascal Gross,5.45
-Brighton v Coventry City,1788030000,Yasin Ayari,5.29
-Brighton v Coventry City,1788030000,Olivier Boscagli,5.31
-Brighton v Coventry City,1788030000,Ferdi Kadioglu,5.08
-Brighton v Coventry City,1788030000,Jack Hinshelwood,6.34
-Brighton v Coventry City,1788030000,Pascal Struijk,6.64
-Brighton v Coventry City,1788030000,Costinha,6.16
-Brighton v Coventry City,1788030000,Promise David,8.42
-Brighton v Coventry City,1788030000,Charalampos Kostoulas,5.6
-Brighton v Coventry City,1788030000,Kaoru Mitoma,7.97
-Brighton v Coventry City,1788030000,Yankuba Minteh,4.21
-Chelsea v Hull City,1788030000,Joao Pedro,6.69
-Chelsea v Hull City,1788030000,Cole Palmer,6.6
-Chelsea v Hull City,1788030000,Morgan Rogers,5.13
-Chelsea v Hull City,1788030000,Levi Samuels Colwill,5.2
-Chelsea v Hull City,1788030000,Maxence Lacroix,5.94
-Chelsea v Hull City,1788030000,Reece James,4.04
-Chelsea v Hull City,1788030000,Jorrel Hato,3.71
-Chelsea v Hull City,1788030000,Moises Caicedo,4.04
-Chelsea v Hull City,1788030000,Roméo Lavia,4.2
-Chelsea v Hull City,1788030000,Wesley Fofana,4.12
-Chelsea v Hull City,1788030000,Josh Acheampong,4.49
-Man City v Man Utd,1788030000,Enzo Fernandez,9.24
-Chelsea v Hull City,1788030000,Pedro Neto,5.42
-Chelsea v Hull City,1788030000,Estevao,4.03
-Chelsea v Hull City,1788030000,Marco Palestra,5.49
-Chelsea v Hull City,1788030000,Pep Chavarría,5.62
-Chelsea v Hull City,1788030000,Danny Welbeck,6.83
-Chelsea v Hull City,1788030000,Jamie Gittens,6.53
-Coventry City v Brighton,1788030000,Matt Grimes,5.98
-Coventry City v Brighton,1788030000,Milan van Ewijk,5.14
-Coventry City v Brighton,1788030000,Aurèle Amenda,4.6
-Coventry City v Brighton,1788030000,Bobby Thomas,4.47
-Coventry City v Brighton,1788030000,Caleb Yirenkyi,3.6
-Coventry City v Brighton,1788030000,Jay Dasilva,5.03
-Coventry City v Brighton,1788030000,Loum Tchaouna,7.31
-Coventry City v Brighton,1788030000,Frank Onyeka,3.72
-Coventry City v Brighton,1788030000,Taiwo Awoniyi,9.53
-Coventry City v Brighton,1788030000,Brandon Thomas-Asante,6.44
-Coventry City v Brighton,1788030000,Ellis Simms,9.24
-Coventry City v Brighton,1788030000,Victor Torp,4.65
-Coventry City v Brighton,1788030000,Jack Rudoni,5.76
-Coventry City v Brighton,1788030000,Tatsuhiro Sakamoto,7.31
-Coventry City v Brighton,1788030000,Gustavo Hamer,3.63
-Coventry City v Brighton,1788030000,Ephron Mason-Clark,6.64
-Coventry City v Brighton,1788030000,Miguel Brau,13.76
-Coventry City v Brighton,1788030000,Sidiki Cherif,15.03
-Coventry City v Brighton,1788030000,Josh Eccles,3.34
-Coventry City v Brighton,1788030000,Kaine Kesler-Hayden,6.14
-Coventry City v Brighton,1788030000,Haji Wright,12.08
-Coventry City v Brighton,1788030000,Jake Bidwell,3.92
-Crystal Palace v Ipswich Town,1788030000,Chris Richards,7.21
-Crystal Palace v Ipswich Town,1788030000,Adam Wharton,5.75
-Crystal Palace v Ipswich Town,1788030000,Tyrick Mitchell,7.21
-Crystal Palace v Ipswich Town,1788030000,Daichi Kamada,6.43
-Crystal Palace v Ipswich Town,1788030000,Jaydee Canvot,4.97
-Crystal Palace v Ipswich Town,1788030000,Jorgen Strand Larsen,5.23
-Crystal Palace v Ipswich Town,1788030000,Yeremy Pino,5.03
-Crystal Palace v Ipswich Town,1788030000,Anan Khalaili,6.74
-Crystal Palace v Ipswich Town,1788030000,Dwight McNeil,10.36
-Crystal Palace v Ipswich Town,1788030000,Takehiro Tomiyasu,6.52
-Nott'm Forest v Aston Villa,1788030000,Daniel Munoz,6.78
-Crystal Palace v Ipswich Town,1788030000,Oscar Mingueza,9.01
-Crystal Palace v Ipswich Town,1788030000,Eddie Nketiah,5.69
-Crystal Palace v Ipswich Town,1788030000,Evann Guessand,9.68
-Crystal Palace v Ipswich Town,1788030000,Will Hughes,4.15
-Crystal Palace v Ipswich Town,1788030000,Walter Benitez,95.24
-Crystal Palace v Ipswich Town,1788030000,Justin Devenny,7.97
-Crystal Palace v Ipswich Town,1788030000,Chadi Riad,8.37
-Crystal Palace v Ipswich Town,1788030000,Ismaila Sarr,8.41
-Crystal Palace v Ipswich Town,1788030000,Jean-Philippe Mateta,7.24
-Crystal Palace v Ipswich Town,1788030000,Matheus França de Oliveira,12.49
-Everton v Spurs,1788030000,Kiernan Dewsbury-Hall,4.56
-Everton v Spurs,1788030000,Vitalii Mykolenko,5.03
-Everton v Spurs,1788030000,James Tarkowski,3.72
-Man City v Man Utd,1788030000,Iliman Ndiaye,9.46
-Everton v Spurs,1788030000,Jarrad Branthwaite,5.17
-Everton v Spurs,1788030000,Thierno Barry,4.61
-Everton v Spurs,1788030000,Hayden Hackney,3.55
-Everton v Spurs,1788030000,Tyrique George,5.27
-Everton v Spurs,1788030000,Merlin Röhl,3.64
-Everton v Spurs,1788030000,Harrison Armstrong,3.55
-Everton v Spurs,1788030000,Jake O'Brien,4.84
-Everton v Spurs,1788030000,Tyler Dibling,4.68
-Everton v Spurs,1788030000,Christian Norgaard,2.99
-Everton v Spurs,1788030000,Brennan Johnson,4.06
-Everton v Spurs,1788030000,James Garner,4.26
-Everton v Spurs,1788030000,Charly Alcaraz,3.32
-Everton v Spurs,1788030000,Beto,8.33
-Hull City v Chelsea,1788030000,Tim Iroegbunam,4.6
-Everton v Spurs,1788030000,Michael Keane,4.82
-Fulham v Liverpool,1788030000,Alex Iwobi,9.83
-Fulham v Liverpool,1788030000,Antonee Robinson,4.53
-Fulham v Liverpool,1788030000,Calvin Bassey,5.1
-Fulham v Liverpool,1788030000,Gonzalo García,6.86
-Fulham v Liverpool,1788030000,Sander Berge,4.68
-Fulham v Liverpool,1788030000,Timothy Castagne,5.6
-Fulham v Liverpool,1788030000,Oscar Bobb,8.8
-Fulham v Liverpool,1788030000,Joachim Andersen,5.26
-Fulham v Liverpool,1788030000,Josh King,4.75
-Fulham v Liverpool,1788030000,César Palacios,6.05
-Fulham v Liverpool,1788030000,Kevin,6.88
-Fulham v Liverpool,1788030000,Emile Smith Rowe,8.43
-Fulham v Liverpool,1788030000,Rodrigo Muniz,4.68
-Fulham v Liverpool,1788030000,Kenny Tete,4.57
-Fulham v Liverpool,1788030000,Shea Charles,5.52
-Fulham v Liverpool,1788030000,Jorge Cuenca,6.34
-Fulham v Liverpool,1788030000,Ryan Sessegnon,6.22
-Hull City v Chelsea,1788030000,Oli McBurnie,4.27
-Hull City v Chelsea,1788030000,Regan Slater,4.55
-Hull City v Chelsea,1788030000,Nobel Mendy,3.63
-Hull City v Chelsea,1788030000,Mohamed Belloumi,5.59
-Hull City v Chelsea,1788030000,Elliot Stroud,5.35
-Hull City v Chelsea,1788030000,Ryan Giles,5.7
-Hull City v Chelsea,1788030000,Matt Crooks,3.01
-Hull City v Chelsea,1788030000,John Egan,5.23
-Hull City v Chelsea,1788030000,Semi Ajayi,5.1
-Hull City v Chelsea,1788030000,Lewie Coyle,3.73
-Hull City v Chelsea,1788030000,Cody Drameh,5.17
-Hull City v Chelsea,1788030000,Lucas Gourna-Douath,3.71
-Hull City v Chelsea,1788030000,Jens Hjertø-Dahl,6.05
-Hull City v Chelsea,1788030000,Liam Millar,2.92
-Hull City v Chelsea,1788030000,Matt Targett,5.49
-Hull City v Chelsea,1788030000,Kieran Dowell,3.42
-Hull City v Chelsea,1788030000,Abdülkadir Ömür,5.15
-Hull City v Chelsea,1788030000,Joe Gelhardt,5.15
-Hull City v Chelsea,1788030000,Hidemasa Morita,4.57
-Hull City v Chelsea,1788030000,David Akintola,5.15
-Hull City v Chelsea,1788030000,Charlie Hughes,3.92
-Hull City v Chelsea,1788030000,Óscar Zambrano,3.96
-Ipswich Town v Crystal Palace,1788030000,Dara O'Shea,5.24
-Ipswich Town v Crystal Palace,1788030000,Jacob Greaves,4.03
-Ipswich Town v Crystal Palace,1788030000,Leif Davis,5.17
-Ipswich Town v Crystal Palace,1788030000,Sasa Lukic,2.74
-Ipswich Town v Crystal Palace,1788030000,Issa Diop,3.62
-Ipswich Town v Crystal Palace,1788030000,Daizen Maeda,4.14
-Ipswich Town v Crystal Palace,1788030000,Emersonn Correia da Silva,5.19
-Ipswich Town v Crystal Palace,1788030000,Julio Enciso,9.32
-Ipswich Town v Crystal Palace,1788030000,Marcelino Núñez,4.37
-Ipswich Town v Crystal Palace,1788030000,Abdul Fatawu,4.14
-Ipswich Town v Crystal Palace,1788030000,Sindre Walle Egeli,3.58
-Ipswich Town v Crystal Palace,1788030000,Jack Clarke,3.31
-Ipswich Town v Crystal Palace,1788030000,Florentino,2.8
-Ipswich Town v Crystal Palace,1788030000,Jack Taylor,3.73
-Ipswich Town v Crystal Palace,1788030000,Abdoul Ouattara,9.06
-Ipswich Town v Crystal Palace,1788030000,Darnell Furlong,3.22
-Ipswich Town v Crystal Palace,1788030000,Chiedozie Ogbene,8.91
-Ipswich Town v Crystal Palace,1788030000,Anis Mehmeti,3.31
-Ipswich Town v Crystal Palace,1788030000,Chuba Akpom,3.58
-Ipswich Town v Crystal Palace,1788030000,Jaden Philogene,3.73
-Ipswich Town v Crystal Palace,1788030000,George Hirst,8.95
-Ipswich Town v Crystal Palace,1788030000,Ben Johnson,9.06
-Ipswich Town v Crystal Palace,1788030000,Cédric Kipré,3.62
-Ipswich Town v Crystal Palace,1788030000,Azor Matusiwa,2.8
-Leeds v Newcastle,1788030000,Ethan Ampadu,4.24
-Leeds v Newcastle,1788030000,Jayden Bogle,4.25
-Leeds v Newcastle,1788030000,Dominic Calvert-Lewin,8.52
-Leeds v Newcastle,1788030000,Joe Rodon,7.38
-Leeds v Newcastle,1788030000,Jaka Bijol,4.25
-Leeds v Newcastle,1788030000,Tarik Muharemović,4.66
-Leeds v Newcastle,1788030000,James Justin,5.97
-Leeds v Newcastle,1788030000,Anton Stach,5.82
-Leeds v Newcastle,1788030000,Harry Wilson,4.6
-Leeds v Newcastle,1788030000,Brenden Aaronson,5.7
-Leeds v Newcastle,1788030000,Noah Okafor,8.63
-Leeds v Newcastle,1788030000,Ao Tanaka,7.34
-Leeds v Newcastle,1788030000,Nico Elvedi,5.22
-Leeds v Newcastle,1788030000,Sean Longstaff,7.19
-Leeds v Newcastle,1788030000,Gabriel Gudmundsson,6.05
-Leeds v Newcastle,1788030000,Wilfried Gnonto,7.03
-Liverpool v Fulham,1788030000,Jeremie Frimpong,4.68
-Liverpool v Fulham,1788030000,Milos Kerkez,5.05
-Liverpool v Fulham,1788030000,Alexander Isak,9.95
-Liverpool v Fulham,1788030000,Virgil van Dijk,6.91
-Liverpool v Fulham,1788030000,Ryan Gravenberch,5.33
-Liverpool v Fulham,1788030000,Florian Wirtz,5.87
-Liverpool v Fulham,1788030000,Dominik Szoboszlai,5.65
-Liverpool v Fulham,1788030000,Jeremy Jacquet,5.75
-Liverpool v Fulham,1788030000,Rio Ngumoha,5.98
-Liverpool v Fulham,1788030000,Cody Gakpo,8.04
-Liverpool v Fulham,1788030000,Alexis Mac Allister,4.52
-Liverpool v Fulham,1788030000,Victor Munoz,7.93
-Liverpool v Fulham,1788030000,Ronald Araujo,4.79
-Liverpool v Fulham,1788030000,Harvey Elliott,9.78
-Liverpool v Fulham,1788030000,Bradley Barcola,9.78
-Liverpool v Fulham,1788030000,Conor Bradley,8.62
-Liverpool v Fulham,1788030000,Hugo Ekitike,10.61
-Man City v Man Utd,1788030000,Antoine Semenyo,5.5
-Man City v Man Utd,1788030000,Erling Haaland,6.94
-Man City v Man Utd,1788030000,Phil Foden,8.53
-Man City v Man Utd,1788030000,Ruben Dias,6.0
-Man City v Man Utd,1788030000,Elliot Anderson,5.21
-Man City v Man Utd,1788030000,Josko Gvardiol,5.65
-Man City v Man Utd,1788030000,Nico O'Reilly,5.52
-Man City v Man Utd,1788030000,Rayan Cherki,7.01
-Man City v Man Utd,1788030000,Abduqodir Khusanov,4.79
-Man City v Man Utd,1788030000,Marc Guehi,7.36
-Man City v Man Utd,1788030000,Matheus Nunes,5.21
-Man City v Man Utd,1788030000,Rayan Ait Nouri,5.52
-Man City v Man Utd,1788030000,Jeremy Doku,7.86
-Man City v Man Utd,1788030000,Mateo Kovačić,4.8
-Man City v Man Utd,1788030000,Tijjani Reijnders,9.89
-Man City v Man Utd,1788030000,Rodri,9.89
-Man Utd v Man City,1788030000,Bruno Fernandes,4.51
-Man Utd v Man City,1788030000,Bryan Mbeumo,7.22
-Man Utd v Man City,1788030000,Matheus Cunha,5.24
-Man Utd v Man City,1788030000,Luke Shaw,3.16
-Man Utd v Man City,1788030000,Lisandro Martinez,4.66
-Man Utd v Man City,1788030000,Marcus Rashford,8.82
-Man Utd v Man City,1788030000,Youri Tielemans,4.81
-Man Utd v Man City,1788030000,Andrey Santos,3.51
-Man Utd v Man City,1788030000,Harry Maguire,4.14
-Man Utd v Man City,1788030000,Ayden Heaven,5.08
-Man Utd v Man City,1788030000,Kobbie Mainoo,5.41
-Man Utd v Man City,1788030000,Noussair Mazraoui,5.08
-Man Utd v Man City,1788030000,Diogo Dalot,4.43
-Man Utd v Man City,1788030000,Benjamin Sesko,6.64
-Man Utd v Man City,1788030000,Leny Yoro,6.01
-Man Utd v Man City,1788030000,Mason Mount,4.91
-Man Utd v Man City,1788030000,Patrick Dorgu,5.21
-Man Utd v Man City,1788030000,Matthijs de Ligt,6.01
-Man Utd v Man City,1788030000,Amad Diallo,6.54
-Man Utd v Man City,1788030000,Joshua Zirkzee,6.64
-Newcastle v Leeds,1788030000,Malick Thiaw,4.85
-Newcastle v Leeds,1788030000,Lewis Hall,4.96
-Newcastle v Leeds,1788030000,Sven Botman,5.72
-Newcastle v Leeds,1788030000,Amar Dedic,3.81
-Newcastle v Leeds,1788030000,Anthony Elanga,9.51
-Newcastle v Leeds,1788030000,Yoane Wissa,5.6
-Newcastle v Leeds,1788030000,Nick Woltemade,7.44
-Newcastle v Leeds,1788030000,Harvey Barnes,8.15
-Newcastle v Leeds,1788030000,Jacob Ramsey,4.46
-Newcastle v Leeds,1788030000,Lewis Miley,6.02
-Newcastle v Leeds,1788030000,Sean Steur,5.05
-Newcastle v Leeds,1788030000,Bazoumana Touré,6.02
-Newcastle v Leeds,1788030000,Aladji Bamba,3.89
-Newcastle v Leeds,1788030000,Dan Burn,3.57
-Newcastle v Leeds,1788030000,Jacob Murphy,5.66
-Newcastle v Leeds,1788030000,Fabian Schar,3.86
-Newcastle v Leeds,1788030000,Tino Livramento,6.81
-Newcastle v Leeds,1788030000,Joe Willock,5.24
-Newcastle v Leeds,1788030000,Nico Gonzalez,5.7
-Newcastle v Leeds,1788030000,Joelinton,3.3
-Newcastle v Leeds,1788030000,William Osula,7.73
-Nott'm Forest v Aston Villa,1788030000,Neco Williams,4.54
-Nott'm Forest v Aston Villa,1788030000,Nikola Milenkovic,5.41
-Nott'm Forest v Aston Villa,1788030000,Morgan Gibbs-White,5.48
-Nott'm Forest v Aston Villa,1788030000,Igor Jesus,5.13
-Nott'm Forest v Aston Villa,1788030000,Murillo dos Santos,5.75
-Nott'm Forest v Aston Villa,1788030000,Ola Aina,4.45
-Nott'm Forest v Aston Villa,1788030000,Dan Ndoye,6.46
-Nott'm Forest v Aston Villa,1788030000,James McAtee,8.14
-Nott'm Forest v Aston Villa,1788030000,Ousmane Diomande,5.99
-Nott'm Forest v Aston Villa,1788030000,Xaver Schlager,4.42
-Nott'm Forest v Aston Villa,1788030000,Nicolas Dominguez,3.67
-Nott'm Forest v Aston Villa,1788030000,Liam Delap,10.97
-Nott'm Forest v Aston Villa,1788030000,Omari Hutchinson,9.02
-Nott'm Forest v Aston Villa,1788030000,Chris Wood,10.42
-Nott'm Forest v Aston Villa,1788030000,Callum Hudson-Odoi,9.93
-Nott'm Forest v Aston Villa,1788030000,Arnaud Kalimuendo,9.17
-Nott'm Forest v Aston Villa,1788030000,Ryan Yates,3.67
-Nott'm Forest v Aston Villa,1788030000,Felipe Rodrigues da Silva,15.76
-Nott'm Forest v Aston Villa,1788030000,Jair Paula da Cunha Filho,4.59
-Nott'm Forest v Aston Villa,1788030000,Ibrahim Sangare,4.33
-Nott'm Forest v Aston Villa,1788030000,Nicolo Savona,8.49
-Spurs v Everton,1788030000,Sandro Tonali,3.95
-Spurs v Everton,1788030000,Jan Paul van Hecke,4.94
-Spurs v Everton,1788030000,Pedro Porro,4.71
-Spurs v Everton,1788030000,Sávio,22.05
-Spurs v Everton,1788030000,Mateus Fernandes,4.18
-Spurs v Everton,1788030000,Andrew Robertson,3.87
-Spurs v Everton,1788030000,Conor Gallagher,3.93
-Spurs v Everton,1788030000,Richarlison,3.7
-Spurs v Everton,1788030000,Mathys Tel,5.9
-Spurs v Everton,1788030000,Micky van de Ven,5.32
-Spurs v Everton,1788030000,Marcos Senesi,3.76
-Spurs v Everton,1788030000,Archie Gray,5.24
-Spurs v Everton,1788030000,Dominic Solanke,9.66
-Spurs v Everton,1788030000,Pape Matar Sarr,7.31
-Spurs v Everton,1788030000,Omar Marmoush,10.46
-Spurs v Everton,1788030000,Lucas Bergvall,4.11
-Spurs v Everton,1788030000,Destiny Udogie,4.41
-Spurs v Everton,1788030000,Rodrigo Bentancur,3.46
-Spurs v Everton,1788030000,Mikey Moore,13.28
-Spurs v Everton,1788030000,Ben Davies,5.3
-Spurs v Everton,1788030000,James Maddison,5.28
-Spurs v Everton,1788030000,Mohammed Kudus,6.96
-Spurs v Everton,1788030000,Xavi Simons,13.63
-Sunderland v Arsenal,1788030000,Dan Ballard,4.48
-Sunderland v Arsenal,1788030000,Granit Xhaka,4.63
-Sunderland v Arsenal,1788030000,Enzo Le Fee,5.63
-Sunderland v Arsenal,1788030000,Noah Sadiki,4.46
-Sunderland v Arsenal,1788030000,Trai Hume,3.86
-Sunderland v Arsenal,1788030000,Luke O'Nien,3.35
-Sunderland v Arsenal,1788030000,Brian Brobbey,3.7
-Sunderland v Arsenal,1788030000,Reinildo Mandava,3.65
-Sunderland v Arsenal,1788030000,Nilson Angulo,4.94
-Sunderland v Arsenal,1788030000,Thomas Meunier,4.28
-Sunderland v Arsenal,1788030000,Chemsdine Talbi,6.71
-Sunderland v Arsenal,1788030000,Chris Rigg,4.38
-Sunderland v Arsenal,1788030000,Habib Diarra,4.66
-Sunderland v Arsenal,1788030000,Wilson Isidor,5.03
-Sunderland v Arsenal,1788030000,Omar Alderete,4.95
-Sunderland v Arsenal,1788030000,Nordi Mukiele,4.48
-Sunderland v Arsenal,1788030000,Arthur Masuaku,11.03
-Sunderland v Arsenal,1788030000,Romaine Mundle,6.44
-Sunderland v Arsenal,1788030000,Simon Adingra,9.0
-Everton v Spurs,1788030000,Jack Grealish,6.64
-Aston Villa v Nott'm Forest,1788030000,Leon Goretzka,9.38
-Arsenal v Sunderland,1788030000,Mikel Merino,4.14
-Brighton v Coventry City,1788030000,Matt O'Riley,9.17
-Newcastle v Leeds,1788030000,Matias Fernandez-Pardo,10.13
-Leeds v Newcastle,1788030000,Lukas Nmecha,7.61
-Ipswich Town v Crystal Palace,1788030000,Zian Flemming,8.95
-Crystal Palace v Ipswich Town,1788030000,Darío Osorio,12.49
-Sunderland v Arsenal,1788030000,Kevin Danso,4.11
-Crystal Palace v Ipswich Town,1788030000,Axel Disasi,10.38
-Brighton v Coventry City,1788030000,Malick Yalcouyé,4.82
-Aston Villa v Nott'm Forest,1788030000,Taylor Harwood-Bellis,9.62
-Chelsea v Hull City,1788030000,Malo Gusto,4.77
-Ipswich Town v Crystal Palace,1788030000,Exequiel Palacios,9.32
-Man City v Man Utd,1788030000,Ayyoub Bouaddi,10.84
-Sunderland v Arsenal,1788030000,Malick Fofana,10.27
+Arsenal v Leeds,1788030000,Bukayo Saka,7.21
+Arsenal v Leeds,1788030000,Christos Tzolis,7.35
+Arsenal v Leeds,1788030000,Declan Rice,6.75
+Arsenal v Leeds,1788030000,Ezri Konsa,7.56
+Arsenal v Leeds,1788030000,Gabriel Magalhaes,6.86
+Arsenal v Leeds,1788030000,Kai Havertz,5.43
+Arsenal v Leeds,1788030000,Martin Odegaard,8.93
+Arsenal v Leeds,1788030000,Myles Lewis-Skelly,4.51
+Arsenal v Leeds,1788030000,Riccardo Calafiori,4.75
+Arsenal v Leeds,1788030000,Ben White,5.37
+Arsenal v Leeds,1788030000,Jurrien Timber,11.12
+Arsenal v Leeds,1788030000,Bruno Guimaraes,4.2
+Arsenal v Leeds,1788030000,Cristhian Mosquera,5.55
+Arsenal v Leeds,1788030000,Eberechi Eze,11.41
+Arsenal v Leeds,1788030000,Ethan Nwaneri,11.45
+Arsenal v Leeds,1788030000,Fabio Vieira,11.45
+Arsenal v Leeds,1788030000,Gabriel Jesus,11.4
+Arsenal v Leeds,1788030000,Gabriel Martinelli,11.45
+Arsenal v Leeds,1788030000,Martin Zubimendi,4.58
+Arsenal v Leeds,1788030000,Max Dowman,7.3
+Arsenal v Leeds,1788030000,Mikel Merino,4.58
+Arsenal v Leeds,1788030000,Noni Madueke,11.45
+Arsenal v Leeds,1788030000,Piero Hincapie,4.77
+Arsenal v Leeds,1788030000,Reiss Nelson,11.45
+Arsenal v Leeds,1788030000,Viktor Gyokeres,7.15
+Arsenal v Leeds,1788030000,William Saliba,11.53
+Aston Villa v Brentford,1788030000,Boubacar Kamara,3.43
+Aston Villa v Brentford,1788030000,Emiliano Buendia,3.63
+Aston Villa v Brentford,1788030000,George Hemmings,4.17
+Aston Villa v Brentford,1788030000,Ian Maatsen,4.09
+Aston Villa v Brentford,1788030000,Joao Gomes,3.5
+Aston Villa v Brentford,1788030000,John McGinn,4.04
+Aston Villa v Brentford,1788030000,Nicolas Jackson,4.83
+Aston Villa v Brentford,1788030000,Victor Lindelof,7.21
+Aston Villa v Brentford,1788030000,Matty Cash,3.89
+Aston Villa v Brentford,1788030000,Tyrone Mings,5.89
+Aston Villa v Brentford,1788030000,Aaron Wan-Bissaka,4.63
+Aston Villa v Brentford,1788030000,Pau Torres,8.83
+Aston Villa v Brentford,1788030000,Ross Barkley,5.34
+Aston Villa v Brentford,1788030000,Johan Manzambi,5.59
+Aston Villa v Brentford,1788030000,Alejandro Garnacho,7.87
+Aston Villa v Brentford,1788030000,Alysson Edward Franco da Rocha dos Santos,7.35
+Aston Villa v Brentford,1788030000,Amadou Onana,9.63
+Aston Villa v Brentford,1788030000,Andrés García,9.79
+Aston Villa v Brentford,1788030000,Bradley Burrowes,9.07
+Aston Villa v Brentford,1788030000,Brian Madjo,4.92
+Aston Villa v Brentford,1788030000,Ibrahim Mbaye,6.24
+Aston Villa v Brentford,1788030000,Kosta Nedeljkovic,9.5
+Aston Villa v Brentford,1788030000,Lamare Bogarde,4.01
+Aston Villa v Brentford,1788030000,Leon Bailey,9.63
+Aston Villa v Brentford,1788030000,Leon Goretzka,9.35
+Aston Villa v Brentford,1788030000,Lucas Digne,9.79
+Aston Villa v Brentford,1788030000,Luka Lynch,9.35
+Aston Villa v Brentford,1788030000,Matteo Ruggeri,4.63
+Aston Villa v Brentford,1788030000,Ollie Watkins,9.33
+Aston Villa v Brentford,1788030000,Samuel Iling-Junior,9.63
+Aston Villa v Brentford,1788030000,Tammy Abraham,6.26
+Aston Villa v Brentford,1788030000,Taylor Harwood-Bellis,5.11
+Aston Villa v Brentford,1788030000,Triston Rowe,9.5
+Bournemouth v Chelsea,1788030000,Adam Smith,3.94
+Bournemouth v Chelsea,1788030000,Adrien Truffert,5.36
+Bournemouth v Chelsea,1788030000,Alex Scott,3.37
+Bournemouth v Chelsea,1788030000,António João Pereira de Albuquerque Tavares da Silva,4.8
+Bournemouth v Chelsea,1788030000,Evanilson,6.75
+Bournemouth v Chelsea,1788030000,James Hill,5.45
+Bournemouth v Chelsea,1788030000,Justin Kluivert,4.63
+Bournemouth v Chelsea,1788030000,Marcus Tavernier,6.12
+Bournemouth v Chelsea,1788030000,Rayan,6.27
+Bournemouth v Chelsea,1788030000,Tyler Adams,3.46
+Bournemouth v Chelsea,1788030000,Ryan Christie,4.49
+Bournemouth v Chelsea,1788030000,Alex Tóth,6.55
+Bournemouth v Chelsea,1788030000,Amine Adli,4.52
+Bournemouth v Chelsea,1788030000,Bafode Diakite,4.44
+Bournemouth v Chelsea,1788030000,Ben Gannon-Doak,5.69
+Bournemouth v Chelsea,1788030000,Daniel Jebbison,5.2
+Bournemouth v Chelsea,1788030000,David Brooks,6.12
+Bournemouth v Chelsea,1788030000,Enes Ünal,9.73
+Bournemouth v Chelsea,1788030000,Juanlu Sánchez,5.13
+Bournemouth v Chelsea,1788030000,Julian Araujo,5.22
+Bournemouth v Chelsea,1788030000,Julio Soler Barreto,3.7
+Bournemouth v Chelsea,1788030000,Junior Kroupi,9.75
+Bournemouth v Chelsea,1788030000,Lewis Cook,5.79
+Bournemouth v Chelsea,1788030000,Veljko Milosavljevic,3.35
+Bournemouth v Chelsea,1788030000,Álvaro Rodríguez,3.36
+Brentford v Aston Villa,1788030000,Dango Ouattara,5.12
+Brentford v Aston Villa,1788030000,Igor Thiago,4.24
+Brentford v Aston Villa,1788030000,Keane Lewis-Potter,5.02
+Brentford v Aston Villa,1788030000,Kevin Schade,4.5
+Brentford v Aston Villa,1788030000,Kristoffer Ajer,4.65
+Brentford v Aston Villa,1788030000,Mamadou Sangaré,4.16
+Brentford v Aston Villa,1788030000,Michael Kayode,3.85
+Brentford v Aston Villa,1788030000,Mikkel Damsgaard,7.86
+Brentford v Aston Villa,1788030000,Vitaly Janelt,3.58
+Brentford v Aston Villa,1788030000,Jannik Schuster,4.19
+Brentford v Aston Villa,1788030000,Nathan Collins,5.28
+Brentford v Aston Villa,1788030000,Aaron Hickey,3.96
+Brentford v Aston Villa,1788030000,Antoni Milambo,8.42
+Brentford v Aston Villa,1788030000,Callum Wilson,5.94
+Brentford v Aston Villa,1788030000,El Hadji Malick Diouf,4.49
+Brentford v Aston Villa,1788030000,Fabio Carvalho,6.39
+Brentford v Aston Villa,1788030000,Jaidon Anthony,8.36
+Brentford v Aston Villa,1788030000,Josh Dasilva,6.32
+Brentford v Aston Villa,1788030000,Kaye Furo,8.39
+Brentford v Aston Villa,1788030000,Kim Ji-soo,8.3
+Brentford v Aston Villa,1788030000,Mathias Jensen,6.39
+Brentford v Aston Villa,1788030000,Rico Henry,7.8
+Brentford v Aston Villa,1788030000,Sepp van den Berg,8.3
+Brentford v Aston Villa,1788030000,Yehor Yarmoliuk,4.61
+Brighton v Sunderland,1788030000,Diego Gomez,3.57
+Brighton v Sunderland,1788030000,Ferdi Kadioglu,4.99
+Brighton v Sunderland,1788030000,Lewis Dunk,3.64
+Brighton v Sunderland,1788030000,Luka Vušković,4.35
+Brighton v Sunderland,1788030000,Malick Yalcouyé,3.66
+Brighton v Sunderland,1788030000,Olivier Boscagli,4.89
+Brighton v Sunderland,1788030000,Pascal Gross,5.17
+Brighton v Sunderland,1788030000,Yasin Ayari,4.92
+Brighton v Sunderland,1788030000,Maxim De Cuyper,4.85
+Brighton v Sunderland,1788030000,Georginio Rutter,4.99
+Brighton v Sunderland,1788030000,Charalampos Kostoulas,4.79
+Brighton v Sunderland,1788030000,Jaouen Hadjam,7.71
+Brighton v Sunderland,1788030000,Amario Cozier-Duberry,9.83
+Brighton v Sunderland,1788030000,Costinha,4.85
+Brighton v Sunderland,1788030000,Diego Coppola,9.16
+Brighton v Sunderland,1788030000,Evan Ferguson,9.16
+Brighton v Sunderland,1788030000,Facundo Buonanotte,9.18
+Brighton v Sunderland,1788030000,Femi Azeez,9.83
+Brighton v Sunderland,1788030000,Harry Howell,9.18
+Brighton v Sunderland,1788030000,Ibrahim Osman,5.28
+Brighton v Sunderland,1788030000,Igor Julio,9.16
+Brighton v Sunderland,1788030000,Jack Hinshelwood,8.53
+Brighton v Sunderland,1788030000,José María Andrés Baixauli,9.83
+Brighton v Sunderland,1788030000,Kaoru Mitoma,8.53
+Brighton v Sunderland,1788030000,Mats Wieffer,4.74
+Brighton v Sunderland,1788030000,Matt O'Riley,8.98
+Brighton v Sunderland,1788030000,Michael Svoboda,5.26
+Brighton v Sunderland,1788030000,Nehemiah Oriola,9.16
+Brighton v Sunderland,1788030000,Pascal Struijk,5.26
+Brighton v Sunderland,1788030000,Promise David,4.66
+Brighton v Sunderland,1788030000,Stefanos Tzimas,9.16
+Brighton v Sunderland,1788030000,Tom Watson,9.18
+Brighton v Sunderland,1788030000,Yankuba Minteh,8.53
+Brighton v Sunderland,1788030000,Zadok Yohanna,6.31
+Chelsea v Bournemouth,1788030000,Cole Palmer,6.09
+Chelsea v Bournemouth,1788030000,Joao Pedro,6.11
+Chelsea v Bournemouth,1788030000,Jorrel Hato,3.33
+Chelsea v Bournemouth,1788030000,Maxence Lacroix,5.82
+Chelsea v Bournemouth,1788030000,Morgan Rogers,4.57
+Chelsea v Bournemouth,1788030000,Pedro Neto,4.45
+Chelsea v Bournemouth,1788030000,Roméo Lavia,3.9
+Chelsea v Bournemouth,1788030000,Reece James,4.04
+Chelsea v Bournemouth,1788030000,Wesley Fofana,3.8
+Chelsea v Bournemouth,1788030000,Josh Acheampong,4.45
+Chelsea v Bournemouth,1788030000,Levi Samuels Colwill,4.87
+Chelsea v Bournemouth,1788030000,Valentín Barco,3.98
+Chelsea v Bournemouth,1788030000,Moises Caicedo,3.98
+Chelsea v Bournemouth,1788030000,Jordan Henderson,4.39
+Chelsea v Bournemouth,1788030000,Aaron Anselmino,8.43
+Chelsea v Bournemouth,1788030000,Benoit Badiashile,9.31
+Chelsea v Bournemouth,1788030000,Danny Welbeck,6.34
+Chelsea v Bournemouth,1788030000,Dário Luís Essugo,9.14
+Chelsea v Bournemouth,1788030000,Emmanuel Emegha,9.23
+Chelsea v Bournemouth,1788030000,Estevao,3.57
+Chelsea v Bournemouth,1788030000,Geovany Quenda,8.26
+Chelsea v Bournemouth,1788030000,Jamie Gittens,5.81
+Chelsea v Bournemouth,1788030000,Malang Sarr,9.31
+Chelsea v Bournemouth,1788030000,Malo Gusto,4.06
+Chelsea v Bournemouth,1788030000,Marc Guiu,9.23
+Chelsea v Bournemouth,1788030000,Marco Palestra,5.34
+Chelsea v Bournemouth,1788030000,Pep Chavarría,4.19
+Chelsea v Bournemouth,1788030000,Shumaira Mheuka,9.23
+Chelsea v Bournemouth,1788030000,Trevoh Chalobah,9.31
+Coventry City v Newcastle,1788030000,Aurèle Amenda,4.41
+Coventry City v Newcastle,1788030000,Bobby Thomas,4.28
+Coventry City v Newcastle,1788030000,Ephron Mason-Clark,6.74
+Coventry City v Newcastle,1788030000,Frank Onyeka,3.62
+Coventry City v Newcastle,1788030000,Jack Rudoni,5.61
+Coventry City v Newcastle,1788030000,Jay Dasilva,4.69
+Coventry City v Newcastle,1788030000,Matt Grimes,5.77
+Coventry City v Newcastle,1788030000,Milan van Ewijk,5.18
+Coventry City v Newcastle,1788030000,Taiwo Awoniyi,10.91
+Coventry City v Newcastle,1788030000,Ethan Pinnock,8.99
+Coventry City v Newcastle,1788030000,Jake Bidwell,3.96
+Coventry City v Newcastle,1788030000,Ellis Simms,8.41
+Coventry City v Newcastle,1788030000,Brandon Thomas-Asante,6.0
+Coventry City v Newcastle,1788030000,Caleb Yirenkyi,3.61
+Coventry City v Newcastle,1788030000,George Shepherd,13.83
+Coventry City v Newcastle,1788030000,Gustavo Hamer,3.69
+Coventry City v Newcastle,1788030000,Haji Wright,12.09
+Coventry City v Newcastle,1788030000,Jahnoah Markelo,13.26
+Coventry City v Newcastle,1788030000,Joel Latibeaudiere,4.06
+Coventry City v Newcastle,1788030000,Josh Eccles,3.33
+Coventry City v Newcastle,1788030000,Kai Andrews,15.73
+Coventry City v Newcastle,1788030000,Kaine Kesler-Hayden,11.15
+Coventry City v Newcastle,1788030000,Liam Kitching,12.34
+Coventry City v Newcastle,1788030000,Loum Tchaouna,7.11
+Coventry City v Newcastle,1788030000,Luke Woolfenden,7.11
+Coventry City v Newcastle,1788030000,Miguel Brau,13.91
+Coventry City v Newcastle,1788030000,Norman Bassette,13.26
+Coventry City v Newcastle,1788030000,Raphael Borges Rodrigues,13.83
+Coventry City v Newcastle,1788030000,Sidiki Cherif,8.08
+Coventry City v Newcastle,1788030000,Stephen Mfuni,3.58
+Coventry City v Newcastle,1788030000,Tatsuhiro Sakamoto,7.18
+Coventry City v Newcastle,1788030000,Victor Torp,4.6
+Coventry City v Newcastle,1788030000,Yann Gboho,5.73
+Crystal Palace v Nott'm Forest,1788030000,Adam Wharton,5.25
+Crystal Palace v Nott'm Forest,1788030000,Anan Khalaili,5.88
+Crystal Palace v Nott'm Forest,1788030000,Axel Disasi,9.6
+Crystal Palace v Nott'm Forest,1788030000,Chris Richards,6.72
+Crystal Palace v Nott'm Forest,1788030000,Daichi Kamada,5.96
+Crystal Palace v Nott'm Forest,1788030000,Jaydee Canvot,4.53
+Crystal Palace v Nott'm Forest,1788030000,Quinten Timber,6.79
+Crystal Palace v Nott'm Forest,1788030000,Tyrick Mitchell,6.83
+Crystal Palace v Nott'm Forest,1788030000,Yeremy Pino,4.47
+Crystal Palace v Nott'm Forest,1788030000,Eddie Nketiah,5.39
+Crystal Palace v Nott'm Forest,1788030000,Jorgen Strand Larsen,4.99
+Crystal Palace v Nott'm Forest,1788030000,Ben Chilwell,6.87
+Crystal Palace v Nott'm Forest,1788030000,Borna Sosa,11.09
+Crystal Palace v Nott'm Forest,1788030000,Chadi Riad,11.09
+Crystal Palace v Nott'm Forest,1788030000,Cheick Doucoure,3.43
+Crystal Palace v Nott'm Forest,1788030000,Christantus Uche,11.51
+Crystal Palace v Nott'm Forest,1788030000,Darío Osorio,5.98
+Crystal Palace v Nott'm Forest,1788030000,Dwight McNeil,10.49
+Crystal Palace v Nott'm Forest,1788030000,Evann Guessand,9.16
+Crystal Palace v Nott'm Forest,1788030000,Honest Ahanor,6.44
+Crystal Palace v Nott'm Forest,1788030000,Ismaila Sarr,9.16
+Crystal Palace v Nott'm Forest,1788030000,Jean-Philippe Mateta,9.74
+Crystal Palace v Nott'm Forest,1788030000,Jefferson Lerma,3.03
+Crystal Palace v Nott'm Forest,1788030000,Jesurun Rak-Sakyi,8.7
+Crystal Palace v Nott'm Forest,1788030000,Joél Drakes-Thomas,11.46
+Crystal Palace v Nott'm Forest,1788030000,Justin Devenny,10.94
+Crystal Palace v Nott'm Forest,1788030000,Matheus França de Oliveira,11.46
+Crystal Palace v Nott'm Forest,1788030000,Oscar Mingueza,8.36
+Crystal Palace v Nott'm Forest,1788030000,Rio Cardines,11.67
+Crystal Palace v Nott'm Forest,1788030000,Romain Esse,10.94
+Crystal Palace v Nott'm Forest,1788030000,Takehiro Tomiyasu,6.19
+Crystal Palace v Nott'm Forest,1788030000,Will Hughes,3.8
+Crystal Palace v Nott'm Forest,1788030000,Zavier Gozo,5.5
+Everton v Hull City,1788030000,Harrison Armstrong,3.81
+Everton v Hull City,1788030000,James Tarkowski,3.96
+Everton v Hull City,1788030000,Jarrad Branthwaite,5.41
+Everton v Hull City,1788030000,Kiernan Dewsbury-Hall,5.01
+Everton v Hull City,1788030000,Thierno Barry,4.75
+Everton v Hull City,1788030000,Tyrique George,5.82
+Everton v Hull City,1788030000,Vitalii Mykolenko,5.27
+Everton v Hull City,1788030000,Merlin Röhl,3.97
+Everton v Hull City,1788030000,James Garner,4.13
+Everton v Hull City,1788030000,Brennan Johnson,4.31
+Everton v Hull City,1788030000,Jack Grealish,5.31
+Everton v Hull City,1788030000,Hayden Hackney,3.81
+Everton v Hull City,1788030000,Ainsley Maitland-Niles,4.34
+Everton v Hull City,1788030000,Christian Norgaard,3.3
+Everton v Hull City,1788030000,Adam Aznou,9.16
+Everton v Hull City,1788030000,Beto,9.23
+Everton v Hull City,1788030000,Braiden Graham,6.03
+Everton v Hull City,1788030000,Charly Alcaraz,3.61
+Everton v Hull City,1788030000,Jake O'Brien,4.96
+Everton v Hull City,1788030000,Michael Keane,5.57
+Everton v Hull City,1788030000,Nathan Patterson,9.16
+Everton v Hull City,1788030000,Tyler Dibling,5.05
+Fulham v Ipswich Town,1788030000,Alex Iwobi,9.28
+Fulham v Ipswich Town,1788030000,Antonee Robinson,4.42
+Fulham v Ipswich Town,1788030000,Calvin Bassey,4.91
+Fulham v Ipswich Town,1788030000,Gonzalo García,6.38
+Fulham v Ipswich Town,1788030000,Joachim Andersen,5.14
+Fulham v Ipswich Town,1788030000,Josh King,4.85
+Fulham v Ipswich Town,1788030000,Oscar Bobb,9.28
+Fulham v Ipswich Town,1788030000,Shea Charles,4.4
+Fulham v Ipswich Town,1788030000,Timothy Castagne,5.32
+Fulham v Ipswich Town,1788030000,César Palacios,6.54
+Fulham v Ipswich Town,1788030000,Sander Berge,4.74
+Fulham v Ipswich Town,1788030000,David Affengruber,7.18
+Fulham v Ipswich Town,1788030000,Emile Smith Rowe,9.01
+Fulham v Ipswich Town,1788030000,Harrison Reed,3.95
+Fulham v Ipswich Town,1788030000,Hugo Larsson,8.04
+Fulham v Ipswich Town,1788030000,Jonah Kusi-Asare,5.32
+Fulham v Ipswich Town,1788030000,Jorge Cuenca,6.35
+Fulham v Ipswich Town,1788030000,Kenny Tete,4.61
+Fulham v Ipswich Town,1788030000,Kevin,7.17
+Fulham v Ipswich Town,1788030000,Luc De Fougerolles,9.22
+Fulham v Ipswich Town,1788030000,Macaulay Zepa,9.49
+Fulham v Ipswich Town,1788030000,Manuel Ángel Morán Ibáñez,9.94
+Fulham v Ipswich Town,1788030000,Rodrigo Muniz,4.09
+Fulham v Ipswich Town,1788030000,Ryan Sessegnon,6.35
+Fulham v Ipswich Town,1788030000,Tom Cairney,9.94
+Hull City v Everton,1788030000,Elliot Stroud,4.89
+Hull City v Everton,1788030000,John Egan,5.26
+Hull City v Everton,1788030000,Lewie Coyle,3.84
+Hull City v Everton,1788030000,Lucas Gourna-Douath,3.74
+Hull City v Everton,1788030000,Mohamed Belloumi,5.55
+Hull City v Everton,1788030000,Nobel Mendy,3.56
+Hull City v Everton,1788030000,Oli McBurnie,4.24
+Hull City v Everton,1788030000,Regan Slater,4.53
+Hull City v Everton,1788030000,Ryan Giles,5.79
+Hull City v Everton,1788030000,Semi Ajayi,5.04
+Hull City v Everton,1788030000,Abdülkadir Ömür,5.01
+Hull City v Everton,1788030000,Abu Kamara,10.69
+Hull City v Everton,1788030000,Brooke Norton-Cuffy,5.26
+Hull City v Everton,1788030000,Cathal McCarthy,10.82
+Hull City v Everton,1788030000,Charlie Hughes,9.38
+Hull City v Everton,1788030000,Christos Mouzakitis,5.85
+Hull City v Everton,1788030000,Cody Drameh,7.62
+Hull City v Everton,1788030000,Darko Gyabi,9.41
+Hull City v Everton,1788030000,David Akintola,7.2
+Hull City v Everton,1788030000,Eliot Matazo,10.69
+Hull City v Everton,1788030000,Enis Destan,10.51
+Hull City v Everton,1788030000,Hidemasa Morita,4.87
+Hull City v Everton,1788030000,Ilyas Ansah,11.85
+Hull City v Everton,1788030000,Jens Hjertø-Dahl,5.21
+Hull City v Everton,1788030000,Joe Gelhardt,4.6
+Hull City v Everton,1788030000,Kieran Dowell,5.51
+Hull City v Everton,1788030000,Liam Millar,6.65
+Hull City v Everton,1788030000,Lucas Herrington,4.67
+Hull City v Everton,1788030000,Mason Burstow,10.51
+Hull City v Everton,1788030000,Matt Crooks,2.98
+Hull City v Everton,1788030000,Matt Targett,5.31
+Hull City v Everton,1788030000,Matty Jacob,10.82
+Hull City v Everton,1788030000,Mohamed-Ali Cho,6.53
+Hull City v Everton,1788030000,Paddy McNair,4.2
+Hull City v Everton,1788030000,Robinio Vaz,5.82
+Hull City v Everton,1788030000,Sorba Thomas,4.8
+Hull City v Everton,1788030000,Tim Iroegbunam,3.16
+Hull City v Everton,1788030000,Óscar Zambrano,3.94
+Ipswich Town v Fulham,1788030000,Abdul Fatawu,4.5
+Ipswich Town v Fulham,1788030000,Daizen Maeda,4.56
+Ipswich Town v Fulham,1788030000,Dara O'Shea,5.51
+Ipswich Town v Fulham,1788030000,Exequiel Palacios,3.72
+Ipswich Town v Fulham,1788030000,Issa Diop,4.06
+Ipswich Town v Fulham,1788030000,Jacob Greaves,4.62
+Ipswich Town v Fulham,1788030000,Julio Enciso,5.99
+Ipswich Town v Fulham,1788030000,Leif Davis,5.55
+Ipswich Town v Fulham,1788030000,Sasa Lukic,2.84
+Ipswich Town v Fulham,1788030000,Zian Flemming,6.0
+Ipswich Town v Fulham,1788030000,Emersonn Correia da Silva,5.6
+Ipswich Town v Fulham,1788030000,Abdoul Ouattara,4.07
+Ipswich Town v Fulham,1788030000,Ali Al-Hamadi,10.56
+Ipswich Town v Fulham,1788030000,Anis Mehmeti,3.66
+Ipswich Town v Fulham,1788030000,Azor Matusiwa,3.05
+Ipswich Town v Fulham,1788030000,Ben Johnson,10.82
+Ipswich Town v Fulham,1788030000,Cameron Humphreys,10.68
+Ipswich Town v Fulham,1788030000,Chiedozie Ogbene,10.25
+Ipswich Town v Fulham,1788030000,Chuba Akpom,4.04
+Ipswich Town v Fulham,1788030000,Cédric Kipré,4.14
+Ipswich Town v Fulham,1788030000,Darnell Furlong,3.66
+Ipswich Town v Fulham,1788030000,Florentino,3.05
+Ipswich Town v Fulham,1788030000,George Hirst,10.56
+Ipswich Town v Fulham,1788030000,Jack Clarke,4.12
+Ipswich Town v Fulham,1788030000,Jack Taylor,7.03
+Ipswich Town v Fulham,1788030000,Jaden Philogene,4.26
+Ipswich Town v Fulham,1788030000,Kasey McAteer,4.08
+Ipswich Town v Fulham,1788030000,Marcelino Núñez,4.82
+Ipswich Town v Fulham,1788030000,Sam Szmodics,11.09
+Ipswich Town v Fulham,1788030000,Sindre Walle Egeli,4.04
+Ipswich Town v Fulham,1788030000,Wes Burns,11.09
+Leeds v Arsenal,1788030000,Anton Stach,5.3
+Leeds v Arsenal,1788030000,Ao Tanaka,5.14
+Leeds v Arsenal,1788030000,Dominic Calvert-Lewin,7.74
+Leeds v Arsenal,1788030000,Ethan Ampadu,3.91
+Leeds v Arsenal,1788030000,Gabriel Gudmundsson,4.64
+Leeds v Arsenal,1788030000,James Justin,6.02
+Leeds v Arsenal,1788030000,Jayden Bogle,3.72
+Leeds v Arsenal,1788030000,Noah Okafor,6.32
+Leeds v Arsenal,1788030000,Tarik Muharemović,5.36
+Leeds v Arsenal,1788030000,Jaka Bijol,3.76
+Leeds v Arsenal,1788030000,Nico Elvedi,5.36
+Leeds v Arsenal,1788030000,Alfie Cresswell,9.0
+Leeds v Arsenal,1788030000,Brenden Aaronson,7.28
+Leeds v Arsenal,1788030000,Daniel James,6.93
+Leeds v Arsenal,1788030000,Harry Wilson,3.44
+Leeds v Arsenal,1788030000,Ilia Gruev,3.77
+Leeds v Arsenal,1788030000,Jack Harrison,8.9
+Leeds v Arsenal,1788030000,Jayden Lienou,9.07
+Leeds v Arsenal,1788030000,Jean-Mattéo Bahoya,9.0
+Leeds v Arsenal,1788030000,Joe Rodon,8.74
+Leeds v Arsenal,1788030000,Joel Piroe,9.31
+Leeds v Arsenal,1788030000,Lukas Nmecha,6.48
+Leeds v Arsenal,1788030000,Mateo Joseph Fernández-Regatillo,9.43
+Leeds v Arsenal,1788030000,Melvin Bard,5.32
+Leeds v Arsenal,1788030000,Sean Longstaff,5.32
+Leeds v Arsenal,1788030000,Sebastiaan Bornauw,8.83
+Leeds v Arsenal,1788030000,Wilfried Gnonto,8.65
+Liverpool v Man City,1788030000,Alexander Isak,9.41
+Liverpool v Man City,1788030000,Alexis Mac Allister,4.23
+Liverpool v Man City,1788030000,Dominik Szoboszlai,5.44
+Liverpool v Man City,1788030000,Florian Wirtz,5.22
+Liverpool v Man City,1788030000,Jeremy Jacquet,5.29
+Liverpool v Man City,1788030000,Milos Kerkez,4.78
+Liverpool v Man City,1788030000,Ronald Araujo,4.25
+Liverpool v Man City,1788030000,Virgil van Dijk,6.45
+Liverpool v Man City,1788030000,Cody Gakpo,7.45
+Liverpool v Man City,1788030000,Bradley Barcola,6.76
+Liverpool v Man City,1788030000,Victor Munoz,7.06
+Liverpool v Man City,1788030000,Rio Ngumoha,4.9
+Liverpool v Man City,1788030000,Ryan Gravenberch,4.63
+Liverpool v Man City,1788030000,Calvin Ramsay,9.36
+Liverpool v Man City,1788030000,Conor Bradley,9.49
+Liverpool v Man City,1788030000,Curtis Jones,9.07
+Liverpool v Man City,1788030000,Endo Wataru,4.63
+Liverpool v Man City,1788030000,Federico Chiesa,8.51
+Liverpool v Man City,1788030000,Giovanni Leoni,9.49
+Liverpool v Man City,1788030000,Harvey Elliott,9.07
+Liverpool v Man City,1788030000,Hugo Ekitike,9.54
+Liverpool v Man City,1788030000,James McConnell,8.51
+Liverpool v Man City,1788030000,Jayden Danns,9.54
+Liverpool v Man City,1788030000,Jeremie Frimpong,4.78
+Liverpool v Man City,1788030000,Joe Gomez,8.97
+Liverpool v Man City,1788030000,Kostas Tsimikas,4.37
+Liverpool v Man City,1788030000,Lewis Koumas,5.24
+Liverpool v Man City,1788030000,Stefan Bajčetić Maquieira,9.07
+Liverpool v Man City,1788030000,Trey Nyoni,6.49
+Liverpool v Man City,1788030000,Wellity Lucky,9.49
+Man City v Liverpool,1788030000,Antoine Semenyo,5.63
+Man City v Liverpool,1788030000,Elliot Anderson,5.21
+Man City v Liverpool,1788030000,Enzo Fernandez,6.52
+Man City v Liverpool,1788030000,Erling Haaland,6.93
+Man City v Liverpool,1788030000,Josko Gvardiol,5.65
+Man City v Liverpool,1788030000,Marc Guehi,7.06
+Man City v Liverpool,1788030000,Ruben Dias,5.75
+Man City v Liverpool,1788030000,Abduqodir Khusanov,4.79
+Man City v Liverpool,1788030000,Rayan Cherki,7.0
+Man City v Liverpool,1788030000,Phil Foden,8.53
+Man City v Liverpool,1788030000,Matheus Nunes,4.95
+Man City v Liverpool,1788030000,Jeremy Doku,8.52
+Man City v Liverpool,1788030000,Nico O'Reilly,6.01
+Man City v Liverpool,1788030000,Iliman Ndiaye,8.26
+Man City v Liverpool,1788030000,Allan Andrade Elias,11.21
+Man City v Liverpool,1788030000,Ayyoub Bouaddi,8.52
+Man City v Liverpool,1788030000,Claudio Echeverri,9.24
+Man City v Liverpool,1788030000,Divine Mukasa,9.88
+Man City v Liverpool,1788030000,Floyd Samba,5.14
+Man City v Liverpool,1788030000,Jeremy Monga,7.47
+Man City v Liverpool,1788030000,Kaden Braithwaite,7.56
+Man City v Liverpool,1788030000,Kalvin Phillips,9.88
+Man City v Liverpool,1788030000,Mateo Kovačić,5.39
+Man City v Liverpool,1788030000,Max Alleyne,9.96
+Man City v Liverpool,1788030000,Rayan Ait Nouri,6.01
+Man City v Liverpool,1788030000,Rico Lewis,7.49
+Man City v Liverpool,1788030000,Rodri,9.88
+Man City v Liverpool,1788030000,Ryan McAidoo,7.57
+Man City v Liverpool,1788030000,Vitor de Oliveira Nunes dos Reis,4.74
+Man Utd v Spurs,1788030000,Bruno Fernandes,5.19
+Man Utd v Spurs,1788030000,Bryan Mbeumo,8.42
+Man Utd v Spurs,1788030000,Diogo Dalot,5.63
+Man Utd v Spurs,1788030000,Lisandro Martinez,5.28
+Man Utd v Spurs,1788030000,Matheus Cunha,5.92
+Man Utd v Spurs,1788030000,Kobbie Mainoo,6.23
+Man Utd v Spurs,1788030000,Youri Tielemans,5.53
+Man Utd v Spurs,1788030000,Harry Maguire,4.67
+Man Utd v Spurs,1788030000,Luke Shaw,3.72
+Man Utd v Spurs,1788030000,Marcus Rashford,10.26
+Man Utd v Spurs,1788030000,Noussair Mazraoui,6.07
+Man Utd v Spurs,1788030000,Benjamin Sesko,8.25
+Man Utd v Spurs,1788030000,Carlos Baleba,10.32
+Man Utd v Spurs,1788030000,Leny Yoro,7.23
+Man Utd v Spurs,1788030000,Amad Diallo,9.66
+Man Utd v Spurs,1788030000,Andrey Santos,4.13
+Man Utd v Spurs,1788030000,Ayden Heaven,6.07
+Man Utd v Spurs,1788030000,Bendito Mantato,10.26
+Man Utd v Spurs,1788030000,Chido Obi,10.34
+Man Utd v Spurs,1788030000,Harry Amass,8.98
+Man Utd v Spurs,1788030000,Jack Fletcher,10.26
+Man Utd v Spurs,1788030000,Joshua Zirkzee,7.66
+Man Utd v Spurs,1788030000,Manuel Ugarte,10.26
+Man Utd v Spurs,1788030000,Mason Mount,5.96
+Man Utd v Spurs,1788030000,Matthijs de Ligt,7.23
+Man Utd v Spurs,1788030000,Patrick Dorgu,6.0
+Man Utd v Spurs,1788030000,Shea Lacey,4.91
+Man Utd v Spurs,1788030000,Toby Collyer,10.26
+Man Utd v Spurs,1788030000,Tyler Fletcher,7.98
+Man Utd v Spurs,1788030000,Tyler Fredricson,10.43
+Newcastle v Coventry City,1788030000,Anthony Elanga,10.82
+Newcastle v Coventry City,1788030000,Harvey Barnes,10.0
+Newcastle v Coventry City,1788030000,Lewis Hall,5.5
+Newcastle v Coventry City,1788030000,Lewis Miley,6.92
+Newcastle v Coventry City,1788030000,Malick Thiaw,5.32
+Newcastle v Coventry City,1788030000,Nico Gonzalez,4.06
+Newcastle v Coventry City,1788030000,Sven Botman,6.54
+Newcastle v Coventry City,1788030000,Yoane Wissa,6.27
+Newcastle v Coventry City,1788030000,Joe Willock,5.92
+Newcastle v Coventry City,1788030000,Amar Dedic,4.55
+Newcastle v Coventry City,1788030000,Tino Livramento,8.49
+Newcastle v Coventry City,1788030000,Matias Fernandez-Pardo,8.23
+Newcastle v Coventry City,1788030000,Aladji Bamba,4.67
+Newcastle v Coventry City,1788030000,Alex Murphy,11.06
+Newcastle v Coventry City,1788030000,Bazoumana Touré,7.37
+Newcastle v Coventry City,1788030000,Dan Burn,5.69
+Newcastle v Coventry City,1788030000,Fabian Schar,4.36
+Newcastle v Coventry City,1788030000,Jacob Murphy,6.8
+Newcastle v Coventry City,1788030000,Jacob Ramsey,5.08
+Newcastle v Coventry City,1788030000,Joelinton,3.01
+Newcastle v Coventry City,1788030000,Leo Shahar,11.63
+Newcastle v Coventry City,1788030000,Sean Neave,11.06
+Newcastle v Coventry City,1788030000,Sean Steur,5.63
+Newcastle v Coventry City,1788030000,William Osula,11.06
+Nott'm Forest v Crystal Palace,1788030000,Dan Ndoye,6.49
+Nott'm Forest v Crystal Palace,1788030000,Jair Paula da Cunha Filho,4.63
+Nott'm Forest v Crystal Palace,1788030000,James McAtee,8.09
+Nott'm Forest v Crystal Palace,1788030000,Liam Delap,5.72
+Nott'm Forest v Crystal Palace,1788030000,Morgan Gibbs-White,4.74
+Nott'm Forest v Crystal Palace,1788030000,Murillo dos Santos,5.4
+Nott'm Forest v Crystal Palace,1788030000,Neco Williams,4.27
+Nott'm Forest v Crystal Palace,1788030000,Nikola Milenkovic,4.41
+Nott'm Forest v Crystal Palace,1788030000,Xaver Schlager,4.23
+Nott'm Forest v Crystal Palace,1788030000,Ola Aina,4.27
+Nott'm Forest v Crystal Palace,1788030000,Daniel Munoz,4.11
+Nott'm Forest v Crystal Palace,1788030000,Ibrahim Sangare,4.04
+Nott'm Forest v Crystal Palace,1788030000,Nicolo Savona,15.07
+Nott'm Forest v Crystal Palace,1788030000,Arnaud Kalimuendo,8.58
+Nott'm Forest v Crystal Palace,1788030000,Callum Hudson-Odoi,9.21
+Nott'm Forest v Crystal Palace,1788030000,Chris Wood,9.77
+Nott'm Forest v Crystal Palace,1788030000,Dilane Bakwa,15.41
+Nott'm Forest v Crystal Palace,1788030000,Felipe Rodrigues da Silva,15.24
+Nott'm Forest v Crystal Palace,1788030000,Igor Jesus,3.98
+Nott'm Forest v Crystal Palace,1788030000,Luca Netz,7.53
+Nott'm Forest v Crystal Palace,1788030000,Nicolas Dominguez,3.43
+Nott'm Forest v Crystal Palace,1788030000,Omar Richards,15.24
+Nott'm Forest v Crystal Palace,1788030000,Omari Hutchinson,15.17
+Nott'm Forest v Crystal Palace,1788030000,Ousmane Diomande,4.84
+Nott'm Forest v Crystal Palace,1788030000,Ryan Yates,3.52
+Nott'm Forest v Crystal Palace,1788030000,Tyler Bindon,15.24
+Nott'm Forest v Crystal Palace,1788030000,Zach Abbott,8.1
+Spurs v Man Utd,1788030000,Jan Paul van Hecke,4.18
+Spurs v Man Utd,1788030000,Micky van de Ven,4.55
+Spurs v Man Utd,1788030000,Pedro Porro,3.97
+Spurs v Man Utd,1788030000,Rodrigo Bentancur,3.01
+Spurs v Man Utd,1788030000,Sandro Tonali,3.36
+Spurs v Man Utd,1788030000,Sávio,4.81
+Spurs v Man Utd,1788030000,Mathys Tel,5.25
+Spurs v Man Utd,1788030000,Omar Marmoush,5.75
+Spurs v Man Utd,1788030000,Destiny Udogie,3.68
+Spurs v Man Utd,1788030000,Conor Gallagher,3.57
+Spurs v Man Utd,1788030000,Andrew Robertson,5.51
+Spurs v Man Utd,1788030000,Mateus Fernandes,3.55
+Spurs v Man Utd,1788030000,Mohammed Kudus,5.51
+Spurs v Man Utd,1788030000,Dominic Solanke,8.32
+Spurs v Man Utd,1788030000,James Maddison,4.51
+Spurs v Man Utd,1788030000,Archie Gray,4.51
+Spurs v Man Utd,1788030000,Ashley Phillips,8.08
+Spurs v Man Utd,1788030000,Ben Davies,4.27
+Spurs v Man Utd,1788030000,Callum Olusesi,8.06
+Spurs v Man Utd,1788030000,Dane Scarlett,8.32
+Spurs v Man Utd,1788030000,Dejan Kulusevski,8.06
+Spurs v Man Utd,1788030000,Djed Spence,8.08
+Spurs v Man Utd,1788030000,James Rowswell,8.08
+Spurs v Man Utd,1788030000,Joao Souza,8.08
+Spurs v Man Utd,1788030000,Jun'ai Byfield,8.08
+Spurs v Man Utd,1788030000,Luca Williams-Barnett,7.87
+Spurs v Man Utd,1788030000,Lucas Bergvall,3.51
+Spurs v Man Utd,1788030000,Marcos Senesi,3.5
+Spurs v Man Utd,1788030000,Mikey Moore,7.82
+Spurs v Man Utd,1788030000,Mykhailo Mudryk,7.78
+Spurs v Man Utd,1788030000,Pape Matar Sarr,7.78
+Spurs v Man Utd,1788030000,Richarlison,5.48
+Spurs v Man Utd,1788030000,Tosin Adarabioyo,5.06
+Spurs v Man Utd,1788030000,Wilson Odobert,8.06
+Spurs v Man Utd,1788030000,Xavi Simons,8.06
+Sunderland v Brighton,1788030000,Brian Brobbey,3.7
+Sunderland v Brighton,1788030000,Dan Ballard,4.56
+Sunderland v Brighton,1788030000,Enzo Le Fee,6.59
+Sunderland v Brighton,1788030000,Granit Xhaka,5.05
+Sunderland v Brighton,1788030000,Kevin Danso,4.56
+Sunderland v Brighton,1788030000,Noah Sadiki,4.77
+Sunderland v Brighton,1788030000,Nordi Mukiele,4.45
+Sunderland v Brighton,1788030000,Reinildo Mandava,3.95
+Sunderland v Brighton,1788030000,Thomas Meunier,4.6
+Sunderland v Brighton,1788030000,Malick Fofana,7.63
+Sunderland v Brighton,1788030000,Nilson Angulo,5.11
+Sunderland v Brighton,1788030000,Arthur Masuaku,12.14
+Sunderland v Brighton,1788030000,Chemsdine Talbi,7.68
+Sunderland v Brighton,1788030000,Chris Rigg,4.55
+Sunderland v Brighton,1788030000,Dayann Méthalie,4.11
+Sunderland v Brighton,1788030000,Djiamgone Jocelin Ta Bi,6.59
+Sunderland v Brighton,1788030000,Habib Diarra,8.0
+Sunderland v Brighton,1788030000,Jenson Seelt,11.1
+Sunderland v Brighton,1788030000,Juan Angulo,12.79
+Sunderland v Brighton,1788030000,Jules Ahoka,5.11
+Sunderland v Brighton,1788030000,Leo Fuhr Hjelde,12.14
+Sunderland v Brighton,1788030000,Luke O'Nien,3.37
+Sunderland v Brighton,1788030000,Omar Alderete,5.14
+Sunderland v Brighton,1788030000,Romaine Mundle,9.27
+Sunderland v Brighton,1788030000,Simon Adingra,11.11
+Sunderland v Brighton,1788030000,Trai Hume,3.99
+Sunderland v Brighton,1788030000,Wilson Isidor,4.89

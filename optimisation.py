@@ -141,9 +141,8 @@ def load_current_team(excel_file, sheet_name='GW Teams'):
     current_gw_column = df_teams.columns[last_col_idx]
     current_team_names = df_teams.iloc[:, last_col_idx].dropna().tolist()
 
-    print(f"Found current team for {current_gw_column}: {len(current_team_names)} players")
-    for i, player in enumerate(current_team_names, 1):
-        print(f"  {i:2d}. {player}")
+    print(f"Found current team for {current_gw_column}: {len(current_team_names)} players "
+          f"({', '.join(current_team_names)})")
 
     return current_team_names, current_gw_column
 
@@ -547,8 +546,15 @@ def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additio
         return
 
     best_t0 = max(best_by_t0, key=lambda k: best_by_t0[k]["wtotal"])
+    # Pure do-nothing baseline: hold the current squad across ALL F1..FN, zero transfers anywhere
+    # (distinct from "BANK (hold now)", which holds F1 but still makes its best GW+1 move).
+    hold_all = sum(w[f] * gw_xp(cur, f)[1] for f in range(N))
+    hr0 = gw_xp(cur, 0)[0]
+    hr1 = gw_xp(cur, 1)[0] if N > 1 else 0.0
     print(f"\n{'=' * 66}\nTransfer-timing plan — value over FULL F1..F{N}, transfers within F1..F{K} "
           f"(start {free_transfers} FT, <= {max_per_gw}/GW, cap {max_ft}):")
+    print(f"  {'HOLD ALL (0/0)':<16} F1 XP {hr0:6.2f}   F2 XP {hr1:6.2f}   "
+          f"8-fixture value {hold_all:7.2f}   (no transfers anywhere in F1..F{K})")
     for t0 in sorted(best_by_t0):
         rec = best_by_t0[t0]
         raw = rec["raw"]
@@ -800,19 +806,11 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
     if force_include_players is None:
         force_include_players = []
 
-    print(f"\nOptimising transfers: max {max_transfers} transfers for {num_fixtures} fixtures")
-    print(f"Finding top {num_solutions} transfer combinations")
-    print(f"Using fixture weights: {[f'{w:.2f}' for w in weights]}")
-    print(f"Additional budget available: £{additional_budget:.1f}m")
+    # (Core params — transfers/fixtures/weights/budget/bench/GK/max-def — are echoed once by the
+    # outer header; only the settings unique to this call are printed here to avoid duplication.)
     if value_weight:
         print(f"Value preference: {value_weight:.2f} weighted XP per £1.0m of squad value "
               f"(accepts {value_weight * 0.1:.2f} lower XP per £0.1m saved)")
-    if len(set(bench_slot_weights)) == 1:
-        print(f"Bench slot weights (sub order 1/2/3): {[f'{w:g}' for w in bench_slot_weights[0]]}")
-    else:
-        print(f"Bench slot weights (sub order 1/2/3, per fixture): {bench_slot_weights}")
-    print(f"GK bench weights: {[f'{w:g}' for w in gk_bench_weights]}")
-    print(f"Max defensive players (GK+DEF) per team: {max_defensive_players_per_team}")
     if force_exclude_players:
         print(f"Force EXCLUDE (must NOT be in squad): {force_exclude_players}")
     if force_include_players:
@@ -1213,7 +1211,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # Chip planning adds big-M integer structure that can make CBC run long or exhaust memory on
         # this large model, so bound it: a time limit + small optimality gap returns the incumbent
         # instead of crashing. Off-chips runs keep the exact solver as before (no behaviour change).
-        _solver = (pulp.PULP_CBC_CMD(msg=0, timeLimit=300, gapRel=0.01)
+        _solver = (pulp.PULP_CBC_CMD(msg=0, timeLimit=900, gapRel=0.01)
                    if (plan_bench_boost or plan_triple_captain) else pulp.PULP_CBC_CMD(msg=0))
 
         # Two-stage tie-break (optional): find the XP ceiling once, then among squads within
@@ -1289,13 +1287,16 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # Chip plan (reported on the ACTUAL fielded lineup, RAW per-fixture XP): the fixture where a
         # Triple Captain / Bench Boost would score most across the horizon.
         triple_captain_plan = bench_boost_plan = None
+        # A Wildcard/Free Hit occupies F1, so BB/TC can't be played there — exclude F1 from the
+        # reported plan too (mirrors the LP's chip_fixtures), else the argmax can still pick F1.
+        chip_cand = fixtures[1:] if (wildcard_f1 and len(fixtures) > 1) else fixtures
         if plan_triple_captain:
-            tc_by_fix = {f: float(df.loc[captains[f], f'{f} XP']) for f in fixtures}
+            tc_by_fix = {f: float(df.loc[captains[f], f'{f} XP']) for f in chip_cand}
             bf = max(tc_by_fix, key=tc_by_fix.get)
             triple_captain_plan = {'fixture': bf, 'player': df.loc[captains[bf], 'Player Name'],
                                    'value': round(tc_by_fix[bf], 2)}
         if plan_bench_boost:
-            bb_by_fix = {f: float(sum(df.loc[i, f'{f} XP'] for i in bench_players[f])) for f in fixtures}
+            bb_by_fix = {f: float(sum(df.loc[i, f'{f} XP'] for i in bench_players[f])) for f in chip_cand}
             bf = max(bb_by_fix, key=bb_by_fix.get)
             bench_boost_plan = {'fixture': bf, 'value': round(bb_by_fix[bf], 2)}
 
@@ -1820,6 +1821,51 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
         print("No consensus transfers in (none appear in >20% of solutions)")
 
 
+def build_hold_pseudo_solution(df, current_team_indices, fixtures, weighted_total, bank=0.0):
+    """A solution-shaped dict for HOLDING the current squad (0 transfers).
+
+    Picks each fixture's best legal XI (by that fixture's raw XP), captain = top starter,
+    bench = the remaining four. The baseline objective is separable across fixtures, so this
+    per-fixture greedy XI matches the LP baseline's lineup; `weighted_total` (from
+    calculate_optimised_baseline) supplies the ranking column so it's directly comparable.
+    """
+    if not current_team_indices:
+        return None
+    pos = {i: df.loc[i, 'Position'] for i in current_team_indices}
+    starting_lineups, captains, bench_players = {}, {}, {}
+    for f in fixtures:
+        col = f"{f} XP"
+        xp = {i: float(df.loc[i, col]) for i in current_team_indices}
+        gks = sorted([i for i in current_team_indices if pos[i] == 'GK'], key=lambda i: -xp[i])
+        defs = sorted([i for i in current_team_indices if pos[i] == 'DEF'], key=lambda i: -xp[i])
+        mids = sorted([i for i in current_team_indices if pos[i] == 'MID'], key=lambda i: -xp[i])
+        fwds = sorted([i for i in current_team_indices if pos[i] == 'FWD'], key=lambda i: -xp[i])
+        best_xi, best_val = None, None
+        for nd in range(3, 6):
+            for nm in range(2, 6):
+                nf = 10 - nd - nm
+                if nf < 1 or nf > 3:
+                    continue
+                if len(gks) < 1 or len(defs) < nd or len(mids) < nm or len(fwds) < nf:
+                    continue
+                xi = [gks[0]] + defs[:nd] + mids[:nm] + fwds[:nf]
+                val = sum(xp[i] for i in xi)
+                if best_val is None or val > best_val:
+                    best_val, best_xi = val, xi
+        if best_xi is None:                       # squad can't field a legal XI for this fixture
+            return None
+        cap = max(best_xi, key=lambda i: xp[i])
+        bench = [i for i in current_team_indices if i not in best_xi]
+        starting_lineups[f] = best_xi
+        captains[f] = cap
+        bench_players[f] = bench
+    return {
+        'solution_number': 0, 'num_transfers': 0, 'budget_remaining': bank,
+        'final_points': weighted_total, 'fixtures': fixtures,
+        'starting_lineups': starting_lineups, 'captains': captains, 'bench_players': bench_players,
+    }
+
+
 def horizon_bands(solution, df):
     """Raw (unweighted) XI and bench XP, split into near / mid / far fixture bands.
 
@@ -1851,13 +1897,16 @@ def horizon_bands(solution, df):
     return rows
 
 
-def display_horizon_table(all_solutions, df):
+def display_horizon_table(all_solutions, df, hold_solution=None):
     """One row per computed solution, XI and bench XP split by fixture band.
 
     Covers EVERY solution in the pool, not just the few displayed in detail — the whole
     point of a compact table is that the also-rans are cheap to show, and a solution
     ranked 9th on the weighted objective may still have the shape you want (a strong
     opening gameweek, say, or a bench worth boosting).
+
+    hold_solution (0 transfers) is always shown first when supplied, so every transfer
+    option is read against the do-nothing baseline.
     """
     if not all_solutions or df is None:
         return
@@ -1871,6 +1920,12 @@ def display_horizon_table(all_solutions, df):
         head += f"{lab + ' XI':>11}{lab + ' Bn':>10}"
     print(head + f"{'Weighted':>11}")
     print("-" * 112)
+
+    if hold_solution is not None:
+        row = f"{'HOLD':>4}{0:>4}{hold_solution['budget_remaining']:>6.1f}m"
+        for _, xi, bench in horizon_bands(hold_solution, df):
+            row += f"{xi:>11.2f}{bench:>10.2f}"
+        print(row + f"{hold_solution['final_points']:>11.2f}")
 
     for s in all_solutions:
         row = f"{s['solution_number']:>4}{s['num_transfers']:>4}{s['budget_remaining']:>6.1f}m"
@@ -1936,14 +1991,16 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
             for _, player in solution['transfers_out'].iterrows():
                 print(
                     f"    - {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, "
-                    f"F1: {player['F1 XP']:.1f} pts, Total: {player['Weighted_Total_XP']:.1f} pts)")
+                    f"F1: {player['F1 XP']:.1f}, F2: {player['F2 XP']:.1f}, F3: {player['F3 XP']:.1f}, "
+                    f"Total: {player['Weighted_Total_XP']:.1f} pts)")
 
         if len(solution['transfers_in']) > 0:
             print(f"  Transfers In:")
             for _, player in solution['transfers_in'].iterrows():
                 print(
                     f"    + {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, "
-                    f"F1: {player['F1 XP']:.1f} pts, Total: {player['Weighted_Total_XP']:.1f} pts)")
+                    f"F1: {player['F1 XP']:.1f}, F2: {player['F2 XP']:.1f}, F3: {player['F3 XP']:.1f}, "
+                    f"Total: {player['Weighted_Total_XP']:.1f} pts)")
 
         # Rental flag: does this transfer batch GAIN in F1 but LOSE over the tail (F2..)? That's the
         # rent-and-revert shape the ownership-weighted objective quietly favours (F6 badness is
@@ -2192,7 +2249,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   force_exclude_players=None, force_include_players=None,
                                   tie_breaker=None, tie_break_mode='differential', xp_tolerance=0.5,
                                   num_solutions_display=3,
-                                  show_all_details=False, show_detailed_f1=False,
+                                  show_all_details=False, show_detailed_f1=False, compact=False,
                                   compute_solutions=20, show_frequency_analysis=True,
                                   min_frequency=2, max_defensive_players_per_team=3,
                                   ownership_weights=None, reliability_weights=None,
@@ -2280,25 +2337,41 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             display_squad_frequency(all_solutions, fixtures, weights, current_team_names)
 
         # Display summary of top N solutions only
-        # Horizon table covers the whole pool; the detailed summaries below are capped
-        display_horizon_table(all_solutions, df)
+        # Horizon table covers the whole pool; the detailed summaries below are capped.
+        # HOLD baseline (0 transfers) so every option reads against doing nothing.
+        hold_solution = None
+        try:
+            _fx = all_solutions[0]['fixtures']
+            _base = calculate_optimised_baseline(
+                df, current_team_indices, _fx, all_solutions[0]['weights'],
+                bench_slot_weights, gk_bench_weights_used)
+            _weighted = _base[0] if _base else 0.0
+            hold_solution = build_hold_pseudo_solution(
+                df, current_team_indices, _fx, _weighted, bank=additional_budget)
+        except Exception:
+            hold_solution = None
+        display_horizon_table(all_solutions, df, hold_solution=hold_solution)
 
         solutions_to_display = all_solutions[:num_solutions_display]
         display_multi_solution_summary(solutions_to_display, show_f1_breakdown=True,
                                        show_detailed_f1=show_detailed_f1,
                                        df=df, current_team_indices=current_team_indices, gameweek=gameweek)
 
-        for sol in solutions_to_display:
-            print("\n" + "=" * 78)
-            print(f"OPTION {sol['solution_number']} — per-player role over the horizon")
-            print("=" * 78)
-            display_role_frequency(sol, df, sol['fixtures'])
+        # compact=True cuts the two bulky blocks (per-player role table + the full DETAILED VIEW:
+        # per-fixture grid, weekly totals, key-probs) — leaving the transfer summary (incl F1/F2/F3),
+        # the horizon line, and the transfer-timing plan. show_all_details overrides compact.
+        if not compact:
+            for sol in solutions_to_display:
+                print("\n" + "=" * 78)
+                print(f"OPTION {sol['solution_number']} — per-player role over the horizon")
+                print("=" * 78)
+                display_role_frequency(sol, df, sol['fixtures'])
 
         # Display details for solutions if requested
         if show_all_details:
             for solution in solutions_to_display:
                 display_solution_detail(solution, excel_file, current_team_names)
-        else:
+        elif not compact:
             # Just show details for the best solution
             print("\n" + "=" * 100)
             print(
@@ -2330,25 +2403,25 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 
 result = main_multi_transfer_optimiser(
     excel_file="outputs/13_players_master.csv",
-    max_transfers=15,
-    additional_budget=7.1,
-    num_fixtures=12,
+    max_transfers=2,
+    additional_budget=0.1,
+    num_fixtures=8,
     compute_solutions=1,
-    # bank_lookahead_gws=1,
+    # bank_lookahead_gws=2,
     # Weighted-XP charged per £1.0m of squad value: prefers cheaper squads/transfers, trading XP for
     # bank at this rate. 0.0 = pure XP (off). e.g. 1.0 -> accept 0.5 lower weighted XP to save £0.5m.
-    value_weight=0,
+    # value_weight=2.0,
     # How fast the squad churns
     ownership_weights=[1.0, 0.92, 0.846, 0.78, 0.716, 0.66, 0.606, 0.558, 0.513, 0.472, 0.434, 0.4, 0.368, 0.338, 0.31],
     # ownership_weights=[1.0, 0.95, 0.90, 0.86, 0.81, 0.77, 0.74, 0.70, 0.66, 0.63, 0.60, 0.57, 0.54, 0.51, 0.49],
     # How much the projection is trusted
     reliability_weights=[1.0, 0.85, 0.71, 0.63, 0.55, 0.47, 0.4, 0.34, 0.29, 0.25, 0.22, 0.19, 0.16, 0.14, 0.12],
-    # bench_slot_weights=(0.25, 0.05, 0.01),
+    bench_slot_weights=(0.25, 0.05, 0.01),
+    # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.25, 0.05, 0.01)]*14,
+    # bench_slot_weights=[(0.25, 0.05, 0.01)] * 2 + [(0.3, 0.1, 0.05)] * 2 + [(0.35, 0.15, 0.1)] * 11,
     # bench_slot_weights=[(0.35, 0.10, 0.02)] * 2 + [(0.40, 0.20, 0.05)] * 2 + [(0.45, 0.25, 0.08)] * 11,
-    bench_slot_weights=[(0.25, 0.05, 0.01)] * 2 + [(0.3, 0.1, 0.05)] * 2 + [(0.35, 0.15, 0.1)] * 11,
     # bench_slot_weights=(0.15, 0.001, 0.001),
     # bench_slot_weights=(0.001, 0.001, 0.001),
-    # bench_slot_weights=[(1.0, 1.0, 1.0)] + [(0.30, 0.10, 0.05)]*14,
     # gk_bench_weights=[0.001]*15,
     gk_bench_weights=[0.05]*15,
     # gk_bench_weights=[1.0] + [0.01]*14,
@@ -2357,17 +2430,18 @@ result = main_multi_transfer_optimiser(
     show_all_details=False,
     show_detailed_f1=False,
     show_current_analysis=False,
-    # min_f1_gain=0.1,
-    # min_total_gain=1.0,
-    # min_remaining_gain=1.0,
+    # compact=True,
+    min_f1_gain=0.1,
+    min_total_gain=1.0,
+    min_remaining_gain=1.0,
     # force_exclude_players=[],
-    # force_include_players=['Alexander Isak', 'Erling Haaland', 'Bruno Fernandes', 'Cole Palmer', 'Cody Gakpo', 'Morgan Rogers'],
+    # force_include_players=[],
     # tie_breaker="ownership",
     # tie_break_mode="differential",
     # xp_tolerance=1.0,
-    plan_bench_boost=True,
-    plan_triple_captain=True,
-    wildcard_f1=True,
+    # plan_bench_boost=True,
+    # plan_triple_captain=True,
+    # wildcard_f1=True,
 )
 
 if __name__ == "__main__":

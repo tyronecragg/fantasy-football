@@ -34,38 +34,40 @@ MIN_MINUTES = 60   # see the control in main()
 
 
 def actuals(season=SEASON):
-    """goals scored per player per gameweek, from the per-match files."""
+    """goals scored per player per gameweek, from the per-gameweek files (player_gameweek_stats).
+    2026-09-09: switched from playermatchstats.csv, whose GW2 2026-27 folder held 20 matches (GW1
+    duplicated) and whose GW4 folder held a stray match, inflating 'actual' by ~25%."""
     base = os.path.join(os.path.dirname(config.FPL_DATA_DIR.rstrip("\/")), season)
-    players = pd.read_csv(os.path.join(base, "players.csv"))
-    name = {r.player_id: f"{r.first_name} {r.second_name}".strip()
-            for r in players.itertuples()}
     rows = []
     for d in sorted(glob.glob(os.path.join(base, "By Gameweek", "GW*")),
                     key=lambda p: int(re.search(r"GW(\d+)", p).group(1))):
         gw = int(re.search(r"GW(\d+)", d).group(1))
         try:
-            m = pd.read_csv(os.path.join(d, "playermatchstats.csv"))
-        except FileNotFoundError:
+            m = pd.read_csv(os.path.join(d, "player_gameweek_stats.csv"), usecols=["id", "goals_scored", "minutes"])
+        except (FileNotFoundError, ValueError):
             continue
-        col = "goals_scored" if "goals_scored" in m else "goals"
-        if col not in m:
+        if m.empty:
             continue
-        mins = "minutes_played" if "minutes_played" in m else "minutes"
-        g = m.groupby("player_id").agg(**{col: (col, "sum"),
-                                          "minutes": (mins, "sum")}).reset_index()
-        g["Gameweek"] = gw
-        g["Player Name"] = g["player_id"].map(name)
-        rows.append(g.rename(columns={col: "goals"}))
+        m = m.drop_duplicates("id").rename(columns={"id": "player_id", "goals_scored": "goals"})
+        m["Gameweek"] = gw
+        rows.append(m)
     return pd.concat(rows, ignore_index=True)
 
 
 def main():
-    arch = pd.read_csv(os.path.join(config.INPUTS_DIR, "historical_player_data.csv"))
-    arch = arch[arch["Season"] == SEASON][["Season", "Gameweek", "Player Name", "F1 Score 1+"]]
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--season", default=SEASON, help="e.g. 2026-2027")
+    season = ap.parse_args().season
+    arch = pd.read_csv(os.path.join(config.INPUTS_DIR, "historical_player_data.csv"), low_memory=False)
+    arch = arch[arch["Season"] == season][["Season", "Gameweek", "Player Name", "player_id", "F1 Score 1+"]]
     arch = arch.dropna(subset=["F1 Score 1+"])
-    act = actuals()
-    df = arch.merge(act[["Gameweek", "Player Name", "goals", "minutes"]],
-                    on=["Gameweek", "Player Name"], how="inner")
+    arch["player_id"] = pd.to_numeric(arch["player_id"], errors="coerce")
+    act = actuals(season)
+    # join on player_id (2026-09-09): the name join silently dropped accented / re-spelled names and
+    # skewed the sample toward well-known scorers (2026-27 GW1-3 read 14.2% actual by name vs 11.1% by id)
+    df = arch.merge(act[["Gameweek", "player_id", "goals", "minutes"]],
+                    on=["Gameweek", "player_id"], how="inner")
     df["scored"] = (df["goals"] > 0).astype(int)
     # CRITICAL CONTROL: a projected player who never came on cannot score, so an unfiltered
     # comparison blames the margin for what is really start probability. Restrict to players

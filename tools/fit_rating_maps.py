@@ -27,7 +27,7 @@ from fpl_pipeline import config, rating  # noqa: E402
 # is EXCLUDED: the maps must be out-of-sample for every season the GBMs train on, or the rating
 # feature on those rows would carry a sliver of its own season. Add 2526 when the archive seasons
 # move on (i.e. when 2025-26 is no longer a training season).
-DEFAULT_SEASONS = ["2122", "2223", "2324", "2425"]
+DEFAULT_SEASONS = ["2122", "2223", "2324", "2425", "2526"]   # 2526 added 2026-09-09 (was the holdout; +2025-26 lowers 2026-27 MAE 0.0463 -> 0.0459 at every horizon)
 
 
 def main():
