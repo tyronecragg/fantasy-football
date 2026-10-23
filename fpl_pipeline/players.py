@@ -1,15 +1,15 @@
 """Build the master players DataFrame — the Python replica of the Players sheet.
 
-Column names deliberately match the workbook headers exactly so the parity harness can
-compare by name. Known deliberate deviations from the workbook:
+Column names match the retired workbook's headers (the optimisers read them by name). The
+workbook-parity check was retired 2026-10-23; deviations it allowed for are kept for the record:
 
 1. F2 Score 1+ row 2: the workbook's AW2 is a leftover F1 VLOOKUP; we apply the
    Coefficients model uniformly (workbook rows 3+ behaviour).
 2. Fallback-factor lookups: the workbook uses approximate-match VLOOKUP on an unsorted
    sheet (undefined results); we use exact name match.
 3. Opponent/venue lookups that hit a blank cell: Excel VLOOKUP renders blank as 0; the
-   pipeline keeps NaN (validate.py treats that pattern as a known deviation).
-Improved mode (build(..., improved=True); parity mode = improved=False is workbook-exact):
+   pipeline keeps NaN.
+Improved mode (build(..., improved=True) - what run.py always uses; improved=False is the old workbook-exact path):
 
 4. F2 model fallback: when F2 match odds are missing (e.g. gameweek 1, when bookmakers
    have only priced one gameweek), F2 win/opponent-win are predicted from season odds

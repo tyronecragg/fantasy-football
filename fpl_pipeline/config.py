@@ -7,19 +7,11 @@ OUTPUTS_DIR = os.path.join(ROOT, "outputs")
 SPORTSBET_DIR = os.path.join(ROOT, "sportsbet")
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 COEFFICIENTS_JSON = os.path.join(DATA_DIR, "coefficients.json")
-WORKBOOK = os.path.join(ROOT, "Fantasy Premier League.xlsx")
 # Odds provenance manifest — which sportsbet markets are real vs synthetic right now (fpl_pipeline/provenance.py)
 PROVENANCE_JSON = os.path.join(SPORTSBET_DIR, "_provenance.json")
 
 SEASON = "2026-2027"
 FPL_DATA_DIR = os.path.join(ROOT, "fpl_data", "FPL-Core-Insights", "data", SEASON)
-
-# The frozen workbook (parity reference) is a 2025-2026 artifact; parity mode pins its
-# season and reads inputs/odds from a frozen snapshot so --validate keeps comparing
-# like-for-like after season rollovers and weekly scrapes.
-PARITY_SEASON = "2025-2026"
-PARITY_INPUTS_DIR = os.path.join(ROOT, "parity_reference", "inputs")
-PARITY_SPORTSBET_DIR = os.path.join(ROOT, "parity_reference", "sportsbet")
 
 # Bookmaker margin divisors (odds -> probability = 1/odds/margin)
 MARGIN_PLAYER = 1.05   # player & team match markets

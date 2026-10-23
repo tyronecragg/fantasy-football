@@ -7,7 +7,7 @@ Usage:
     python tools/refit_coefficients.py --write --only baselines   # just the baselines (projection-gated)
     python tools/refit_coefficients.py --write --only win_pred    # just the F3+ win model (its own gate)
                                                   # (workbook original backed up once to
-                                                  #  coefficients_workbook.json for parity mode)
+                                                  #  coefficients_workbook.json for reference)
 
 Design notes:
 - Feature construction reuses fpl_pipeline.model._features / win_pred's feature map, so

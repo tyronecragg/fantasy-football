@@ -8,13 +8,14 @@ Purpose: reference for replicating the whole process in Python with observable D
 > and has since gained model improvements, automated archives, a coefficient-refit tool,
 > a consolidated name-mapping table, and a pytest suite (2026-07-25). **See README.md for
 > current usage** — this document remains the map of how the original workbook worked.
+> **2026-10-23:** the workbook, `--validate`, `validate.py` and the two migration tools below
+> were deleted; the frozen parity data moved to `tests/data/` as test fixtures.
 >
-> - Run: `python -m fpl_pipeline.run` — every stage snapshots to `outputs/NN_*.csv`,
+> - Run: `python -m fpl_pipeline.run` — every stage snapshots to `outputs/*.csv`,
 >   ending in `outputs/players_master.csv` (the Players sheet equivalent).
-> - Validate vs Excel: `python -m fpl_pipeline.run --validate` (parity report in outputs/).
-> - Manual data now lives in `inputs/*.csv` (exported by `tools/export_workbook_inputs.py`);
->   regression coefficients in `fpl_pipeline/data/coefficients.json` (extracted by
->   `tools/extract_coefficients.py`).
+> - Manual data now lives in `inputs/*.csv` (exported once by the since-deleted `tools/export_workbook_inputs.py`);
+>   regression coefficients in `fpl_pipeline/data/coefficients.json` (extracted once by
+>   the since-deleted `tools/extract_coefficients.py`).
 > - Known deliberate deviations from the workbook (all documented in
 >   `fpl_pipeline/players.py`): the AW2 leftover-formula cell, exact-match fallback-factor
 >   lookups, and NaN instead of VLOOKUP's 0 for blank opponent/venue cells.
@@ -28,11 +29,9 @@ Purpose: reference for replicating the whole process in Python with observable D
 >   unbounded (win prediction unclamped, opponent-win clamped only at 0, factor ×
 >   baseline stats can leave [0, 1]); improved mode clips every modelled probability to
 >   [0, 1] before the ladders and XP scoring. Odds-derived probabilities are untouched.
->   `--validate` disables all these improvements for workbook-exact parity (still 161/161).
 > - Both PuLP optimisers now default to the pipeline outputs
 >   (`outputs/players_master.csv` + `inputs/gw_teams.csv`) and were verified to produce
->   byte-identical results vs their Excel-fed runs; pass an `.xlsx` path to use the
->   legacy workbook. Run them with the repo virtualenv (`env/Scripts/python`), which has
+>   byte-identical results vs their Excel-fed runs. Run them with the repo virtualenv (`env/Scripts/python`), which has
 >   PuLP installed.
 
 ## The process in one paragraph
@@ -147,7 +146,7 @@ Coefficients rows 1–5 model × factor; Score 2+/3+ via threshold ladder on Sco
 ### 4. Win probability for F3–F6 (no odds yet)
 - **Since 2026-09-02 (improved mode):** a rolling odds-implied team rating (`fpl_pipeline/rating.py`,
   weighted least squares on football-data closing prices, 30-day half-life) mapped to three-way
-  probabilities per horizon. The Lasso below is the workbook/parity path and the runtime fallback.
+  probabilities per horizon. The Lasso below is the workbook's original path and the runtime fallback.
 - **Personal team views (since 2026-10-17):** `inputs/team_views.csv` nudges a team's rating by `nudge` goals per
   game — 1X2 strength += nudge × 1.3 (log-odds per goal), attack and defence log-rates each += log(1 + nudge/2/1.35).
   Only rows for the current F1 gameweek apply (`rating.load_team_views`), so they go inert after the roll. Applied once

@@ -220,37 +220,6 @@ def load_defensive_contributions():
     return out
 
 
-def _workbook_values(sheet_name, n_cols):
-    """Values-only read of a workbook sheet's first n_cols columns (parity source)."""
-    import openpyxl
-
-    wb = openpyxl.load_workbook(config.WORKBOOK, data_only=True, read_only=True)
-    ws = wb[sheet_name]
-    rows = [row[:n_cols] for row in ws.values]
-    wb.close()
-    df = pd.DataFrame(rows[1:], columns=range(n_cols))
-    return df.dropna(how="all")
-
-
-def load_fpl_players_workbook():
-    """Roster as frozen in the workbook's FPL Players sheet. Used by parity mode (and
-    tests) so they compare against the workbook's own inputs — the upstream
-    FPL-Core-Insights repo rewrites past-season data and would break alignment."""
-    df = _workbook_values("FPL Players", 4)
-    df.columns = ["name", "position", "team", "cost"]
-    return df.reset_index(drop=True)
-
-
-def load_defensive_contributions_workbook():
-    """DC stats as frozen in the workbook's Defensive Contribution sheets (cols A-C)."""
-    out = {}
-    for pos, sheet in [("DEF", "Defensive Contribution DEF"), ("MID", "Defensive Contribution MID")]:
-        df = _workbook_values(sheet, 3)
-        df.columns = ["name", "nineties", "dc90"]
-        out[pos] = df.reset_index(drop=True)
-    return out
-
-
 SPORTSBET_FILES = {
     "wdw": "sportsbet_win_draw_win_odds.csv",
     "score1": "sportsbet_goalscorer_odds.csv",

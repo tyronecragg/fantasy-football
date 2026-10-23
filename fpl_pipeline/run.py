@@ -1,17 +1,11 @@
 """Run the full pipeline with a CSV snapshot per stage.
 
-Usage:  python -m fpl_pipeline.run [--validate] [--gw N]
+Usage:  python -m fpl_pipeline.run [--gw N] [--force-archive]
 
-Default (improved) mode applies the model improvements documented in players.py.
 Passing --gw N additionally upserts the historical archives and refreshes the fallback
 factors in inputs/ (re-running the same gameweek replaces its rows). Without --gw the
 archives are never touched — inference from FPL data proved unreliable and is only
 printed as a hint.
-
---validate runs in parity mode: improvements and input-mutating side effects are
-disabled and the output is compared cell-for-cell with the workbook. If a coefficient
-refit has replaced coefficients.json, parity automatically uses the backed-up
-coefficients_workbook.json.
 """
 import os
 import sys
@@ -95,80 +89,51 @@ def guard_synthetic_archive(gameweek, force=False):
     return "all"
 
 
-def run(parity_mode=False, gameweek=None, force_archive=False):
+def run(gameweek=None, force_archive=False):
     archive_mode = guard_synthetic_archive(gameweek, force_archive)
-    reset_counter(subdir="parity" if parity_mode else None)
-    improved = not parity_mode
-
-    live_data_dir = config.FPL_DATA_DIR
-    if parity_mode:
-        print(f"Running in parity mode (workbook-exact, improvements disabled, "
-              f"season pinned to {config.PARITY_SEASON})")
-        config.FPL_DATA_DIR = os.path.join(
-            config.ROOT, "fpl_data", "FPL-Core-Insights", "data", config.PARITY_SEASON)
-        if os.path.exists(model.WORKBOOK_COEFFICIENTS_JSON):
-            print("  using workbook-extracted coefficients (coefficients_workbook.json)")
-            model.load_coefficients(model.WORKBOOK_COEFFICIENTS_JSON)
-    else:
-        model.load_coefficients()
-
-    try:
-        return _run(parity_mode, gameweek, improved, archive_mode, force_archive)
-    finally:
-        config.FPL_DATA_DIR = live_data_dir
+    reset_counter()
+    model.load_coefficients()
+    return _run(gameweek, archive_mode, force_archive)
 
 
-def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=False):
+def _run(gameweek, archive_mode="none", force_archive=False):
     print("Loading sources...")
-    if parity_mode:
-        inputs = ingest.load_inputs(config.PARITY_INPUTS_DIR)
-        sportsbet = ingest.load_sportsbet(config.PARITY_SPORTSBET_DIR)
-    else:
-        inputs = ingest.load_inputs()
-        # Lineups go through the same name mapper as the roster/odds, so a
-        # name_mappings.csv row can fix a lineup spelling (accent/alias) too.
-        inputs["starting_lineups"]["Player"] = names.apply_player_names(
-            inputs["starting_lineups"]["Player"])
-        sportsbet = ingest.load_sportsbet()
+    inputs = ingest.load_inputs()
+    # Lineups go through the same name mapper as the roster/odds, so a
+    # name_mappings.csv row can fix a lineup spelling (accent/alias) too.
+    inputs["starting_lineups"]["Player"] = names.apply_player_names(
+        inputs["starting_lineups"]["Player"])
+    sportsbet = ingest.load_sportsbet()
 
-    if parity_mode:
-        # The workbook's own frozen roster/DC data: upstream FPL data rewrites history
-        roster = snapshot(ingest.load_fpl_players_workbook(), "fpl_players")
-        dc_stats = ingest.load_defensive_contributions_workbook()
-    else:
-        roster = snapshot(ingest.load_fpl_players(), "fpl_players")
-        dc_stats = ingest.load_defensive_contributions()
+    roster = snapshot(ingest.load_fpl_players(), "fpl_players")
+    dc_stats = ingest.load_defensive_contributions()
     snapshot(dc_stats["DEF"], "dc_stats_def")
     snapshot(dc_stats["MID"], "dc_stats_mid")
 
-    season = snapshot(team_model.season_probs(inputs, workbook_quirks=parity_mode), "season_probs")
-    teamview = snapshot(team_model.team_fixture_view(inputs, sportsbet, draw_aware=improved),
+    season = snapshot(team_model.season_probs(inputs), "season_probs")
+    teamview = snapshot(team_model.team_fixture_view(inputs, sportsbet, draw_aware=True),
                         "team_fixture_view")
 
-    mkts = markets.build_all(sportsbet, inputs, dedup_f2=improved, roster_names=roster["name"])
+    mkts = markets.build_all(sportsbet, inputs, dedup_f2=True, roster_names=roster["name"])
     for key in ("score1", "score2", "assist", "yellow", "clean_sheet", "concede", "gk_saves"):
         snapshot(mkts[key], f"market_{key}")
 
-    # The master must stay snapshot #13 — the optimisers read outputs/players_master.csv
-    # by name, so variable-count stages (reconciliation) come after it.
-    factor_history = None
     assist_real = provenance.is_real("sportsbet_assist_odds.csv")
-    if improved:
-        # assist normally stays single-week (backtested better on real weeks), but it needs its
-        # archive history available so players.build can fall back to the trailing median when the
-        # assist market ISN'T real. Every other stat medians unconditionally (MEDIAN_FACTOR_STATS).
-        hist_stats = tuple(config.MEDIAN_FACTOR_STATS) + ("assist",)
-        factor_history = {stat: h for stat in hist_stats
-                          if (h := history.season_weekly_factors(stat))}
-        if factor_history:
-            print(f"  trailing-median factors active for {len(factor_history)} stats "
-                  f"({len(next(iter(factor_history.values())))} players with archive weeks)"
-                  + ("" if assist_real else "; assist market not real -> assist on trailing median"))
+    # assist normally stays single-week (backtested better on real weeks), but it needs its
+    # archive history available so players.build can fall back to the trailing median when the
+    # assist market ISN'T real. Every other stat medians unconditionally (MEDIAN_FACTOR_STATS).
+    hist_stats = tuple(config.MEDIAN_FACTOR_STATS) + ("assist",)
+    factor_history = {stat: h for stat in hist_stats
+                      if (h := history.season_weekly_factors(stat))}
+    if factor_history:
+        print(f"  trailing-median factors active for {len(factor_history)} stats "
+              f"({len(next(iter(factor_history.values())))} players with archive weeks)"
+              + ("" if assist_real else "; assist market not real -> assist on trailing median"))
 
     # Personal team views (inputs/team_views.csv, current F1 gameweek only): full strength on the
     # rolling rating (F3-F8), TEAM_VIEW_MARKET_WEIGHT on the priced weeks' bookmaker numbers.
     views, gw_now = {}, None
-    if improved and config.USE_TEAM_VIEWS:
+    if config.USE_TEAM_VIEWS:
         gw_now = rating_mod.current_f1_gw()
         views = rating_mod.load_team_views(gw_now)
         if not views and os.path.exists(config.TEAM_VIEWS_CSV):
@@ -181,7 +146,7 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
                   + ", ".join(f"{t} {n:+.3f}" for t, n in sorted(eff.items(), key=lambda x: -x[1])))
 
     rating = rating_raw = None
-    if improved and config.USE_ROLLING_RATING:
+    if config.USE_ROLLING_RATING:
         rating = rating_raw = rating_mod.load()
         if rating is not None:
             print(f"  {rating.summary()}")
@@ -195,12 +160,12 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
 
     master_raw = players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
                                inputs["fallback_factors"], dc_stats, inputs["dc_params"],
-                               improved=improved, factor_history=factor_history, gameweek=gameweek,
+                               improved=True, factor_history=factor_history, gameweek=gameweek,
                                assist_real=assist_real, rating=rating)
     master = master_raw
     # Fixture risk (inputs/fixture_risk.csv, current GW only): scale F1 points by the chance the match is
     # played. Published master only - the archive below keeps master_raw.
-    if improved and config.USE_FIXTURE_RISK:
+    if config.USE_FIXTURE_RISK:
         gw_risk = gw_now if gw_now is not None else rating_mod.current_f1_gw()
         risk = fixture_risk.load(gw_risk)
         master, applied = fixture_risk.apply(master_raw, risk, gameweek=gw_risk)
@@ -210,49 +175,47 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
                               for t, (p, c) in sorted(applied.items())))
     master = snapshot(master, "players_master")
 
-    if improved:
-        rec = reconcile.report(roster, inputs["starting_lineups"], mkts, sportsbet)
-        reconcile.print_summary(rec)
-        cur = curation_check.check(master)          # availability ceiling + team start-prob sums
-        curation_check.print_summary(cur)
-        rec = pd.concat([rec, cur], ignore_index=True) if not cur.empty else rec
-        if not rec.empty:
-            snapshot(rec, "data_checks")       # names + curation checks (reconcile.py writes name_reconciliation.csv)
+    rec = reconcile.report(roster, inputs["starting_lineups"], mkts, sportsbet)
+    reconcile.print_summary(rec)
+    cur = curation_check.check(master)          # availability ceiling + team start-prob sums
+    curation_check.print_summary(cur)
+    rec = pd.concat([rec, cur], ignore_index=True) if not cur.empty else rec
+    if not rec.empty:
+        snapshot(rec, "data_checks")       # names + curation checks (reconcile.py writes name_reconciliation.csv)
 
     # Archive updates are destructive (same-gameweek reruns replace rows), so they only
     # happen with an explicit --gw. Inference is a suggestion, never acted on: the FPL
     # data can lag or predate the season, silently corrupting the wrong gameweek.
-    if improved:
-        if gameweek and archive_mode != "none":
-            print(f"Updating historical archives for GW{gameweek}...")
-            # Match odds are archived whenever we have them - they cannot be backfilled - unless
-            # the W/D/W file is still the synthetic seed (the roll writes one before Betway prices).
-            if force_archive or provenance.state(_WDW) != "synthetic":
-                history.update_fixture_history(sportsbet["wdw"], season, gameweek=gameweek,
-                                               sportsbet=sportsbet, fixtures=inputs["fixtures"])
-            else:
-                print("  match odds are still the synthetic seed - fixture history not archived")
-            raw = history.archive_raw_odds(config.SEASON, gameweek)   # `season` here is the season-odds frame
-            print(f"  raw bookmaker prices saved for {len(raw)} real market(s), {sum(raw.values())} rows -> inputs/raw_odds/{config.SEASON}/GW{gameweek:02d}"
-                  if raw else "  raw bookmaker prices: no real markets to save")
-            if archive_mode == "all":
-                withheld = withheld_player_columns(force_archive)
-                archive_master = master_raw     # never the fixture-risk-scaled published master
-                if views:   # the archive records the market as priced, never our personal views
-                    print("  team views active - rebuilding an unshaded master for the archive")
-                    archive_master = players.build(
-                        roster, season, teamview_raw, mkts_raw, inputs["starting_lineups"],
-                        inputs["fallback_factors"], dc_stats, inputs["dc_params"], improved=improved,
-                        factor_history=factor_history, gameweek=gameweek, assist_real=assist_real,
-                        rating=rating_raw)
-                history.update_player_history(archive_master, gameweek, withhold=withheld)
-                history.refresh_fallback_factors(archive_master, withhold=withheld)
-        elif gameweek:
-            print(f"Archives NOT updated for GW{gameweek} (see guard message above)")
+    if gameweek and archive_mode != "none":
+        print(f"Updating historical archives for GW{gameweek}...")
+        # Match odds are archived whenever we have them - they cannot be backfilled - unless
+        # the W/D/W file is still the synthetic seed (the roll writes one before Betway prices).
+        if force_archive or provenance.state(_WDW) != "synthetic":
+            history.update_fixture_history(sportsbet["wdw"], season, gameweek=gameweek,
+                                           sportsbet=sportsbet, fixtures=inputs["fixtures"])
         else:
-            guess = history.infer_gameweek()
-            hint = f" (FPL data suggests GW{guess})" if guess else ""
-            print(f"Archives not updated - rerun with --gw N to record this run{hint}")
+            print("  match odds are still the synthetic seed - fixture history not archived")
+        raw = history.archive_raw_odds(config.SEASON, gameweek)   # `season` here is the season-odds frame
+        print(f"  raw bookmaker prices saved for {len(raw)} real market(s), {sum(raw.values())} rows -> inputs/raw_odds/{config.SEASON}/GW{gameweek:02d}"
+              if raw else "  raw bookmaker prices: no real markets to save")
+        if archive_mode == "all":
+            withheld = withheld_player_columns(force_archive)
+            archive_master = master_raw     # never the fixture-risk-scaled published master
+            if views:   # the archive records the market as priced, never our personal views
+                print("  team views active - rebuilding an unshaded master for the archive")
+                archive_master = players.build(
+                    roster, season, teamview_raw, mkts_raw, inputs["starting_lineups"],
+                    inputs["fallback_factors"], dc_stats, inputs["dc_params"], improved=True,
+                    factor_history=factor_history, gameweek=gameweek, assist_real=assist_real,
+                    rating=rating_raw)
+            history.update_player_history(archive_master, gameweek, withhold=withheld)
+            history.refresh_fallback_factors(archive_master, withhold=withheld)
+    elif gameweek:
+        print(f"Archives NOT updated for GW{gameweek} (see guard message above)")
+    else:
+        guess = history.infer_gameweek()
+        hint = f" (FPL data suggests GW{guess})" if guess else ""
+        print(f"Archives not updated - rerun with --gw N to record this run{hint}")
 
     cols = ["Player Name", "Position", "Team", "Cost", "F1 XP"]
     print("\nTop 5 by F1 XP:")
@@ -276,9 +239,4 @@ if __name__ == "__main__":
     for _stream in (sys.stdout, sys.stderr):      # Windows consoles default to cp1252; names carry accents
         if hasattr(_stream, "reconfigure"):
             _stream.reconfigure(encoding="utf-8", errors="replace")
-    parity = "--validate" in sys.argv
-    master = run(parity_mode=parity, gameweek=_parse_gw(sys.argv),
-                 force_archive="--force-archive" in sys.argv)
-    if parity:
-        from . import validate
-        validate.run(master)
+    run(gameweek=_parse_gw(sys.argv), force_archive="--force-archive" in sys.argv)

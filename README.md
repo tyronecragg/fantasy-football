@@ -4,7 +4,7 @@ Python replacement for the old `Fantasy Premier League.xlsx` process: bookmaker 
 FPL data in, per-player expected points (XP) over the next eight fixtures out, feeding two
 PuLP squad optimisers. Every stage is an inspectable DataFrame snapshotted to `outputs/`.
 
-The workbook itself is retired — kept only as a frozen reference for parity validation.
+The workbook is retired and deleted (parity check removed 2026-10-23).
 `docs/PIPELINE_MAP.md` documents how the original workbook worked and how it was replicated.
 
 ## Weekly routine (in-season)
@@ -241,8 +241,8 @@ Around the commands:
 `config.LONGSHOT_CALIBRATION` shrinks over-stated long prices on the player attacking
 markets (goalscorer, 2+ goals, assists). Applied in `markets.py::longshot_calibrate`, right
 after `implied()` converts odds to probabilities — **the scraped CSVs stay raw**, so a
-different curve can be fitted later without re-scraping. Off in parity mode, since the
-workbook applied a flat margin. `LONGSHOT_CALIBRATION = None` disables it.
+different curve can be fitted later without re-scraping.
+`LONGSHOT_CALIBRATION = None` disables it.
 
 **Assists use their own, gentler curve since 2026-09-09** (`config.LONGSHOT_CALIBRATION_ASSIST`,
 the goal knots with multipliers square-rooted, i.e. half strength in log space; `build_all`
@@ -408,8 +408,7 @@ Things known to be provisional, with what would settle them:
   0.65 nineties = 0.65/4 own + 3.35/4 average, one full match = 0.25 own, four or more = own,
   under ~59 min = the average. Replaces the old hard
   cliff (own rate at ≥4 nineties, otherwise the average). Blended in probability space so
-  the zero-evidence fallback stays the population's expected probability. Parity keeps
-  the cliff. Moved ~60 partial-sample players on the live data (e.g. Pinnock 3.5 nineties at
+  the zero-evidence fallback stays the population's expected probability. Moved ~60 partial-sample players on the live data (e.g. Pinnock 3.5 nineties at
   11.9/90: 0.32 → 0.63), none of the reliable or zero-evidence ones.
 
 - **Bonus points — ODDS-ANCHORED model, LIVE** (`config.BONUS_ODDS_MODEL=True`, improved mode;
@@ -430,7 +429,7 @@ Things known to be provisional, with what would settle them:
   proportion to **XP above the 2-pt appearance floor** (goalscorers/clean-sheet keepers take most,
   benched ~0). Validated on GW1 2026-27: **total 64.2** (was 28.1; reality ~64), per-team pots track
   win prob (Arsenal 4.93 hosting Coventry → Coventry 1.48 away at Arsenal, a 3.3x spread ≈ the
-  measured 4x), Haaland's bonus 0.21→0.53. Parity unaffected (flag is improved-only). Revert with the
+  measured 4x), Haaland's bonus 0.21→0.53. Revert with the
   one-line flag. RESIDUAL / to refine, gated through `tools/backtest_projections.py`: (1) the
   within-team split is proportional-to-performance-XP, a reasonable but unvalidated shape — real BPS
   concentrates harder on the single top performer (3/2/1); a concentration power or a direct BPS
@@ -480,7 +479,6 @@ Things known to be provisional, with what would settle them:
 | `fixture_risk.csv` | you (by hand) | chance a current-GW match is actually played (weather/safety). `Gameweek,Team,play_prob,note`, list both teams; only current-GW rows apply. Scales those teams' F1 XP in the published master (`fpl_pipeline/fixture_risk.py`); optional `replay_gw` adds the postponed share to that week (the double gameweek). The master also gets `F1 XP Raw` (unscaled), which the optimiser uses to pick the GW XI, bench order and captain (start them, rely on autosub); transfers/squad use the adjusted XP. The archive keeps unscaled numbers. Never put this in `starting_lineups.csv` (renormalised to 11, and scored by the ledger). Added 2026-10-23 for Storm Boelo (Liverpool v Brighton, 0.95) |
 | `historical_fixture_odds.csv` | pipeline (`--gw` runs) | per-gameweek match + season odds; never edit. Records more than the pipeline consumes (draw odds, `Gameweek` stamp, per-team clean-sheet and over-1.5/over-3.5 goal odds) because odds can't be backfilled — see task #19. Rows before 2026-27 predate those columns and carry NA, and the archive starts ~GW12 2025-26, so it describes the mid-season regime only |
 | `raw_odds/<season>/GW<NN>/` | pipeline (`--gw` runs, `history.archive_raw_odds`) | never edit; every sportsbet file the provenance manifest marks **real**, prices exactly as scraped, with synthetic seed rows dropped (numeric match id/date; win/draw/win has no marker) + that slice of `_provenance.json`. Synthetic and derived markets are skipped. The player archive holds our adjusted chances; this keeps the untouched bookmaker prices so the longshot curves can be re-fit from scratch. Started GW8 2026-27. **GW1–7 goalscorer/assist rebuilt** by `tools/backfill_raw_odds.py` (inverts margin + that week's curve; keeps only prices landing on a 2-decimal value, which excludes fallback fill-ins) as `*_reconstructed.csv`, marked `reconstructed` in the folder's `_provenance.json` |
-| `historical_expected_points.csv` | you, optional | legacy tracking log, nothing reads it |
 | `historical_outright_odds.csv` | `tools/betway_outrights.py` (weekly) | week-by-week archive of the full team outright board (Winner/Top 2/4/5/6/Top Half/Bottom Half/Bottom/Relegation); long format, GW-keyed; a data lake for future modelling — nothing reads it yet |
 | `f2_yellow_card.csv` | vestigial | second-source F2 card odds; empty since that pipeline was retired |
 
@@ -499,6 +497,11 @@ reconciliation stage need no changes.
 | `--dry-run` | report what would be written, change nothing |
 | `--no-fill` | write only what Betway priced; derive nothing |
 | `--har FILE` | parse a saved capture instead of fetching |
+
+**Team totals — two layouts (2026-10-23).** Betway renamed the per-team goals market from
+`"<Team> Total (1.5)"` to `"<Team> - Total Goals"` with the line in the selection text
+(`"Over (1.5)"`). The parser reads both, keeping lines 0.5–2.5 only; before the fix the
+team-goals market silently stayed synthetic.
 
 **Two-stage by design.** First it writes whatever Betway actually prices. Then
 `fill_gaps()` derives what Betway hasn't published yet *from the real odds it just
@@ -600,8 +603,7 @@ provenance manifest (`tools/odds_status.py`). Never edit by hand.
 
 Numbered snapshots `01`–`12` (roster, DC stats, season probs, team fixture view, market
 tables), then **`players_master.csv`** — guaranteed the master, it's what the
-optimisers read — then `data_checks.csv` when issues exist. Parity runs
-write to `outputs/parity/` so they never clobber the live master. The backtest writes
+optimisers read — then `data_checks.csv` when issues exist. The backtest writes
 `backtest_pairs.csv` here too.
 
 ## Tools
@@ -627,7 +629,6 @@ write to `outputs/parity/` so they never clobber the live master. The backtest w
 | `python tools/save_projection_models.py` | trains + persists the deployable models to `outputs/models/`. **Rerun after each new gameweek of real archive data** |
 | `python tools/refit_coefficients.py [--write] [--only win_pred\|baselines]` | refit regressions from the archives (holdout-gated; see Refitting) |
 | `python -m fpl_pipeline.reconcile` | standalone name-reconciliation report |
-| `tools/extract_coefficients.py`, `tools/export_workbook_inputs.py` | one-off migration tools (workbook → pipeline); kept for provenance |
 
 ### Forward-projection models (`config.USE_PROJECTION_MODEL`)
 
@@ -756,11 +757,9 @@ Both optimisers configure via their `__main__` blocks (edit and run):
   above are `optimisation.py` only. Port them if you wildcard, or pass that file's
   `combine_fixture_weights()` output as `fixture_weights`.
 
-Both accept `excel_file="...xlsx"` to run against the legacy workbook instead.
-
 ## Model improvements over the workbook (improved mode, the default)
 
-Documented with rationale in `fpl_pipeline/players.py`; all are disabled in parity mode:
+Documented with rationale in `fpl_pipeline/players.py`; `run.py` always uses them:
 
 | Improvement | What it fixes |
 |---|---|
@@ -810,18 +809,14 @@ archived. The backtest measures the pre-blend machinery; pairs land in
    never collide with last season's rows. `dc_params.csv` and `fallback_factors.csv`
    carry over and self-refresh as data arrives.
 
-Parity validation stays pinned to the 2025-26 workbook (`config.PARITY_SEASON`): it
-reads its roster/DC data from the workbook's own sheets and its inputs/odds from the
-frozen `parity_reference/` snapshot, so it keeps passing regardless of season, weekly
-scrapes, or upstream FPL-data rewrites. The test suite uses the same frozen data.
+The test suite reads a frozen 2025-26 snapshot in `tests/data/` (inputs, odds, roster, DefCon
+tables), so it keeps passing regardless of season, weekly scrapes, or upstream FPL-data rewrites.
 
 ## Validation
 
-`python -m fpl_pipeline.run --validate` runs **parity mode**: all improvements and
-input-mutating side effects off, output compared cell-for-cell against the workbook's
-cached values (161/161 columns clean at migration). Parity is only meaningful while
-`inputs/` and `sportsbet/*.csv` are unchanged since the workbook last calculated —
-gameweek runs mutate the archives, after which the frozen workbook is a stale reference.
+The workbook-parity check (`--validate`, 161/161 columns clean at migration) was retired
+2026-10-23 along with the workbook. Projection changes are judged on outcomes instead — see
+the backtest and walk-forward tools.
 
 ## Pending model decision — re-run at GW5
 
@@ -872,8 +867,7 @@ archive (GW16+) cannot test.
 
 **Adopted 2026-09-02 (`config.USE_ROLLING_RATING`).** `fpl_pipeline/rating.py` now serves the F3–F8
 win / opponent-win probabilities (and the F2 fallback when Betway has not priced F2) in improved mode;
-the outrights Lasso remains the fallback when the maps or price data are unavailable, and parity mode
-is untouched. The strengths are solved fresh on every run from football-data closing prices
+the outrights Lasso remains the fallback when the maps or price data are unavailable. The strengths are solved fresh on every run from football-data closing prices
 (`fpl_data/football_data/E0_*.csv`; the current season's file is re-downloaded when older than a day,
 falling back to the cache offline). The rating-gap → probability maps live in
 `fpl_pipeline/data/rating_maps.json` (`tools/fit_rating_maps.py`, fitted on 2022-23 to 2025-26; re-run
@@ -911,8 +905,7 @@ construction, and fit every leg the way the live model does.
 `inputs/historical_player_data.csv` and `inputs/historical_fixture_odds.csv` (which the
 pipeline now maintains automatically). Dry run by default — shows n / R² / changed
 coefficients; `--write` regenerates `fpl_pipeline/data/coefficients.json`, backing up the
-workbook-extracted original to `coefficients_workbook.json` (parity mode then uses the
-backup automatically). Feature construction is shared with serving code, so train and
+workbook-extracted original to `coefficients_workbook.json` once (kept for reference). Feature construction is shared with serving code, so train and
 serve cannot drift. The bonus model is carried over unchanged (refitting it needs actual
 bonus-point outcomes, which the archives don't hold).
 
@@ -977,7 +970,7 @@ heal the files back to UTF-8 automatically.
 predictions) → `model` (baselines, factors machinery, Poisson curves, scoring — all
 coefficients from `data/coefficients.json`) → `players` (the master build; every
 improvement documented in its docstring) → `reconcile` (name-join audit) → `history`
-(season-keyed archive upserts) → `validate` (workbook parity) → `run` (orchestration),
+(season-keyed archive upserts) → `run` (orchestration),
 with `io_utils` (snapshots, tolerant CSV reading) underneath. `docs/PIPELINE_MAP.md` maps
 each module back to the workbook sheets it replaced.
 
@@ -987,8 +980,8 @@ each module back to the workbook sheets it replaced.
 behaviour on a synthetic single-gameweek state, history upsert semantics (player and
 fixture archives), the synthetic-odds archive guard, FFS staging and team-news parsing,
 refit round-trip (predictions, not raw coefficients — the feature sets are collinear),
-name reconciliation and Excel-encoding repair, the fixture-window builder, and the
-full workbook parity check.
+name reconciliation and Excel-encoding repair, and the fixture-window builder. Fixtures
+read the frozen snapshot in `tests/data/`.
 
 `tests/test_optimiser_bench_slots.py` (bench sub-order pricing, fixture-weight
 combination) **is skipped under system Python** — PuLP lives only in the repo

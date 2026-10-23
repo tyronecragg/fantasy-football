@@ -16,6 +16,8 @@ Measured on 33,895 player-weeks (2025-26 + 2026-27, FPL-Core-Insights per-GW sta
 ## Fixes
 - [x] **`tools/refit_coefficients.py` season-aware holdout** (done 2026-10-17): the check now holds out the newest season's latest weeks and fits on everything before. Re-run: refit PASSES (3-week holdout: assist −2.3%, clean_sheet −4.9%, concede2 +1.9%, saves3 −3.7%, score1 −1.3%, yellow +1.7%; 4-week: +3.0 / −3.1 / −1.8 / −5.5 / −0.6 / +0.8%).
 - [x] **Refit written** (2026-10-17): baselines + win_pred_f3plus only (`--only baselines`, then `--only win_pred`); training data rebuilt, GBMs retrained, DEFENSIVE_MODEL_WEIGHT / PROJECTION_STACK re-checked (unchanged). `pred_xp` excluded from the refit. Documented in docs/PIPELINE_MAP.md (Model refresh).
+- [ ] **Strip the dead `improved=False` branches** (players/markets/team_model). Parity was removed 2026-10-23 and `run.py` always passes improved; the old workbook-exact paths now run only in unit tests.
+- [ ] **Before GW9 lineups: review Ajer's F3+ slide.** Andrews called him a "mainstay"; check whether the slide is still justified.
 - [ ] **~GW12: re-run the refit** (`tools/refit_coefficients.py`, dry run first); if it writes, repeat the cascade (build_training_data → save_projection_models → weight re-check).
 
 ## Scheduled re-checks

@@ -15,6 +15,7 @@ COEFS = None
 BASELINES = None
 SHEET = None
 
+# The original workbook-extracted coefficients, backed up once by the first refit (kept for reference/rollback)
 WORKBOOK_COEFFICIENTS_JSON = os.path.join(config.DATA_DIR, "coefficients_workbook.json")
 
 

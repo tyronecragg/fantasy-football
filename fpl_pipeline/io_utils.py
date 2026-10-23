@@ -56,8 +56,7 @@ def snapshot(df, name):
 
 
 def reset_counter(subdir=None):
-    """Reset the stage counter. Parity runs pass subdir='parity' so their snapshots
-    never clobber outputs/ — the optimisers read outputs/players_master.csv."""
+    """Reset the stage counter; `subdir` redirects snapshots under outputs/ (none by default)."""
     _state["n"] = 0
     _state["dir"] = os.path.join(config.OUTPUTS_DIR, subdir) if subdir else None
 
