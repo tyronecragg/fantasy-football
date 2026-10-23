@@ -1,0 +1,11 @@
+# Chance a current-gameweek match is actually played (weather, safety, etc.). play_prob scales each listed
+# team's F1 points in the published master; the archive keeps the unscaled numbers. Only rows whose Gameweek
+# = the current F1 gameweek (first column of fixtures.csv) apply; others are ignored. List BOTH teams.
+# replay_gw (optional): the gameweek a postponed match would most likely be replayed in; (1 - play_prob) x F1 XP
+# is added to that week's XP (the double gameweek). Leave blank if unknown.
+# Wrap a note in double quotes if it contains a comma (an unquoted comma breaks the row and the run).
+Gameweek,Team,play_prob,replay_gw,note
+8,Liverpool,0.95,15,Storm Boelo: yellow wind warning only (amber is Cumbria/Northumberland/Scotland); ~47mph gusts at KO easing; PL wind postponements have come under amber - est 5%. Replay reported 15-16 Dec = GW15
+8,Brighton,0.95,15,same as Liverpool row
+8,Sunderland,0.95,15,Storm Boelo: yellow wind warning; Met Office max gust 63mph Sun; next to the amber area - est 5% (Tyrone). Replay week a guess (mid-Dec like Liverpool v Brighton)
+8,Leeds,0.95,15,same as Sunderland row

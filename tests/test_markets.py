@@ -3,14 +3,26 @@ import pandas as pd
 import numpy as np
 
 
+def test_recalibrate_round_trips_between_curves():
+    from fpl_pipeline import config, markets
+    raw = pd.Series([0.03, 0.06, 0.12, 0.25])
+    old = markets.longshot_calibrate(raw)                                     # archived under the goals curve
+    new = markets.recalibrate(old, config.LONGSHOT_CALIBRATION, config.LONGSHOT_CALIBRATION_ASSIST)
+    want = markets.longshot_calibrate(raw, knots=config.LONGSHOT_CALIBRATION_ASSIST)
+    assert np.allclose(new, want, atol=2e-4)
+    same = markets.recalibrate(want, config.LONGSHOT_CALIBRATION_ASSIST, config.LONGSHOT_CALIBRATION_ASSIST)
+    assert np.allclose(same, want, atol=2e-4)
+
+
 def test_assist_curve_is_gentler_than_goals_and_ranks_preserved():
     from fpl_pipeline import config, markets
     p = pd.Series([0.03, 0.06, 0.10, 0.20, 0.40])
     goals = markets.longshot_calibrate(p)
     assists = markets.longshot_calibrate(p, knots=config.LONGSHOT_CALIBRATION_ASSIST)
-    assert (assists >= goals).all() and (assists <= p).all()          # between the goals shrink and raw
+    assert (assists >= goals).all() and (assists <= p + 1e-12).all()  # between the goals shrink and raw
     assert (np.diff(assists) > 0).all()                                 # monotone
-    assert abs(assists[0] / p[0] - (goals[0] / p[0]) ** 0.5) < 1e-3     # half strength in log space (knots rounded to 3dp)
+    assert abs(assists[0] / p[0] - 0.80) < 1e-9                         # light trim at the very bottom...
+    assert abs(assists[2] - p[2]) < 1e-12 and abs(assists[4] - p[4]) < 1e-12   # ...and raw from 8% up
 
 from fpl_pipeline import markets
 

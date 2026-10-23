@@ -33,7 +33,7 @@ from tools.build_preseason_data import (  # noqa: E402  (reuse the tested helper
     FACTOR_STATS, PLAYER_MARGIN, WDW_MARGIN, fixture_win_probs)
 
 HIST = os.path.join(config.INPUTS_DIR, "historical_player_data.csv")
-MASTER = os.path.join(config.OUTPUTS_DIR, "13_players_master.csv")
+MASTER = os.path.join(config.OUTPUTS_DIR, "players_master.csv")
 EPOCH = 1788030000  # ~28 Aug 2026, informational (the pipeline keys markets by player/team, not date)
 
 

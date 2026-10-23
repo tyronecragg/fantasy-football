@@ -32,14 +32,15 @@ from fpl_pipeline import config, ingest, names  # noqa: E402
 HIST = os.path.join(ROOT, "inputs", "source_history", "predicted_xis.csv")
 COLS = ["Season", "Gameweek", "Source", "Team", "Player"]
 
-# Sources the archive expects every gameweek — Curated is ours (--seed-ours); FFS + RotoWire are the
-# standing externals captured at each deadline ("compile the teams"). score() flags any that are
-# missing so a source can't silently fall out of the ledger the way RotoWire did through GW2.
-MAIN_SOURCES = ["Curated", "FFS", "RotoWire"]
+# Sources the archive expects every gameweek — Curated is ours (--seed-ours); FFS, Fantasy Football
+# Pundit and RotoWire are the standing externals captured at each deadline ("compile the teams").
+# score() flags any that are missing so a source can't silently fall out of the ledger the way
+# RotoWire did through GW2. FFP promoted to a primary source 2026-10-08 (name kept as in GW2-3 rows).
+MAIN_SOURCES = ["Curated", "FFS", "FantasyFootballPundit", "RotoWire"]
 
 
 def _norm(s):
-    s = unicodedata.normalize("NFKD", str(s))
+    s = unicodedata.normalize("NFKD", str(s).replace("ø", "o").replace("Ø", "O"))
     return "".join(c for c in s if not unicodedata.combining(c)).casefold().strip()
 
 
@@ -49,13 +50,19 @@ def _squash(s):
 
 
 _INITIAL = re.compile(r"^[A-Za-z]\.?$")
+_GLUED = re.compile(r"^[A-Za-z]\.(?=\S)")
+_PAREN = re.compile(r"^(.+?)\s*\((.+)\)$")
 
 
 def _strip_initials(label):
     """Drop leading forename initials from a source label — RotoWire prints 'E. Haaland',
     'V. van Dijk', 'M. Lewis-Skelly', so match on the surname portion ('Haaland', 'van Dijk')."""
-    parts = [p for p in str(label).split() if not _INITIAL.match(p)]
-    return " ".join(parts) if parts else str(label)
+    label = _GLUED.sub("", str(label).strip())                 # FFP 'J.TIMBER' -> 'TIMBER'
+    m = _PAREN.match(label)                                     # FFS 'MURPHY (JACOB)' -> 'JACOB MURPHY'
+    if m:
+        label = f"{m.group(2)} {m.group(1)}"
+    parts = [p for p in label.split() if not _INITIAL.match(p)]
+    return " ".join(parts) if parts else label
 
 
 # Source team labels -> roster/FPL-canonical, so every source aligns to the actual-XI vocabulary
@@ -74,11 +81,23 @@ TEAM_CANON = {
 ALIASES = {
     ("Arsenal", "Gabriel"): "Gabriel Magalhaes",   # not Martinelli / Jesus
     ("Leeds", "DCL"): "Dominic Calvert-Lewin",
+    ("Newcastle", "Will Osula"): "William Osula",     # RotoWire short first name
     ("Man City", "Nunes"): "Matheus Nunes",         # not Vitor Nunes
     ("Man Utd", "Tielemens"): "Youri Tielemans",    # source misspelling
     ("Sunderland", "O'Nein"): "Luke O'Nien",        # source misspelling
     ("Hull City", "Hjerto-Dahl"): "Jens Hjertø-Dahl",
+    ("Arsenal", "RAYA MARTIN"): "David Raya",            # FFS full surname
+    ("Bournemouth", "ANTÓNIO SILVA"): "António João Pereira de Albuquerque Tavares da Silva",
+    ("Brentford", "YARMOLYUK"): "Yehor Yarmoliuk",       # FFS/RotoWire transliteration
+    ("Brentford", "Yehor Yarmolyuk"): "Yehor Yarmoliuk",
+    ("Brighton", "CHEMA ANDRÉS"): "José María Andrés Baixauli",
+    ("Newcastle", "MILEY"): "Lewis Miley",
+    ("Spurs", "SAVINHO"): "Sávio",                       # FFS uses his nickname
+    ("Liverpool", "A.BECKER"): "Alisson Becker",
+    ("Arsenal", "KONSA NGOYO"): "Ezri Konsa",           # FFS full surname
+    ("Brighton", "Chema"): "José María Andrés Baixauli",  # RotoWire nickname
 }
+ALIASES = {(t, _norm(n)): v for (t, n), v in ALIASES.items()}  # case/accent-insensitive lookup
 
 
 class Resolver:
@@ -109,8 +128,8 @@ class Resolver:
         return TEAM_CANON.get(_norm(team), team)
 
     def resolve(self, team, player, player_mapped=None):
-        if (team, player) in ALIASES:
-            return ALIASES[(team, player)]
+        if (team, _norm(player)) in ALIASES:
+            return ALIASES[(team, _norm(player))]
         # Try the mapper's spelling, then the raw one, then each with leading initials stripped
         # ('E. Haaland' -> 'Haaland') so RotoWire-style labels resolve too.
         raw = [c for c in (player_mapped, player) if c is not None]
@@ -120,6 +139,8 @@ class Resolver:
             if full is not None:
                 return full
         cands = self.by_team.get(_norm(team), [])
+        m = re.match(r"^([A-Za-z])\.\s*\S", str(player).strip())
+        ini = _norm(m.group(1)) if m else None
         for cand in cand_list:
             aq = _squash(cand)
             if not aq:
@@ -127,6 +148,8 @@ class Resolver:
             hits = [c for c, sq, toks in cands if aq == sq or aq in toks]        # exact token / full
             if not hits:
                 hits = [c for c, sq, toks in cands if len(aq) >= 4 and aq in sq]  # substring fallback
+            if len(set(hits)) > 1 and ini:                                  # 'L.MILEY': use the initial
+                hits = [c for c in hits if _norm(c).startswith(ini)]
             if len(set(hits)) == 1:
                 return hits[0]
         return None

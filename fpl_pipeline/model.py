@@ -207,11 +207,20 @@ def reconcile_win_draw(win, opp):
     return live * r, live * (1.0 - r)
 
 
-def dc_favourite_multiplier(win_prob, position):
+def dc_probability_start(rate, p90, sub_minutes, sd, threshold):
+    """P(DC >= threshold | starts) as a mixture of a full-90 game and a subbed-off game:
+    p90 x P(hit | rate) + (1 - p90) x P(hit | rate x sub_minutes / 90). `rate` is the per-90 rate."""
+    full = dc_probability(rate, sd, threshold)
+    sub = dc_probability(rate * (float(sub_minutes) / 90.0), sd, threshold)
+    p = pd.to_numeric(p90, errors="coerce").fillna(1.0).clip(0.0, 1.0)
+    return p * full + (1.0 - p) * sub
+
+
+def dc_favourite_multiplier(win_prob, position, curve=None):
     """Per-fixture multiplier on the DC rate from the team's win probability (config.DC_FAVOURITE_CURVE):
     1.0 below the start of the curve, linear to the end multiplier at the end win prob, flat beyond.
     Positions without a curve, and rows with no win probability, get 1.0."""
-    curve = getattr(config, "DC_FAVOURITE_CURVE", None) or {}
+    curve = (getattr(config, "DC_FAVOURITE_CURVE", None) or {}) if curve is None else curve
     w = pd.to_numeric(win_prob, errors="coerce")
     out = pd.Series(1.0, index=w.index)
     for pos, (lo, hi, mult) in curve.items():
@@ -223,8 +232,13 @@ def dc_favourite_multiplier(win_prob, position):
 def dc_probability(dc90, sd, threshold):
     """P(defensive contribution >= threshold) = 1 - NormCDF(threshold; dc90, sd).
 
-    `sd` is the WITHIN-player match-to-match spread (dc_params.csv: DEF 3.86, MID 3.49), measured
-    from 90-min games last season - NOT the pooled cross-player SD, which is too wide (it double-
+    `sd` is the WITHIN-player match-to-match spread (dc_params.csv: DEF 3.86, MID 3.86 - MID raised from 3.49
+    on 2026-10-17: walk-forward 1,679 starts, pred/actual 0.88 -> 0.97, Brier 0.11602 -> 0.11571, best of
+    3.49/3.62/3.70/3.86/4.10), measured
+    from 90-min games last season (NB 2026-09-21: the DEF figure was measured on the upstream per-gameweek
+    column, which wrongly includes recoveries for defenders in 2025-26 GW2-10; on clean data the
+    within-player sd is 3.53-3.59, MID 3.62. The walk-forward harness still prefers 3.86/3.70 for DEF -
+    a PREDICTIVE spread also carries the uncertainty in the player's rate - so it stays) - NOT the pooled cross-player SD, which is too wide (it double-
     counts how much players differ from each other) and inflated low-DC hit rates ~2x.
     TODO (#2, mean-dependent SD): within-player spread grows with the mean (corr ~0.46), so a single
     fixed sd still slightly overstates the lowest-DC band. Fit sd(mu) or move to a count model

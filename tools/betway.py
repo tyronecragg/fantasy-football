@@ -376,11 +376,24 @@ def collect(fixture_rows, gw_of, delay=3.0):
         team_tot = defaultdict(dict)
         for market, mrows in by_market.items():
             mm = re.match(r"^(.+?) Total \((\d\.5)\)$", market)
-            if not mm:
+            if mm and " & " not in market and not market.lower().startswith(("1st half", "2nd half")):
+                tname = names.apply_team_names(pd.Series([mm.group(1).strip()]))[0]
+                for sel, _, odds in mrows:
+                    team_tot[(tname, mm.group(2))][sel.strip().lower()] = odds
+                continue
+            # Layout since Oct 2026: "<Team> - Total Goals", selection "Over " / "Under " with the
+            # line in sbv (" (1.5)"), lines 0.5-2.5 only (no 3.5 -> concede 4+ falls back to the
+            # Poisson extension off the 1.5 line). The old layout above silently matched nothing
+            # for GW8, leaving the synthetic seed in place.
+            mm = re.match(r"^(.+?) - Total Goals$", market)
+            if not mm or market.lower().startswith(("1st half", "2nd half")):
                 continue
             tname = names.apply_team_names(pd.Series([mm.group(1).strip()]))[0]
-            for sel, _, odds in mrows:
-                team_tot[(tname, mm.group(2))][sel.strip().lower()] = odds
+            for sel, sbv, odds in mrows:
+                side = sel.strip().lower()
+                line = re.search(r"(\d\.5)", f"{sel} {sbv}")
+                if side.startswith(("over", "under")) and line:
+                    team_tot[(tname, line.group(1))][side.split()[0]] = odds
         if any(t in (home, away) for t, _ in team_tot):
             tg_bucket = team_goals if gw == "f1" else team_goals_f2
             for a, b in ((home, away), (away, home)):
@@ -633,7 +646,7 @@ def derive_saves(frames, conversion=CONVERSION, verbose=True):
     if sot is None or cs is None or sot.empty or cs.empty:
         return frames
 
-    roster = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv"))
+    roster = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "fpl_players.csv"))
     team_of = dict(zip(roster["name"], roster["team"]))
     keepers = roster[roster.get("position", "").astype(str).str.upper().isin(["GK", "GKP"])]
     gk_of = dict(zip(keepers["team"], keepers["name"]))
@@ -724,7 +737,7 @@ TEAM_KEY = {"clean_sheet": "team_name", "team_goals": "Team", "gk_saves": "Team"
 
 def _player_team_map():
     """name -> team from the roster snapshot, to resolve which teams Betway priced."""
-    r = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv"))
+    r = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "fpl_players.csv"))
     return r.drop_duplicates(subset="name").set_index("name")["team"]
 
 
@@ -913,8 +926,10 @@ if __name__ == "__main__":
         fx_all = [r for r in fx_all if not any(t in r[1].lower() for t in terms)]
         for d in dropped:
             print(f"  --skip-fixture: ignoring '{d}' (kept {len(fx_all)} fixtures for the F1/F2 split)")
-        if not dropped:
-            print(f"  WARNING: --skip-fixture {args.skip_fixture} matched no fixture label")
+        for t in args.skip_fixture:                      # per term, so one typo can't hide behind the others
+            if not any(t.lower() in d.lower() for d in dropped):
+                print(f"  WARNING: --skip-fixture '{t}' matched no fixture label "
+                      f"(Betway adds 'FC' to some clubs, e.g. 'Liverpool FC', 'Everton FC', 'Brentford FC')")
     gw_of, fx = assign_f1_f2(fx_all)
     crosscheck_split([r for r in fx if gw_of.get(r[1]) == "f1"],
                      [r for r in fx if gw_of.get(r[1]) == "f2"])

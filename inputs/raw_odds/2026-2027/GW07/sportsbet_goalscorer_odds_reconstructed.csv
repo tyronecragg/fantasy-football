@@ -1,0 +1,473 @@
+player_name,team,opponent,venue,odds_decimal
+Ben White,Arsenal,Nott'm Forest,A,10.0
+Cristhian Mosquera,Arsenal,Nott'm Forest,A,11.0
+Ezri Konsa,Arsenal,Nott'm Forest,A,11.0
+Gabriel Magalhaes,Arsenal,Nott'm Forest,A,8.2
+Jurrien Timber,Arsenal,Nott'm Forest,A,8.8
+Piero Hincapie,Arsenal,Nott'm Forest,A,11.0
+Riccardo Calafiori,Arsenal,Nott'm Forest,A,8.4
+Bruno Guimaraes,Arsenal,Nott'm Forest,A,5.8
+Bukayo Saka,Arsenal,Nott'm Forest,A,3.0
+Declan Rice,Arsenal,Nott'm Forest,A,6.6
+Eberechi Eze,Arsenal,Nott'm Forest,A,3.8
+Ethan Nwaneri,Arsenal,Nott'm Forest,A,2.96
+Martin Odegaard,Arsenal,Nott'm Forest,A,4.7
+Martin Zubimendi,Arsenal,Nott'm Forest,A,7.4
+Max Dowman,Arsenal,Nott'm Forest,A,4.1
+Mikel Merino,Arsenal,Nott'm Forest,A,4.1
+Myles Lewis-Skelly,Arsenal,Nott'm Forest,A,9.8
+Noni Madueke,Arsenal,Nott'm Forest,A,4.0
+Kai Havertz,Arsenal,Nott'm Forest,A,2.55
+Viktor Gyokeres,Arsenal,Nott'm Forest,A,2.46
+Aaron Wan-Bissaka,Aston Villa,Newcastle,A,16.0
+Lucas Digne,Aston Villa,Newcastle,A,8.36
+Matty Cash,Aston Villa,Newcastle,A,11.0
+Pau Torres,Aston Villa,Newcastle,A,13.0
+Taylor Harwood-Bellis,Aston Villa,Newcastle,A,11.0
+Tyrone Mings,Aston Villa,Newcastle,A,13.0
+Victor Lindelof,Aston Villa,Newcastle,A,15.0
+Boubacar Kamara,Aston Villa,Newcastle,A,12.0
+Bradley Burrowes,Aston Villa,Newcastle,A,6.94
+Emiliano Buendia,Aston Villa,Newcastle,A,3.6
+George Hemmings,Aston Villa,Newcastle,A,6.0
+Ibrahim Mbaye,Aston Villa,Newcastle,A,4.4
+Joao Gomes,Aston Villa,Newcastle,A,9.2
+Johan Manzambi,Aston Villa,Newcastle,A,3.9
+John McGinn,Aston Villa,Newcastle,A,5.0
+Lamare Bogarde,Aston Villa,Newcastle,A,13.0
+Leon Bailey,Aston Villa,Newcastle,A,4.56
+Ross Barkley,Aston Villa,Newcastle,A,5.4
+Brian Madjo,Aston Villa,Newcastle,A,3.05
+Nicolas Jackson,Aston Villa,Newcastle,A,2.6
+Tammy Abraham,Aston Villa,Newcastle,A,2.7
+Adam Smith,Bournemouth,Sunderland,H,16.0
+Adrien Truffert,Bournemouth,Sunderland,H,12.0
+António João Pereira de Albuquerque Tavares da Silva,Bournemouth,Sunderland,H,11.0
+Bafode Diakite,Bournemouth,Sunderland,H,12.0
+James Hill,Bournemouth,Sunderland,H,14.0
+Juanlu Sánchez,Bournemouth,Sunderland,H,9.2
+Julio Soler Barreto,Bournemouth,Sunderland,H,15.0
+Veljko Milosavljevic,Bournemouth,Sunderland,H,7.27
+Alex Tóth,Bournemouth,Sunderland,H,7.6
+Amine Adli,Bournemouth,Sunderland,H,3.84
+Ben Gannon-Doak,Bournemouth,Sunderland,H,4.7
+David Brooks,Bournemouth,Sunderland,H,4.3
+Lewis Cook,Bournemouth,Sunderland,H,10.0
+Marcus Tavernier,Bournemouth,Sunderland,H,3.9
+Rayan,Bournemouth,Sunderland,H,3.5
+Ryan Christie,Bournemouth,Sunderland,H,4.9
+Tyler Adams,Bournemouth,Sunderland,H,9.8
+Daniel Jebbison,Bournemouth,Sunderland,H,3.2
+Evanilson,Bournemouth,Sunderland,H,3.05
+Álvaro Rodríguez,Bournemouth,Sunderland,H,3.05
+Aaron Hickey,Brentford,Liverpool,H,11.0
+Benjamin Fredrick,Brentford,Liverpool,H,13.0
+El Hadji Malick Diouf,Brentford,Liverpool,H,9.6
+Jannik Schuster,Brentford,Liverpool,H,12.0
+Kim Ji-soo,Brentford,Liverpool,H,15.69
+Kristoffer Ajer,Brentford,Liverpool,H,12.0
+Michael Kayode,Brentford,Liverpool,H,12.0
+Nathan Collins,Brentford,Liverpool,H,11.0
+Rico Henry,Brentford,Liverpool,H,10.0
+Sepp van den Berg,Brentford,Liverpool,H,12.0
+Dango Ouattara,Brentford,Liverpool,H,4.0
+Fabio Carvalho,Brentford,Liverpool,H,3.6
+Gustavo Nunes Fernandes Gomes,Brentford,Liverpool,H,4.2
+Jaidon Anthony,Brentford,Liverpool,H,3.5
+Josh Dasilva,Brentford,Liverpool,H,6.23
+Keane Lewis-Potter,Brentford,Liverpool,H,4.9
+Kevin Schade,Brentford,Liverpool,H,3.2
+Mamadou Sangaré,Brentford,Liverpool,H,6.0
+Mathias Jensen,Brentford,Liverpool,H,7.0
+Mikkel Damsgaard,Brentford,Liverpool,H,4.5
+Vitaly Janelt,Brentford,Liverpool,H,8.0
+Yehor Yarmoliuk,Brentford,Liverpool,H,8.2
+Callum Wilson,Brentford,Liverpool,H,2.75
+Igor Thiago,Brentford,Liverpool,H,2.12
+Costinha,Brighton,Crystal Palace,H,9.0
+Diego Coppola,Brighton,Crystal Palace,H,6.44
+Ferdi Kadioglu,Brighton,Crystal Palace,H,6.8
+Igor Julio,Brighton,Crystal Palace,H,7.79
+Jaouen Hadjam,Brighton,Crystal Palace,H,7.0
+Lewis Dunk,Brighton,Crystal Palace,H,8.6
+Luka Vušković,Brighton,Crystal Palace,H,6.4
+Mats Wieffer,Brighton,Crystal Palace,H,8.02
+Maxim De Cuyper,Brighton,Crystal Palace,H,3.8
+Michael Svoboda,Brighton,Crystal Palace,H,8.8
+Olivier Boscagli,Brighton,Crystal Palace,H,10.0
+Pascal Struijk,Brighton,Crystal Palace,H,7.8
+Diego Gomez,Brighton,Crystal Palace,H,3.25
+Ibrahim Osman,Brighton,Crystal Palace,H,3.1
+José María Andrés Baixauli,Brighton,Crystal Palace,H,4.7
+Kaoru Mitoma,Brighton,Crystal Palace,H,3.03
+Malick Yalcouyé,Brighton,Crystal Palace,H,3.85
+Matt O'Riley,Brighton,Crystal Palace,H,3.75
+Nehemiah Oriola,Brighton,Crystal Palace,H,3.44
+Pascal Gross,Brighton,Crystal Palace,H,4.2
+Yankuba Minteh,Brighton,Crystal Palace,H,3.08
+Yasin Ayari,Brighton,Crystal Palace,H,4.0
+Younes Ibrahim,Brighton,Crystal Palace,H,3.6
+Zadok Yohanna,Brighton,Crystal Palace,H,2.83
+Charalampos Kostoulas,Brighton,Crystal Palace,H,2.08
+Georginio Rutter,Brighton,Crystal Palace,H,2.41
+Promise David,Brighton,Crystal Palace,H,2.3
+Jorrel Hato,Chelsea,Everton,A,13.0
+Josh Acheampong,Chelsea,Everton,A,12.0
+Levi Samuels Colwill,Chelsea,Everton,A,14.0
+Malo Gusto,Chelsea,Everton,A,12.0
+Marco Palestra,Chelsea,Everton,A,10.0
+Maxence Lacroix,Chelsea,Everton,A,13.0
+Pep Chavarría,Chelsea,Everton,A,12.0
+Reece James,Chelsea,Everton,A,7.27
+Wesley Fofana,Chelsea,Everton,A,14.0
+Cole Palmer,Chelsea,Everton,A,2.7
+Dário Luís Essugo,Chelsea,Everton,A,8.47
+Estevao,Chelsea,Everton,A,3.35
+Geovany Quenda,Chelsea,Everton,A,4.5
+Jordan Henderson,Chelsea,Everton,A,10.0
+Moises Caicedo,Chelsea,Everton,A,9.6
+Morgan Rogers,Chelsea,Everton,A,3.3
+Pedro Neto,Chelsea,Everton,A,4.5
+Roméo Lavia,Chelsea,Everton,A,9.6
+Valentín Barco,Chelsea,Everton,A,7.2
+Danny Welbeck,Chelsea,Everton,A,2.65
+Emmanuel Emegha,Chelsea,Everton,A,2.76
+Joao Pedro,Chelsea,Everton,A,2.41
+Marc Guiu,Chelsea,Everton,A,2.79
+Aurèle Amenda,Coventry City,Spurs,A,16.22
+Bobby Thomas,Coventry City,Spurs,A,10.0
+Ethan Pinnock,Coventry City,Spurs,A,16.0
+Jake Bidwell,Coventry City,Spurs,A,15.0
+Jay Dasilva,Coventry City,Spurs,A,17.0
+Joel Latibeaudiere,Coventry City,Spurs,A,17.0
+Milan van Ewijk,Coventry City,Spurs,A,18.0
+Stephen Mfuni,Coventry City,Spurs,A,15.0
+Caleb Yirenkyi,Coventry City,Spurs,A,10.0
+Ephron Mason-Clark,Coventry City,Spurs,A,5.2
+Frank Onyeka,Coventry City,Spurs,A,11.0
+George Shepherd,Coventry City,Spurs,A,6.06
+Gustavo Hamer,Coventry City,Spurs,A,6.4
+Jack Rudoni,Coventry City,Spurs,A,6.0
+Josh Eccles,Coventry City,Spurs,A,7.68
+Kai Andrews,Coventry City,Spurs,A,6.06
+Loum Tchaouna,Coventry City,Spurs,A,6.4
+Matt Grimes,Coventry City,Spurs,A,13.0
+Tatsuhiro Sakamoto,Coventry City,Spurs,A,6.8
+Victor Torp,Coventry City,Spurs,A,6.0
+Yann Gboho,Coventry City,Spurs,A,4.9
+Brandon Thomas-Asante,Coventry City,Spurs,A,4.4
+Ellis Simms,Coventry City,Spurs,A,3.55
+Haji Wright,Coventry City,Spurs,A,5.11
+Sidiki Cherif,Coventry City,Spurs,A,4.3
+Anan Khalaili,Crystal Palace,Brighton,A,6.8
+Ben Chilwell,Crystal Palace,Brighton,A,11.0
+Chris Richards,Crystal Palace,Brighton,A,15.0
+Honest Ahanor,Crystal Palace,Brighton,A,17.0
+Jaydee Canvot,Crystal Palace,Brighton,A,17.0
+Oscar Mingueza,Crystal Palace,Brighton,A,12.0
+Rio Cardines,Crystal Palace,Brighton,A,11.58
+Takehiro Tomiyasu,Crystal Palace,Brighton,A,16.0
+Tyrick Mitchell,Crystal Palace,Brighton,A,13.0
+Adam Wharton,Crystal Palace,Brighton,A,12.0
+Cheick Doucoure,Crystal Palace,Brighton,A,9.4
+Daichi Kamada,Crystal Palace,Brighton,A,7.2
+Darío Osorio,Crystal Palace,Brighton,A,6.2
+Dwight McNeil,Crystal Palace,Brighton,A,6.4
+Evann Guessand,Crystal Palace,Brighton,A,4.5
+Ismaila Sarr,Crystal Palace,Brighton,A,3.95
+Jefferson Lerma,Crystal Palace,Brighton,A,11.0
+Jesurun Rak-Sakyi,Crystal Palace,Brighton,A,5.35
+Joél Drakes-Thomas,Crystal Palace,Brighton,A,6.01
+Matheus França de Oliveira,Crystal Palace,Brighton,A,6.01
+Quinten Timber,Crystal Palace,Brighton,A,9.6
+Will Hughes,Crystal Palace,Brighton,A,13.0
+Yeremy Pino,Crystal Palace,Brighton,A,5.6
+Zavier Gozo,Crystal Palace,Brighton,A,5.8
+Christantus Uche,Crystal Palace,Brighton,A,3.99
+Eddie Nketiah,Crystal Palace,Brighton,A,3.85
+Jean-Philippe Mateta,Crystal Palace,Brighton,A,3.25
+Jorgen Strand Larsen,Crystal Palace,Brighton,A,3.5
+Adam Aznou,Everton,Chelsea,H,8.92
+Ainsley Maitland-Niles,Everton,Chelsea,H,10.0
+Jake O'Brien,Everton,Chelsea,H,11.0
+James Tarkowski,Everton,Chelsea,H,10.0
+Jarrad Branthwaite,Everton,Chelsea,H,9.4
+Michael Keane,Everton,Chelsea,H,9.2
+Nathan Patterson,Everton,Chelsea,H,8.53
+Brennan Johnson,Everton,Chelsea,H,4.3
+Charly Alcaraz,Everton,Chelsea,H,5.2
+Christian Norgaard,Everton,Chelsea,H,7.8
+Harrison Armstrong,Everton,Chelsea,H,8.0
+Hayden Hackney,Everton,Chelsea,H,7.0
+Jack Grealish,Everton,Chelsea,H,4.8
+James Garner,Everton,Chelsea,H,7.6
+Kiernan Dewsbury-Hall,Everton,Chelsea,H,3.65
+Merlin Röhl,Everton,Chelsea,H,8.4
+Tyler Dibling,Everton,Chelsea,H,5.2
+Tyrique George,Everton,Chelsea,H,4.1
+Thierno Barry,Everton,Chelsea,H,3.0
+Antonee Robinson,Fulham,Hull City,H,8.8
+Calvin Bassey,Fulham,Hull City,H,10.0
+David Affengruber,Fulham,Hull City,H,11.0
+Joachim Andersen,Fulham,Hull City,H,10.0
+Jorge Cuenca,Fulham,Hull City,H,8.4
+Kenny Tete,Fulham,Hull City,H,12.0
+Luc De Fougerolles,Fulham,Hull City,H,9.55
+Ryan Sessegnon,Fulham,Hull City,H,5.4
+Timothy Castagne,Fulham,Hull City,H,9.6
+Alex Iwobi,Fulham,Hull City,H,4.1
+César Palacios,Fulham,Hull City,H,3.3
+Emile Smith Rowe,Fulham,Hull City,H,3.4
+Harrison Reed,Fulham,Hull City,H,7.4
+Hugo Larsson,Fulham,Hull City,H,7.0
+Josh King,Fulham,Hull City,H,2.85
+Kevin,Fulham,Hull City,H,3.35
+Manuel Ángel Morán Ibáñez,Fulham,Hull City,H,6.4
+Oscar Bobb,Fulham,Hull City,H,4.3
+Sander Berge,Fulham,Hull City,H,9.2
+Shea Charles,Fulham,Hull City,H,6.0
+Gonzalo García,Fulham,Hull City,H,2.31
+Rodrigo Muniz,Fulham,Hull City,H,2.48
+Brooke Norton-Cuffy,Hull City,Fulham,A,15.0
+Cody Drameh,Hull City,Fulham,A,17.68
+John Egan,Hull City,Fulham,A,15.0
+Lewie Coyle,Hull City,Fulham,A,17.0
+Lucas Herrington,Hull City,Fulham,A,15.0
+Nobel Mendy,Hull City,Fulham,A,12.0
+Paddy McNair,Hull City,Fulham,A,12.22
+Ryan Giles,Hull City,Fulham,A,15.0
+Semi Ajayi,Hull City,Fulham,A,15.0
+Abdülkadir Ömür,Hull City,Fulham,A,7.8
+Christos Mouzakitis,Hull City,Fulham,A,12.0
+David Akintola,Hull City,Fulham,A,5.97
+Eliot Matazo,Hull City,Fulham,A,12.36
+Elliot Stroud,Hull City,Fulham,A,5.4
+Hidemasa Morita,Hull City,Fulham,A,11.0
+Jens Hjertø-Dahl,Hull City,Fulham,A,6.2
+Joe Gelhardt,Hull City,Fulham,A,4.1
+Kieran Dowell,Hull City,Fulham,A,6.46
+Liam Millar,Hull City,Fulham,A,6.37
+Lucas Gourna-Douath,Hull City,Fulham,A,12.0
+Matt Crooks,Hull City,Fulham,A,7.0
+Mohamed Belloumi,Hull City,Fulham,A,4.7
+Mohamed-Ali Cho,Hull City,Fulham,A,5.0
+Regan Slater,Hull City,Fulham,A,10.0
+Sorba Thomas,Hull City,Fulham,A,5.8
+Tim Iroegbunam,Hull City,Fulham,A,12.0
+Óscar Zambrano,Hull City,Fulham,A,8.0
+Oli McBurnie,Hull City,Fulham,A,3.6
+Abdoul Ouattara,Ipswich Town,Man City,A,12.0
+Cédric Kipré,Ipswich Town,Man City,A,16.0
+Dara O'Shea,Ipswich Town,Man City,A,17.0
+Darnell Furlong,Ipswich Town,Man City,A,18.0
+Issa Diop,Ipswich Town,Man City,A,19.0
+Jacob Greaves,Ipswich Town,Man City,A,19.0
+Leif Davis,Ipswich Town,Man City,A,13.0
+Abdul Fatawu,Ipswich Town,Man City,A,6.4
+Anis Mehmeti,Ipswich Town,Man City,A,5.6
+Azor Matusiwa,Ipswich Town,Man City,A,17.0
+Cameron Humphreys,Ipswich Town,Man City,A,10.82
+Daizen Maeda,Ipswich Town,Man City,A,5.2
+Exequiel Palacios,Ipswich Town,Man City,A,13.0
+Florentino,Ipswich Town,Man City,A,15.0
+Jack Clarke,Ipswich Town,Man City,A,5.2
+Jack Taylor,Ipswich Town,Man City,A,9.84
+Jaden Philogene,Ipswich Town,Man City,A,5.4
+Julio Enciso,Ipswich Town,Man City,A,5.0
+Kasey McAteer,Ipswich Town,Man City,A,6.2
+Marcelino Núñez,Ipswich Town,Man City,A,7.6
+Sasa Lukic,Ipswich Town,Man City,A,13.0
+Chuba Akpom,Ipswich Town,Man City,A,4.3
+Emersonn Correia da Silva,Ipswich Town,Man City,A,4.4
+Sindre Walle Egeli,Ipswich Town,Man City,A,5.6
+Zian Flemming,Ipswich Town,Man City,A,4.0
+Gabriel Gudmundsson,Leeds,Man Utd,H,13.0
+Jaka Bijol,Leeds,Man Utd,H,10.0
+James Justin,Leeds,Man Utd,H,9.2
+Jayden Bogle,Leeds,Man Utd,H,8.4
+Jayden Lienou,Leeds,Man Utd,H,12.55
+Melvin Bard,Leeds,Man Utd,H,12.0
+Nico Elvedi,Leeds,Man Utd,H,11.0
+Sebastiaan Bornauw,Leeds,Man Utd,H,7.7
+Tarik Muharemović,Leeds,Man Utd,H,11.0
+Anton Stach,Leeds,Man Utd,H,4.9
+Ao Tanaka,Leeds,Man Utd,H,5.6
+Brenden Aaronson,Leeds,Man Utd,H,4.3
+Ethan Ampadu,Leeds,Man Utd,H,12.0
+Harry Wilson,Leeds,Man Utd,H,3.35
+Ilia Gruev,Leeds,Man Utd,H,11.0
+Jean-Mattéo Bahoya,Leeds,Man Utd,H,4.1
+Noah Okafor,Leeds,Man Utd,H,3.2
+Sean Longstaff,Leeds,Man Utd,H,5.8
+Dominic Calvert-Lewin,Leeds,Man Utd,H,2.35
+Joel Piroe,Leeds,Man Utd,H,2.94
+Lukas Nmecha,Leeds,Man Utd,H,2.9
+Mateo Joseph Fernández-Regatillo,Leeds,Man Utd,H,2.92
+Calvin Ramsay,Liverpool,Brentford,A,8.3
+Jeremie Frimpong,Liverpool,Brentford,A,9.0
+Jeremy Jacquet,Liverpool,Brentford,A,12.0
+Joe Gomez,Liverpool,Brentford,A,14.0
+Kostas Tsimikas,Liverpool,Brentford,A,12.0
+Milos Kerkez,Liverpool,Brentford,A,11.0
+Ronald Araujo,Liverpool,Brentford,A,10.0
+Virgil van Dijk,Liverpool,Brentford,A,9.2
+Alexis Mac Allister,Liverpool,Brentford,A,6.6
+Bradley Barcola,Liverpool,Brentford,A,3.4
+Cody Gakpo,Liverpool,Brentford,A,3.4
+Curtis Jones,Liverpool,Brentford,A,5.21
+Dominik Szoboszlai,Liverpool,Brentford,A,5.0
+Endo Wataru,Liverpool,Brentford,A,10.0
+Federico Chiesa,Liverpool,Brentford,A,4.09
+Florian Wirtz,Liverpool,Brentford,A,4.6
+Harvey Elliott,Liverpool,Brentford,A,4.36
+James McConnell,Liverpool,Brentford,A,6.4
+Lewis Koumas,Liverpool,Brentford,A,3.25
+Rio Ngumoha,Liverpool,Brentford,A,4.4
+Ryan Gravenberch,Liverpool,Brentford,A,8.8
+Stefan Bajčetić Maquieira,Liverpool,Brentford,A,8.37
+Trey Nyoni,Liverpool,Brentford,A,6.4
+Victor Munoz,Liverpool,Brentford,A,4.3
+Alexander Isak,Liverpool,Brentford,A,2.6
+Hugo Ekitike,Liverpool,Brentford,A,2.54
+Jayden Danns,Liverpool,Brentford,A,3.3
+Abduqodir Khusanov,Man City,Ipswich Town,H,12.0
+Josko Gvardiol,Man City,Ipswich Town,H,6.4
+Kaden Braithwaite,Man City,Ipswich Town,H,8.01
+Marc Guehi,Man City,Ipswich Town,H,7.0
+Matheus Nunes,Man City,Ipswich Town,H,9.6
+Max Alleyne,Man City,Ipswich Town,H,7.42
+Nico O'Reilly,Man City,Ipswich Town,H,4.7
+Rayan Ait Nouri,Man City,Ipswich Town,H,4.0
+Rico Lewis,Man City,Ipswich Town,H,7.4
+Ruben Dias,Man City,Ipswich Town,H,9.2
+Vitor de Oliveira Nunes dos Reis,Man City,Ipswich Town,H,7.0
+Allan Andrade Elias,Man City,Ipswich Town,H,2.95
+Antoine Semenyo,Man City,Ipswich Town,H,2.41
+Ayyoub Bouaddi,Man City,Ipswich Town,H,7.0
+Claudio Echeverri,Man City,Ipswich Town,H,3.2
+Elliot Anderson,Man City,Ipswich Town,H,6.2
+Enzo Fernandez,Man City,Ipswich Town,H,3.45
+Floyd Samba,Man City,Ipswich Town,H,2.43
+Iliman Ndiaye,Man City,Ipswich Town,H,2.8
+Jeremy Doku,Man City,Ipswich Town,H,3.15
+Jeremy Monga,Man City,Ipswich Town,H,2.84
+Mateo Kovačić,Man City,Ipswich Town,H,5.8
+Phil Foden,Man City,Ipswich Town,H,2.7
+Rayan Cherki,Man City,Ipswich Town,H,2.7
+Ryan McAidoo,Man City,Ipswich Town,H,3.2
+Erling Haaland,Man City,Ipswich Town,H,1.41
+Ayden Heaven,Man Utd,Leeds,A,15.0
+Diogo Dalot,Man Utd,Leeds,A,13.0
+Harry Amass,Man Utd,Leeds,A,12.0
+Harry Maguire,Man Utd,Leeds,A,11.0
+Leny Yoro,Man Utd,Leeds,A,16.0
+Lisandro Martinez,Man Utd,Leeds,A,14.0
+Luke Shaw,Man Utd,Leeds,A,16.0
+Matthijs de Ligt,Man Utd,Leeds,A,12.0
+Noussair Mazraoui,Man Utd,Leeds,A,17.0
+Amad Diallo,Man Utd,Leeds,A,4.9
+Andrey Santos,Man Utd,Leeds,A,8.0
+Bruno Fernandes,Man Utd,Leeds,A,3.5
+Bryan Mbeumo,Man Utd,Leeds,A,3.35
+Carlos Baleba,Man Utd,Leeds,A,10.0
+Jack Fletcher,Man Utd,Leeds,A,6.02
+Kobbie Mainoo,Man Utd,Leeds,A,9.8
+Marcus Rashford,Man Utd,Leeds,A,3.75
+Mason Mount,Man Utd,Leeds,A,5.2
+Matheus Cunha,Man Utd,Leeds,A,3.55
+Patrick Dorgu,Man Utd,Leeds,A,4.9
+Shea Lacey,Man Utd,Leeds,A,4.3
+Tyler Fletcher,Man Utd,Leeds,A,7.0
+Youri Tielemans,Man Utd,Leeds,A,6.6
+Benjamin Sesko,Man Utd,Leeds,A,2.75
+Chido Obi,Man Utd,Leeds,A,3.62
+Joshua Zirkzee,Man Utd,Leeds,A,3.55
+Amar Dedic,Newcastle,Aston Villa,H,11.0
+Dan Burn,Newcastle,Aston Villa,H,11.0
+Fabian Schar,Newcastle,Aston Villa,H,8.6
+Leo Shahar,Newcastle,Aston Villa,H,8.58
+Lewis Hall,Newcastle,Aston Villa,H,10.0
+Malick Thiaw,Newcastle,Aston Villa,H,9.2
+Miodrag Pivas,Newcastle,Aston Villa,H,9.3
+Sven Botman,Newcastle,Aston Villa,H,12.0
+Tino Livramento,Newcastle,Aston Villa,H,11.0
+Aladji Bamba,Newcastle,Aston Villa,H,7.2
+Harvey Barnes,Newcastle,Aston Villa,H,3.15
+Jacob Murphy,Newcastle,Aston Villa,H,4.6
+Jacob Ramsey,Newcastle,Aston Villa,H,4.8
+Joe Willock,Newcastle,Aston Villa,H,5.0
+Joelinton,Newcastle,Aston Villa,H,4.9
+Lewis Miley,Newcastle,Aston Villa,H,9.0
+Nico Gonzalez,Newcastle,Aston Villa,H,9.0
+Sean Steur,Newcastle,Aston Villa,H,7.6
+Matias Fernandez-Pardo,Newcastle,Aston Villa,H,3.25
+William Osula,Newcastle,Aston Villa,H,2.55
+Yoane Wissa,Newcastle,Aston Villa,H,2.7
+Daniel Munoz,Nott'm Forest,Arsenal,H,9.8
+Jair Paula da Cunha Filho,Nott'm Forest,Arsenal,H,19.0
+Luca Netz,Nott'm Forest,Arsenal,H,18.0
+Murillo dos Santos,Nott'm Forest,Arsenal,H,17.0
+Neco Williams,Nott'm Forest,Arsenal,H,13.0
+Nicolo Savona,Nott'm Forest,Arsenal,H,8.01
+Nikola Milenkovic,Nott'm Forest,Arsenal,H,15.35
+Ola Aina,Nott'm Forest,Arsenal,H,19.0
+Ousmane Diomande,Nott'm Forest,Arsenal,H,18.0
+Callum Hudson-Odoi,Nott'm Forest,Arsenal,H,6.6
+Dan Ndoye,Nott'm Forest,Arsenal,H,5.8
+Ibrahim Sangare,Nott'm Forest,Arsenal,H,12.0
+James McAtee,Nott'm Forest,Arsenal,H,8.0
+Morgan Gibbs-White,Nott'm Forest,Arsenal,H,4.4
+Nicolas Dominguez,Nott'm Forest,Arsenal,H,10.0
+Ryan Yates,Nott'm Forest,Arsenal,H,11.0
+Xaver Schlager,Nott'm Forest,Arsenal,H,12.0
+Arnaud Kalimuendo,Nott'm Forest,Arsenal,H,4.5
+Chris Wood,Nott'm Forest,Arsenal,H,4.3
+Liam Delap,Nott'm Forest,Arsenal,H,4.5
+Andrew Robertson,Spurs,Coventry City,H,9.4
+Ben Davies,Spurs,Coventry City,H,9.6
+Cristian Romero,Spurs,Coventry City,H,4.84
+Destiny Udogie,Spurs,Coventry City,H,11.0
+Jan Paul van Hecke,Spurs,Coventry City,H,7.6
+Marcos Senesi,Spurs,Coventry City,H,11.0
+Micky van de Ven,Spurs,Coventry City,H,6.6
+Pedro Porro,Spurs,Coventry City,H,5.92
+Tosin Adarabioyo,Spurs,Coventry City,H,9.0
+Archie Gray,Spurs,Coventry City,H,7.4
+Conor Gallagher,Spurs,Coventry City,H,4.1
+James Maddison,Spurs,Coventry City,H,3.3
+Lucas Bergvall,Spurs,Coventry City,H,5.0
+Mateus Fernandes,Spurs,Coventry City,H,4.4
+Mathys Tel,Spurs,Coventry City,H,3.1
+Mohammed Kudus,Spurs,Coventry City,H,3.2
+Mykhailo Mudryk,Spurs,Coventry City,H,3.04
+Rodrigo Bentancur,Spurs,Coventry City,H,6.6
+Sandro Tonali,Spurs,Coventry City,H,5.8
+Sávio,Spurs,Coventry City,H,3.6
+Dominic Solanke,Spurs,Coventry City,H,2.31
+Omar Marmoush,Spurs,Coventry City,H,2.43
+Richarlison,Spurs,Coventry City,H,1.97
+Arthur Masuaku,Sunderland,Bournemouth,A,8.09
+Dayann Méthalie,Sunderland,Bournemouth,A,11.0
+Jenson Seelt,Sunderland,Bournemouth,A,11.99
+Kevin Danso,Sunderland,Bournemouth,A,16.0
+Leo Fuhr Hjelde,Sunderland,Bournemouth,A,11.99
+Luke O'Nien,Sunderland,Bournemouth,A,15.0
+Nordi Mukiele,Sunderland,Bournemouth,A,12.0
+Omar Alderete,Sunderland,Bournemouth,A,12.0
+Reinildo Mandava,Sunderland,Bournemouth,A,17.0
+Thomas Meunier,Sunderland,Bournemouth,A,8.2
+Trai Hume,Sunderland,Bournemouth,A,8.0
+Chemsdine Talbi,Sunderland,Bournemouth,A,4.5
+Chris Rigg,Sunderland,Bournemouth,A,5.8
+Djiamgone Jocelin Ta Bi,Sunderland,Bournemouth,A,6.2
+Enzo Le Fee,Sunderland,Bournemouth,A,5.0
+Granit Xhaka,Sunderland,Bournemouth,A,9.6
+Habib Diarra,Sunderland,Bournemouth,A,5.31
+Jules Ahoka,Sunderland,Bournemouth,A,9.2
+Malick Fofana,Sunderland,Bournemouth,A,4.6
+Nilson Angulo,Sunderland,Bournemouth,A,4.6
+Noah Sadiki,Sunderland,Bournemouth,A,12.0
+Simon Adingra,Sunderland,Bournemouth,A,4.45
+Brian Brobbey,Sunderland,Bournemouth,A,3.42
+Juan Angulo,Sunderland,Bournemouth,A,3.4
+Wilson Isidor,Sunderland,Bournemouth,A,3.3

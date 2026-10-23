@@ -45,7 +45,7 @@ FETCH_HEADERS = {
     "Accept": "application/json, text/plain, */*",
     "X-EB-MarketId": "5", "X-EB-PlatformId": "1", "X-EB-Accept-Language": "en_BE",
 }
-ROSTER_CSV = os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv")
+ROSTER_CSV = os.path.join(config.OUTPUTS_DIR, "fpl_players.csv")
 MIN_PLAYERS = 8   # fewer resolved than this -> treat the match as incomplete, leave it synthetic
 
 MATCH_SPLIT = 'event-name prematch-name"><span>'

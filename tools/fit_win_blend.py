@@ -131,7 +131,7 @@ if __name__ == "__main__":
     # ---- August ground truth ----
     ratings = pd.read_csv(os.path.join(config.INPUTS_DIR, "team_ratings.csv"))
     ratings = ratings[ratings["Season"] == config.SEASON].set_index("Team")["rating"]
-    master = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "13_players_master.csv"))
+    master = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "players_master.csv"))
     ou26 = master[["Team", "Title", "Relegation", "Top 6"]].drop_duplicates("Team").set_index("Team")
 
     truth = gw1_truth()

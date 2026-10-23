@@ -2,7 +2,8 @@
 
 Tools for the **FPL Challenge** game — a separate competition from the main FPL squad.
 Each gameweek is a fresh, standalone pick with its own scoring twist. This folder has one
-script per gameweek of the opening "Kick Off" series (GW1–GW5) plus a shared engine.
+script per gameweek — the "Kick Off" series (GW1–GW5) and the "Game Changers" series
+(GW6–GW9) — plus a shared engine.
 
 > This is **not** the main-squad optimiser (`../optimisation.py`). Nothing here
 > carries over week to week, there is no budget, and there are no transfers.
@@ -25,7 +26,7 @@ hands a prepared table to the shared engine, which does the actual optimisation.
 
 ---
 
-## The five weeks
+## The weeks
 
 | Script | Week | Rule | Club cap | How it's modelled |
 |---|---|---|---|---|
@@ -34,16 +35,20 @@ hands a prepared table to the shared engine, which does the actual optimisation.
 | `gw3.py` | All Out Attack | Goals **and** assists score **×2** | 1 | add one more copy of goal+assist points |
 | `gw4.py` | Derby Day | Man City & Man Utd score **×2** | **3** | double players from those clubs |
 | `gw5.py` | The Shield | Defensive contributions score **10** (not 2) | 1 | add `8 × P(DefCon threshold)` |
+| `gw6.py` | Matchwinner | Winning goals worth an extra **10** | 1 | add `10 × P(win) × goal-share` |
+| `gw7.py` | Away Days | Players in **away** matches score **×2** | 1 | double players whose fixture is away |
+| `gw8.py` | Legends | ≥5 years at club score **×2** | 1 | double players on the Legends list |
+| `gw9.py` | Trick or Treat | **+3** per successful dribble, **−1** per dispossession | 1 | add `start × (3·dribbles/90 − dispossessed/90)` |
 
-Two kinds of twist:
+Three kinds of twist:
 
-- **"Double these players" (GW1, GW2, GW4).** A set of players gets ×2. The captain
-  stacks on top, so a captained doubled player scores **×4**. If it turns out a week does
-  *not* stack the two doublers, pass `--no-stack` and a captained doubled player counts ×3
-  instead.
-- **"Change the points" (GW3, GW5).** The scoring itself changes for everyone, so there's
-  no player set — the effective points are recomputed and the captain then doubles that
-  boosted total.
+- **"Double these players" (GW1, GW2, GW4, GW7, GW8).** A set of players gets ×2. The captain
+  stacks on top, so a captained doubled player scores **×4**. If a week does *not* stack the
+  two doublers, pass `--no-stack` and a captained doubled player counts ×3 instead.
+- **"Change the points" (GW3, GW5).** The scoring itself changes for everyone — the effective
+  points are recomputed and the captain then doubles that boosted total.
+- **"Add a bespoke term" (GW6, GW9).** A per-player expected-points term is added on top of
+  normal XP (winning-goal value; dribble/dispossession value), then captain-doubled.
 
 ---
 
@@ -77,24 +82,29 @@ Each `gw*.py` builds these on the player table before calling the engine:
 
 ## Inputs
 
-- **`../outputs/13_players_master.csv`** — the pipeline's player projections. The scripts
-  read the **`F1 XP`** column (expected points for the upcoming gameweek) and, for GW3/GW5,
-  the underlying component columns (`F1 Start`, `F1 Score 1+/2+/3+`, `F1 Assist`,
-  `F1 Assist 2+`, `F1 Defensive Contribution - DEF/MID`).
+- **`../outputs/players_master.csv`** — the pipeline's player projections. The scripts
+  read the **`F1 XP`** column (expected points for the upcoming gameweek) plus component
+  columns as each week needs: `F1 Start`, `F1 Score 1+/2+/3+`, `F1 Assist`, `F1 Assist 2+`,
+  `F1 Defensive Contribution - DEF/MID` (GW3/GW5), `F1 Win` (GW6), and `F1 Venue` (GW7).
 - **`../inputs/fpl_challenge_new_signings.csv`** (GW1 only) — the double-points list, one
   `Player` per row. **The in-game "new signings" filter toggle is the definitive source**;
   this file was built from the Transfermarkt 2026/27 arrivals. Only that summer's arrivals
   qualify — last season's signings score single points. Names are matched
   accent/case-insensitively with a last-name fallback; unmatched names are printed so
   typos and departed players surface.
+- **`../inputs/fpl_challenge_dribbles.csv`** (GW9 only) — this-season successful-dribbles
+  per 90, one `Player` per row, matched to FPL names. **Sourced from FotMob** (the per-90
+  dribble leaderboard); **refresh it closer to GW9** by re-pasting an updated FotMob list, as
+  the current values are an early-season snapshot. Values are raw per-90 (unshrunk small
+  samples early on), so treat outliers with care until minutes build.
 
 ---
 
-## GW3 & GW5: staying consistent with the model
+## Modelling the twists
 
-GW3 and GW5 rebuild points from the projection's components rather than guessing. The
-reconstruction was checked against the pipeline's own `F1 XP Pre` and matches to within
-~0.001, so these weeks stay consistent with `fpl_pipeline/model.py`:
+GW3/GW5 rebuild points from the projection's components; the reconstruction was checked
+against the pipeline's own `F1 XP Pre` and matches to within ~0.001, so they stay consistent
+with `fpl_pipeline/model.py`:
 
 - **GW3** adds `start × (goal_points + assist_points)`, where goal points use the FPL
   per-position values (GK 10, DEF 6, MID 5, FWD 4) times `P(score 1+/2+/3+)`, and assists
@@ -104,6 +114,17 @@ reconstruction was checked against the pipeline's own `F1 XP Pre` and matches to
   The model carries DefCon for **defenders and midfielders only**, so forwards get no
   boost this week.
 
+GW6/GW9 add a bespoke expected-points term:
+
+- **GW6** adds `10 × P(team wins) × goal_share`, where `goal_share` = the player's expected
+  goals ÷ the team's expected goals (from goalscorer odds). Shares within a team sum to 1, so
+  exactly one winning goal is spread across the winning side. `P(win)` is `F1 Win`.
+- **GW9** adds `start × (3 × dribbles/90 − 1 × dispossessed/90)`. Dribbles/90 come from
+  `fpl_challenge_dribbles.csv` (this season, pasted leaderboard); dispossessed/90 from this
+  season's FPL-Core-Insights match stats, shrunk by 270 pseudo-minutes. Note: this season's
+  feed leaves `successful_dribbles` empty, which is why dribbles come from the pasted file
+  rather than being read directly.
+
 ---
 
 ## Running
@@ -112,17 +133,13 @@ From inside this folder:
 
 ```bash
 cd fpl_challenge
-python gw1.py
-python gw2.py
-python gw3.py
-python gw4.py
-python gw5.py
+python gw1.py   # … through gw9.py
 ```
 
 Flags:
 
 - `--max-per-club N` — override the club cap for the week.
-- `--no-stack` — GW1/GW2/GW4 only; captain does not re-double an already-doubled player.
+- `--no-stack` — GW1/GW2/GW4/GW7/GW8 only; captain does not re-double an already-doubled player.
 - `--confirmed-not-starting NAME …` — players confirmed benched/out; removed from the pool.
 - `--confirmed-starting NAME …` — players confirmed in the XI; start set to 1.0 (see below).
 
@@ -193,14 +210,12 @@ swaps are judged actionable. Without the file, headers show `kickoff ?` and swap
 
 ## Important caveat: which gameweek the data points at
 
-All five scripts read the **`F1`** columns — i.e. whatever the pipeline currently treats as
-the *next* gameweek. Run for GW1, that's GW1. To play GW2–GW5 for real, **refresh the
-pipeline so `F1` points at that week's fixtures** before running the matching script; the
-scripts do not reach into the `F2`/`F3`/… columns.
+All scripts read the **`F1`** columns — i.e. whatever the pipeline currently treats as the
+*next* gameweek. So **refresh the pipeline so `F1` points at that week's fixtures** before
+running the matching script; the scripts do not reach into the `F2`/`F3`/… columns.
 
-If you'd prefer them to take a `--gw N` argument and read the matching `Fn` columns
-directly (so you could run all five off one data build), that's a small change to
-`challenge_core.py` — the goal/assist/DefCon component names are the only per-week parts.
+If you'd prefer them to take a `--gw N` argument and read the matching `Fn` columns directly
+(so you could run any week off one data build), that's a small change to `challenge_core.py`.
 
 ---
 
@@ -209,6 +224,8 @@ directly (so you could run all five off one data build), that's a small change t
 | File | Purpose |
 |---|---|
 | `challenge_core.py` | shared engine: player loading, name matching, confirmed-lineup handling, formation ILP, reporting, the goal/assist/DefCon helpers, and the "bring in if they start" watchlist |
-| `gw1.py` … `gw5.py` | one week each; each just builds `eff_xp` / `cap_bonus` / `boosted` and calls the engine |
+| `gw1.py` … `gw9.py` | one week each; each builds `eff_xp` / `cap_bonus` / `boosted` and calls the engine |
 | `../inputs/fpl_challenge_new_signings.csv` | GW1 double-points list |
+| `../inputs/fpl_challenge_legends.csv` | GW8 Legends list (5+ years at club), from the in-game filter |
+| `../inputs/fpl_challenge_dribbles.csv` | GW9 this-season dribbles per 90 |
 | `../outputs/fixture_kickoffs.csv` | per-fixture UTC kickoffs for the watchlist's timing; written by `tools/betway.py` |

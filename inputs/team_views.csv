@@ -1,0 +1,6 @@
+# Personal team views. nudge = goals per game better (+) / worse (-) than the market-fitted rating.
+# Only rows whose Gameweek = the current F1 gameweek (first column of fixtures.csv) apply; others are ignored.
+# Affects the rating-served weeks (F3-F8, F2 if unpriced); priced weeks keep Betway's odds.
+# Rough scale: tiny 0.03 | a bit 0.08-0.12 | clearly 0.15-0.25.  Set config.USE_TEAM_VIEWS=False to compare.
+Gameweek,Team,nudge,note
+1,Leeds,0.12,a bit better than expected

@@ -152,7 +152,7 @@ def report(roster, lineups, mkts, sportsbet=None):
     for p in sorted(set(starters["Player"]) & roster_set):
         if positions.get(p) != "GK" and p not in with_score and p not in with_assist:
             rows.append({"source": "coverage", "name": p,
-                         "issue": "XI starter with no score/assist odds (0 attacking XP)",
+                         "issue": "XI starter with no score/assist odds (projected from fallback factor; 0 if none)",
                          "suggestion": None, "how": None})
 
     # 4) Team-market keys vs FPL team names

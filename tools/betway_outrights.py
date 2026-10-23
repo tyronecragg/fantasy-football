@@ -45,6 +45,19 @@ FILES = {"title": ("Premier League - Winner", "title_odds.csv"),
          "top6": ("Premier League - Top 6", "top6_odds.csv")}
 
 
+_PL_EVENT_RE = re.compile(r"^Premier League(\s+\d{2,4}/\d{2})?$")   # "Premier League" or "Premier League 26/27"
+
+
+def _pl_event_id(d):
+    """Betway sometimes suffixes the season onto the event name; match either form."""
+    return next((e["eventId"] for e in d["events"] if _PL_EVENT_RE.match(e["name"].strip())), None)
+
+
+def _suffix(market_name):
+    """'Premier League 2026/27 - Top 6' -> 'Top 6' (market names carry an optional season label)."""
+    return market_name.split(" - ", 1)[1] if " - " in market_name else market_name
+
+
 def canon(name):
     return apply_team_names(pd.Series([str(name).strip()]))[0]
 
@@ -65,14 +78,15 @@ def fetch(har=None):
 
 def parse(d):
     price = {p["outcomeId"]: p["priceDecimal"] for p in d["prices"]}
-    eid = next((e["eventId"] for e in d["events"] if e["name"] == PL_EVENT), None)
+    eid = _pl_event_id(d)
     if eid is None:
-        raise SystemExit("no Premier League event in the outrights feed")
+        raise SystemExit("no Premier League event in the outrights feed (events: "
+                         + ", ".join(e["name"] for e in d["events"]) + ")")
     ocs = [o for o in d["outcomes"] if o["eventId"] == eid]
     mkts = {m["marketId"]: m["name"] for m in d["markets"] if m["eventId"] == eid}
 
     def market_outcomes(market_name):
-        mid = next((k for k, v in mkts.items() if v == market_name), None)
+        mid = next((k for k, v in mkts.items() if _suffix(v) == _suffix(market_name)), None)
         return {o["name"]: price.get(o["outcomeId"]) for o in ocs if o["marketId"] == mid} if mid else {}
 
     out = {}
@@ -92,6 +106,9 @@ def parse(d):
             fb += 1
     out["relegation"] = releg
     return out, fb
+
+
+MIN_MARKET_TEAMS = 5   # fewer teams than this = the market isn't on offer, not a settled boundary
 
 
 def write_book(odds, fname):
@@ -115,7 +132,7 @@ def fill_missing_teams(out, teams):
     band = {"title": 1, "top6": 6, "relegation": 3}
 
     def prob(market, t):
-        o = out[market].get(t)
+        o = out.get(market, {}).get(t)      # a market may be absent this week (kept file)
         return (1 / o / m) if o else None
 
     def strength(t):                                   # attacking quality: title + top6 (missing terms = 0)
@@ -156,13 +173,13 @@ def archive_outrights(d, dry_run=False):
     future prediction work. The pipeline does NOT read this file — it's a raw data lake. Upsert:
     re-running a gameweek replaces that GW's snapshot (last scrape wins)."""
     price = {p["outcomeId"]: p["priceDecimal"] for p in d["prices"]}
-    eid = next((e["eventId"] for e in d["events"] if e["name"] == PL_EVENT), None)
+    eid = _pl_event_id(d)
     ocs = [o for o in d["outcomes"] if o["eventId"] == eid]
     mkts = {m["marketId"]: m["name"] for m in d["markets"] if m["eventId"] == eid}
     gw, ts = _current_gw(), datetime.date.today().isoformat()
     rows = []
     for mid, name in mkts.items():
-        suffix = name.split(" - ", 1)[1] if " - " in name else name
+        suffix = _suffix(name)
         if suffix not in ARCHIVE_SUFFIXES:
             continue
         for o in ocs:
@@ -189,6 +206,13 @@ def main():
     d = fetch(a.har)
     out, fb = parse(d)
     teams = set(ingest.load_fpl_players()["team"].dropna())
+    # A market Betway isn't offering at all (it pulls Top 6 some weeks) is NOT twenty settled teams:
+    # filling it would write 6 sides at 100% and 14 at 0%. Keep last week's file instead.
+    absent = [k for k in out if len(out[k]) < MIN_MARKET_TEAMS]
+    for k in absent:
+        print(f"  WARNING [{k}]: Betway listed only {len(out[k])} team(s) - market not on offer; "
+              f"keeping the existing file untouched")
+    kept = {k: out.pop(k) for k in absent}
     for market, info in fill_missing_teams(out, teams).items():
         if info:
             print(f"  WARNING [{market}]: {len(info)} team(s) not listed, inferred from other markets "
@@ -197,6 +221,9 @@ def main():
     fnames = {"title": "title_odds.csv", "top6": "top6_odds.csv", "relegation": "relegation_odds.csv"}
     print(f"Betway PL outrights ({'HAR' if a.har else 'live'}):")
     for key, fname in fnames.items():
+        if key in kept:
+            print(f"  {fname:<22} NOT written (market absent - previous file kept)")
+            continue
         df = write_book(out[key], fname) if not a.dry_run else pd.DataFrame(sorted(out[key].items()),
                                                                            columns=["Team", "book_1"])
         note = f" ({fb} via main-market fallback)" if key == "relegation" and fb else ""

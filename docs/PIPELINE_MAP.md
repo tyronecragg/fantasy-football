@@ -10,7 +10,7 @@ Purpose: reference for replicating the whole process in Python with observable D
 > current usage** — this document remains the map of how the original workbook worked.
 >
 > - Run: `python -m fpl_pipeline.run` — every stage snapshots to `outputs/NN_*.csv`,
->   ending in `outputs/13_players_master.csv` (the Players sheet equivalent).
+>   ending in `outputs/players_master.csv` (the Players sheet equivalent).
 > - Validate vs Excel: `python -m fpl_pipeline.run --validate` (parity report in outputs/).
 > - Manual data now lives in `inputs/*.csv` (exported by `tools/export_workbook_inputs.py`);
 >   regression coefficients in `fpl_pipeline/data/coefficients.json` (extracted by
@@ -30,7 +30,7 @@ Purpose: reference for replicating the whole process in Python with observable D
 >   [0, 1] before the ladders and XP scoring. Odds-derived probabilities are untouched.
 >   `--validate` disables all these improvements for workbook-exact parity (still 161/161).
 > - Both PuLP optimisers now default to the pipeline outputs
->   (`outputs/13_players_master.csv` + `inputs/gw_teams.csv`) and were verified to produce
+>   (`outputs/players_master.csv` + `inputs/gw_teams.csv`) and were verified to produce
 >   byte-identical results vs their Excel-fed runs; pass an `.xlsx` path to use the
 >   legacy workbook. Run them with the repo virtualenv (`env/Scripts/python`), which has
 >   PuLP installed.
@@ -135,6 +135,11 @@ Same coefficient sets are reused for F1 (to derive factors) and F2–F6 (to proj
 
 ### 3. Player factors
 `factor_s = F1_actual_prob_s / baseline_s(F1 win, F1 opp_win, …)`; if no F1 odds → Fallback Factors sheet.
+  *Python (improved mode, 2026-10-08):* the fallback is also used for score/assist when the **match** is priced but the
+  player isn't (Betway omitted him) — his F1 score/assist chances are then built from fallback factor × baseline.
+  `inputs/fallback_factors.csv` is **rebuilt from the archive** on each `--gw` run (`history.refresh_fallback_factors`):
+  each player's median over his last 10 real-odds weeks (all seasons); a value < 0.05 with no history → position median.
+  (It used to copy the live master, which let synthetic 1%-price placeholders leak in — e.g. Joelinton assist 0.01.)
 Projection for fixture k: `prob_s(k) = factor_s × baseline_s(win_k, opp_win_k, …)`.
 F2 uses real odds where available (Clean Sheet, Team Total Goals, Yellow Card via IFERROR; Score 1+ via
 Coefficients rows 1–5 model × factor; Score 2+/3+ via threshold ladder on Score 1+).
@@ -143,6 +148,15 @@ Coefficients rows 1–5 model × factor; Score 2+/3+ via threshold ladder on Sco
 - **Since 2026-09-02 (improved mode):** a rolling odds-implied team rating (`fpl_pipeline/rating.py`,
   weighted least squares on football-data closing prices, 30-day half-life) mapped to three-way
   probabilities per horizon. The Lasso below is the workbook/parity path and the runtime fallback.
+- **Personal team views (since 2026-10-17):** `inputs/team_views.csv` nudges a team's rating by `nudge` goals per
+  game — 1X2 strength += nudge × 1.3 (log-odds per goal), attack and defence log-rates each += log(1 + nudge/2/1.35).
+  Only rows for the current F1 gameweek apply (`rating.load_team_views`), so they go inert after the roll. Applied once
+  in `run.py` to the live FixtureRating (never to the training/backtest path), so it moves rating-served weeks and the
+  GBM's `rating_win`/`rating_xg` features. Priced weeks (F1, priced F2) are shaded at `TEAM_VIEW_MARKET_WEIGHT`
+  (0.5) by `team_views.shade`: win/loss log-odds += 1.3×(n_t−n_o) with the draw kept; conceding rate × exp(s(n_o)−s(n_t))
+  → clean sheet, concede 2+/4+, keeper saves; each player's goal/assist rate × exp(s(n_t)−s(n_o)). `--gw` archive
+  runs rebuild an unshaded master (raw markets + plain rating) for `update_player_history` / fallback factors. Measured GW7: Leeds +0.12 → Muharemović +0.46 over F3–F8;
+  Man Utd −0.10 → Mbeumo −0.54, B.Fernandes −0.59; Brighton −0.08 → De Cuyper −0.59.
 - Team: hardcoded Lasso (from `predict_match_win.py`): features from title/releg/top6 probs of both teams + venue.
 - Opponent: Coefficients rows 41–46 (`max(0, intercept + b·title + c·opp_title + d·releg + e·opp_releg + f·away)`).
 
@@ -169,3 +183,17 @@ current-squad constraints, transfer count/hits, captaincy; both print rosters to
 - Zero odds in Title/Top 6 → 5001, Relegation → 2001 (i.e. "no market" sentinel).
 - The workbook is currently in end-of-season state (Fixtures only has GW38), so many F2+ lookups
   currently resolve via fallbacks/#N/A paths.
+
+
+## Model refresh — 2026-10-17
+- Projection GBMs retrained on 2025-26 + 2026-27 (`save_projection_models.py`: TRAIN_SEASONS, current-season latest week = early-stopping val, MIN_TREES=20 guard). Unseen-GW7 test: clean_sheet −14%, concede2 −21%, saves3 −25%, score1 −24%, yellow −13% MAE vs the old models.
+- Defensive GBMs served as `w·model + (1−w)·raw factor×baseline` (`config.DEFENSIVE_MODEL_WEIGHT`: CS .75, concede2 .65, saves3 .80) in F3–F8 and the unpriced-F2 fallback.
+- MID DefCon sd 3.86 (`inputs/dc_params.csv`); `config.YELLOW_CALIBRATION` 0.85 applied in `players.xp_block`.
+- Kept after testing: goals/assist longshot curves, bonus model, reliability row, rating maps.
+- Coefficient refit WRITTEN (same day): `refit_coefficients.py` holdout is now season-aware (newest season's latest weeks), and `--only baselines` writes just the baseline block. Baselines (gate passed) + `win_pred_f3plus` (own gate passed) written; match-odds and F2-score formulas untouched; prior set kept as `coefficients_workbook.json` (parity). `pred_xp` (display-only `F1 Pred XP`) is excluded from the refit — its target includes non-starters and rescaled it 3.8→1.2. Then: training data rebuilt, GBMs retrained, blend/stack weights re-checked (unchanged). Like-for-like `--gw` comparison: every stat's mean within ~1%, players within ±0.5 XP over F1–F8.
+- Comparing outputs: projection GBMs serve only on `--gw` runs; a plain run is factor×baseline only, so compare like with like.
+- Raw odds archive: `inputs/raw_odds/<season>/GW<NN>/` (`history.archive_raw_odds`, each `--gw` run) holds the sportsbet files marked real in the provenance manifest, prices exactly as scraped, minus synthetic seed rows. These are the untouched bookmaker prices; the player archive stores adjusted chances. Started GW8 2026-27, for re-fitting the goal/assist longshot curves from scratch.
+- Odds-lag test (2026-10-18): recent actual-vs-odds and xG/xA-vs-odds gaps don't predict real goals/assists beyond the odds (cross-season, 3/6-game windows). No form or xG adjustment; re-test ~GW19 (docs/TODO.md).
+- Fixture risk (2026-10-23): `inputs/fixture_risk.csv` + `fpl_pipeline/fixture_risk.py` scale a current-GW match's F1 XP by its chance of being played (published master only; archive uses `master_raw`). First use: Liverpool v Brighton x0.95 (Storm Boelo, yellow warning).
+- Projection blend OFF (2026-10-23): `config.PROJECTION_BLEND = {}`. Future goals/assists/saves no longer mix in this week's price, which carried this week's fixture forward. Judged on ranking, not average error. Goals stack weight 0.65 re-checked (still best). Re-test ~GW12.
+- Probability models scored on SQUARED error (2026-10-23), was absolute: GBM early stopping (`eval_metric="l2"` in save/train_projection_model), the tuning search, both refit gates (`refit_coefficients.py`), and the backtest/training printouts (now RMSE). Squared error is the proper score for a probability and targets the mean, which XP needs. GBMs retrained; DEFENSIVE_MODEL_WEIGHT / PROJECTION_STACK re-checked on squared error + ranking (all within ~1% of best, unchanged). Outcome tests stay on Brier; log loss only as a longshot-curve side check.

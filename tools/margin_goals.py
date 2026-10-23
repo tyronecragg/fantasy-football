@@ -40,7 +40,7 @@ def main(path="betway_matches.har"):
     import tools.betway as bw
     import pandas as pd, os
     from fpl_pipeline import config
-    roster = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv"))
+    roster = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "fpl_players.csv"))
     team_of = dict(zip(roster["name"], roster["team"]))
 
     cs_csv = pd.read_csv(os.path.join(config.SPORTSBET_DIR, "sportsbet_clean_sheet_odds.csv"))

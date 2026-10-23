@@ -102,19 +102,48 @@ def test_season_weekly_factors_ignore_zero_factors(tmp_path):
     assert len(out["A"]) == 1 and out["A"][0] > 0
 
 
-def test_fallback_factors_only_overwrite_with_real_values(tmp_path):
-    path = str(tmp_path / "fallback.csv")
+def _score_archive(path, rows):
+    """Archive rows (season, gw, player, position, P(score)) at a fixed fixture; returns the
+    factor that one unit of probability maps to, so expected medians can be computed."""
+    from fpl_pipeline import model
+    recs = [{"Season": s, "Gameweek": g, "Player Name": p, "Position": pos, "F1 Venue": "H",
+             "F1 Win": 0.5, "F1 Opponent Win": 0.3, "F1 Score 1+": prob} for s, g, p, pos, prob in rows]
+    pd.DataFrame(recs).to_csv(path, index=False)
+    base = {pos: float(model.baseline("score1", pd.Series([0.5]), pd.Series([0.3]),
+                                      pd.Series([pos]), pd.Series([True]))[0]) for pos in ("MID", "FWD")}
+    return base
+
+
+def test_fallback_rebuilt_from_archive_median(tmp_path):
+    fb, hist = str(tmp_path / "fallback.csv"), str(tmp_path / "hist.csv")
     cols = ["Player Name"] + history.FACTOR_COLUMNS
-    pd.DataFrame([["A"] + [1.0] * 7, ["B"] + [2.0] * 7], columns=cols).to_csv(path, index=False)
+    # A: stale placeholder in the sheet; B: plausible value, no archive; Z: placeholder, no archive
+    pd.DataFrame([["A"] + [0.01] * 7, ["B"] + [0.7] * 7, ["Z"] + [0.01] * 7],
+                 columns=cols).to_csv(fb, index=False)
+    base = _score_archive(hist, [("2025-2026", 30, "A", "MID", 0.30),
+                                 ("2026-2027", 1, "A", "MID", 0.10),
+                                 ("2026-2027", 2, "A", "MID", 0.20),
+                                 ("2026-2027", 1, "C", "FWD", 0.40)])
+    master = pd.DataFrame({"Player Name": ["A", "B", "C", "Z"], "Position": ["MID", "MID", "FWD", "MID"]})
+    out = history.refresh_fallback_factors(master, path=fb, history_path=hist).set_index("Player Name")
 
-    master = pd.DataFrame([["A", 0.9] + [3.0] + [None] * 6, ["C", 0.8] + [4.0] * 7],
-                          columns=["Player Name", "F1 Win"] + history.FACTOR_COLUMNS)
-    out = history.refresh_fallback_factors(master, path=path).set_index("Player Name")
+    sc = "Score 1+ Factor"
+    assert abs(out.loc["A", sc] - 0.20 / base["MID"]) < 1e-9   # median of A's real weeks, across seasons
+    assert out.loc["B", sc] == 0.7                             # no history, plausible -> kept
+    assert abs(out.loc["C", sc] - 0.40 / base["FWD"]) < 1e-9   # new player from the archive appended
+    assert out.loc["Z", sc] >= history.FALLBACK_MIN_FACTOR     # placeholder, no history -> position median
+    vals = out[history.FACTOR_COLUMNS]
+    assert ((vals >= history.FALLBACK_MIN_FACTOR) | vals.isna()).all().all()   # no placeholder survives
 
-    assert out.loc["A", history.FACTOR_COLUMNS[0]] == 3.0   # fresh value overwrites
-    assert out.loc["A", history.FACTOR_COLUMNS[1]] == 1.0   # NaN does NOT overwrite
-    assert out.loc["B", history.FACTOR_COLUMNS[0]] == 2.0   # absent player untouched
-    assert out.loc["C", history.FACTOR_COLUMNS[0]] == 4.0   # new player appended
+
+def test_fallback_uses_only_most_recent_weeks(tmp_path):
+    fb, hist = str(tmp_path / "fallback.csv"), str(tmp_path / "hist.csv")
+    pd.DataFrame([["A"] + [1.0] * 7], columns=["Player Name"] + history.FACTOR_COLUMNS).to_csv(fb, index=False)
+    rows = [("2025-2026", g, "A", "MID", 0.05) for g in range(1, 21)]          # 20 old low weeks
+    rows += [("2026-2027", g, "A", "MID", 0.30) for g in range(1, 4)]         # 3 recent high weeks
+    base = _score_archive(hist, rows)
+    out = history.refresh_fallback_factors(None, path=fb, history_path=hist, weeks=3).set_index("Player Name")
+    assert abs(out.loc["A", "Score 1+ Factor"] - 0.30 / base["MID"]) < 1e-9
 
 
 def test_season_weekly_factors(tmp_path):

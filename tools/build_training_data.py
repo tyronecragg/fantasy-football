@@ -34,6 +34,7 @@ import os
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -275,9 +276,9 @@ def add_diffs(pairs):
     return pairs
 
 
-def _mae(a, b):
-    d = (a - b).abs()
-    return float(d.mean()) if d.notna().any() else float("nan")
+def _mae(a, b):        # name kept; root-mean-squared error since 2026-10-23 (squared-error basis)
+    d = (a - b) ** 2
+    return float(np.sqrt(d.mean())) if d.notna().any() else float("nan")
 
 
 def main():
@@ -300,7 +301,7 @@ def main():
     os.makedirs(outdir, exist_ok=True)
 
     print(f"{'component':<12}{'rows':>7}{'players':>9}{'gw_pairs':>9} | "
-          f"{'MAE base':>9}{'MAE persist':>12}  (baseline to beat / naive)")
+          f"{'RMSE base':>9}{'RMSE pers.':>12}  (baseline to beat / naive)")
     print("-" * 74)
     for stat in STATS:
         sub = pairs[(pairs["stat"] == stat)].dropna(subset=["actual", "persistence"]).copy()

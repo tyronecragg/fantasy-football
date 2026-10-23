@@ -3,6 +3,8 @@
 
     env/Scripts/python tools/roll_gameweek.py --gw N [--factor-gw M]
 
+Refuses if fixtures.csv already starts at GW N (already rolled) unless --force.
+
 RUN THIS FIRST, before scraping or editing anything, and NEVER hand-edit inputs/fixtures.csv or
 shift the master yourself: build_synthetic_gw's guard checks that the master's F2 really is GW N,
 and a manual shift desyncs that and breaks the roll (leaving last week's / fabricated player markets
@@ -70,6 +72,19 @@ def shift_lineups():
     print(f"  shifted {len(rows)} rows: F2->F1 ... F8->F7, F8 held. Re-curate the new F1 with team news.")
 
 
+def current_f1_gw(path=None):
+    """The gameweek fixtures.csv currently starts at ('GW7 Opponent' -> 7); None if unreadable."""
+    import csv
+    path = path or os.path.join(ROOT, "inputs", "fixtures.csv")
+    try:
+        with open(path, newline="", encoding="utf-8") as f:
+            head = next(csv.reader(f))[1]
+        digits = "".join(ch for ch in head.upper().replace("GW", "", 1) if ch.isdigit())
+        return int(digits) if digits else None
+    except (OSError, StopIteration, IndexError):
+        return None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--gw", type=int, required=True, help="the new gameweek to roll to (becomes F1)")
@@ -79,7 +94,18 @@ def main():
                     help="do NOT shift starting_lineups.csv (default: slide F2->F1 ... F8->F7)")
     ap.add_argument("--no-roster-sync", action="store_true",
                     help="do NOT reconcile starting_lineups.csv to the live FPL roster")
+    ap.add_argument("--force", action="store_true",
+                    help="roll even if fixtures.csv already starts at --gw (re-seeds markets + shifts lineups AGAIN)")
     a = ap.parse_args()
+
+    # Double-roll guard: build_synthetic_gw's own check only trips once the pipeline has rebuilt the
+    # master, so a second roll straight after the first would re-shift the lineups and overwrite
+    # scraped odds with synthetic ones.
+    if current_f1_gw() == a.gw and not a.force:
+        raise SystemExit(
+            f"fixtures.csv already starts at GW{a.gw}: this gameweek has already been rolled. Running again "
+            f"would shift starting_lineups.csv a second time and replace scraped odds with synthetic ones. "
+            f"Nothing changed. Pass --force only if you really mean to re-roll.")
 
     step(f"1/4  Shift fixture window to GW{a.gw}",
          PY + [os.path.join(ROOT, "tools", "build_fixtures.py"), "--gw", str(a.gw)])

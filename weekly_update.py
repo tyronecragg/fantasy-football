@@ -32,7 +32,7 @@ VENV_PY = os.path.join(ROOT, "env", "Scripts", "python.exe")
 # Files Excel tends to hold open; a locked one aborts the phase before any half-writes
 LOCK_CHECKS = {
     1: ["sportsbet/sportsbet_win_draw_win_odds.csv", "inputs/ffs_predicted_lineups.csv"],
-    2: ["outputs/13_players_master.csv", "inputs/starting_lineups.csv", "inputs/fixtures.csv"],
+    2: ["outputs/players_master.csv", "inputs/starting_lineups.csv", "inputs/fixtures.csv"],
 }
 
 results = []

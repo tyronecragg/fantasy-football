@@ -25,7 +25,7 @@ from tools.ladbrokes_cards import candidates  # reuse the word-order candidate g
 
 BOOKING_FILE = "sportsbet_booking_odds.csv"
 BOOKING_CSV = os.path.join(config.SPORTSBET_DIR, BOOKING_FILE)
-ROSTER_CSV = os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv")
+ROSTER_CSV = os.path.join(config.OUTPUTS_DIR, "fpl_players.csv")
 
 
 def make_resolver(roster_names):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Train the deployable forward-projection models on ALL 2025-26 data and persist them for the
+"""Train the deployable forward-projection models on 2025-26 + the current season's resolved weeks and persist them for the
 pipeline to serve. Only the components where the model beats the *actual* pipeline value are
 deployed (the defensive markets): clean_sheet, concede2, saves3. score1 is excluded — the
 existing F1-blend already beats the model there; assist/yellow never beat the baseline.
@@ -64,16 +64,31 @@ def _prep(df, feats):
     return X
 
 
+# 2026-10-17: train on 2025-26 AND the current season's resolved weeks. Leak-free test (2026-27 gw_to 6-7
+# held out, trained on everything resolved before): clean_sheet -20.7%, concede2 -18.5%, score1 -21.6%,
+# yellow -6.7% MAE vs the 2025-26-only models (player bootstrap P = 1.00 each). Validation for early
+# stopping = the current season's latest resolved week. A retrain that early-stops under MIN_TREES
+# (saves3: 123 keepers, a one-tree fit) keeps the existing model file instead.
+TRAIN_SEASONS = ("2025-2026", config.SEASON)
+MIN_TREES = 20
+
+
 def train_one(stat, params):
     df = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "training", f"train_{stat}.csv"))
-    df = df[df["season"] == SEASON].dropna(subset=["actual"]).reset_index(drop=True)
+    df = df[df["season"].isin(TRAIN_SEASONS)].dropna(subset=["actual"]).reset_index(drop=True)
     X, y = _prep(df, features_for(stat)), df["actual"].astype(float)
-    weeks = np.sort(df["gw_from"].unique())
-    cut = weeks[-VAL_WEEKS]
-    tr, va = df["gw_from"] < cut, df["gw_from"] >= cut
+    cur = df["season"] == config.SEASON
+    if cur.any():
+        last = df.loc[cur, "gw_to"].max()
+        va = cur & (df["gw_to"] == last)
+        tr = ~va & ~(cur & (df["gw_to"] > last))
+    else:                                   # pre-season: the old within-2025-26 split
+        weeks = np.sort(df["gw_from"].unique())
+        cut = weeks[-VAL_WEEKS]
+        tr, va = df["gw_from"] < cut, df["gw_from"] >= cut
     p = {**FIXED, **params, "num_leaves": 2 ** params["max_depth"] - 1}
     model = lgb.LGBMRegressor(**p)
-    model.fit(X[tr], y[tr], eval_X=X[va], eval_y=y[va], eval_metric="l1",
+    model.fit(X[tr], y[tr], eval_X=X[va], eval_y=y[va], eval_metric="l2",   # squared error (was l1 until 2026-10-23)
               callbacks=[lgb.early_stopping(50, verbose=False)])
     return model, model.best_iteration_, int(tr.sum()), int(va.sum())
 
@@ -84,6 +99,9 @@ def main():
     print(f"{'stat':<12}{'trees':>6}{'n_train':>9}{'n_val':>7}")
     for stat, params in DEPLOY.items():
         model, trees, ntr, nva = train_one(stat, params)
+        if trees < MIN_TREES and os.path.exists(os.path.join(outdir, f"proj_{stat}.joblib")):
+            print(f"{stat:<12}{trees:>6}{ntr:>9}{nva:>7}  early-stopped under {MIN_TREES} trees - existing model kept")
+            continue
         joblib.dump(model, os.path.join(outdir, f"proj_{stat}.joblib"))
         print(f"{stat:<12}{trees:>6}{ntr:>9}{nva:>7}")
     joblib.dump({"features": FEATURES, "categorical": CATEGORICAL, "deploy": list(DEPLOY),

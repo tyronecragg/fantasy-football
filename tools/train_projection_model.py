@@ -20,7 +20,7 @@ DATA ROLES
        any 2025-26 split, so it's the most real-world check we have (small, F2-only).
 
 TUNING  a random search: each candidate is trained with early stopping on VAL, and the winner
-is chosen by VAL MAE — TEST/GW2 are never consulted during selection. best_iteration (the
+is chosen by VAL squared error — TEST/GW2 are never consulted during selection. best_iteration (the
 early-stopped tree count) is passed explicitly to predict, so no split is self-graded.
 """
 import os
@@ -61,7 +61,7 @@ SPACE = dict(max_depth=[2, 3, 4, 5, 6, 8],
              learning_rate=[0.02, 0.03, 0.05])
 
 
-def _mae(pred, actual):
+def _err(pred, actual):
     m = pd.notna(pred) & pd.notna(actual)
     return float(np.abs(np.asarray(pred)[m.values] - np.asarray(actual)[m.values]).mean()) \
         if m.any() else float("nan")
@@ -94,7 +94,7 @@ def _sample_params(rng):
 
 def _fit(params, Xtr, ytr, Xva, yva):
     model = lgb.LGBMRegressor(**params)
-    model.fit(Xtr, ytr, eval_X=Xva, eval_y=yva, eval_metric="l1",
+    model.fit(Xtr, ytr, eval_X=Xva, eval_y=yva, eval_metric="l2",
               callbacks=[lgb.early_stopping(PATIENCE, verbose=False)])
     return model
 
@@ -119,45 +119,45 @@ def run_component(stat, path):
     for _ in range(N_TRIALS):
         params = _sample_params(rng)
         model = _fit(params, X[tr], y[tr], X[va], y[va])
-        val_mae = _mae(_predict(model, X[va]), y[va])          # selection metric (VAL only)
-        if best is None or val_mae < best["val_mae"]:
-            best = dict(params=params, model=model, val_mae=val_mae)
+        val_err = _err(_predict(model, X[va]), y[va])          # selection metric (VAL only)
+        if best is None or val_err < best["val_err"]:
+            best = dict(params=params, model=model, val_err=val_err)
 
     # In-season TEST (latest 2025-26 weeks), scored once
     d = df[te]
     pred_te = _predict(best["model"], X[te])
-    base_mae, model_mae = _mae(d["predicted"], d["actual"]), _mae(pred_te, d["actual"])
+    base_err, model_err = _err(d["predicted"], d["actual"]), _err(pred_te, d["actual"])
 
     # Out-of-season GW2 holdout (2026-27 F2), scored once
     g = full[full["season"] == GW2_SEASON].dropna(subset=["actual"]).reset_index(drop=True)
     gw2 = None
     if len(g):
         pg = _predict(best["model"], _prep(g))
-        gw2 = (len(g), _mae(g["predicted"], g["actual"]), _mae(pg, g["actual"]))
+        gw2 = (len(g), _err(g["predicted"], g["actual"]), _err(pg, g["actual"]))
 
-    imp = (base_mae - model_mae) / base_mae * 100
+    imp = (base_err - model_err) / base_err * 100
     g_txt = (f"{gw2[0]:>5}{gw2[1]:>8.4f}{gw2[2]:>8.4f}{(gw2[1]-gw2[2])/gw2[1]*100:>+7.1f}%"
              if gw2 else f"{'-':>5}{'-':>8}{'-':>8}{'-':>8}")
     print(f"{stat:<12}{best['model'].best_iteration_:>5}{int(te.sum()):>6} | "
-          f"{base_mae:>8.4f}{model_mae:>8.4f}{imp:>+7.1f}% | {g_txt}")
+          f"{base_err:>8.4f}{model_err:>8.4f}{imp:>+7.1f}% | {g_txt}")
     return dict(stat=stat, best=best, test=d.assign(model=pred_te.values))
 
 
 def per_horizon(results):
-    print("\nper-horizon TEST MAE (base -> model):")
+    print("\nper-horizon TEST squared error (base -> model):")
     print(f"{'component':<12}{'horizon':>8}{'n':>6} | {'base':>8}{'model':>8}{'Δ%':>8}")
     print("-" * 52)
     for r in results:
         d = r["test"]
         for k in sorted(d["horizon"].unique()):
             s = d[d["horizon"] == k]
-            b, mo = _mae(s["predicted"], s["actual"]), _mae(s["model"], s["actual"])
+            b, mo = _err(s["predicted"], s["actual"]), _err(s["model"], s["actual"])
             print(f"{r['stat']:<12}{f'F{int(k)+1}':>8}{len(s):>6} | "
                   f"{b:>8.4f}{mo:>8.4f}{(b - mo) / b * 100:>+7.1f}%")
 
 
 def show_best(results):
-    print("\nselected hyperparameters (by VAL MAE):")
+    print("\nselected hyperparameters (by VAL squared error):")
     keys = list(SPACE)
     print(f"{'component':<12}" + "".join(f"{k:>17}" for k in keys))
     for r in results:

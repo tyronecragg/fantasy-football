@@ -33,7 +33,7 @@ and it stores **raw beliefs**; the pipeline normalises at consumption time.
 
 > ✅ **TWO DISCRETE CROSS-CHECKS EVERY PASS** (added 2026-08-27 — each was skipped once and left the wrong players starting; normalisation will NOT save you, it only rescales existing values and has no idea who's injured or newly-signed):
 > 1. **Zero the entire out-list, as its own step.** Take the full SportsGambler + FPL-API availability list and set F1≈0 for EVERY player out/suspended for this GW — do not rely on targeted edits to surface injuries. A stale high F1 on an injured player sails straight through a sum-normalisation. *(Caught starting despite being out: Riad, Kovačić [red], Ajayi, Coyle, Osula.)*
-> 2. **Reconcile the file against the LIVE roster, as its own step.** Diff every club's `outputs/01_fpl_players.csv` squad vs the file: **ADD** starter-level new signings the file is missing (they belong in the roster now and carry a real F1), and drop players who left. *(Caught: Sávio — a £50m signing both RotoWire & All About FPL named in the XI — was entirely ABSENT from the file while the youth Mikey Moore sat at 0.42.)*
+> 2. **Reconcile the file against the LIVE roster, as its own step.** Diff every club's `outputs/fpl_players.csv` squad vs the file: **ADD** starter-level new signings the file is missing (they belong in the roster now and carry a real F1), and drop players who left. *(Caught: Sávio — a £50m signing both RotoWire & All About FPL named in the XI — was entirely ABSENT from the file while the youth Mikey Moore sat at 0.42.)*
 > Then check `groupby('Team')['F1'].sum() == 11` and that no cell > 1.0.
 
 - **Sum rule.** `F1` must sum to **exactly 11** per team (the GW1 XI is a known 11). `F2`+ may sit
@@ -89,25 +89,28 @@ and it stores **raw beliefs**; the pipeline normalises at consumption time.
 
 ## Tier 1 — Base panel (predicted XIs, all 20 teams, every week)
 
-Cross-reference these three. Where they agree → high confidence. Where they split → that's
+Cross-reference these four. Where they agree → high confidence. Where they split → that's
 your judgement call, and the trigger to escalate to Tier 3.
 
 | Source | Role | Notes |
 |---|---|---|
-| **Fantasy Football Scout** — [team-news](https://www.fantasyfootballscout.co.uk/team-news) | **Primary, automated** | Already scraped by `starting_lineups.py` into `ffs_predicted_lineups.csv` + `ffs_team_news.md`. FPL-native; grades doubts with a % chance. |
-| **RotoWire** — [lineups](https://www.rotowire.com/soccer/lineups.php) | Cross-check | Predicted *and* confirmed XIs, injury feed integrated, all 20 clubs. |
-| **All About FPL** — [predicted lineups](https://allaboutfpl.com/category/predicted-lineups/) | Cross-check | All 20 teams, updates after friendlies. Good third consensus voice. |
+| **Fantasy Football Scout** — [team-news](https://www.fantasyfootballscout.co.uk/team-news) | **Primary** | FPL-native; full XI for all 20 + per-club notes, grades doubts with a % chance. **Public — no login needed** for the XIs, doubts or notes. Fetch tools summarise long pages and drop players, so ask for the lists verbatim (or paste the page). Check each team's "Last Updated" date — a club can lag (GW6: Coventry + Leeds still showed 29 Sep). |
+| **Fantasy Football Pundit** — [team news](https://www.fantasyfootballpundit.com/fantasy-premier-league-team-news/) | **Primary** | All 20 XIs with a per-player **Start %** (incl. "leaks") — the most direct input for a calibrated split. No explicit injury list. Promoted from backup 2026-10-08 after proving decisive on the GW5 contested slots. |
+| **RotoWire** — [lineups](https://www.rotowire.com/soccer/lineups.php) | Cross-check | Predicted *and* confirmed XIs, injury feed integrated, all 20 clubs. Flips to confirmed on match day, so capture it before the first kickoff. |
+| **All About FPL** — [predicted lineups](https://allaboutfpl.com/category/predicted-lineups/) | Cross-check | All 20 teams. Had no GW5 article (latest was GW1) — date-check it, and drop it for the week if it's stale. |
 
 Alternatives if one is thin: [Never Manage Alone / Yahoo "FPL GW Predicted Lineups: every PL
 club"](https://www.nevermanagealone.com/) (all 20 XIs on one page — a fast whole-league
-cross-check), [Fantasy Football Hub](https://www.fantasyfootballhub.co.uk/premier-league-predicted-lineups)
-(press-conference round-ups), [FPL Edits](https://fpledits.com/predicted-lineups-pl)
+cross-check), [FPL Edits](https://fpledits.com/predicted-lineups-pl)
 (all 20 XIs + subs + injury updates, own prediction/no source attribution; also an
-[injury-updates roundup](https://fpledits.com/injury-updates-roundup)),
-[Fantasy Football Pundit](https://www.fantasyfootballpundit.com/fantasy-premier-league-team-news/)
-(all 20 XIs with a per-player **Start %**, own prediction incl. "leaks"; no explicit injury list).
+[injury-updates roundup](https://fpledits.com/injury-updates-roundup); JS-only page, often won't render for automated fetches).
 
-**Keep it to three.** More sources add noise and conflicting signals, not clarity.
+**Keep it to this panel.** More sources add noise and conflicting signals, not clarity.
+
+> 🤖 **Using agents for the sweep:** agents read the **predicted lineups AND the descriptive text**
+> (previews, injury explanations, presser quotes, Start %s) and **return everything they find**, quoted
+> with source + date. They **never set percentages or make the start/bench call** — Claude reconciles
+> the evidence and sets every F1–F8 value. Full contract: `docs/SOURCE_ACCURACY_CAPTURE.md`.
 
 > ⚠️ **Reliability caveat (learned GW1 2026-27):** automated *fetches of FFS/other per-club
 > "season preview" pages* sometimes return **stale prior-season squads** — GW1 2026-27 pulls

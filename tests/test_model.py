@@ -12,7 +12,7 @@ def test_dc_favourite_multiplier_shape():
         pos = pd.Series(["DEF"] * 6)
         out = model.dc_favourite_multiplier(w, pos)
         assert out.tolist()[:2] == [1.0, 1.0]                     # nothing below the start
-        assert abs(out[2] - 0.91) < 1e-9                          # halfway
+        assert abs(out[2] - 0.91) < 1e-9                          # halfway (0.55 -> 0.85, test curve)
         assert abs(out[3] - 0.82) < 1e-9 and abs(out[4] - 0.82) < 1e-9   # full, and clamped
         assert out[5] == 1.0                                      # no win prob -> untouched
         assert (model.dc_favourite_multiplier(w, pd.Series(["MID"] * 6)) == 1.0).all()   # no MID curve

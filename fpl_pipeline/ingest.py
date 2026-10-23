@@ -68,10 +68,12 @@ def _start_minutes(data_dir):
         if len(g):
             frames.append(g)
     if not frames:
-        return pd.DataFrame(columns=["id", "starts", "start_minutes"])
+        return pd.DataFrame(columns=["id", "starts", "start_minutes", "full_starts"])
     g = pd.concat(frames).drop_duplicates(subset=["id", "gw"])
-    g = g[g["starts"] == 1]
-    return g.groupby("id").agg(starts=("minutes", "size"), start_minutes=("minutes", "sum")).reset_index()
+    g = g[g["starts"] == 1].copy()
+    g["full"] = (g["minutes"] >= 90).astype(float)
+    return g.groupby("id").agg(starts=("minutes", "size"), start_minutes=("minutes", "sum"),
+                               full_starts=("full", "sum")).reset_index()
 
 
 def _dc_source(data_dir):
@@ -83,6 +85,7 @@ def _dc_source(data_dir):
     df = df.merge(_start_minutes(data_dir), on="id", how="left")
     df["starts"] = df["starts"].fillna(0.0).astype(float)
     df["start_minutes"] = df["start_minutes"].fillna(0.0).astype(float)
+    df["full_starts"] = df["full_starts"].fillna(0.0).astype(float)
     df["name"] = _apply_name_changes(df["first_name"] + " " + df["second_name"])
     df["nineties"] = (df["minutes"] / 90).round(2)
     df["position"] = df["position"].map(config.POSITION_MAP)
@@ -101,8 +104,40 @@ def _merge_external_prior(prior):
         return prior
     ext = pd.read_csv(path).dropna(subset=["dc90"]).drop_duplicates(subset="name").set_index("name")
     new = ext[~ext.index.isin(prior.index)][["minutes", "team", "dc90"]]
-    keep = [c for c in ["minutes", "team", "dc90", "starts", "start_minutes"] if c in prior.columns]
+    keep = [c for c in ["minutes", "team", "dc90", "starts", "start_minutes", "full_starts"] if c in prior.columns]
     return pd.concat([prior[keep], new]) if len(new) else prior
+
+
+def favourite_mix(matches, curve=None):
+    """{(season, team, position): the team's AVERAGE DC favourite multiplier over its played matches}.
+    `matches`: the rating module's match frame (season, HomeTeam, AwayTeam, p_home, p_away)."""
+    from . import model
+    curve = (getattr(config, "DC_FAVOURITE_CURVE", None) or {}) if curve is None else curve
+    if not curve or matches is None or not len(matches):
+        return {}
+    long = pd.concat([
+        pd.DataFrame({"season": matches["season"], "team": matches["HomeTeam"], "w": matches["p_home"]}),
+        pd.DataFrame({"season": matches["season"], "team": matches["AwayTeam"], "w": matches["p_away"]}),
+    ], ignore_index=True)
+    out = {}
+    for pos in curve:
+        mult = model.dc_favourite_multiplier(long["w"], pd.Series(pos, index=long.index), curve=curve)
+        for (s, t), v in mult.groupby([long["season"], long["team"]]).mean().items():
+            out[(s, t, pos)] = float(v)
+    return out
+
+
+def _load_favourite_mix(seasons):
+    """favourite_mix from football-data closing odds for `seasons`; {} (no neutralisation) when the
+    curve is off, the switch is off, or the match data cannot be loaded."""
+    if not getattr(config, "DC_NEUTRALISE_FIXTURE_MIX", False) or not (getattr(config, "DC_FAVOURITE_CURVE", None) or {}):
+        return {}
+    try:
+        from . import rating
+        return favourite_mix(rating.load_matches([rating.season_code(s) for s in seasons]))
+    except Exception as exc:                                   # offline / no cache: price as before
+        print(f"  DefCon fixture-mix neutralisation skipped: {exc}")
+        return {}
 
 
 def load_defensive_contributions():
@@ -120,6 +155,11 @@ def load_defensive_contributions():
     recency preference is not extra evidence, so one recent match stays one match of trust.
     Players with no data in either season still land on the position average."""
     df = _dc_source(config.FPL_DATA_DIR)
+    prior_season = _prior_season(config.SEASON)
+    mix = _load_favourite_mix([prior_season, config.SEASON])
+    # neutral-fixture rate: this season's dc90 / the team's average favourite multiplier this season
+    cur_mix = pd.Series([mix.get((config.SEASON, t, p), 1.0) for t, p in zip(df["team"], df["position"])], index=df.index)
+    df["dc90"] = df["dc90"] / cur_mix
 
     w = config.DC_CURRENT_SEASON_WEIGHT
     m_cur = df["minutes"].fillna(0.0).where(df["dc90"].notna(), 0.0)
@@ -130,6 +170,9 @@ def load_defensive_contributions():
         prior = (_dc_source(prior_dir).dropna(subset=["dc90"])
                  .drop_duplicates(subset="name").set_index("name"))
         prior = _merge_external_prior(prior)
+        # neutralise the prior season's rate by the PRIOR club's fixture mix (position from this season)
+        pri_team = df["name"].map(prior["team"])
+        pri_mix = pd.Series([mix.get((prior_season, t, p), 1.0) for t, p in zip(pri_team, df["position"])], index=df.index)
         m_pri = (df["name"].map(prior["minutes"]).fillna(0.0)
                  .clip(upper=config.DC_PRIOR_CAP_MINUTES))
         # MOVERS: a player at a different club than last season has a stale role, so his prior counts
@@ -137,7 +180,7 @@ def load_defensive_contributions():
         prior_team = df["name"].map(prior["team"])
         mover = df["team"].notna() & prior_team.notna() & (df["team"] != prior_team)
         prior_rate = m_pri * mover.map({True: config.DC_MOVER_PRIOR_WEIGHT, False: 1.0}).astype(float)
-        num = num + prior_rate * df["name"].map(prior["dc90"]).fillna(0.0)
+        num = num + prior_rate * (df["name"].map(prior["dc90"]) / pri_mix).fillna(0.0)
         rate_denom = w * m_cur + prior_rate   # recency- and mover-tilted, for the dc90 weighted average
         evidence = m_cur + m_pri              # true minutes (mover discount does NOT touch evidence)
         # minutes per start: prior starts capped at DC_MINUTES_PRIOR_CAP_STARTS (their minutes scaled
@@ -149,10 +192,12 @@ def load_defensive_contributions():
         pm = (pm * cap / ps).where(ps > 0, 0.0)
         disc = mover.map({True: config.DC_MOVER_PRIOR_WEIGHT, False: 1.0}).astype(float)
         s_pri, sm_pri = cap * disc, pm * disc
+        pf = df["name"].map(prior["full_starts"]).fillna(0.0) if "full_starts" in prior.columns else zero
+        f_pri = (pf * cap / ps).where(ps > 0, 0.0) * disc
     else:
         rate_denom = w * m_cur
         evidence = m_cur
-        s_pri = sm_pri = pd.Series(0.0, index=df.index)
+        s_pri = sm_pri = f_pri = pd.Series(0.0, index=df.index)
 
     df["dc90"] = (num / rate_denom).where(rate_denom > 0)
     df["nineties"] = (evidence / 90).round(2)
@@ -161,11 +206,14 @@ def load_defensive_contributions():
     k = float(config.DC_MINUTES_SHRINK_STARTS)
     avg = df["position"].map(config.DC_MINUTES_POSITION_AVG).astype(float)
     df["mps"] = ((w * df["start_minutes"] + sm_pri + k * avg) / (w * df["starts"] + s_pri + k)).round(1)
+    # share of starts that go the full 90, same evidence rules (config.DC_FULL90_POSITION_AVG)
+    avg90 = df["position"].map(config.DC_FULL90_POSITION_AVG).astype(float)
+    df["p90"] = ((w * df["full_starts"] + f_pri + k * avg90) / (w * df["starts"] + s_pri + k)).round(3)
 
     out = {}
     for pos in ("DEF", "MID", "FWD"):      # FWD: same 12 threshold as MID (improved mode only)
         out[pos] = (
-            df[df["position"] == pos][["name", "nineties", "dc90", "mps"]]
+            df[df["position"] == pos][["name", "nineties", "dc90", "mps", "p90"]]
             .sort_values("name")
             .reset_index(drop=True)
         )

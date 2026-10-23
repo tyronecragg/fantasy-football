@@ -181,13 +181,15 @@ def _metrics(pred, actual):
     if mask.sum() == 0:
         return None
     e = pred[mask] - actual[mask]
-    return {"n": int(mask.sum()), "mae": e.abs().mean(), "bias": e.mean(),
+    # "mae" key now holds RMSE (squared-error basis since 2026-10-23; column kept for the print layout)
+    return {"n": int(mask.sum()), "mae": float(np.sqrt((e ** 2).mean())), "bias": e.mean(),
             "corr": pred[mask].corr(actual[mask])}
 
 
 def report(pairs):
     for stat in pairs["stat"].unique():
         print(f"\n=== {stat} ===")
+        print("RMSE by horizon (squared-error basis):")
         print(f"{'horizon':<9} {'n':>5} | {'model':>7} {'oracle':>7} {'persist':>7} "
               f"{'posmean':>7} {'f2form':>7} | {'bias':>7} {'corr':>6}")
         sub_all = pairs[(pairs["stat"] == stat) & pairs["valid_opp"]]

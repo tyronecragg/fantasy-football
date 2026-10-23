@@ -18,7 +18,7 @@ import sys
 
 import pandas as pd
 
-from . import (config, curation_check, history, ingest, markets, model, names, players,
+from . import (config, curation_check, fixture_risk, history, ingest, markets, model, names, players, team_views,
                provenance, rating as rating_mod, reconcile, team_model)
 from .io_utils import reset_counter, snapshot
 
@@ -149,7 +149,7 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
     for key in ("score1", "score2", "assist", "yellow", "clean_sheet", "concede", "gk_saves"):
         snapshot(mkts[key], f"market_{key}")
 
-    # The master must stay snapshot #13 — the optimisers read outputs/13_players_master.csv
+    # The master must stay snapshot #13 — the optimisers read outputs/players_master.csv
     # by name, so variable-count stages (reconciliation) come after it.
     factor_history = None
     assist_real = provenance.is_real("sportsbet_assist_odds.csv")
@@ -165,18 +165,50 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
                   f"({len(next(iter(factor_history.values())))} players with archive weeks)"
                   + ("" if assist_real else "; assist market not real -> assist on trailing median"))
 
-    rating = None
+    # Personal team views (inputs/team_views.csv, current F1 gameweek only): full strength on the
+    # rolling rating (F3-F8), TEAM_VIEW_MARKET_WEIGHT on the priced weeks' bookmaker numbers.
+    views, gw_now = {}, None
+    if improved and config.USE_TEAM_VIEWS:
+        gw_now = rating_mod.current_f1_gw()
+        views = rating_mod.load_team_views(gw_now)
+        if not views and os.path.exists(config.TEAM_VIEWS_CSV):
+            print(f"  team views: none for GW{gw_now} - projections are the plain odds/rating")
+    teamview_raw, mkts_raw = teamview, mkts
+    if views:
+        teamview, mkts, eff = team_views.shade(teamview, mkts, roster, views)
+        if eff:
+            print(f"  team views GW{gw_now} on priced weeks at x{config.TEAM_VIEW_MARKET_WEIGHT:g}: "
+                  + ", ".join(f"{t} {n:+.3f}" for t, n in sorted(eff.items(), key=lambda x: -x[1])))
+
+    rating = rating_raw = None
     if improved and config.USE_ROLLING_RATING:
-        rating = rating_mod.load()
+        rating = rating_raw = rating_mod.load()
         if rating is not None:
             print(f"  {rating.summary()}")
+            if views:
+                rating, applied, skipped = rating_mod.apply_team_views(rating, views)
+                if applied:
+                    print(f"  team views GW{gw_now} on the rating (F3-F8): "
+                          + ", ".join(f"{t} {n:+.2f}" for t, n in sorted(applied.items(), key=lambda x: -x[1])))
+                if skipped:
+                    print(f"  team views: unknown team(s) ignored: {', '.join(skipped)}")
 
-    master = snapshot(
-        players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
-                      inputs["fallback_factors"], dc_stats, inputs["dc_params"],
-                      improved=improved, factor_history=factor_history, gameweek=gameweek,
-                      assist_real=assist_real, rating=rating),
-        "players_master")
+    master_raw = players.build(roster, season, teamview, mkts, inputs["starting_lineups"],
+                               inputs["fallback_factors"], dc_stats, inputs["dc_params"],
+                               improved=improved, factor_history=factor_history, gameweek=gameweek,
+                               assist_real=assist_real, rating=rating)
+    master = master_raw
+    # Fixture risk (inputs/fixture_risk.csv, current GW only): scale F1 points by the chance the match is
+    # played. Published master only - the archive below keeps master_raw.
+    if improved and config.USE_FIXTURE_RISK:
+        gw_risk = gw_now if gw_now is not None else rating_mod.current_f1_gw()
+        risk = fixture_risk.load(gw_risk)
+        master, applied = fixture_risk.apply(master_raw, risk, gameweek=gw_risk)
+        if applied:
+            print("  fixture risk (F1 points x chance played; postponed share -> replay week): "
+                  + ", ".join(f"{t} x{p:g}" + (f" (+{1 - p:.2g} x F1 XP into {c})" if c else "")
+                              for t, (p, c) in sorted(applied.items())))
+    master = snapshot(master, "players_master")
 
     if improved:
         rec = reconcile.report(roster, inputs["starting_lineups"], mkts, sportsbet)
@@ -185,7 +217,7 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
         curation_check.print_summary(cur)
         rec = pd.concat([rec, cur], ignore_index=True) if not cur.empty else rec
         if not rec.empty:
-            snapshot(rec, "name_reconciliation")
+            snapshot(rec, "data_checks")       # names + curation checks (reconcile.py writes name_reconciliation.csv)
 
     # Archive updates are destructive (same-gameweek reruns replace rows), so they only
     # happen with an explicit --gw. Inference is a suggestion, never acted on: the FPL
@@ -200,10 +232,21 @@ def _run(parity_mode, gameweek, improved, archive_mode="none", force_archive=Fal
                                                sportsbet=sportsbet, fixtures=inputs["fixtures"])
             else:
                 print("  match odds are still the synthetic seed - fixture history not archived")
+            raw = history.archive_raw_odds(config.SEASON, gameweek)   # `season` here is the season-odds frame
+            print(f"  raw bookmaker prices saved for {len(raw)} real market(s), {sum(raw.values())} rows -> inputs/raw_odds/{config.SEASON}/GW{gameweek:02d}"
+                  if raw else "  raw bookmaker prices: no real markets to save")
             if archive_mode == "all":
                 withheld = withheld_player_columns(force_archive)
-                history.update_player_history(master, gameweek, withhold=withheld)
-                history.refresh_fallback_factors(master, withhold=withheld)
+                archive_master = master_raw     # never the fixture-risk-scaled published master
+                if views:   # the archive records the market as priced, never our personal views
+                    print("  team views active - rebuilding an unshaded master for the archive")
+                    archive_master = players.build(
+                        roster, season, teamview_raw, mkts_raw, inputs["starting_lineups"],
+                        inputs["fallback_factors"], dc_stats, inputs["dc_params"], improved=improved,
+                        factor_history=factor_history, gameweek=gameweek, assist_real=assist_real,
+                        rating=rating_raw)
+                history.update_player_history(archive_master, gameweek, withhold=withheld)
+                history.refresh_fallback_factors(archive_master, withhold=withheld)
         elif gameweek:
             print(f"Archives NOT updated for GW{gameweek} (see guard message above)")
         else:

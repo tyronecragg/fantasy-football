@@ -63,7 +63,7 @@ def solve_n(raw, total, margin_fav=MARGIN_FAV):
 def main():
     cs = pd.read_csv(os.path.join(config.SPORTSBET_DIR, "sportsbet_clean_sheet_odds.csv"))
     gs = pd.read_csv(os.path.join(config.SPORTSBET_DIR, "sportsbet_goalscorer_odds.csv"))
-    roster = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "01_fpl_players.csv"))
+    roster = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "fpl_players.csv"))
     team_of = dict(zip(roster["name"], roster["team"]))
     gs["team"] = gs["player_name"].map(team_of)
 

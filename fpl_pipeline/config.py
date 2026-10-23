@@ -24,6 +24,11 @@ PARITY_SPORTSBET_DIR = os.path.join(ROOT, "parity_reference", "sportsbet")
 # Bookmaker margin divisors (odds -> probability = 1/odds/margin)
 MARGIN_PLAYER = 1.05   # player & team match markets
 MARGIN_CARD = 1.10     # Bet365 "player to be booked" — higher overround than goals/assists
+# Booking odds -> points calibration (improved mode), applied where a yellow probability becomes points so every
+# horizon, the archive and the trained models stay on the market's scale. 2026-27 GW1-6 (1,245 player-games of
+# 60+ min, 188 booked): the pipeline's F1 yellow ran 1.20x the actual rate, over in EVERY week (1.09-1.45x);
+# x0.85 had the best Brier (0.12537 vs 0.12626, player bootstrap P = 0.90). Measured 2026-10-17; re-check ~GW12.
+YELLOW_CALIBRATION = 0.85
 
 # 2+ assists as a fraction of the 1+ chance, measured on the CALIBRATED probabilities the fill
 # is applied to (i.e. after MARGIN_PLAYER and the longshot shrink, not the raw odds). Real 2+
@@ -66,7 +71,23 @@ LONGSHOT_CALIBRATION = [
 # lowest bands projecting 13 assists and getting 28 (~4 s.e.); the 1xBet two-way cross-check
 # put Betway's raw assist prices within 8% of a de-margined book. Half strength in log space
 # (multipliers square-rooted) lifts those bands to ~0.8x of actual. Re-fit ~GW9 on outcomes.
-LONGSHOT_CALIBRATION_ASSIST = [(p, round(m ** 0.5, 3)) for p, m in LONGSHOT_CALIBRATION]
+# 2026-09-21, five gameweeks (924 player-games of 60+ min with assist odds, 101 assisters): the half-
+# strength curve was still 16% under (0.84x); quarter strength 0.94x; the RAW de-margined Betway price
+# 1.07x with the best Brier. The only band raw over-states is the very bottom (<6%: 1.23x), so the assist
+# curve is now a light trim there and nothing above 8%: pooled 1.05x, bands 1.03 / 0.88 / 1.01 / 1.19 /
+# 1.03. (The >30% band reads 1.7x over on 14 rows / 3 assists - too thin to act on.) The old half curve
+# was: [(p, round(m ** 0.5, 3)) for p, m in LONGSHOT_CALIBRATION]. Re-check ~GW9.
+LONGSHOT_CALIBRATION_ASSIST = [(0.04, 0.80), (0.08, 1.00)]
+# The ARCHIVE stores each week's F1 Assist as calibrated AT THE TIME, and the forward assist factor is a
+# trailing median over those weeks (history.season_weekly_factors) - so every change of curve would leave
+# the median anchored to the old regime for the rest of the season. The archive is never rewritten;
+# instead each archived week is re-expressed under the CURRENT curve when the factors are read: invert
+# the curve that week was archived under, apply today's. (season, first GW, last GW, knots-at-the-time).
+# Weeks not listed were archived under the current curve. Add a row whenever the assist curve changes.
+ASSIST_CURVE_REGIMES = [
+    ("2026-2027", 1, 3, LONGSHOT_CALIBRATION),                                             # full goals curve
+    ("2026-2027", 4, 5, [(p, round(m ** 0.5, 3)) for p, m in LONGSHOT_CALIBRATION]),      # half strength
+]
 MARGIN_WDW = 1.03      # win-draw-win
 MARGIN_SEASON = 1.08   # title / relegation / top-6
 
@@ -78,11 +99,15 @@ SENTINEL_RELEGATION = 2001
 SAVES3_DEFAULT = 0.6
 SAVES6_DEFAULT = 0.0
 
-# Projection blend (improved mode): modelled F2-F6 probability = w * model + (1-w) * the
-# player's current F1 odds-implied probability. Weights fitted per stat by
-# tools/backtest_projections.py on 2025-26 GW16-29 forecast-vs-actual pairs; stats
-# absent here backtested best at w=1.0 (pure model) and are not blended.
-PROJECTION_BLEND = {"score1": 0.70, "assist": 0.85, "saves3": 0.85}
+# Projection blend (improved mode): modelled F2-F8 probability = w * model + (1-w) * the
+# player's current F1 odds-implied probability. Stats absent here are pure model.
+# EMPTY since 2026-10-23 (Tyrone): was {"score1": .70, "assist": .85, "saves3": .85}, fitted on
+# 2025-26 GW16-29 for average error vs the later real odds. Blending the RAW current price carries
+# this week's fixture into every future week (tough fixtures projected too high, soft too low).
+# Re-tested on RANKING (within-position rank match + top-5 pick shortfall, the transfer decision):
+# on 2026-27 Betway data no blend ranks and picks best for goals and keepers, assists ~level;
+# last season (Sportsbet) preferred a last-3-week price average. Re-test ~GW12 (docs/TODO.md).
+PROJECTION_BLEND = {}
 
 # Use the trained forward-projection models (outputs/models/) for F3-F8 clean_sheet/concede2/
 # saves3 instead of factor x baseline. Only these three beat the real pipeline value on
@@ -100,16 +125,38 @@ USE_ROLLING_RATING = True
 RATING_HALFLIFE_DAYS = 30.0        # a match's weight halves every 30 days (grid-best; 20-45 similar)
 RATING_PROMOTED_WEIGHT = 2.0       # promoted side's prior = 2 matches' worth at the three-lowest level
 RATING_MAPS_JSON = os.path.join(DATA_DIR, "rating_maps.json")   # tools/fit_rating_maps.py
+# Personal team views (inputs/team_views.csv: Gameweek,Team,nudge,note). A nudge is "this team is
+# n goals per game better (+) / worse (-) than the rating says". Only rows whose Gameweek equals the
+# window's current F1 gameweek apply, so a forgotten row goes inert at the next roll. Applied to the
+# rolling rating (full strength, F3-F8 + unpriced F2) and the priced weeks' bookmaker numbers
+# (fpl_pipeline/team_views.py, at TEAM_VIEW_MARKET_WEIGHT). USE_TEAM_VIEWS=False to compare.
+
+# Fixture risk (inputs/fixture_risk.csv, current F1 gameweek only): chance a match is played. Each listed
+# team's F1 XP is scaled by it in the published master; the archive keeps the unscaled numbers.
+USE_FIXTURE_RISK = True
+FIXTURE_RISK_CSV = os.path.join(INPUTS_DIR, "fixture_risk.csv")
+USE_TEAM_VIEWS = True
+TEAM_VIEWS_CSV = os.path.join(INPUTS_DIR, "team_views.csv")
+TEAM_VIEW_LOGODDS_PER_GOAL = 1.3   # log(pH/pA) per goal of supremacy (Poisson, typical PL scorelines)
+TEAM_VIEW_AVG_GOALS = 1.35         # league-average goals per team per game (converts goals -> log rate)
+TEAM_VIEW_MAX = 0.5                # |nudge| cap in goals per game - a guard against typos
+TEAM_VIEW_MARKET_WEIGHT = 0.5      # strength on the PRICED weeks (F1, priced F2): 0 = leave Betway alone, 1 = full
 # assist is NOT here: the model beats the RAW baseline (+2%) but the deployed serving blends 0.85
 # with the current odds, and the blended BASELINE beats the blended MODEL (-2.1% walk-forward,
 # 2026-08). The F1 anchor is what helps attacking stats, not the tree. score1 same. See memory.
 PROJECTION_MODEL_STATS = {"clean_sheet": "Clean Sheet", "concede2": "Concede 2+ Goals",
                           "saves3": "3+ Saves"}
+# 2026-10-17 refresh: the defensive GBMs are served as w*model + (1-w)*raw factor x baseline instead of
+# pure model. Three one-week leak-free folds (2026-27 gw_to 5-7, models retrained on 2025-26 + earlier 2026-27):
+# clean_sheet pure 0.0251 -> 0.0233 at w=0.75 (-7%); concede2 0.0340 -> 0.0309 at 0.65 (-9%); saves3 0.0652 ->
+# 0.0631 at 0.80 (-3%). Stats absent here are served pure. Re-fit with the models.
+DEFENSIVE_MODEL_WEIGHT = {"clean_sheet": 0.75, "concede2": 0.65, "saves3": 0.80}
 # STACKED stats (2026-09-02): the GBM does not beat the F1-blend on its own for goals / yellow, but
 # w*model + (1-w)*blend does - like-for-like walk-forward with player bootstrap
 # (tools/assist_walkforward.py, set E: rating win/opp + expected goals + the baseline as a feature +
 # 6/10-week odds form): goals stack -4.5% error (P=1.00, and -6.6% on the 2026-27 cross-season fold),
-# yellow stack -7.1% (P=1.00). Weights = the VAL-fitted stack weights. Assists are NOT stacked: the
+# yellow stack -7.1% (P=1.00). Weights = the VAL-fitted stack weights; re-checked 2026-10-17 on 2026-27 folds
+# after the retrain (score1 best 0.65, yellow flat 0.60-0.70) - unchanged. Assists are NOT stacked: the
 # in-season gain (~+2.5%) reversed on the cross-season fold (-4% to -18%).
 PROJECTION_STACK = {"score1": ("Score 1+", 0.65), "yellow": ("Yellow Card", 0.70)}
 # A stack is only applied once the season archive holds this many real weeks (yellow leans on
@@ -198,17 +245,47 @@ DC_SHRINK_MIN_NINETIES = 0.65
 # False = price the full 90.
 DC_MINUTES_PER_START = True
 DC_MINUTES_POSITION_AVG = {"DEF": 85.0, "MID": 80.0, "FWD": 79.0}
+# 2026-09-21: the minutes enter as a MIXTURE, not an average. Plugging in average minutes (rate x mps/90)
+# over-corrected midfielders (walk-forward, 17 GWs / 3,013 starts, tools-style as-of rebuild: MID
+# predicted/actual 1.21 flat -> 0.86) because a player who plays 90 half the time and ~70 the rest clears
+# the threshold more often than one who always plays 80. So P(hit | start) = p90 x P(hit | full rate)
+# + (1 - p90) x P(hit | rate x sub_minutes / 90): MID Brier 0.1163 -> 0.1152 (ratio 0.89), DEF unchanged.
+# p90 = the player's share of starts that go the full 90, with the same evidence rules as minutes per
+# start (this season 2x, <=10 prior starts, mover discount, DC_MINUTES_SHRINK_STARTS pseudo-starts at the
+# position average). Sub minutes = mean minutes of starts that end early (2025-26: DEF 67.6, MID 69.6,
+# FWD 70.8). `mps` is still computed and written to the dc_stats outputs for reference.
+DC_FULL90_POSITION_AVG = {"DEF": 0.78, "MID": 0.49, "FWD": 0.42}
+DC_SUB_MINUTES = {"DEF": 68.0, "MID": 70.0, "FWD": 70.5}
 DC_MINUTES_SHRINK_STARTS = 7
 DC_MINUTES_PRIOR_CAP_STARTS = 10
 # Improved mode: HEAVY-FAVOURITE DISCOUNT, per fixture. A defender's DC rate in games where his team is
 # a 70%+ favourite runs x0.82 his own norm (player fixed effects, home + minutes controlled, 2025-26 +
 # 2026-27, 1,354 DEF starts / 55 heavy: t = -3.1, within-player permutation p = 0.007; replicates in
-# 2025-26 alone; 0.55-0.70 band x0.93). Midfielders: x0.91, t = -1.8, p = 0.14 - NOT applied, re-test
-# ~GW12. Position -> (win prob where the discount starts, win prob where it is fully on, multiplier
+# 2025-26 alone; 0.55-0.70 band x0.93). Midfielders: x0.91, t = -1.8, p = 0.14 - applied lightly from
+# 2026-10-17 (see below), re-test ~GW12. Position -> (win prob where the discount starts, win prob where it is fully on, multiplier
 # there); linear between, 1.0 below the start, clamped above the end. The multiplier scales the RATE
 # (after minutes per start) for EACH fixture from that fixture's win probability (F1/F2 odds,
 # F3+ predicted), so DefCon is no longer a flat copy of F1 across the horizon. Measured 2026-09-16.
-DC_FAVOURITE_CURVE = {"DEF": (0.55, 0.85, 0.82)}
+# 2026-09-21 re-fit in the walk-forward harness WITH the neutralisation below: the first curve
+# (0.55 -> 0.82) left favourites over-predicted (0.55-0.70 band 1.11x, >0.70 band 3.3x); starting at
+# 0.50 and ending at 0.65 calibrates <=0.55 at 1.00x and 0.55-0.70 at 1.03x with the best Brier among
+# neutralised variants (0.1730 vs 0.1735). The >0.70 band is still ~2.5x over on 54 starts / 3 hits -
+# too thin to chase; re-fit ~GW12.
+# MID added 2026-10-17 (Tyrone: "Let's turn it on"). Walk-forward (2025-26 GW16-29 + 2026-27 GW2-6, 1,679 MID
+# starts, neutralised, mixture minutes): every curve within 0.0002 Brier of off; 0.55->0.91 (the Sept measured
+# x0.91, starting later so the 0.55-0.70 band - already under-predicted 0.78x - is barely touched) has the best
+# Brier (0.1160 vs 0.1162) and cuts the >0.70 over-prediction 2.35x -> 1.99x. That band is only 63 starts /
+# 4 hits, so this is a light touch, not a fit - re-fit ~GW12 with the DEF curve.
+DC_FAVOURITE_CURVE = {"DEF": (0.50, 0.85, 0.65), "MID": (0.55, 0.85, 0.91)}
+# ...and the HISTORIC rate is neutralised for the fixtures it was earned in (Tyrone, 2026-09-21). The
+# x0.82 was measured against a player's OTHER games, but a City/Arsenal defender's season dc90 is
+# already mostly favourite games - applying the discount to that average double-counts (a player who
+# averaged 15 at a typical 80% win prob should be priced at ~15 in an 80% game, not below it). So each
+# season's dc90 is divided by his team's AVERAGE multiplier over the matches played that season
+# (football-data closing odds, the rolling rating's match frame) before the seasons are blended; the
+# upcoming fixture's multiplier is then applied to that neutral-fixture rate. Prior-season rates use the
+# prior club. No PL matches for a team (Championship/foreign priors) -> 1.0. False = no neutralisation.
+DC_NEUTRALISE_FIXTURE_MIX = True
 
 # Predicted match odds (F2 fallback + F3-F8): win_pred and opp_win_pred are fitted INDEPENDENTLY,
 # so the implied draw (1 - win - opp) is an unconstrained residual that balloons when both fits

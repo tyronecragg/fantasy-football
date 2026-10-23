@@ -1,7 +1,7 @@
 """Mini-league differentials: who your rivals own that you don't, and who you own that they don't.
 
 Pulls a real FPL mini-league from the live API and computes INTRA-LEAGUE ownership (not global), then
-joins it to our own XP projection (outputs/13_players_master.csv) so you see not just "12/50 rivals own
+joins it to our own XP projection (outputs/players_master.csv) so you see not just "12/50 rivals own
 Haaland" but whether our model rates the chase. Two lists:
   - RIVALS' TEMPLATE YOU'RE MISSING : high league-ownership players you do NOT own (the threats)
   - YOUR DIFFERENTIALS              : your players with LOW league ownership (your edge)
@@ -28,7 +28,7 @@ from fpl_pipeline import config  # noqa: E402
 API = "https://fantasy.premierleague.com/api"
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 DEFAULT_ENTRY = 1250175   # Tyrone
-MASTER = os.path.join(config.OUTPUTS_DIR, "13_players_master.csv")
+MASTER = os.path.join(config.OUTPUTS_DIR, "players_master.csv")
 
 # --xp weighted-total weights. These MIRROR optimisation.py's OWNERSHIP_WEIGHTS / RELIABILITY_WEIGHTS
 # (kept local because optimisation.py runs the optimiser at import — not import-safe). Fixture weight =

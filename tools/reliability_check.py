@@ -30,7 +30,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from fpl_pipeline import config  # noqa: E402
 
-SEASON = "2025-2026"
+SEASON = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--season=")), "2025-2026")   # --season=2026-2027 to score this season
 OWN = [1.0, 0.920, 0.846, 0.779, 0.716, 0.659, 0.606, 0.558]
 ROWS = {
     "old":       [1.0, 0.850, 0.616, 0.578, 0.503, 0.498, 0.481, 0.472],
@@ -91,8 +91,8 @@ def main():
         mae_x = (s["xp"] - s["points"]).abs().mean()
         mae_m = (s["pos_mean"] - s["points"]).abs().mean()
         sk = 1 - mae_x / mae_m
-        slope = np.polyfit(s["xp"], s["points"], 1)[0]
-        rho = spearmanr(s["xp"], s["points"]).correlation
+        slope = np.polyfit(s["xp"].astype(float), s["points"].astype(float), 1)[0]
+        rho = spearmanr(s["xp"].astype(float), s["points"].astype(float)).correlation
         skill[k] = sk
         print(f"F{k:<7}{len(s):>7}{s['target_gw'].nunique():>6} | {mae_x:>7.3f}{mae_m:>9.3f}{sk:>7.3f} | "
               f"{slope:>6.3f}{rho:>9.3f} | {sk / skill[1]:>13.3f}")

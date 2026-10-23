@@ -33,7 +33,7 @@ from tools.build_team_ratings import DEFAULT_SEASONS, fetch, match_probs, rate  
 
 RATINGS = os.path.join(config.INPUTS_DIR, "team_ratings.csv")
 FIXTURES = os.path.join(config.INPUTS_DIR, "season_fixtures.csv")
-MASTER = os.path.join(config.OUTPUTS_DIR, "13_players_master.csv")
+MASTER = os.path.join(config.OUTPUTS_DIR, "players_master.csv")
 
 
 def fit_rating_model(seasons=DEFAULT_SEASONS):

@@ -47,6 +47,16 @@ def longshot_calibrate(prob, enabled=True, knots=None):
     return (p * mult).clip(0, 1).where(p.notna())
 
 
+def recalibrate(prob, old_knots, new_knots):
+    """Re-express probabilities calibrated under `old_knots` as if calibrated under `new_knots`:
+    numerically invert the old curve (it is monotone) to the raw de-margined price, apply the new one."""
+    grid = np.linspace(1e-4, 0.999, 8000)
+    old = longshot_calibrate(pd.Series(grid), knots=old_knots).to_numpy()
+    p = pd.to_numeric(prob, errors="coerce")
+    raw = pd.Series(np.interp(p.to_numpy(dtype=float), old, grid), index=p.index).where(p.notna())
+    return longshot_calibrate(raw, knots=new_knots)
+
+
 def player_market(df, calibrate=False, roster_names=None, knots=None):
     """Goalscorer / 2+ goals / assist CSVs: player_name, match_id, odds_decimal.
 

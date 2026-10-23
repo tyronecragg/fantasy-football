@@ -19,10 +19,13 @@ a provisional/empty XI, which rots the ledger. So: compile at the deadline, not 
 - **FFS** — compiled by hand into `inputs/ffs_predicted_lineups.csv` at the deadline (the automated
   scrape/staging was retired). Use `--seed-ffs` **only if that file is fresh for this GW** (check its
   date first — a stale file freezes a pre-season XI, as happened at GW4), else refresh it from the live site.
+  The page is public (no login) — the full XIs, doubt %s and notes are all visible. A WebFetch summary can drop
+  players, so request the 11 names per team verbatim, or paste the page. Check each team's "Last Updated" date.
+- **Fantasy Football Pundit** (ledger name `FantasyFootballPundit`) — https://www.fantasyfootballpundit.com/fantasy-premier-league-team-news/
+  — all 20 XIs with a per-player Start %. Promoted to main 2026-10-08. Capture its predicted XI (its 11
+  listed starters per team, not a top-11-by-% reconstruction).
 
 **On trial (capture when populated, promote once they earn it):**
-- **Fantasy Football Pundit** — https://www.fantasyfootballpundit.com/fantasy-premier-league-team-news/
-  (all 20 XIs with a per-player Start %, own prediction; added 2026-09-03).
 - **FPL Edits** — https://fpledits.com/predicted-lineups-pl (added 2026-09-03).
 - **All About FPL** — https://allaboutfpl.com/category/predicted-lineups/ (its per-GW page can vanish
   after the GW — capture it live at the deadline, no retro back-fill).
@@ -63,14 +66,19 @@ dumps ship no `lineups.csv`).
   article, so it was not captured (not substituted). Sources were gathered via a panel-restricted
   agent (Tier-1 URLs only, roster-checked) rather than the browser. Score after GW4 plays.
 - **GW4 scored (2026-09-18):** FFS **89.1%**, RotoWire **88.2%**. ⚠️ **Curated NOT captured** — `--seed-ours` was skipped at the GW4 deadline and the roll then shifted `starting_lineups.csv`, so our own XI is lost/unscoreable for GW4 (git HEAD was a stale 427-row pre-final state). **Fix: seed-ours at the deadline BEFORE rolling** (now in the rollover memory).
+- **GW5 scored (2026-10-08):** **Curated 90.9%**, FFS 90.5%, RotoWire 90.0% (Curated = our full-panel reconciled XI). FFP not captured for GW5. Everyone missed the same late rotations (Hemmings, Cash, Kluivert, Dunk, Livramento, Udogie, Stroud, Hume). Our coin-flip picks split both ways vs FFS: we were right on Man Utd LB (Shaw) and Forest (Ndoye); FFS was right on Everton (Armstrong) and Palace (Canvot).
 - Per-source *ranking* was deprioritised 2026-08-28 (the odds price in form; the panel is hand-curated),
   so this is mainly (a) calibration of our own XI and (b) a one-off validation of a new source like FPL
   Edits before promoting it — not a heavy weekly obligation.
 
-## Agent-sweep contract — evidence, not verdicts (added 2026-09-18)
+## Agent-sweep contract — evidence, not verdicts (added 2026-09-18, tightened 2026-10-08)
+**Division of labour:** when team-lineup research is handed to agents, the agents **read both the predicted lineups AND the descriptive text** (previews, injury explanations, presser quotes, rotation notes, Start %s) and **return everything they find** — every XI, every quote, every number, with source + date. **The agents never set percentages or make the start/bench call.** Claude (the caller) reconciles the evidence and decides every F1–F8 value.
+
 Lineup/team-news research (sub-agents or direct) must **return raw per-source evidence, not a synthesized IN/OUT call**. Three agent syntheses overstated a single source and got relayed as fact (Bijol "named starter"; Maddison "shoulder" — FPL said 100%; Porro/Tonali "out" — both 75% FPL doubts, only Sports Mole's cautious XI benched them).
 - **Output = per-player × per-source grid, verbatim + dated** (FFS / RotoWire / Sports Mole / SportsGambler each quoted). Agent flags **source SPLITS**; the reconciliation (vs the FPL flag) is done by the caller, not the agent.
 - **Cross-check every call vs the FPL `chance_of_playing`/`status` flag.** A 75% flag + one predicted-XI omission = DOUBT leaning start (~0.7), NOT "out".
 - **Never cite a source not present in the return.** Label single-source claims "one source only".
 - **Squad-critical players: fetch directly (no agent).**
 See memory `agent-sweep-evidence-not-verdicts`.
+- **GW6 captured (Fri 9 Oct ~23:45 BST, pre-deadline):** Curated + FFS + FFP + RotoWire, 220 rows each, 0 UNMATCHED. RotoWire all 20 still "Predicted Lineup". **FFS as shown:** 11 teams still "Last Updated Thu 8 Oct" (e.g. Forest starts Milenković, now out). **FFP:** 19 teams dated 9 Oct, Coventry 6 Oct; it starts Brobbey (out), Havertz, Koumas, Stroud. Curated top-11 ties broken by slot: Konsa (CB, .5 vs Mosquera .45), Neco Williams (incumbent RB, .6 tie with Aina). Raw file: `inputs/source_history/gw6_external.csv`. Resolver now handles FFP's glued initials (`J.TIMBER`, initial used to split `L.MILEY`/`J.MURPHY`), FFS's `SURNAME (FIRST)`, and `Ø`; aliases are case/accent-insensitive.
+- **GW6 scored (2026-10-13):** **Curated 85.9% (189/220)**, FFP 85.9% (189), FFS 84.5% (186), RotoWire 84.1% (185). A rotation-heavy week after the break (GW5 was ~90% for all). **Nobody predicted 17 of the 31 players who started against our XI** (White, Madueke, Cash, Brooks, Diouf, Struijk, Acheampong, Cherif, Keane, Tete, Gelhardt, Maeda, Florentino, O'Reilly, Amad, Yoro, Bergvall, Senesi). 11 of our flat-1.0 players didn't start (Cook, Sangaré, Mfuni, Belloumi, Palacios, Clarke, Szoboszlai, Gvardiol, Dalot, van de Ven, Marmoush). Coin-flips: right on Konsa, João Pedro, Walton, N.Williams; wrong on Bruno G. (Lewis-Skelly), Wan-Bissaka (Cash), Mykolenko, Robinson, Dedić, Jair (Aina), Ngumoha (Gravenberch/Koumas). **Calibration flag:** our 0.8–0.99 band started only 68% (13/19; avg belief 0.89) — Eze, Timber, Gyökeres, Dunk, Ahanor, Onyeka were all too high. Worst teams: Arsenal 7/11 (every source 6–8), Spurs 8/11 (sources 6–8).

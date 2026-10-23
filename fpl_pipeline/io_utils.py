@@ -49,7 +49,7 @@ def snapshot(df, name):
     out_dir = _state["dir"] or config.OUTPUTS_DIR
     os.makedirs(out_dir, exist_ok=True)
     _state["n"] += 1
-    path = os.path.join(out_dir, f"{_state['n']:02d}_{name}.csv")
+    path = os.path.join(out_dir, f"{name}.csv")       # unnumbered since 2026-10-23 (stage no. only in the log)
     df.to_csv(path, index=False)
     print(f"  [{_state['n']:02d}] {name:<28} {df.shape[0]:>5} rows x {df.shape[1]:>3} cols -> {os.path.relpath(path, config.ROOT)}")
     return df
@@ -57,7 +57,7 @@ def snapshot(df, name):
 
 def reset_counter(subdir=None):
     """Reset the stage counter. Parity runs pass subdir='parity' so their snapshots
-    never clobber outputs/ — the optimisers read outputs/13_players_master.csv."""
+    never clobber outputs/ — the optimisers read outputs/players_master.csv."""
     _state["n"] = 0
     _state["dir"] = os.path.join(config.OUTPUTS_DIR, subdir) if subdir else None
 

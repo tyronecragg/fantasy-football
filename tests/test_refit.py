@@ -68,7 +68,9 @@ def test_refit_dry_run_never_writes(tmp_path, monkeypatch, capsys):
 
     from fpl_pipeline import config
     before = os.path.getmtime(config.COEFFICIENTS_JSON)
+    wb = model.WORKBOOK_COEFFICIENTS_JSON          # exists once a real refit has been written
+    wb_before = os.path.getmtime(wb) if os.path.exists(wb) else None
     refit.main(write=False)
     assert os.path.getmtime(config.COEFFICIENTS_JSON) == before
-    assert not os.path.exists(model.WORKBOOK_COEFFICIENTS_JSON)
+    assert (os.path.getmtime(wb) if os.path.exists(wb) else None) == wb_before   # dry run never touches it
     assert "Dry run" in capsys.readouterr().out

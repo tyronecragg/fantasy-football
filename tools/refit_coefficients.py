@@ -4,6 +4,8 @@ workflow of pasting data into modelling scripts and hand-copying coefficients ba
 Usage:
     python tools/refit_coefficients.py            # dry run: fit, compare, write nothing
     python tools/refit_coefficients.py --write    # regenerate fpl_pipeline/data/coefficients.json
+    python tools/refit_coefficients.py --write --only baselines   # just the baselines (projection-gated)
+    python tools/refit_coefficients.py --write --only win_pred    # just the F3+ win model (its own gate)
                                                   # (workbook original backed up once to
                                                   #  coefficients_workbook.json for parity mode)
 
@@ -36,8 +38,10 @@ BASELINE_TARGETS = {
     "score1": "F1 Score 1+", "assist": "F1 Assist", "yellow": "F1 Yellow Card",
     "concede2": "F1 Concede 2+ Goals", "concede4": "F1 Concede 4+ Goals",
     "saves3": "F1 3+ Saves", "saves6": "F1 6+ Saves",
-    "clean_sheet": "F1 Clean Sheet", "pred_xp": "F1 XP",
+    "clean_sheet": "F1 Clean Sheet",
 }
+# pred_xp (the display-only "F1 Pred XP") is NOT refit: its workbook form is XP-for-a-starter, and F1 XP in the
+# history includes non-starters, so a refit silently rescales it (~3.8 -> ~1.2). Kept as-is via model.BASELINES.
 MIN_ROWS = 100
 
 
@@ -69,7 +73,7 @@ def fit_baselines(report, path=None):
     feats = model._features(hist["F1 Win"], hist["F1 Opponent Win"],
                             hist["Position"], hist["F1 Venue"] == "H")
 
-    out = {}
+    out = dict(model.BASELINES)  # stats not refit (pred_xp) carry through unchanged
     for stat, target_col in BASELINE_TARGETS.items():
         names = list(model.BASELINES[stat].keys())  # keep the model's functional form
         fit = ols(feats, names, hist[target_col])
@@ -200,20 +204,26 @@ def projection_holdout_check(holdout_gws=4, tolerance=0.05):
 
     bt = _load_backtest()
     archive = bt.load_archive()
-    gws = sorted(archive["Gameweek"].dropna().unique())
-    if len(gws) < holdout_gws + 4:
-        print(f"Holdout check SKIPPED: only {len(gws)} archived gameweeks "
-              f"(need {holdout_gws + 4}) — refusing is the safe default")
+    # SEASON-AWARE (2026-10-17): gameweek numbers recur across seasons, so the holdout is the latest
+    # `holdout_gws` weeks of the newest archived season and the fit uses everything before them
+    # (all earlier seasons + that season's earlier weeks). The old global "Gameweek < cutoff" split
+    # trained on 2026-27 GW1-7 and tested on 2025-26 GW25+ once both seasons were archived.
+    season = sorted(archive["Season"].dropna().unique())[-1]
+    gws = sorted(archive.loc[archive["Season"] == season, "Gameweek"].dropna().unique())
+    if len(gws) < holdout_gws + 2:
+        print(f"Holdout check SKIPPED: only {len(gws)} archived gameweeks in {season} "
+              f"(need {holdout_gws + 2}) — refusing is the safe default")
         return False
     cutoff = gws[-holdout_gws]
+    in_holdout = (archive["Season"] == season) & (archive["Gameweek"] >= cutoff)
 
     train_path = os.path.join(tempfile.gettempdir(), "refit_train_history.csv")
-    archive[archive["Gameweek"] < cutoff].to_csv(train_path, index=False)
+    archive[~in_holdout].to_csv(train_path, index=False)
     candidate = fit_baselines([], path=train_path)
 
-    def holdout_mae(pairs):
-        sub = pairs[pairs["valid_opp"] & (pairs["gw_from"] >= cutoff)]
-        return {stat: (s["predicted"] - s["actual"]).abs().mean()
+    def holdout_mae(pairs):        # name kept for diff-stability; squared error since 2026-10-23
+        sub = pairs[pairs["valid_opp"] & (pairs["season"] == season) & (pairs["gw_from"] >= cutoff)]
+        return {stat: ((s["predicted"] - s["actual"]) ** 2).mean()
                 for stat, s in sub.dropna(subset=["predicted", "actual"]).groupby("stat")}
 
     current = holdout_mae(bt.build_pairs(archive))
@@ -223,7 +233,8 @@ def projection_holdout_check(holdout_gws=4, tolerance=0.05):
     finally:
         model.load_coefficients()
 
-    print(f"\nHoldout projection check (fit < GW{int(cutoff)}, evaluate >= GW{int(cutoff)}):")
+    print(f"\nHoldout projection check ({season}: fit on everything before GW{int(cutoff)}, "
+          f"evaluate pairs from GW{int(cutoff)}+):")
     degraded = []
     for stat in current:
         change = (refit_mae[stat] - current[stat]) / current[stat]
@@ -272,8 +283,8 @@ def win_pred_holdout_check(holdout_frac=0.3, tolerance=0.0):
     print(f"\nwin_pred holdout check (chronological, fit on first {cut} of {n} fixtures):")
     ok = True
     for label, sl in (("train", slice(0, cut)), ("holdout", slice(cut, n))):
-        cur = (incumbent[sl] - y[sl]).abs().mean()
-        cand = (candidate[sl] - y[sl]).abs().mean()
+        cur = ((incumbent[sl] - y[sl]) ** 2).mean()      # squared error since 2026-10-23
+        cand = ((candidate[sl] - y[sl]) ** 2).mean()
         change = (cand - cur) / cur
         flag = "ok" if change <= tolerance else "WORSE"
         print(f"  {label:<8} current {cur:.4f}  refit {cand:.4f}  {change:+.1%}  {flag}")
@@ -317,6 +328,8 @@ def main(write=False, force=False, only=None):
         kept = json.load(open(config.COEFFICIENTS_JSON, encoding="utf-8"))
         if only == "win_pred":
             kept["win_pred_f3plus"] = new["win_pred_f3plus"]
+        elif only == "baselines":          # the gated part only; win_pred / sheet formulas untouched
+            kept["baselines"] = new["baselines"]
         else:
             raise SystemExit(f"unknown --only target: {only}")
         new = kept

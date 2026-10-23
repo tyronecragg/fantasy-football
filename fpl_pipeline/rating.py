@@ -425,6 +425,61 @@ class RatingSource:
         return self._cache[key]
 
 
+def current_f1_gw(path=None):
+    """The gameweek inputs/fixtures.csv currently starts at ('GW7 Opponent' -> 7), else None."""
+    try:
+        head = str(pd.read_csv(path or os.path.join(config.INPUTS_DIR, "fixtures.csv"), nrows=0).columns[1])
+    except (OSError, IndexError, pd.errors.EmptyDataError):
+        return None
+    digits = "".join(ch for ch in head.upper().replace("GW", "", 1).split()[0] if ch.isdigit())
+    return int(digits) if digits else None
+
+
+def load_team_views(gameweek, path=None):
+    """{team: nudge in goals per game} for `gameweek` only (rows for any other GW are ignored, so a
+    stale file has no effect). Missing/empty file or no matching rows -> {}."""
+    path = path or config.TEAM_VIEWS_CSV
+    if gameweek is None or not os.path.exists(path):
+        return {}
+    v = pd.read_csv(path, comment="#")
+    if v.empty:
+        return {}
+    v = v[pd.to_numeric(v["Gameweek"], errors="coerce") == gameweek]
+    out = {}
+    for team, n in zip(names.apply_team_names(v["Team"].astype(str).str.strip()), pd.to_numeric(v["nudge"])):
+        if not np.isfinite(n):
+            continue
+        out[team] = float(np.clip(n, -config.TEAM_VIEW_MAX, config.TEAM_VIEW_MAX))
+    return out
+
+
+def apply_team_views(fr, views):
+    """A copy of FixtureRating `fr` with each team nudged by `views` {team: goals per game}:
+    the 1X2 strength moves by nudge x TEAM_VIEW_LOGODDS_PER_GOAL; the goals split moves half to
+    attack, half to defence (log rate of +nudge/2 goals on a TEAM_VIEW_AVG_GOALS base each way).
+    Unknown teams are returned in `skipped`. Returns (new_fr, applied, skipped)."""
+    if fr is None or not views:
+        return fr, {}, []
+    known = set(fr.ratings.index)
+    applied = {t: n for t, n in views.items() if t in known}
+    skipped = sorted(set(views) - known)
+    r = fr.ratings.copy()
+    for t, n in applied.items():
+        r[t] += n * config.TEAM_VIEW_LOGODDS_PER_GOAL
+    goals = fr.goals
+    if goals is not None:
+        att, dfn, c_h, c_a = goals
+        att, dfn = att.copy(), dfn.copy()
+        for t, n in applied.items():
+            step = np.log1p(abs(n) / 2 / config.TEAM_VIEW_AVG_GOALS) * np.sign(n)
+            if t in att.index:
+                att[t] += step
+            if t in dfn.index:
+                dfn[t] += step            # higher def = fewer goals conceded (log_against = o_att - t_def + c)
+        goals = (att, dfn, c_h, c_a)
+    return FixtureRating(r, fr.hfa, fr.weight, fr.maps, fr.cutoff, fr.season, goals), applied, skipped
+
+
 def load(season=None, cutoff=None):
     """The live FixtureRating for `season` (default config.SEASON) as of `cutoff` (default now),
     or None (with a message) when the maps or price data are unavailable."""

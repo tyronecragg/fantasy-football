@@ -2,7 +2,7 @@
 
 They read the built master and flag lineup-belief problems the name-reconciliation pass does
 not: a start probability above what FPL itself says is possible, and teams whose start
-probabilities do not add up. Findings are appended to outputs/14_name_reconciliation.csv and
+probabilities do not add up. Findings are appended to outputs/data_checks.csv and
 printed in the run summary. Nothing is auto-corrected — FPL availability flags can lag, and a
 pending sale legitimately reads as "available", so these are surfaced for a human decision.
 """
@@ -87,7 +87,7 @@ def print_summary(cur):
     if cur.empty:
         print("  curation checks: F1 sums to 11, F2-F8 >= 11, no availability-ceiling breaches")
         return
-    print(f"  curation checks: {len(cur)} issue(s) -> outputs/14_name_reconciliation.csv")
+    print(f"  curation checks: {len(cur)} issue(s) -> outputs/data_checks.csv")
     for _, r in cur[cur.source == "curation:ceiling"].iterrows():
         print(f"    [ceiling]  {r['name']}: {r['issue']}")
     for _, r in cur[cur.source == "curation:team_sum"].iterrows():

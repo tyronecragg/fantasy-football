@@ -42,7 +42,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from fpl_pipeline import config, history  # noqa: E402
 
-MASTER = os.path.join(ROOT, "outputs", "13_players_master.csv")
+MASTER = os.path.join(ROOT, "outputs", "players_master.csv")
 GW_TEAMS = os.path.join(ROOT, "inputs", "gw_teams.csv")
 HIST = os.path.join(ROOT, "inputs", "chip_history.csv")
 XI_MIN = {"GK": 1, "DEF": 3, "MID": 2, "FWD": 1}

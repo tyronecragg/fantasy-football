@@ -1,0 +1,12 @@
+{
+  "sportsbet_goalscorer_odds_reconstructed.csv": {
+    "state": "reconstructed",
+    "source": "tools/backfill_raw_odds.py",
+    "detail": "inverted archived F1 Score 1+ (margin 1.05, week's curve); 472 of 583 landed on a 2-decimal price"
+  },
+  "sportsbet_assist_odds_reconstructed.csv": {
+    "state": "reconstructed",
+    "source": "tools/backfill_raw_odds.py",
+    "detail": "inverted archived F1 Assist (margin 1.05, week's curve); 421 of 547 landed on a 2-decimal price"
+  }
+}

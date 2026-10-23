@@ -36,9 +36,9 @@ Improved mode (build(..., improved=True); parity mode = improved=False is workbo
    sheet model's MAE is 0.063 even given the fixture's actual odds, vs 0.019 for the
    generic machinery — the factor is calibrated against the full baseline, so
    multiplying it into a different model family breaks its scale.
-10. Persistence blend: modelled F2-F6 score/assist/saves probabilities are blended with
-   the player's current F1 odds-implied probability at backtested weights
-   (config.PROJECTION_BLEND). Other stats backtested best as pure model.
+10. Persistence blend: modelled F2-F8 probabilities CAN be blended with the player's current
+   F1 odds-implied probability (config.PROJECTION_BLEND). Switched off 2026-10-23 (empty dict):
+   it carried this week's fixture into every future week; see the config comment.
 """
 import warnings
 
@@ -121,11 +121,13 @@ def _dc_table(dc_stats, params_row, improved=True):
         w = w.where(n >= config.DC_SHRINK_MIN_NINETIES, 0.0)   # under ~59 min played: no evidence
         df["dc_weight"] = w
         blended = w * df["dc90"].fillna(avg_dc90) + (1.0 - w) * avg_dc90   # blend the RATE
-        if getattr(config, "DC_MINUTES_PER_START", False) and "mps" in df.columns:
-            # per-90 rate -> expected count in the minutes he actually plays when he starts
-            blended = blended * df["mps"].astype(float).fillna(90.0) / 90.0
-        df["rate_eff"] = blended                     # per-start expected count, before any fixture effect
-        df["prob_filled"] = model.dc_probability(blended, params_row["sd"], params_row["threshold"])
+        df["rate_eff"] = blended                     # per-90 rate, before minutes or any fixture effect
+        if getattr(config, "DC_MINUTES_PER_START", False) and "p90" in df.columns:
+            # full-90 game vs subbed-off game mixture (config.DC_FULL90_POSITION_AVG / DC_SUB_MINUTES)
+            sub = config.DC_SUB_MINUTES.get(getattr(params_row, "name", None), 69.0)
+            df["prob_filled"] = model.dc_probability_start(blended, df["p90"], sub, params_row["sd"], params_row["threshold"])
+        else:
+            df["prob_filled"] = model.dc_probability(blended, params_row["sd"], params_row["threshold"])
     else:
         df["prob_filled"] = df["prob"].where(n >= 4, params_row["average_dc90"])
     return df
@@ -252,9 +254,11 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
     if dc_fwd_on:
         dc_tables["FWD"] = dc_fwd
     if improved:
-        m["_dc_rate"] = 0.0
+        m["_dc_rate"], m["_dc_p90"] = 0.0, 1.0
         for _pos, _tab in dc_tables.items():
             m["_dc_rate"] = m["_dc_rate"].where(pos != _pos, vlookup(name, _tab, "name", "rate_eff"))
+            if "p90" in _tab.columns and getattr(config, "DC_MINUTES_PER_START", False):
+                m["_dc_p90"] = m["_dc_p90"].where(pos != _pos, vlookup(name, _tab, "name", "p90"))
 
     def dc_fixture(prefix, win):
         """Write {prefix} Defensive Contribution - DEF/MID(/FWD) from _dc_rate x favourite multiplier."""
@@ -265,7 +269,8 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         mult = model.dc_favourite_multiplier(win, pos)
         for _pos in dc_tables:
             row = prm.loc[_pos]
-            p = model.dc_probability(m["_dc_rate"] * mult, row["sd"], row["threshold"])
+            p = model.dc_probability_start(m["_dc_rate"] * mult, m["_dc_p90"], config.DC_SUB_MINUTES.get(_pos, 69.0),
+                                           row["sd"], row["threshold"])
             m[f"{prefix} Defensive Contribution - {_pos}"] = p.where(pos == _pos, 0.0).fillna(0.0)
 
     def concede6_stat(prefix):
@@ -340,7 +345,13 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         computed = m[prob_col] / model.baseline(stat, m["F1 Win"], m["F1 Opponent Win"], pos, home1)
         computed = _median_with_history(stat, computed)
         fb = vlookup(name, fallback, fb_cols[0], fb_cols[fb_idx])
-        m[col] = computed.where(have_odds, fb)
+        # improved: also fall back when the MATCH is priced but this player isn't (Betway omitted
+        # him) - otherwise his factor is NaN and every forward column scores him 0 (2026-10-08).
+        # Scoped to the player-priced attacking markets; team/keeper stats are untouched.
+        if improved and stat in ("score1", "assist"):
+            m[col] = computed.where(have_odds & computed.notna(), pd.to_numeric(fb, errors="coerce"))
+        else:
+            m[col] = computed.where(have_odds, fb)
 
     m["Clean Sheet Factor"] = _median_with_history(
         "clean_sheet", m["F1 Clean Sheet"] / model.baseline(
@@ -358,7 +369,31 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         real_a2 = vlookup(name, mkts["assist2"], "player", "prob")
         m["F1 Assist 2+"] = real_a2.where(real_a2.notna(), assist2_ratio * m["F1 Assist"])
 
+    if improved:
+        # A starter in a PRICED match whom Betway left out of the scorer/assist markets: build his
+        # F1 chances from his fallback factor x this fixture's baseline (as F2-F8 do), so he isn't
+        # projected as a non-attacker. Only fills gaps - real prices are never touched.
+        outfield = pos != "GK"                           # keepers are never priced to score/assist
+        gap_s = outfield & have_odds & m["F1 Score 1+"].isna() & m["Score 1+ Factor"].notna()
+        if gap_s.any():
+            p1 = (m["Score 1+ Factor"] * model.baseline("score1", m["F1 Win"], m["F1 Opponent Win"],
+                                                        pos, home1)).clip(0.0, 1.0)
+            m.loc[gap_s, "F1 Score 1+"] = p1[gap_s]
+            m.loc[gap_s & m["F1 Score 2+"].isna(), "F1 Score 2+"] = model.poisson_score2(p1)[gap_s]
+            m.loc[gap_s, "F1 Score 3+"] = model.poisson_score3(p1)[gap_s]
+        gap_a = outfield & have_odds & m["F1 Assist"].isna() & m["Assist Factor"].notna()
+        if gap_a.any():
+            pa = (m["Assist Factor"] * model.baseline("assist", m["F1 Win"], m["F1 Opponent Win"],
+                                                      pos, home1)).clip(0.0, 1.0)
+            m.loc[gap_a, "F1 Assist"] = pa[gap_a]
+            m.loc[gap_a & m["F1 Assist 2+"].isna(), "F1 Assist 2+"] = (assist2_ratio * pa)[gap_a]
+        if gap_s.any() or gap_a.any():
+            print(f"  F1 attacking chances from fallback factor for {int((gap_s | gap_a).sum())} players "
+                  f"in priced matches with no own price")
+
     def xp_block(prefix, start, stats):
+        if improved and "yellow" in stats:          # booking-odds calibration (config.YELLOW_CALIBRATION)
+            stats = {**stats, "yellow": stats["yellow"] * config.YELLOW_CALIBRATION}
         pre = model.xp_pre(pos, start, stats,
                            concede_points=model.CONCEDE_POINTS_FPL if improved
                            else model.CONCEDE_POINTS_WORKBOOK)
@@ -498,13 +533,19 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             ("F2 Concede 2+ Goals", "F1 Concede 2+ Goals Factor", "concede2"),
             ("F2 Concede 4+ Goals", "F1 Concede 4+ Goals Factor", "concede4"),
         ]:
-            fb = (preds2[stat] if (preds2 is not None and stat in preds2)
-                  else m[factor_col] * model.baseline(stat, w2, ow2, pos, home2))
+            raw2 = m[factor_col] * model.baseline(stat, w2, ow2, pos, home2)
+            if preds2 is not None and stat in preds2:
+                _w = config.DEFENSIVE_MODEL_WEIGHT.get(stat, 1.0)
+                fb = _w * preds2[stat] + (1 - _w) * raw2.clip(0.0, 1.0)
+            else:
+                fb = raw2
             m[col] = m[col].where(m[col].notna(), fb)
-    if preds2 is not None:
-        m["F2 3+ Saves"] = preds2["saves3"]                     # no real F2 saves market
+    raw_s3 = m["F1 3+ Saves Factor"] * model.baseline("saves3", w2, ow2, pos, home2)
+    if preds2 is not None:                                      # no real F2 saves market
+        _w = config.DEFENSIVE_MODEL_WEIGHT.get("saves3", 1.0)
+        m["F2 3+ Saves"] = _w * preds2["saves3"] + (1 - _w) * raw_s3.clip(0.0, 1.0)
     else:
-        m["F2 3+ Saves"] = m["F1 3+ Saves Factor"] * model.baseline("saves3", w2, ow2, pos, home2)
+        m["F2 3+ Saves"] = raw_s3
     m["F2 6+ Saves"] = m["F1 6+ Saves Factor"] * model.baseline("saves6", w2, ow2, pos, home2)
     dc_fixture("F2", w2)                              # F2 odds, or the predicted win prob when unpriced
     clip01(["F2 Assist", "F2 Yellow Card", "F2 Clean Sheet", "F2 Concede 2+ Goals",
@@ -572,9 +613,11 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
         m[f"{p} 3+ Saves"] = m["F1 3+ Saves Factor"] * model.baseline("saves3", w, ow, pos, home)
         m[f"{p} 6+ Saves"] = m["F1 6+ Saves Factor"] * model.baseline("saves6", w, ow, pos, home)
         if server is not None:                         # model overrides factor x baseline (F3-F8)
-            preds = server.predict_horizon(m, k)       # clean_sheet/concede2 pure; saves3 blended below
+            preds = server.predict_horizon(m, k)       # w*model + (1-w)*raw (config.DEFENSIVE_MODEL_WEIGHT)
             for _stat, _label in config.PROJECTION_MODEL_STATS.items():
-                m[f"{p} {_label}"] = preds[_stat].values
+                _w = config.DEFENSIVE_MODEL_WEIGHT.get(_stat, 1.0) if improved else 1.0
+                _raw = m[f"{p} {_label}"].clip(0.0, 1.0)
+                m[f"{p} {_label}"] = (_w * preds[_stat] + (1 - _w) * _raw).values
             apply_stacks(p, {"score1": score_raw, "yellow": yellow_raw}, {}, k)
         m[f"{p} Score 2+"], m[f"{p} Score 3+"] = score_curves(m[f"{p} Score 1+"])
         dc_fixture(p, w)                              # this fixture's predicted win prob
@@ -599,4 +642,4 @@ def build(roster, season, teamview, mkts, lineups, fallback, dc_stats, dc_params
             **dc_fwd_stat(p), **concede6_stat(p),
         })
 
-    return m.drop(columns=[c for c in m.columns if c.startswith("_start") or c == "_dc_rate"])
+    return m.drop(columns=[c for c in m.columns if c.startswith("_start") or c.startswith("_dc_")])

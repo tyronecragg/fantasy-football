@@ -70,9 +70,9 @@ def test_score_curves_are_poisson_in_improved_mode(master):
     pd.testing.assert_series_equal(got, expected, check_names=False)
 
 
-def test_f3_score_is_blended_with_f1_odds(master):
+def test_f3_score_follows_projection_blend(master):
     from fpl_pipeline import config
-    w = config.PROJECTION_BLEND["score1"]
+    w = config.PROJECTION_BLEND.get("score1", 1.0)   # 1.0 = no blend (pure model)
     row = master[master["Player Name"] == "Erling Haaland"].iloc[0]
     pure = row["Score 1+ Factor"] * model.baseline(
         "score1", pd.Series([row["F3 Win Pred"]]), pd.Series([row["F3 Opponent Win Pred"]]),
@@ -83,7 +83,7 @@ def test_f3_score_is_blended_with_f1_odds(master):
 
 def test_f2_score_uses_generic_baseline_not_sheet_model(master):
     from fpl_pipeline import config
-    w = config.PROJECTION_BLEND["score1"]
+    w = config.PROJECTION_BLEND.get("score1", 1.0)   # 1.0 = no blend (pure model)
     row = master[master["Player Name"] == "Erling Haaland"].iloc[0]
     pure = row["Score 1+ Factor"] * model.baseline(
         "score1", pd.Series([row["F2 Win"]]), pd.Series([row["F2 Opponent Win"]]),
@@ -116,6 +116,36 @@ def test_odds_take_precedence_over_predictions(gw1_inputs, sportsbet, roster, dc
 
     home_rows = mb[mb["Team"].isin(set(gw2_home.iloc[:, 0]))]["F2 Win"].dropna()
     assert np.allclose(home_rows, 1 / 2.0 / 1.03)  # no draw odds -> legacy de-margin
+
+
+def test_unpriced_player_in_priced_match_uses_fallback(gw1_inputs, sportsbet, roster, dc_stats):
+    """Betway omits a starter from a match it priced: improved mode projects him from his fallback
+    factor (F1 and forward); parity mode keeps the workbook behaviour (no F1 price -> NaN)."""
+    from fpl_pipeline import markets as mk, team_model as tm, players as pl
+    who = "Bukayo Saka"
+    mkts = mk.build_all(sportsbet, gw1_inputs, dedup_f2=True)
+    for key in ("score1", "score2", "assist", "assist2"):
+        if key in mkts and "player" in mkts[key].columns:
+            mkts[key] = mkts[key][mkts[key]["player"] != who]
+    fb = gw1_inputs["fallback_factors"]
+    fb_row = fb[fb.iloc[:, 0] == who]
+    assert not fb_row.empty and pd.notna(fb_row["Score 1+ Factor"].iloc[0])
+
+    def build(improved):
+        season = tm.season_probs(gw1_inputs)
+        tv = tm.team_fixture_view(gw1_inputs, sportsbet, draw_aware=improved)
+        return pl.build(roster, season, tv, mkts, gw1_inputs["starting_lineups"], fb,
+                        dc_stats, gw1_inputs["dc_params"], improved=improved).set_index("Player Name")
+
+    mi = build(True).loc[who]
+    assert pd.notna(mi["F1 Win"])                                   # his match IS priced
+    assert abs(mi["Score 1+ Factor"] - fb_row["Score 1+ Factor"].iloc[0]) < 1e-9
+    assert mi["F1 Score 1+"] > 0 and mi["F1 Assist"] > 0           # no longer a non-attacker
+    assert mi["F1 Score 2+"] < mi["F1 Score 1+"]
+    assert mi["F2 Score 1+"] > 0
+
+    mp = build(False).loc[who]
+    assert pd.isna(mp["F1 Score 1+"])                               # parity untouched
 
 
 def test_parity_mode_uses_ladders(gw1_inputs, sportsbet, roster, dc_stats):

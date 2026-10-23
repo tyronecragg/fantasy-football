@@ -28,7 +28,7 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fpl_pipeline import config, model, players as P  # noqa: E402
 
-MASTER = os.path.join(config.OUTPUTS_DIR, "13_players_master.csv")
+MASTER = os.path.join(config.OUTPUTS_DIR, "players_master.csv")
 FIRST_HALF_END = 19
 STAT_FACTORS = {  # master factor column -> baseline stat key
     "score1": "Score 1+ Factor", "assist": "Assist Factor", "yellow": "F1 Yellow Card Factor",
@@ -64,7 +64,7 @@ def _xp_pre_future(m, w, ow, home):
 def build_matrix():
     m = pd.read_csv(MASTER)
     m["Position"] = m["Position"].astype(str)
-    season = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "04_season_probs.csv"))
+    season = pd.read_csv(os.path.join(config.OUTPUTS_DIR, "season_probs.csv"))
     fx = pd.read_csv(os.path.join(config.INPUTS_DIR, "season_fixtures.csv"))
 
     # opponent + venue per team per GW (from the full-season list)

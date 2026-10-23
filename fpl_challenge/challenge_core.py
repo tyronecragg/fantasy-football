@@ -23,7 +23,7 @@ import pandas as pd
 import pulp
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PLAYERS_CSV = os.path.join(ROOT, "outputs", "13_players_master.csv")
+PLAYERS_CSV = os.path.join(ROOT, "outputs", "players_master.csv")
 KICKOFFS_CSV = os.path.join(ROOT, "outputs", "fixture_kickoffs.csv")
 INPUTS = os.path.join(ROOT, "inputs")
 XP_COL = "F1 XP"
@@ -159,6 +159,13 @@ def confirm_starting(df, raw_names):
 
 def _series(df, col):
     return df[col].fillna(0.0) if col in df.columns else pd.Series(0.0, index=df.index)
+
+
+def expected_goals(df):
+    """Expected goals per player this week (start-scaled), from the goalscorer-odds tail
+    P(1+)+P(2+)+P(3+). Used by GW6 to split each team's goals into per-player shares."""
+    return _series(df, "F1 Start") * (
+        _series(df, "F1 Score 1+") + _series(df, "F1 Score 2+") + _series(df, "F1 Score 3+"))
 
 
 def attacking_points(df):

@@ -24,7 +24,7 @@ def load_sheet(source, sheet_name='Players'):
     """Load a data table from the legacy Excel workbook or the fpl_pipeline CSVs.
 
     Pass the workbook path (.xlsx) to read the named sheet, or the pipeline's master
-    players CSV (outputs/13_players_master.csv). With a CSV source, the 'GW Teams'
+    players CSV (outputs/players_master.csv). With a CSV source, the 'GW Teams'
     sheet is read from inputs/gw_teams.csv in the repo root.
     """
     source = str(source)
@@ -618,12 +618,81 @@ def bench_points_for_fixture(df, bench_indices, fixture_col, bench_slot_weights,
     return total
 
 
-def pure_xp_lineup(squad_indices, df, fixture_col):
+def _miss_chance(df, fixture):
+    """Chance each player does NOT start `fixture` (1 - '{fixture} Start'); 0 when the column is
+    absent (e.g. a legacy workbook), which reduces vice-captain cover to the old XP-only captaincy."""
+    col = f'{fixture} Start'
+    if col not in df.columns:
+        return pd.Series(0.0, index=df.index)
+    return (1.0 - pd.to_numeric(df[col], errors='coerce').fillna(1.0)).clip(0.0, 1.0)
+
+
+def lineup_col(df, fixture):
+    """XP column used to PICK the XI, bench order and captain for `fixture`. For F1 that is the unadjusted
+    'F1 XP Raw' when the pipeline applied fixture risk (inputs/fixture_risk.csv): postponement-risk players
+    start as normal and autosub covers a call-off; transfers/squad choice still use the adjusted 'F1 XP'."""
+    return "F1 XP Raw" if fixture == "F1" and "F1 XP Raw" in df.columns else f"{fixture} XP"
+
+
+def captain_and_vice(xi, df, fixture, cover=True):
+    """Captain, vice-captain and the vice's expected armband points for a fixed XI.
+
+    FPL doubles the vice-captain when the captain plays 0 minutes. A captain's XP already
+    shrinks for his chance of not starting, so the armband's real value is
+    captain XP + (chance he doesn't start) x vice XP, with the vice = best other starter.
+    Pick the captain maximising that (cover=False -> plain max XP, the old rule). Treats the
+    two players' availability as independent. Returns (captain, vice, cover_points)."""
+    xp = {i: float(df.loc[i, lineup_col(df, fixture)]) for i in xi}
+    miss = _miss_chance(df, fixture) if cover else None
+    best = None
+    for c in xi:
+        others = [v for v in xi if v != c]
+        vice = max(others, key=xp.get) if others else None
+        bonus = float(miss[c]) * xp[vice] if (cover and vice is not None) else 0.0
+        if best is None or xp[c] + bonus > best[0] + 1e-12:
+            best = (xp[c] + bonus, c, vice, bonus)
+    return best[1], best[2], best[3]
+
+
+def _vice_cover_expr(prob, xp, miss, captain_f, starting_f, indices, tag, max_captains=40):
+    """LP expression (UNWEIGHTED) for the vice-captain's expected armband points in one fixture:
+    sum over c of captain_c x miss_c x (best non-captain starter's XP).
+
+    Linear form: z = the vice's XP (continuous vice_i <= start_i - captain_i, sum <= 1; the
+    maximisation puts it on the best other starter); w_c = z when c captains, else 0
+    (w_c <= z, w_c <= M x captain_c). Only players with a real chance of not starting, among
+    the fixture's top `max_captains` by XP, get a w_c - nobody else is ever captain, and a
+    captain without one just earns no cover (conservative, never inflated). None if no one
+    qualifies."""
+    pos_xp = [i for i in indices if xp[i] > 0]
+    cand = [i for i in sorted(pos_xp, key=lambda i: -xp[i])[:max_captains] if miss[i] > 1e-6]
+    if not cand:
+        return None
+    M = float(max(xp[i] for i in pos_xp))
+    vice = {i: pulp.LpVariable(f"vc_{tag}_{i}", lowBound=0, upBound=1) for i in pos_xp}
+    for i in pos_xp:
+        prob += vice[i] <= starting_f[i] - captain_f[i]
+    prob += pulp.lpSum(vice.values()) <= 1
+    z = pulp.LpVariable(f"vcz_{tag}", lowBound=0, upBound=M)
+    prob += z <= pulp.lpSum(xp[i] * vice[i] for i in pos_xp)
+    terms = []
+    for c in cand:
+        w = pulp.LpVariable(f"vcw_{tag}_{c}", lowBound=0, upBound=M)
+        prob += w <= M * captain_f[c]
+        prob += w <= z
+        terms.append(float(miss[c]) * w)
+    return pulp.lpSum(terms)
+
+
+def pure_xp_lineup(squad_indices, df, fixture_col, vice_cover=True):
     """Max-XP legal XI, bench, and captain for one fixture, chosen PURELY on expected points
     from a fixed 15-man squad. Applied after the squad is decided so the ownership tie-break
     only ever shapes transfers/squad selection -- never who you field. Formation: 1 GK,
-    3-5 DEF, 2-5 MID, 1-3 FWD; bench outfielders and the captain fall out by XP too.
+    3-5 DEF, 2-5 MID, 1-3 FWD; bench outfielders fall out by XP too. The captain includes
+    vice-captain cover (captain_and_vice) unless vice_cover=False.
     """
+    fixture = fixture_col[:-len(' XP')]
+    fixture_col = lineup_col(df, fixture)          # unadjusted F1 XP when fixture risk is active
     pos = {k: [] for k in ('GK', 'DEF', 'MID', 'FWD')}
     for i in squad_indices:
         pos[df.loc[i, 'Position']].append(i)
@@ -635,14 +704,17 @@ def pure_xp_lineup(squad_indices, df, fixture_col):
     xi += rest[:4]
     xi_set = set(xi)
     bench = [i for i in squad_indices if i not in xi_set]
-    captain = max(xi, key=lambda i: df.loc[i, fixture_col])
+    captain, _, _ = captain_and_vice(xi, df, fixture, cover=vice_cover)
     return xi, bench, captain
 
 
-def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights):
+def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights,
+                                 vice_captain_cover=True):
     """
     Calculate the optimal baseline score for the current squad by running a mini-optimizer.
     This simulates dynamic lineup selection across fixtures without any transfers.
+    Captaincy includes vice-captain cover (captain_and_vice) unless vice_captain_cover=False,
+    matching the main optimiser so transfer gains compare like with like.
 
     Parameters:
     - bench_slot_weights: (slot1, slot2, slot3) outfield bench weights by sub order,
@@ -698,6 +770,13 @@ def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, be
         objective_terms.extend(_bench_slot_objective(
             prob, df[fixture_col], bench_vars[fixture], outfield, weight,
             bench_slot_weights[i], f"base_{fixture}"))
+
+        if vice_captain_cover:
+            cover = _vice_cover_expr(prob, df[fixture_col].fillna(0.0), _miss_chance(df, fixture),
+                                     captain_vars[fixture], starting_vars[fixture],
+                                     current_team_indices, f"base_{fixture}")
+            if cover is not None:
+                objective_terms.append(weight * cover)
 
     prob += pulp.lpSum(objective_terms)
 
@@ -770,6 +849,16 @@ def calculate_optimised_baseline(df, current_team_indices, fixtures, weights, be
                 if i == 0:  # F1
                     f1_captain += df.loc[player_idx, fixture_col]
 
+        if vice_captain_cover:           # the vice's armband share, for the LP's own captain
+            xi = [p for p in current_team_indices if starting_vars[fixture][p].varValue == 1]
+            cap = next((p for p in current_team_indices if captain_vars[fixture][p].varValue == 1), None)
+            if cap is not None and len(xi) > 1:
+                vice_xp = max(df.loc[p, fixture_col] for p in xi if p != cap)
+                cover_pts = float(_miss_chance(df, fixture)[cap]) * vice_xp
+                total_captain_points += cover_pts * weight
+                if i == 0:
+                    f1_captain += cover_pts
+
         bench_idx = [p for p in current_team_indices if bench_vars[fixture][p].varValue == 1]
         fixture_bench_points = bench_points_for_fixture(
             df, bench_idx, fixture_col, bench_slot_weights[i], gk_bench_weights[i])
@@ -794,7 +883,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                              tie_break_mode='differential', xp_tolerance=0.5, value_weight=0.0,
                              plan_bench_boost=False, plan_triple_captain=False,
                              min_f1_gain=0.0, min_total_gain=0.0, min_remaining_gain=0.0,
-                             wildcard_f1=False):
+                             wildcard_f1=False, vice_captain_cover=True):
 
     weights = fixture_weights[:num_fixtures]
     gk_bench_weights = gk_bench_weights[:num_fixtures]
@@ -945,6 +1034,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         objective_terms = []
 
         # Add weighted points from starting players in each fixture
+        cover_exprs = {}                       # fixture -> unweighted vice-captain cover (for the gain gate)
         gk_mask = df['Position'] == 'GK'
         outfield_index = [p for p in df.index if not gk_mask[p]]
         for i, fixture in enumerate(fixtures):
@@ -966,6 +1056,15 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             objective_terms.extend(_bench_slot_objective(
                 prob, df[fixture_col], bench_vars[fixture], outfield_index, weight,
                 bench_slot_weights[i], f"s{solution_num}_{fixture}"))
+
+            # Vice-captain cover: the vice doubles when the captain doesn't play (captain_and_vice)
+            if vice_captain_cover:
+                cover = _vice_cover_expr(prob, df[fixture_col].fillna(0.0), _miss_chance(df, fixture),
+                                         captain_vars[fixture], starting_vars[fixture],
+                                         list(df.index), f"s{solution_num}_{fixture}")
+                if cover is not None:
+                    cover_exprs[fixture] = cover
+                    objective_terms.append(weight * cover)
 
         xp_expr = pulp.lpSum(objective_terms)
 
@@ -1181,7 +1280,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # WEIGHTED total incl bench (= the objective). Metrics match the displayed improvement lines.
         if min_f1_gain > 0 or min_total_gain > 0 or min_remaining_gain > 0:
             gate_base = calculate_optimised_baseline(
-                df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights)
+                df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights,
+                vice_captain_cover=vice_captain_cover)
             if gate_base is not None:
                 base_total, base_start_all, _, base_f1 = gate_base   # wtd+bench, wtd XI+cap, f1+bench, f1 XI+cap
                 made = pulp.LpVariable(f"gate_made_{solution_num}", cat='Binary')
@@ -1194,7 +1294,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 if min_f1_gain > 0:
                     f1 = fixtures[0]
                     f1_expr = pulp.lpSum(df.loc[i, f'{f1} XP'] * (starting_vars[f1][i] + captain_vars[f1][i])
-                                         for i in df.index)
+                                         for i in df.index) + cover_exprs.get(f1, 0)
                     prob += f1_expr - base_f1 >= min_f1_gain - bigM * (1 - made)
                 if min_remaining_gain > 0 and len(fixtures) > 1:
                     # F2..F_last only: weighted starting-XI + captain gain (the "tail"). Baseline tail =
@@ -1203,7 +1303,9 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                     remaining_expr = pulp.lpSum(
                         weights[k] * df.loc[i, f'{fixtures[k]} XP']
                         * (starting_vars[fixtures[k]][i] + captain_vars[fixtures[k]][i])
-                        for k in range(1, len(fixtures)) for i in df.index)
+                        for k in range(1, len(fixtures)) for i in df.index) + pulp.lpSum(
+                        weights[k] * cover_exprs[fixtures[k]]
+                        for k in range(1, len(fixtures)) if fixtures[k] in cover_exprs)
                     prob += remaining_expr - base_remaining >= min_remaining_gain - bigM * (1 - made)
             else:
                 print("  WARNING: min-gain gate skipped (baseline optimiser unavailable)")
@@ -1278,11 +1380,15 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # allowed to shape the SQUAD (transfers) exactly as before. But once the 15 is fixed,
         # ALWAYS set the XI / bench order / captain by pure expected points, so who you field
         # is never affected by ownership. (Tyrone, 2026-08-21.)
+        vice_captains, cover_points = {}, {}
         for fixture in fixtures:
-            xi, bench, cap = pure_xp_lineup(final_squad_indices, df, f'{fixture} XP')
+            xi, bench, _ = pure_xp_lineup(final_squad_indices, df, f'{fixture} XP')
+            cap, vice, cover_pts = captain_and_vice(xi, df, fixture, cover=vice_captain_cover)
             starting_lineups[fixture] = xi
             bench_players[fixture] = bench
             captains[fixture] = cap
+            vice_captains[fixture] = vice
+            cover_points[fixture] = cover_pts
 
         # Chip plan (reported on the ACTUAL fielded lineup, RAW per-fixture XP): the fixture where a
         # Triple Captain / Bench Boost would score most across the horizon.
@@ -1321,10 +1427,10 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             for player_idx in starting_lineups[fixture]:
                 total_starting_points += df.loc[player_idx, fixture_col] * weight
 
-            # Captain bonus points
+            # Captain bonus points (+ the vice's share when the captain might not play)
             if fixture in captains:
                 captain_idx = captains[fixture]
-                total_captain_points += df.loc[captain_idx, fixture_col] * weight
+                total_captain_points += (df.loc[captain_idx, fixture_col] + cover_points[fixture]) * weight
 
             # Bench points - outfielders by sub order, GK separately
             total_bench_points += weight * bench_points_for_fixture(
@@ -1346,7 +1452,7 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
 
         if f1_fixture in captains:
             captain_idx = captains[f1_fixture]
-            f1_captain_points += df.loc[captain_idx, 'F1 XP']
+            f1_captain_points += df.loc[captain_idx, 'F1 XP'] + cover_points[f1_fixture]
 
         f1_bench_points = bench_points_for_fixture(
             df, bench_players[f1_fixture], 'F1 XP', bench_slot_weights[0], gk_bench_weights[0])
@@ -1359,7 +1465,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         # Calculate optimised baseline using mini-optimizer
         # This properly simulates dynamic lineup selection across fixtures
         baseline_result = calculate_optimised_baseline(
-            df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights
+            df, current_team_indices, fixtures, weights, bench_slot_weights, gk_bench_weights,
+            vice_captain_cover=vice_captain_cover
         )
 
         if baseline_result is None:
@@ -1414,9 +1521,13 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
                 # Calculate points for this fixture
                 starting_points = sum([p['xp'] for p in starting_xi])
 
-                # Captain = best player
-                all_sorted = sorted(current_team_xp, key=lambda x: x['xp'], reverse=True)
-                captain_bonus = all_sorted[0]['xp'] if len(all_sorted) > 0 else 0
+                # Captain = best starter, plus the vice's share when he might not play
+                xi_idx = [p['idx'] for p in starting_xi]
+                if xi_idx:
+                    cap, _, cover_pts = captain_and_vice(xi_idx, df, fixture, cover=vice_captain_cover)
+                    captain_bonus = df.loc[cap, fixture_col] + cover_pts
+                else:
+                    captain_bonus = 0
 
                 # Bench - outfielders by sub order, GK separately
                 bench_idx = [p['idx'] for p in current_team_xp if p not in starting_xi]
@@ -1470,6 +1581,8 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
             'transfers_in': transfers_in_players,
             'starting_lineups': starting_lineups,
             'captains': captains,
+            'vice_captains': vice_captains,
+            'cover_points': cover_points,
             'bench_players': bench_players,
             'final_cost': final_cost,
             'total_budget': total_budget,
@@ -1657,22 +1770,25 @@ def display_squad_frequency(all_solutions, fixtures, weights, current_team_names
         return
 
     seen, owned = {}, set(current_team_names or [])
+    xp_fixtures = list(fixtures)[:8]          # per-gameweek XP columns, F1..F8
     for solution in all_solutions:
         for _, p in solution['final_squad'].iterrows():
             name = p['Player Name']
             if name not in seen:
                 seen[name] = {'count': 0, 'team': p['Team'], 'cost': p['Cost'],
                               'position': p['Position'], 'f1_xp': p['F1 XP'],
+                              'fix_xp': [p[f'{f} XP'] for f in xp_fixtures],
                               'weighted_xp': sum(p[f'{f} XP'] * w for f, w in zip(fixtures, weights))}
             seen[name]['count'] += 1
 
     ownership = load_ownership()
 
-    print("\n" + "=" * 118)
+    width = 92 + 6 * len(xp_fixtures)
+    print("\n" + "=" * width)
     print(f"SQUAD SELECTION FREQUENCY — across {n} near-optimal solutions")
-    print("=" * 118)
-    print(f"{'Player':<28} {'Team':<12} {'Cost':<7} {'F1 XP':<8} {'Wtd XP':<9} "
-          f"{'Picked':<10} {'%':<6} {'Mine':<6} {'FPL own%':<9}")
+    print("=" * width)
+    print(f"{'Player':<28} {'Team':<12} {'Cost':<7} " + "".join(f"{f:>6}" for f in xp_fixtures)
+          + f"  {'Wtd XP':<9} {'Picked':<10} {'%':<6} {'Mine':<6} {'FPL own%':<9}")
 
     for position in ('GK', 'DEF', 'MID', 'FWD'):
         rows = sorted(((k, v) for k, v in seen.items() if v['position'] == position),
@@ -1680,14 +1796,15 @@ def display_squad_frequency(all_solutions, fixtures, weights, current_team_names
         if not rows:
             continue
         print(f"\n{position} ({len(rows)} distinct players across the pool)")
-        print("-" * 118)
+        print("-" * width)
         for name, d in rows:
             picked = f"{d['count']}/{n}"
             pct = d['count'] / n * 100
             own = ownership.get(name)
             own_str = f"{own:.1f}%" if own is not None else "?"
-            print(f"{name:<28} {d['team']:<12} £{d['cost']:<6.1f} {d['f1_xp']:<8.2f} "
-                  f"{d['weighted_xp']:<9.2f} {picked:<10} "
+            print(f"{name:<28} {d['team']:<12} £{d['cost']:<6.1f} "
+                  + "".join(f"{x:>6.2f}" for x in d['fix_xp'])
+                  + f"  {d['weighted_xp']:<9.2f} {picked:<10} "
                   f"{pct:<5.0f}% {'yes' if name in owned else '':<6} {own_str:<9}")
 
     locks = sorted(k for k, v in seen.items() if v['count'] == n)
@@ -1821,7 +1938,8 @@ def display_transfer_frequency(frequency_analysis, min_frequency=2):
         print("No consensus transfers in (none appear in >20% of solutions)")
 
 
-def build_hold_pseudo_solution(df, current_team_indices, fixtures, weighted_total, bank=0.0):
+def build_hold_pseudo_solution(df, current_team_indices, fixtures, weighted_total, bank=0.0,
+                               vice_captain_cover=True):
     """A solution-shaped dict for HOLDING the current squad (0 transfers).
 
     Picks each fixture's best legal XI (by that fixture's raw XP), captain = top starter,
@@ -1854,7 +1972,7 @@ def build_hold_pseudo_solution(df, current_team_indices, fixtures, weighted_tota
                     best_val, best_xi = val, xi
         if best_xi is None:                       # squad can't field a legal XI for this fixture
             return None
-        cap = max(best_xi, key=lambda i: xp[i])
+        cap, _, _ = captain_and_vice(best_xi, df, f, cover=vice_captain_cover)
         bench = [i for i in current_team_indices if i not in best_xi]
         starting_lineups[f] = best_xi
         captains[f] = cap
@@ -2151,7 +2269,7 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
     starting_players['Is_Captain'] = starting_players.index == captain_idx
     # Vice-captain: best remaining starter by this fixture's XP (the armband fallback)
     non_captain = starting_players[~starting_players['Is_Captain']]
-    vice_captain_idx = non_captain[f'{fixture} XP'].idxmax() if len(non_captain) else None
+    vice_captain_idx = non_captain[lineup_col(non_captain, fixture)].idxmax() if len(non_captain) else None
 
     starting_sorted = starting_players.sort_values(['Position', f'{fixture} XP'], ascending=[True, False])
 
@@ -2243,7 +2361,7 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
                 _prob_row(player)
 
 
-def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", max_transfers=2, num_fixtures=5,
+def main_multi_transfer_optimiser(excel_file="outputs/players_master.csv", max_transfers=2, num_fixtures=5,
                                   fixture_weights=None, show_current_analysis=True,
                                   additional_budget=0.0, bench_slot_weights=None, gk_bench_weights=None,
                                   force_exclude_players=None, force_include_players=None,
@@ -2256,7 +2374,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
                                   bank_lookahead_gws=None, value_weight=0.0,
                                   plan_bench_boost=False, plan_triple_captain=False,
                                   min_f1_gain=0.0, min_total_gain=0.0, min_remaining_gain=0.0,
-                                  wildcard_f1=False):
+                                  wildcard_f1=False, vice_captain_cover=True):
     # Fixture weights come from the two components unless one is passed explicitly
     # (an explicit fixture_weights still wins, so old call sites keep working).
     derived = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures)
@@ -2311,7 +2429,7 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             tie_break_mode=tie_break_mode, xp_tolerance=xp_tolerance, value_weight=value_weight,
             plan_bench_boost=plan_bench_boost, plan_triple_captain=plan_triple_captain,
             min_f1_gain=min_f1_gain, min_total_gain=min_total_gain, min_remaining_gain=min_remaining_gain,
-            wildcard_f1=wildcard_f1
+            wildcard_f1=wildcard_f1, vice_captain_cover=vice_captain_cover
         )
         all_solutions, df = result if result else (None, None)
 
@@ -2344,10 +2462,11 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
             _fx = all_solutions[0]['fixtures']
             _base = calculate_optimised_baseline(
                 df, current_team_indices, _fx, all_solutions[0]['weights'],
-                bench_slot_weights, gk_bench_weights_used)
+                bench_slot_weights, gk_bench_weights_used, vice_captain_cover=vice_captain_cover)
             _weighted = _base[0] if _base else 0.0
             hold_solution = build_hold_pseudo_solution(
-                df, current_team_indices, _fx, _weighted, bank=additional_budget)
+                df, current_team_indices, _fx, _weighted, bank=additional_budget,
+                vice_captain_cover=vice_captain_cover)
         except Exception:
             hold_solution = None
         display_horizon_table(all_solutions, df, hold_solution=hold_solution)
@@ -2402,18 +2521,18 @@ def main_multi_transfer_optimiser(excel_file="outputs/13_players_master.csv", ma
 
 
 result = main_multi_transfer_optimiser(
-    excel_file="outputs/13_players_master.csv",
-    max_transfers=2,
-    additional_budget=0.1,
-    num_fixtures=8,
+    excel_file="outputs/players_master.csv",
+    max_transfers=0,
+    additional_budget=2.6,
+    num_fixtures=10,
     compute_solutions=1,
     # bank_lookahead_gws=2,
     # Weighted-XP charged per £1.0m of squad value: prefers cheaper squads/transfers, trading XP for
     # bank at this rate. 0.0 = pure XP (off). e.g. 1.0 -> accept 0.5 lower weighted XP to save £0.5m.
-    # value_weight=2.0,
+    # value_weight=1.0,
     # How fast the squad churns
-    ownership_weights=[1.0, 0.92, 0.846, 0.78, 0.716, 0.66, 0.606, 0.558, 0.513, 0.472, 0.434, 0.4, 0.368, 0.338, 0.31],
-    # ownership_weights=[1.0, 0.95, 0.90, 0.86, 0.81, 0.77, 0.74, 0.70, 0.66, 0.63, 0.60, 0.57, 0.54, 0.51, 0.49],
+    # ownership_weights=[1.0, 0.92, 0.846, 0.78, 0.716, 0.66, 0.606, 0.56, 0.51, 0.47, 0.434, 0.4, 0.37, 0.338, 0.31],
+    ownership_weights=[1.0, 0.95, 0.90, 0.86, 0.81, 0.77, 0.74, 0.70, 0.66, 0.63, 0.60, 0.57, 0.54, 0.51, 0.49],
     # How much the projection is trusted
     reliability_weights=[1.0, 0.85, 0.71, 0.63, 0.55, 0.47, 0.4, 0.34, 0.29, 0.25, 0.22, 0.19, 0.16, 0.14, 0.12],
     bench_slot_weights=(0.25, 0.05, 0.01),

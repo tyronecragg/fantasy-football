@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from fpl_pipeline import config, model  # noqa: E402
 
-SEASON = "2025-2026"
+SEASON = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--season=")), "2025-2026")   # --season=2026-2027 to score this season
 
 
 def load_actual():

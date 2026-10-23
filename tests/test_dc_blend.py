@@ -26,7 +26,20 @@ def seasons(tmp_path, monkeypatch):
     write_season("2026-2027", [("A", 900, 6.0), ("B", 0, None), ("C", 450, 4.0), ("D", 0, None)])
     monkeypatch.setattr(config, "SEASON", "2026-2027")
     monkeypatch.setattr(config, "FPL_DATA_DIR", str(tmp_path / "2026-2027"))
+    monkeypatch.setattr(config, "DC_NEUTRALISE_FIXTURE_MIX", False)   # no football-data in the fixture
     return tmp_path
+
+
+def test_favourite_mix_is_the_teams_average_multiplier():
+    """A team that is a 0.85 favourite in one match and 0.40 in the other averages (0.82 + 1.0) / 2;
+    its opponents (always underdogs) average 1.0. Dividing a rate by the mix and multiplying by the same
+    fixture's multiplier returns the rate - the neutralisation cannot double-count."""
+    m = pd.DataFrame({"season": ["S", "S"], "HomeTeam": ["Fav", "Dog2"], "AwayTeam": ["Dog1", "Fav"],
+                      "p_home": [0.85, 0.35], "p_away": [0.05, 0.40]})
+    mix = ingest.favourite_mix(m, curve={"DEF": (0.55, 0.85, 0.82)})
+    assert abs(mix[("S", "Fav", "DEF")] - 0.91) < 1e-9
+    assert mix[("S", "Dog1", "DEF")] == 1.0 and mix[("S", "Dog2", "DEF")] == 1.0
+    assert ingest.favourite_mix(m, curve={}) == {}
 
 
 def test_minutes_weighted_blend(seasons):
@@ -68,13 +81,18 @@ def test_minutes_per_start_is_shrunk_and_scales_the_rate(seasons, monkeypatch):
     W = config.DC_CURRENT_SEASON_WEIGHT                      # this season's starts count W x, like the rate
     assert abs(dc.loc["A X", "mps"] - (W * 4 * 70 + cap * 90 + k * avg) / (W * 4 + cap + k)) < 0.06
     assert abs(dc.loc["B X", "mps"] - avg) < 1e-9
-    # and the table scales the (blended) rate by mps/90 before converting to a probability
-    prm = pd.Series({"threshold": 10, "sd": 3.86, "average_dc90": 0.44})
-    tab = pd.DataFrame({"name": ["p", "q"], "dc90": [12.0, 12.0], "nineties": [10.0, 10.0], "mps": [90.0, 72.0]})
+    # full-90 share: A has 0 of 4 full this season, 10 (capped) of 20 full last season, k pseudo-starts
+    avg90 = config.DC_FULL90_POSITION_AVG["DEF"]
+    assert abs(dc.loc["A X", "p90"] - (W * 0 + cap * 1.0 + k * avg90) / (W * 4 + cap + k)) < 1e-3
+    assert abs(dc.loc["B X", "p90"] - avg90) < 1e-3
+    # the table prices a start as a mixture: p90 x P(hit | rate) + (1 - p90) x P(hit | rate x sub / 90)
+    prm = pd.Series({"threshold": 10, "sd": 3.86, "average_dc90": 0.44}, name="DEF")
+    tab = pd.DataFrame({"name": ["p", "q"], "dc90": [12.0, 12.0], "nineties": [10.0, 10.0], "p90": [1.0, 0.5]})
     out = players._dc_table(tab, prm, improved=True).set_index("name")
     P = lambda mu: model.dc_probability(pd.Series([mu]), 3.86, 10).iloc[0]
+    sub = config.DC_SUB_MINUTES["DEF"]
     assert abs(out.loc["p", "prob_filled"] - P(12.0)) < 1e-9
-    assert abs(out.loc["q", "prob_filled"] - P(12.0 * 0.8)) < 1e-9
+    assert abs(out.loc["q", "prob_filled"] - (0.5 * P(12.0) + 0.5 * P(12.0 * sub / 90))) < 1e-9
     monkeypatch.setattr(config, "DC_MINUTES_PER_START", False)
     off = players._dc_table(tab, prm, improved=True).set_index("name")
     assert abs(off.loc["q", "prob_filled"] - P(12.0)) < 1e-9

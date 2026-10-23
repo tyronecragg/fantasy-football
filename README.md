@@ -100,6 +100,8 @@ fixtures or the master since. The normal weekly flow guarantees this.
    sheet, team goals, and assist/saves once those open), leaving the rest synthetic. Re-run through
    the week as more markets appear. Stray earlier-GW fixture Betway still lists? `--skip-fixture
    "TERM"` drops it (a team name or any text in the `Home vs. Away` label, repeatable).
+   Use Betway's own labels for a full-fixture term — it adds "FC" to some clubs (`Liverpool FC vs.
+   Manchester City`, `Hull City vs. Everton FC`); the scrape warns for each term that matches nothing.
 3. **Cards** (Ladbrokes / bet365) once card odds are up → bookings go real.
 4. **`tools/odds_status.py`** — confirm `fixture check: every team-bearing market points at GW N`,
    and see real vs synthetic/derived. Assist showing `synth` and two-goals `deriv` early is expected
@@ -129,6 +131,8 @@ Skip step 1 or hand-shift the window, and assist/bookings/saves fall back to sta
 values that silently distort the projections you plan on all week.
 
 **What `roll_gameweek.py` does** (each step a subprocess; a failure stops the roll):
+**Double-roll guard:** it refuses up front if `fixtures.csv` already starts at GW N (a second roll would
+shift `starting_lineups.csv` again and overwrite scraped odds with synthetic ones); `--force` overrides.
 
 1. `build_fixtures.py --gw N` — regenerates `inputs/fixtures.csv` as the GW N…N+7 window (F1 = GW N),
    columns labelled by **absolute** gameweek (`GW{N} Opponent`, …). Hand-edit afterwards for
@@ -251,6 +255,24 @@ moves up, mean F1 assist chance 8.6% -> 10.3%, ~+0.05 F1 XP per starter, most fo
 creators (Marmoush/Xhaka/Enciso ~+0.5 over eight fixtures), premiums barely (Bruno +0.02).
 Re-fit both curves on Betway outcomes ~GW9.
 
+**Assist curve lightened again 2026-09-21.** Five gameweeks (924 player-games of 60+ minutes, 101
+assisters): half strength was still 16% under, quarter 6% under, the raw de-margined price 7% over with
+the best Brier. Only the bottom band (<6%) is over-stated by raw (1.23x), so
+`LONGSHOT_CALIBRATION_ASSIST = [(0.04, 0.80), (0.08, 1.00)]` - a trim below 8%, raw above it (pooled
+1.05x). Same check on **clean sheets** found nothing to fix: the team market is calibrated over 355
+team-games (0.270 predicted, 0.268 actual); midfielders subbed off after 60 keep more clean sheets than
+the team price (0.42 vs 0.27) but it nets to ~+0.02 XP a start.
+
+**Archived weeks are re-expressed under the current assist curve (2026-09-21,
+`config.ASSIST_CURVE_REGIMES`).** The forward assist factor is a trailing median of this season's
+archived weekly factors, and the archive stores each week as calibrated at the time - so after two curve
+changes the median was still mostly old-regime numbers and the lighter curve barely reached F2-F8 (or F1
+whenever assist odds are synthetic). `history.season_weekly_factors` now inverts the curve each archived
+week was stored under and applies today's (`markets.recalibrate`); the archive itself is never rewritten.
+Same-data effect: likely starters' average F1-F8 assist chance DEF 0.039 -> 0.067, MID 0.118 -> 0.149,
+FWD 0.083 -> 0.121 (start-weighted 0.111 against an observed 0.109), +0.7 to +1.0 XP over eight fixtures,
+largest for mid-priced creators. **Add a regime row whenever the assist curve changes.**
+
 **Why.** `MARGIN_PLAYER = 1.05` removes the same 5% at every price. Two measurements say
 that is wrong in a specific way. From prices: the total load on Betway's goalscorer market
 is ~3.5x (`tools/margin_goals.py`, identified by linearity of expectation against the
@@ -337,6 +359,42 @@ Things known to be provisional, with what would settle them:
   Effect: nothing for most defenders; top-side centre-backs lose 0.05–0.13 in hit probability
   (0.1–0.25 XP) in the fixtures they're expected to dominate — Gabriel −0.7 over eight fixtures
   (Arsenal at 0.72–0.84 in three of them), Guéhi −0.5, Konsa/Dias/Gvardiol −0.3.
+  **Fixture-mix neutralisation (2026-09-21, `config.DC_NEUTRALISE_FIXTURE_MIX`).** The ×0.82 was
+  measured against a player's *other* games, but a top-side defender's season dc90 is already mostly
+  favourite games, so discounting that average double-counted (a player who averaged 15 at a typical
+  80% win probability must price at ~15 in an 80% game, not below). Each season's dc90 is now divided
+  by the team's average multiplier over the matches played that season (football-data closing odds;
+  2026-27 to date: Man City 0.943, Arsenal 0.944, Man Utd 0.954, Chelsea 0.966, Liverpool 0.968,
+  everyone else ≈1.0; prior season by the prior club) before blending, and the upcoming fixture's
+  multiplier is applied to that neutral rate. Effect on identical data: top-five defenders gain
+  +0.03–0.05 DefCon probability in every fixture (Gabriel +0.9 XP over eight, van Dijk/Guéhi +0.5),
+  so against the pre-curve model Gabriel is now 0.41 in ordinary games (was 0.36) and 0.27–0.34 in
+  the games Arsenal dominate. Other clubs unchanged.
+  **Walk-forward re-fit (2026-09-21, `tools/dc_backtest.py`).** The archive only holds what was
+  predicted at the time, so the harness rebuilds every variant AS-OF each past gameweek (truncated
+  copies of the FPL dumps run through the real ingest; 2025-26 GW16-29 + 2026-27 GW2-5, 3,013 starts).
+  It overturned two in-sample conclusions: (i) scaling the rate by AVERAGE minutes over-corrected
+  midfielders (predicted/actual 1.21 flat -> 0.86) - a player who plays 90 half the time and ~70 the rest
+  clears the threshold more often than one who always plays 80 - so a start is now priced as a MIXTURE,
+  p90 x P(hit | rate) + (1 - p90) x P(hit | rate x sub minutes / 90) (`model.dc_probability_start`,
+  `config.DC_FULL90_POSITION_AVG`, `DC_SUB_MINUTES`; MID Brier 0.1163 -> 0.1152, ratio 0.89);
+  (ii) the first favourite curve (0.55 -> 0.82) was too gentle, and with the neutralisation on top the
+  0.55-0.70 band ran 1.11x over; re-fitted to **0.50 -> 0.65**, which with neutralisation calibrates
+  <=0.55 at 1.00x and 0.55-0.70 at 1.03x (DEF Brier 0.1755 flat -> 0.1730). Still open: midfielders
+  ~11% under-predicted, and the >0.70 band ~2.5x over on 54 starts / 3 hits. Re-run at ~GW12.
+  **Upstream data bug (found 2026-09-21).** In FPL-Core-Insights 2025-26, `By Gameweek/GW2..GW10/
+  player_gameweek_stats.csv` the DEFENDER `defensive_contribution` column wrongly includes recoveries
+  (GW2 is worse); GW11+ and all of 2026-27 are correct, and FPL's own `defensive_contribution_per_90`
+  field (what the live rate uses) is correct throughout. Defender hit rate on the bad column reads 0.49
+  for GW1-15 against a true 0.27. Anything that reads per-gameweek defender DefCon for those weeks must
+  use `tackles + clearances_blocks_interceptions` instead (`tools/dc_estimator_backtest.py` does). The
+  walk-forward targets are GW16+, so every calibration result above stands.
+  **Mean vs median vs hit rate (`tools/dc_estimator_backtest.py`).** The minutes-weighted mean per 90 is
+  the best summary of a player's history for both positions (Brier DEF 0.1742 / MID 0.1163); the median
+  (0.1771 / 0.1178), a 20-80% trimmed mean (0.1753 / 0.1168) and the player's own shrunk hit rate
+  (0.1766 / 0.1204) are all worse. A big game is signal, not an outlier to clip. **Evidence gate
+  (`tools/dc_gate_backtest.py`):** 3-4 nineties is best; stronger shrink is worse everywhere, including
+  thin-evidence high-rate players (0.45 predicted vs 0.44 actual).
 
 - **The DefCon prior weight** — `DC_PRIOR_CAP_MINUTES = 1710` caps last season's *weight* at
   19 matches (the rate itself uses all 38): pure prior at GW1, ~50/50 after 19 current
@@ -415,10 +473,13 @@ Things known to be provisional, with what would settle them:
 | `name_mappings.csv` | you, from reconciliation suggestions | `type,name,name_cleaned` = raw spelling → canonical; applied to the roster, the odds files AND `starting_lineups.csv`. Never add a reversed (canonical → raw) row — it un-maps canonical names. |
 | `purchase_prices.csv` | you/Claude, on every transfer | what you paid per squad player; drives FPL sell prices (rise banked at half, falls in full) — the transfer optimiser values owned players at sell price, not market |
 | `season_odds_corrections.csv` | you/Claude, rarely (optional) | `market,Team,corrected_odds,reason` — overrides market season odds that don't reflect footballing strength (e.g. Man City relegation odds pricing points-deduction legal risk); improved mode only |
+| `team_views.csv` | you, weekly (optional) | `Gameweek,Team,nudge,note` — your personal view of a team in goals per game (+ better / − worse than the market-fitted rating). **Only rows whose Gameweek = the current F1 gameweek apply**, so a forgotten row goes inert at the next roll. Full strength on the rating-served weeks (F3–F8, F2 when unpriced) and `config.TEAM_VIEW_MARKET_WEIGHT` (0.5 = half) on the priced weeks: win/loss balance, clean sheets, conceding, keeper saves and each player's goal/assist price are re-derived (`fpl_pipeline/team_views.py`; bookings untouched). A `--gw` archive run rebuilds an unshaded master so the archive never records your views. Scale: tiny 0.03, a bit 0.08–0.12, clearly 0.15–0.25 (capped at 0.5). `config.USE_TEAM_VIEWS=False` to compare. The run prints `team views GW7: …` when active |
 | `dc_params.csv` | you, once a season | DC threshold SD / average per position |
 | `fallback_factors.csv` | pipeline (`--gw` runs / pre-season tool) | never edit; per-player factors on the current coefficient scale |
 | `historical_player_data.csv` | pipeline (`--gw` runs) | season-keyed training archive, full F1–F8 forecast block; never edit |
+| `fixture_risk.csv` | you (by hand) | chance a current-GW match is actually played (weather/safety). `Gameweek,Team,play_prob,note`, list both teams; only current-GW rows apply. Scales those teams' F1 XP in the published master (`fpl_pipeline/fixture_risk.py`); optional `replay_gw` adds the postponed share to that week (the double gameweek). The master also gets `F1 XP Raw` (unscaled), which the optimiser uses to pick the GW XI, bench order and captain (start them, rely on autosub); transfers/squad use the adjusted XP. The archive keeps unscaled numbers. Never put this in `starting_lineups.csv` (renormalised to 11, and scored by the ledger). Added 2026-10-23 for Storm Boelo (Liverpool v Brighton, 0.95) |
 | `historical_fixture_odds.csv` | pipeline (`--gw` runs) | per-gameweek match + season odds; never edit. Records more than the pipeline consumes (draw odds, `Gameweek` stamp, per-team clean-sheet and over-1.5/over-3.5 goal odds) because odds can't be backfilled — see task #19. Rows before 2026-27 predate those columns and carry NA, and the archive starts ~GW12 2025-26, so it describes the mid-season regime only |
+| `raw_odds/<season>/GW<NN>/` | pipeline (`--gw` runs, `history.archive_raw_odds`) | never edit; every sportsbet file the provenance manifest marks **real**, prices exactly as scraped, with synthetic seed rows dropped (numeric match id/date; win/draw/win has no marker) + that slice of `_provenance.json`. Synthetic and derived markets are skipped. The player archive holds our adjusted chances; this keeps the untouched bookmaker prices so the longshot curves can be re-fit from scratch. Started GW8 2026-27. **GW1–7 goalscorer/assist rebuilt** by `tools/backfill_raw_odds.py` (inverts margin + that week's curve; keeps only prices landing on a 2-decimal value, which excludes fallback fill-ins) as `*_reconstructed.csv`, marked `reconstructed` in the folder's `_provenance.json` |
 | `historical_expected_points.csv` | you, optional | legacy tracking log, nothing reads it |
 | `historical_outright_odds.csv` | `tools/betway_outrights.py` (weekly) | week-by-week archive of the full team outright board (Winner/Top 2/4/5/6/Top Half/Bottom Half/Bottom/Relegation); long format, GW-keyed; a data lake for future modelling — nothing reads it yet |
 | `f2_yellow_card.csv` | vestigial | second-source F2 card odds; empty since that pipeline was retired |
@@ -538,8 +599,8 @@ provenance manifest (`tools/odds_status.py`). Never edit by hand.
 ### outputs/ — regenerated every run, safe to delete
 
 Numbered snapshots `01`–`12` (roster, DC stats, season probs, team fixture view, market
-tables), then **`13_players_master.csv`** — guaranteed the master, it's what the
-optimisers read — then `14_name_reconciliation.csv` when issues exist. Parity runs
+tables), then **`players_master.csv`** — guaranteed the master, it's what the
+optimisers read — then `data_checks.csv` when issues exist. Parity runs
 write to `outputs/parity/` so they never clobber the live master. The backtest writes
 `backtest_pairs.csv` here too.
 
@@ -550,7 +611,7 @@ write to `outputs/parity/` so they never clobber the live master. The backtest w
 | `python weekly_update.py [--resume --gw N]` | the whole weekly routine in two phases, with preflights and a curation pause |
 | `python tools/build_fixtures.py --gw N` | regenerate the rolling fixture window from the season list |
 | `python tools/roll_gameweek.py --gw N` | **roll to a new gameweek**: shift the window to GW N, then seed synthetic F1 markets from GW N-1's actual factors (chains the two tools below). Update outright odds + lineups first; run `betway.py` after |
-| `python tools/betway_outrights.py [--har F]` | scrape Betway PL **outright** markets → `title_odds.csv` / `top6_odds.csv` / `relegation_odds.csv`. Title & Top-6 = raw team odds (winners=K, de-margined by `MARGIN_SEASON=1.08` which matches Betway's ~8%); relegation = per-team Yes/No markets (more current than the stale main market), main-market fallback for the safe teams with no two-way. **Also archives the full team outright board (Winner/Top 2/4/5/6/Top Half/Bottom Half/Bottom/Relegation) week-by-week to `inputs/historical_outright_odds.csv`** (GW-keyed data lake for future modelling; pipeline doesn't read it). `--har` parses a saved capture |
+| `python tools/betway_outrights.py [--har F]` | scrape Betway PL **outright** markets → `title_odds.csv` / `top6_odds.csv` / `relegation_odds.csv`. Title & Top-6 = raw team odds (winners=K, de-margined by `MARGIN_SEASON=1.08` which matches Betway's ~8%); relegation = per-team Yes/No markets (more current than the stale main market), main-market fallback for the safe teams with no two-way. **Also archives the full team outright board (Winner/Top 2/4/5/6/Top Half/Bottom Half/Bottom/Relegation) week-by-week to `inputs/historical_outright_odds.csv`** (GW-keyed data lake for future modelling; pipeline doesn't read it). `--har` parses a saved capture **A market Betway isn't offering at all that week (it sometimes pulls Top 6) is left alone: the existing file is kept and a warning printed**, rather than filled as 6 teams at 100% / 14 at 0%. |
 | `env\Scripts\python tools/build_synthetic_gw.py --gw N` | seed synthetic **F1-only** (GW N) markets by carrying the current master's **F2 projection** onto GW N's fixtures (default `--source master-f2`; `--source archive` / `--factor-gw M` uses an archived week instead). **Refuses if the master's F2 isn't GW N** (double-shift guard). **F2+ derive off F1** (the `_f2` files are cleared). Stamps every market synthetic in the provenance manifest. In-season sibling of `build_preseason_data` |
 | `python tools/fill_synthetic_gaps.py [--source-gw M]` | backfill the current F1 player-prop markets (goalscorer/2+/assist/booking) from GW M's archived F2 projection, **only for matches Betway hasn't priced** — so attackers in unpriced fixtures aren't stuck on appearance points. Non-destructive; Betway-authoritative per match (a team is "priced" = a majority team of some priced match, robust to loan players) |
 | `python tools/build_preseason_data.py` | pre-season bootstrap: estimated lineups, factor rebuild, synthetic odds (real GW1 markets used when `gw1_match_odds.csv` exists) |
@@ -559,12 +620,12 @@ write to `outputs/parity/` so they never clobber the live master. The backtest w
 | `python tools/bench_blank_split.py [--season Y] [--nailed N]` | how often a nailed starter blanks next GW, split into late injury (pure autosub), foreseeable (flagged pre-deadline) and rotation — grounds `bench_slot_weights` |
 | `env\Scripts\python tools/chip_history.py [--gw N] [--free-transfers 1]` | logs Bench Boost + Triple Captain (single-GW F1), plus **Wildcard** (15-transfer rebuild vs the `--free-transfers` baseline, on the **8-fixture** weighted objective + captaincy) and **Free Hit** (same rebuild-vs-baseline delta but **F1 only** + captaincy) per GW to `inputs/chip_history.csv` (upsert) — spot the week a chip pays. Both deltas are measured against the best team reachable with your free transfers, not the raw current squad. Runs in `weekly_update.py` phase 2; the two deltas need the venv (PuLP) |
 | `python tools/source_history.py --seed-ffs --seed-ours --gw N` / `--score --gw N` | source-accuracy ledger: freeze each source's predicted XI per GW, then score it against actual lineups. Both run automatically in `weekly_update.py` phase 2 (freeze this week, score last week) |
-| `python tools/source_history.py --capture-csv FILE.csv --gw N` | freeze external sources (RotoWire, All About FPL, sweep consensus) from a `Source,Team,Player` CSV — the deadline-sweep step; surnames/nicknames auto-resolve, unmatched names are printed. GW1 back-fill example: `tools/seed_gw1_sources.py` |
+| `python tools/source_history.py --capture-csv FILE.csv --gw N` | freeze external sources (RotoWire, All About FPL, sweep consensus) from a `Source,Team,Player` CSV — the deadline-sweep step; surnames/nicknames auto-resolve, unmatched names are printed. GW1 back-fill example: `tools/seed_gw1_sources.py` Also handles FFP's glued initials (`J.TIMBER`; the initial splits same-surname teammates), FFS's `SURNAME (FIRST)` and `Ø`; aliases are case/accent-insensitive. |
 | `python tools/backtest_projections.py` | forecast-vs-actual evaluation of the projection machinery against the archives |
 | `python tools/build_training_data.py` | builds the per-component training matrices (`outputs/training/train_<stat>.csv`): 19 objective odds-derived features + `predicted` (baseline) + `actual` (target). See **Forward-projection models** below |
 | `python tools/walkforward_projection.py [--embargo N]` | leak-free walk-forward validation of the projection models on 2025-26, picking one common hyperparameter set per component by pooled VAL |
 | `python tools/save_projection_models.py` | trains + persists the deployable models to `outputs/models/`. **Rerun after each new gameweek of real archive data** |
-| `python tools/refit_coefficients.py [--write] [--only win_pred]` | refit regressions from the archives (holdout-gated; see Refitting) |
+| `python tools/refit_coefficients.py [--write] [--only win_pred\|baselines]` | refit regressions from the archives (holdout-gated; see Refitting) |
 | `python -m fpl_pipeline.reconcile` | standalone name-reconciliation report |
 | `tools/extract_coefficients.py`, `tools/export_workbook_inputs.py` | one-off migration tools (workbook → pipeline); kept for provenance |
 
@@ -573,9 +634,12 @@ write to `outputs/parity/` so they never clobber the live master. The backtest w
 Trained LightGBM models replace `factor × baseline` for the **defensive markets** — `clean_sheet`,
 `concede2`, `saves3` — in **F3–F8** (F2 keeps its real-odds/fallback logic). These are the only
 components that beat the *actual* pipeline value on walk-forward (2025-26): score1's F1-blend
-already wins, assist/yellow never do. All three are used **pure** (no F1-blend). Features are the
-19 objective, odds-derived ones — real on-pitch stats/minutes add nothing (the odds already price
-in form + rotation) — plus, since 2026-09-02, the rolling rating's win / opponent-win for the target
+already wins, assist/yellow never do. All three skip the F1-blend; since 2026-10-17 each is served as
+`w·GBM + (1−w)·raw factor×baseline` (`config.DEFENSIVE_MODEL_WEIGHT`: CS .75, concede 2+ .65, saves .80).
+Features are the 19 objective, odds-derived ones — real on-pitch stats/minutes add nothing (the odds
+already price in form + rotation). A separate 2026-10-18 test against real outcomes, rather than future
+odds, agrees: a player's recent actual-vs-odds or xG/xA-vs-odds gap (3/6 games) doesn't predict his next
+game beyond the odds, on either season's out-of-sample fold. The odds don't lag (re-test ~GW19, docs/TODO.md). Plus, since 2026-09-02, the rolling rating's win / opponent-win for the target
 fixture (`rating_win`, `rating_opp`; walk-forward + player bootstrap: clean sheet −2%, concede 2+ −3%,
 saves −4%, P ≥ 0.99, `tools/rating_gbm_check.py`). Training and serving build those two through the
 same `fpl_pipeline.rating.RatingSource`, and `tools/fit_rating_maps.py` fits the maps only on seasons
@@ -585,7 +649,7 @@ attack and a defence strength per team from the market-implied expected goals of
 over/under 2.5 closing prices), giving `rating_xg_for` / `rating_xg_against` for any fixture. Those
 lift the defensive GBMs again (clean sheet −3%, concede 2+ −4%, saves −1%; `tools/rating_gbm_check.py`)
 and, with the raw baseline as a feature and 6/10-week odds-form windows, make GBM **stacks** worth it
-for the attacking stats (`config.PROJECTION_STACK`): F{k} value = w·GBM + (1−w)·F1-blend, with
+for the attacking stats (`config.PROJECTION_STACK`): F{k} value = w·GBM + (1−w)·plain projection (the F1-blend part is off since 2026-10-23; goals w=0.65 re-checked then and still best on ranking), with
 **goals** (w=0.65: −4.5% error pooled, P=1.00, and −6.6% on the 2026-27 cross-season fold) and
 **yellow cards** (w=0.70: −7.1%, P=1.00; gated until the season archive holds 6 real weeks because it
 leans on 10-week form and had no cross-season fold). **Assists stay on the blend**: the in-season
@@ -638,7 +702,13 @@ Both optimisers configure via their `__main__` blocks (edit and run):
   ≥ `min_total_gain`, else the optimiser holds with 0 transfers),
   `compute_solutions` / `num_solutions_display` (solution pool + frequency analysis
   showing how often each player appears across near-optimal solutions),
-  `max_defensive_players_per_team` (GK+DEF cap per club). **Optional two-stage tie-break**
+  `max_defensive_players_per_team` (GK+DEF cap per club),
+  `vice_captain_cover` (default **on**, 2026-10-19). FPL doubles the vice-captain when the
+  captain plays 0 minutes, so the armband is worth captain XP + (chance he doesn't start, from
+  `F{k} Start`) × the best other starter's XP. The main LP, the hold baseline, the gain gate and
+  the reported captain all use it (`captain_and_vice`, `_vice_cover_expr`). It only changes anything
+  for a doubtful captain; `False` restores XP-only captaincy. The transfer-timing plan and
+  `tools/chip_history.py` / `league_differentials.py` still captain on XP alone. **Optional two-stage tie-break**
   for when many squads score ~the same XP (acute at GW1): `tie_breaker="ownership"` +
   `tie_break_mode="differential"|"template"` + `xp_tolerance` locks XP within tolerance of the
   max, then breaks the tie by ownership (differential = favour low-owned to chase rank; template =
@@ -701,7 +771,7 @@ Documented with rationale in `fpl_pipeline/players.py`; all are disabled in pari
 | Draw-aware de-margining | Three-way (home/draw/away) margin removal when the scrape has draw odds, instead of 1/odds/1.03 per side |
 | Poisson score curves | Smooth P(score 2+/3+) from P(score 1+) instead of step ladders (which had an exact `p == 0.3` branch) |
 | Generic F2 score model | The workbook's Coefficients-sheet F2 score formula mixed model families (factor calibrated on one model, applied to another): backtested MAE 0.063 even with perfect odds vs 0.019 for the generic factor × baseline now used |
-| Persistence blend | Modelled F2–F6 score/assist/saves probabilities blended with the player's current F1 odds-implied probability at backtested weights (`config.PROJECTION_BLEND`: 0.70/0.85/0.85) — ~10% error reduction on score projections |
+| Persistence blend | **Off since 2026-10-23** (`config.PROJECTION_BLEND = {}`). Was: future score/assist/saves chances blended with the player's current F1 price (0.70/0.85/0.85), fitted on 2025-26 for average error. It carried this week's fixture into every future week; on 2026-27 data, judged on ranking (within-position rank match + top-5 pick shortfall), no blend ranks and picks best for goals and keepers, assists ~level. Re-test ~GW12 (vs a last-3-week price average) |
 | Projection horizon | `config.HORIZON` (default **17** → a GW3 run reaches GW19) sets how many fixtures F1..HORIZON the pipeline projects. F1/F2 real odds; F3..HORIZON fully modelled (same machinery). **Purely additive** — F1–F8 are byte-identical at HORIZON 8 vs 17. Extended from a hard-coded 8 on 2026-09-02 for chip-window planning. Past F8: start-probs are **held flat at F8** (the start-prob fallback carries the last curated `starting_lineups.csv` column forward), and the GBM's `horizon` feature saturates at its trained max. **The archive stays F1–F8** (history.py only writes existing columns) and the **optimiser keeps its own `num_fixtures` (default 8)** — so neither is affected. The optimisers weight the horizon themselves (`Weighted_Total_XP`); the master's old "Total XP" blend column was removed 2026-08-31 |
 
 ### Projection quality (backtested)
@@ -846,7 +916,7 @@ backup automatically). Feature construction is shared with serving code, so trai
 serve cannot drift. The bonus model is carried over unchanged (refitting it needs actual
 bonus-point outcomes, which the archives don't hold).
 
-**A holdout check gates every `--write`** and refuses if the candidate degrades forecast
+**A holdout check gates every `--write`** (on squared error since 2026-10-23) and refuses if the candidate degrades forecast
 accuracy (override with `--force`, but don't). Two different gates, matched to what's being
 written:
 
@@ -862,6 +932,19 @@ written:
 
 `--only win_pred` writes that model alone, leaving every other coefficient untouched —
 "refit everything at once" is not a safe default given the baseline result above.
+`--only baselines` writes just the gated baseline block (match-odds / F2-score formulas untouched).
+
+**The projection holdout is season-aware** (2026-10-17): it holds out the newest season's latest
+weeks and fits on everything before. It used to split on raw gameweek number across seasons,
+which mixed the two seasons and produced a spurious +100–380% "degradation". With the fix the
+2026-27 refit passed and was written (`--only baselines` + `--only win_pred`). `pred_xp` (the
+display-only `F1 Pred XP`) is never refit: its target in the archive includes non-starters, which
+would rescale it from ~3.8 to ~1.2.
+
+**After any coefficient write**, rerun the cascade: `tools/build_training_data.py` →
+`tools/save_projection_models.py` → re-check `DEFENSIVE_MODEL_WEIGHT` / `PROJECTION_STACK` on
+leak-free folds. The score/yellow GBMs take the baseline (`predicted`) as a feature. To compare
+outputs before vs after, use `--gw` runs on both sides: the GBMs only serve on `--gw` runs.
 
 **Worked example of why the gate exists.** An ad-hoc script suggested the win-pred refit was
 7.5% *better* on holdout; the proper gate found it 9.5% *worse* and refused the write. The
