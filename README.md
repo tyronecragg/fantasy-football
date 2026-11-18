@@ -217,13 +217,12 @@ Around the commands:
   2026-08-21; a file with only F1–F6 falls back to the F6 value for F7/F8). Editing any input CSV in Excel is
   fine — the loaders repair Excel's ANSI re-saves automatically.
   **After any curation pass, check the team sums** (`groupby('Team')['F1'].sum()`): **F1 must be
-  exactly 11** (the GW1 XI is known — 11 players start), and **no column may exceed 11** (>11
-  starters is impossible). F2 onward *may* sit below 11 — that is CORRECT when the missing minutes
-  belong to a player we can't credit yet: a brand-new signing not in the FPL data (Estupiñán at
-  Villa, Enciso at Ipswich), or one who may leave. Never pad the gap onto a different player just
-  to reach 11. Normalisation is certainty-preserving, so 1.0 declarations never move and an
-  inflated total is taken out of the *graded* players — a believed 0.80 was once consumed as 0.56
-  because its team summed to 12.25.
+  exactly 11** (the GW1 XI is known — 11 players start), and **F2 onward must be 11 or a little
+  above (~11.0–11.1), never below** (revised 2026-10-30). Normalisation is certainty-preserving: an
+  over-11 total is trimmed from the *graded* players only and 1.0 declarations never move, but an
+  under-11 total is filled by inflating *every* graded player evenly, crediting unrelated players.
+  So a player's lost share in a later week goes to his same-position replacements. Keep the excess
+  small, though: a believed 0.80 was once consumed as 0.56 because its team summed to 12.25.
 - **After making your transfers**, record the new squad in the `GW{N}` column of
   `inputs/gw_teams.csv` — that's what the next week's transfer optimiser starts from —
   and add each new signing to `inputs/purchase_prices.csv` at the price you paid

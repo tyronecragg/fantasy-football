@@ -939,3 +939,423 @@ Season,Gameweek,market,Team,odds_decimal,scraped
 2026-2027,8,Top 5,Ipswich Town,67.0,2026-10-23
 2026-2027,8,Top 5,Coventry City,125.0,2026-10-23
 2026-2027,8,Top 5,Hull City,125.0,2026-10-23
+2026-2027,9,Winner,Arsenal,1.4,2026-10-31
+2026-2027,9,Winner,Man City,6.45,2026-10-31
+2026-2027,9,Winner,Chelsea,12.9,2026-10-31
+2026-2027,9,Winner,Liverpool,12.9,2026-10-31
+2026-2027,9,Winner,Brighton,20.8,2026-10-31
+2026-2027,9,Winner,Man Utd,100.0,2026-10-31
+2026-2027,9,Winner,Spurs,100.0,2026-10-31
+2026-2027,9,Winner,Aston Villa,150.0,2026-10-31
+2026-2027,9,Winner,Brentford,250.0,2026-10-31
+2026-2027,9,Winner,Leeds,250.0,2026-10-31
+2026-2027,9,Winner,Bournemouth,350.0,2026-10-31
+2026-2027,9,Winner,Newcastle,350.0,2026-10-31
+2026-2027,9,Winner,Everton,500.0,2026-10-31
+2026-2027,9,Winner,Coventry City,1000.0,2026-10-31
+2026-2027,9,Winner,Crystal Palace,1000.0,2026-10-31
+2026-2027,9,Winner,Fulham,1000.0,2026-10-31
+2026-2027,9,Winner,Hull City,1000.0,2026-10-31
+2026-2027,9,Winner,Ipswich Town,1000.0,2026-10-31
+2026-2027,9,Winner,Nott'm Forest,1000.0,2026-10-31
+2026-2027,9,Winner,Sunderland,1000.0,2026-10-31
+2026-2027,9,Relegation,Coventry City,1.61,2026-10-31
+2026-2027,9,Relegation,Hull City,1.66,2026-10-31
+2026-2027,9,Relegation,Man City,1.8,2026-10-31
+2026-2027,9,Relegation,Ipswich Town,3.25,2026-10-31
+2026-2027,9,Relegation,Crystal Palace,3.5,2026-10-31
+2026-2027,9,Relegation,Sunderland,3.75,2026-10-31
+2026-2027,9,Relegation,Fulham,5.5,2026-10-31
+2026-2027,9,Relegation,Nott'm Forest,8.0,2026-10-31
+2026-2027,9,Relegation,Newcastle,11.0,2026-10-31
+2026-2027,9,Relegation,Everton,12.0,2026-10-31
+2026-2027,9,Relegation,Bournemouth,17.0,2026-10-31
+2026-2027,9,Relegation,Leeds,26.0,2026-10-31
+2026-2027,9,Relegation,Man Utd,26.0,2026-10-31
+2026-2027,9,Relegation,Spurs,34.0,2026-10-31
+2026-2027,9,Relegation,Aston Villa,51.0,2026-10-31
+2026-2027,9,Relegation,Brentford,125.0,2026-10-31
+2026-2027,9,Relegation,Brighton,200.0,2026-10-31
+2026-2027,9,Relegation,Chelsea,500.0,2026-10-31
+2026-2027,9,Relegation,Arsenal,1000.0,2026-10-31
+2026-2027,9,Relegation,Liverpool,1000.0,2026-10-31
+2026-2027,9,Top 4,Arsenal,1.01,2026-10-31
+2026-2027,9,Top 4,Man City,1.5,2026-10-31
+2026-2027,9,Top 4,Chelsea,1.53,2026-10-31
+2026-2027,9,Top 4,Liverpool,1.57,2026-10-31
+2026-2027,9,Top 4,Brighton,2.1,2026-10-31
+2026-2027,9,Top 4,Brentford,5.0,2026-10-31
+2026-2027,9,Top 4,Spurs,5.5,2026-10-31
+2026-2027,9,Top 4,Aston Villa,6.5,2026-10-31
+2026-2027,9,Top 4,Man Utd,7.0,2026-10-31
+2026-2027,9,Top 4,Leeds,11.0,2026-10-31
+2026-2027,9,Top 4,Bournemouth,15.0,2026-10-31
+2026-2027,9,Top 4,Newcastle,15.0,2026-10-31
+2026-2027,9,Top 4,Everton,21.0,2026-10-31
+2026-2027,9,Top 4,Nott'm Forest,51.0,2026-10-31
+2026-2027,9,Top 4,Fulham,100.0,2026-10-31
+2026-2027,9,Top 4,Crystal Palace,150.0,2026-10-31
+2026-2027,9,Top 4,Ipswich Town,150.0,2026-10-31
+2026-2027,9,Top 4,Sunderland,150.0,2026-10-31
+2026-2027,9,Top 4,Hull City,250.0,2026-10-31
+2026-2027,9,Top 4,Coventry City,350.0,2026-10-31
+2026-2027,9,Top 2,Arsenal,1.06,2026-10-31
+2026-2027,9,Top 2,Man City,2.75,2026-10-31
+2026-2027,9,Top 2,Chelsea,3.4,2026-10-31
+2026-2027,9,Top 2,Liverpool,4.0,2026-10-31
+2026-2027,9,Top 2,Brighton,5.0,2026-10-31
+2026-2027,9,Top 2,Brentford,41.0,2026-10-31
+2026-2027,9,Top 2,Spurs,41.0,2026-10-31
+2026-2027,9,Top 2,Aston Villa,51.0,2026-10-31
+2026-2027,9,Top 2,Man Utd,67.0,2026-10-31
+2026-2027,9,Top 2,Leeds,100.0,2026-10-31
+2026-2027,9,Top 2,Newcastle,150.0,2026-10-31
+2026-2027,9,Top 2,Bournemouth,200.0,2026-10-31
+2026-2027,9,Top 2,Everton,200.0,2026-10-31
+2026-2027,9,Top 2,Nott'm Forest,300.0,2026-10-31
+2026-2027,9,Top 2,Fulham,500.0,2026-10-31
+2026-2027,9,Top 2,Ipswich Town,750.0,2026-10-31
+2026-2027,9,Top 2,Coventry City,1000.0,2026-10-31
+2026-2027,9,Top 2,Crystal Palace,1000.0,2026-10-31
+2026-2027,9,Top 2,Hull City,1000.0,2026-10-31
+2026-2027,9,Top 2,Sunderland,1000.0,2026-10-31
+2026-2027,9,Top 6,Arsenal,1.005,2026-10-31
+2026-2027,9,Top 6,Chelsea,1.2,2026-10-31
+2026-2027,9,Top 6,Liverpool,1.22,2026-10-31
+2026-2027,9,Top 6,Man City,1.22,2026-10-31
+2026-2027,9,Top 6,Brighton,1.33,2026-10-31
+2026-2027,9,Top 6,Brentford,2.35,2026-10-31
+2026-2027,9,Top 6,Spurs,2.75,2026-10-31
+2026-2027,9,Top 6,Aston Villa,2.85,2026-10-31
+2026-2027,9,Top 6,Man Utd,3.0,2026-10-31
+2026-2027,9,Top 6,Leeds,5.5,2026-10-31
+2026-2027,9,Top 6,Everton,7.0,2026-10-31
+2026-2027,9,Top 6,Newcastle,7.0,2026-10-31
+2026-2027,9,Top 6,Bournemouth,8.5,2026-10-31
+2026-2027,9,Top 6,Nott'm Forest,15.0,2026-10-31
+2026-2027,9,Top 6,Fulham,21.0,2026-10-31
+2026-2027,9,Top 6,Crystal Palace,29.0,2026-10-31
+2026-2027,9,Top 6,Sunderland,29.0,2026-10-31
+2026-2027,9,Top 6,Ipswich Town,34.0,2026-10-31
+2026-2027,9,Top 6,Hull City,67.0,2026-10-31
+2026-2027,9,Top 6,Coventry City,100.0,2026-10-31
+2026-2027,9,To Finish In Top Half,Arsenal,1.001,2026-10-31
+2026-2027,9,To Finish In Top Half,Liverpool,1.03,2026-10-31
+2026-2027,9,To Finish In Top Half,Chelsea,1.04,2026-10-31
+2026-2027,9,To Finish In Top Half,Brighton,1.06,2026-10-31
+2026-2027,9,To Finish In Top Half,Man City,1.18,2026-10-31
+2026-2027,9,To Finish In Top Half,Brentford,1.22,2026-10-31
+2026-2027,9,To Finish In Top Half,Spurs,1.44,2026-10-31
+2026-2027,9,To Finish In Top Half,Aston Villa,1.5,2026-10-31
+2026-2027,9,To Finish In Top Half,Man Utd,1.53,2026-10-31
+2026-2027,9,To Finish In Top Half,Leeds,1.83,2026-10-31
+2026-2027,9,To Finish In Top Half,Newcastle,2.1,2026-10-31
+2026-2027,9,To Finish In Top Half,Everton,2.25,2026-10-31
+2026-2027,9,To Finish In Top Half,Bournemouth,2.35,2026-10-31
+2026-2027,9,To Finish In Top Half,Nott'm Forest,3.25,2026-10-31
+2026-2027,9,To Finish In Top Half,Fulham,5.0,2026-10-31
+2026-2027,9,To Finish In Top Half,Sunderland,6.5,2026-10-31
+2026-2027,9,To Finish In Top Half,Crystal Palace,7.0,2026-10-31
+2026-2027,9,To Finish In Top Half,Ipswich Town,7.0,2026-10-31
+2026-2027,9,To Finish In Top Half,Hull City,15.0,2026-10-31
+2026-2027,9,To Finish In Top Half,Coventry City,17.0,2026-10-31
+2026-2027,9,Top 5,Arsenal,1.005,2026-10-31
+2026-2027,9,Top 5,Man City,1.33,2026-10-31
+2026-2027,9,Top 5,Chelsea,1.36,2026-10-31
+2026-2027,9,Top 5,Liverpool,1.4,2026-10-31
+2026-2027,9,Top 5,Brighton,1.53,2026-10-31
+2026-2027,9,Top 5,Brentford,3.0,2026-10-31
+2026-2027,9,Top 5,Spurs,3.75,2026-10-31
+2026-2027,9,Top 5,Aston Villa,4.35,2026-10-31
+2026-2027,9,Top 5,Man Utd,4.5,2026-10-31
+2026-2027,9,Top 5,Leeds,7.5,2026-10-31
+2026-2027,9,Top 5,Newcastle,11.0,2026-10-31
+2026-2027,9,Top 5,Bournemouth,12.0,2026-10-31
+2026-2027,9,Top 5,Everton,13.0,2026-10-31
+2026-2027,9,Top 5,Nott'm Forest,21.0,2026-10-31
+2026-2027,9,Top 5,Fulham,41.0,2026-10-31
+2026-2027,9,Top 5,Sunderland,41.0,2026-10-31
+2026-2027,9,Top 5,Crystal Palace,51.0,2026-10-31
+2026-2027,9,Top 5,Ipswich Town,51.0,2026-10-31
+2026-2027,9,Top 5,Coventry City,125.0,2026-10-31
+2026-2027,9,Top 5,Hull City,125.0,2026-10-31
+2026-2027,10,Winner,Arsenal,1.33,2026-11-06
+2026-2027,10,Winner,Man City,8.05,2026-11-06
+2026-2027,10,Winner,Brighton,13.1,2026-11-06
+2026-2027,10,Winner,Liverpool,15.1,2026-11-06
+2026-2027,10,Winner,Chelsea,23.2,2026-11-06
+2026-2027,10,Winner,Spurs,68.0,2026-11-06
+2026-2027,10,Winner,Aston Villa,150.0,2026-11-06
+2026-2027,10,Winner,Brentford,150.0,2026-11-06
+2026-2027,10,Winner,Man Utd,200.0,2026-11-06
+2026-2027,10,Winner,Bournemouth,250.0,2026-11-06
+2026-2027,10,Winner,Everton,250.0,2026-11-06
+2026-2027,10,Winner,Leeds,250.0,2026-11-06
+2026-2027,10,Winner,Newcastle,500.0,2026-11-06
+2026-2027,10,Winner,Coventry City,1000.0,2026-11-06
+2026-2027,10,Winner,Crystal Palace,1000.0,2026-11-06
+2026-2027,10,Winner,Fulham,1000.0,2026-11-06
+2026-2027,10,Winner,Hull City,1000.0,2026-11-06
+2026-2027,10,Winner,Ipswich Town,1000.0,2026-11-06
+2026-2027,10,Winner,Nott'm Forest,1000.0,2026-11-06
+2026-2027,10,Winner,Sunderland,1000.0,2026-11-06
+2026-2027,10,Relegation,Hull City,1.8,2026-11-06
+2026-2027,10,Relegation,Coventry City,1.83,2026-11-06
+2026-2027,10,Relegation,Man City,1.9,2026-11-06
+2026-2027,10,Relegation,Sunderland,2.5,2026-11-06
+2026-2027,10,Relegation,Crystal Palace,2.75,2026-11-06
+2026-2027,10,Relegation,Ipswich Town,3.25,2026-11-06
+2026-2027,10,Relegation,Fulham,6.0,2026-11-06
+2026-2027,10,Relegation,Nott'm Forest,6.5,2026-11-06
+2026-2027,10,Relegation,Newcastle,11.0,2026-11-06
+2026-2027,10,Relegation,Man Utd,13.0,2026-11-06
+2026-2027,10,Relegation,Everton,15.0,2026-11-06
+2026-2027,10,Relegation,Bournemouth,21.0,2026-11-06
+2026-2027,10,Relegation,Leeds,21.0,2026-11-06
+2026-2027,10,Relegation,Spurs,34.0,2026-11-06
+2026-2027,10,Relegation,Aston Villa,67.0,2026-11-06
+2026-2027,10,Relegation,Brentford,150.0,2026-11-06
+2026-2027,10,Relegation,Brighton,500.0,2026-11-06
+2026-2027,10,Relegation,Chelsea,500.0,2026-11-06
+2026-2027,10,Relegation,Liverpool,750.0,2026-11-06
+2026-2027,10,Relegation,Arsenal,1000.0,2026-11-06
+2026-2027,10,Top 4,Arsenal,1.01,2026-11-06
+2026-2027,10,Top 4,Brighton,1.53,2026-11-06
+2026-2027,10,Top 4,Liverpool,1.57,2026-11-06
+2026-2027,10,Top 4,Chelsea,1.72,2026-11-06
+2026-2027,10,Top 4,Man City,1.8,2026-11-06
+2026-2027,10,Top 4,Spurs,4.5,2026-11-06
+2026-2027,10,Top 4,Brentford,6.0,2026-11-06
+2026-2027,10,Top 4,Aston Villa,8.0,2026-11-06
+2026-2027,10,Top 4,Man Utd,8.0,2026-11-06
+2026-2027,10,Top 4,Leeds,11.0,2026-11-06
+2026-2027,10,Top 4,Bournemouth,12.0,2026-11-06
+2026-2027,10,Top 4,Everton,15.0,2026-11-06
+2026-2027,10,Top 4,Newcastle,19.0,2026-11-06
+2026-2027,10,Top 4,Nott'm Forest,51.0,2026-11-06
+2026-2027,10,Top 4,Fulham,81.0,2026-11-06
+2026-2027,10,Top 4,Crystal Palace,150.0,2026-11-06
+2026-2027,10,Top 4,Ipswich Town,150.0,2026-11-06
+2026-2027,10,Top 4,Coventry City,250.0,2026-11-06
+2026-2027,10,Top 4,Hull City,250.0,2026-11-06
+2026-2027,10,Top 4,Sunderland,250.0,2026-11-06
+2026-2027,10,Top 2,Arsenal,1.07,2026-11-06
+2026-2027,10,Top 2,Brighton,3.25,2026-11-06
+2026-2027,10,Top 2,Man City,3.25,2026-11-06
+2026-2027,10,Top 2,Liverpool,3.5,2026-11-06
+2026-2027,10,Top 2,Chelsea,4.0,2026-11-06
+2026-2027,10,Top 2,Spurs,21.0,2026-11-06
+2026-2027,10,Top 2,Brentford,26.0,2026-11-06
+2026-2027,10,Top 2,Aston Villa,41.0,2026-11-06
+2026-2027,10,Top 2,Man Utd,67.0,2026-11-06
+2026-2027,10,Top 2,Bournemouth,100.0,2026-11-06
+2026-2027,10,Top 2,Leeds,100.0,2026-11-06
+2026-2027,10,Top 2,Everton,200.0,2026-11-06
+2026-2027,10,Top 2,Newcastle,200.0,2026-11-06
+2026-2027,10,Top 2,Nott'm Forest,300.0,2026-11-06
+2026-2027,10,Top 2,Fulham,500.0,2026-11-06
+2026-2027,10,Top 2,Ipswich Town,750.0,2026-11-06
+2026-2027,10,Top 2,Coventry City,1000.0,2026-11-06
+2026-2027,10,Top 2,Crystal Palace,1000.0,2026-11-06
+2026-2027,10,Top 2,Hull City,1000.0,2026-11-06
+2026-2027,10,Top 2,Sunderland,1000.0,2026-11-06
+2026-2027,10,Top 6,Arsenal,1.002,2026-11-06
+2026-2027,10,Top 6,Liverpool,1.18,2026-11-06
+2026-2027,10,Top 6,Brighton,1.2,2026-11-06
+2026-2027,10,Top 6,Chelsea,1.28,2026-11-06
+2026-2027,10,Top 6,Man City,1.44,2026-11-06
+2026-2027,10,Top 6,Brentford,2.25,2026-11-06
+2026-2027,10,Top 6,Spurs,2.25,2026-11-06
+2026-2027,10,Top 6,Aston Villa,3.25,2026-11-06
+2026-2027,10,Top 6,Man Utd,4.0,2026-11-06
+2026-2027,10,Top 6,Bournemouth,4.5,2026-11-06
+2026-2027,10,Top 6,Everton,5.0,2026-11-06
+2026-2027,10,Top 6,Leeds,6.0,2026-11-06
+2026-2027,10,Top 6,Newcastle,9.0,2026-11-06
+2026-2027,10,Top 6,Nott'm Forest,17.0,2026-11-06
+2026-2027,10,Top 6,Fulham,21.0,2026-11-06
+2026-2027,10,Top 6,Crystal Palace,29.0,2026-11-06
+2026-2027,10,Top 6,Sunderland,29.0,2026-11-06
+2026-2027,10,Top 6,Ipswich Town,34.0,2026-11-06
+2026-2027,10,Top 6,Hull City,67.0,2026-11-06
+2026-2027,10,Top 6,Coventry City,100.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Arsenal,1.001,2026-11-06
+2026-2027,10,To Finish In Top Half,Brighton,1.03,2026-11-06
+2026-2027,10,To Finish In Top Half,Liverpool,1.03,2026-11-06
+2026-2027,10,To Finish In Top Half,Chelsea,1.04,2026-11-06
+2026-2027,10,To Finish In Top Half,Brentford,1.25,2026-11-06
+2026-2027,10,To Finish In Top Half,Spurs,1.3,2026-11-06
+2026-2027,10,To Finish In Top Half,Aston Villa,1.44,2026-11-06
+2026-2027,10,To Finish In Top Half,Man City,1.44,2026-11-06
+2026-2027,10,To Finish In Top Half,Bournemouth,1.57,2026-11-06
+2026-2027,10,To Finish In Top Half,Man Utd,1.61,2026-11-06
+2026-2027,10,To Finish In Top Half,Leeds,1.83,2026-11-06
+2026-2027,10,To Finish In Top Half,Everton,2.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Newcastle,2.5,2026-11-06
+2026-2027,10,To Finish In Top Half,Nott'm Forest,3.75,2026-11-06
+2026-2027,10,To Finish In Top Half,Fulham,5.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Crystal Palace,8.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Ipswich Town,8.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Sunderland,9.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Coventry City,17.0,2026-11-06
+2026-2027,10,To Finish In Top Half,Hull City,17.0,2026-11-06
+2026-2027,10,Top 5,Arsenal,1.005,2026-11-06
+2026-2027,10,Top 5,Brighton,1.3,2026-11-06
+2026-2027,10,Top 5,Liverpool,1.33,2026-11-06
+2026-2027,10,Top 5,Chelsea,1.44,2026-11-06
+2026-2027,10,Top 5,Man City,1.5,2026-11-06
+2026-2027,10,Top 5,Spurs,3.25,2026-11-06
+2026-2027,10,Top 5,Brentford,3.5,2026-11-06
+2026-2027,10,Top 5,Aston Villa,4.5,2026-11-06
+2026-2027,10,Top 5,Man Utd,5.0,2026-11-06
+2026-2027,10,Top 5,Leeds,8.0,2026-11-06
+2026-2027,10,Top 5,Bournemouth,9.0,2026-11-06
+2026-2027,10,Top 5,Everton,9.0,2026-11-06
+2026-2027,10,Top 5,Newcastle,13.0,2026-11-06
+2026-2027,10,Top 5,Nott'm Forest,21.0,2026-11-06
+2026-2027,10,Top 5,Fulham,41.0,2026-11-06
+2026-2027,10,Top 5,Crystal Palace,51.0,2026-11-06
+2026-2027,10,Top 5,Ipswich Town,51.0,2026-11-06
+2026-2027,10,Top 5,Sunderland,51.0,2026-11-06
+2026-2027,10,Top 5,Coventry City,100.0,2026-11-06
+2026-2027,10,Top 5,Hull City,200.0,2026-11-06
+2026-2027,11,Winner,Arsenal,1.25,2026-11-17
+2026-2027,11,Winner,Brighton,10.9,2026-11-17
+2026-2027,11,Winner,Liverpool,12.9,2026-11-17
+2026-2027,11,Winner,Man City,14.9,2026-11-17
+2026-2027,11,Winner,Chelsea,34.0,2026-11-17
+2026-2027,11,Winner,Spurs,100.0,2026-11-17
+2026-2027,11,Winner,Aston Villa,150.0,2026-11-17
+2026-2027,11,Winner,Bournemouth,200.0,2026-11-17
+2026-2027,11,Winner,Man Utd,200.0,2026-11-17
+2026-2027,11,Winner,Brentford,250.0,2026-11-17
+2026-2027,11,Winner,Everton,250.0,2026-11-17
+2026-2027,11,Winner,Leeds,250.0,2026-11-17
+2026-2027,11,Winner,Coventry City,1000.0,2026-11-17
+2026-2027,11,Winner,Crystal Palace,1000.0,2026-11-17
+2026-2027,11,Winner,Fulham,1000.0,2026-11-17
+2026-2027,11,Winner,Hull City,1000.0,2026-11-17
+2026-2027,11,Winner,Ipswich Town,1000.0,2026-11-17
+2026-2027,11,Winner,Newcastle,1000.0,2026-11-17
+2026-2027,11,Winner,Nott'm Forest,1000.0,2026-11-17
+2026-2027,11,Winner,Sunderland,1000.0,2026-11-17
+2026-2027,11,Relegation,Coventry City,1.72,2026-11-17
+2026-2027,11,Relegation,Hull City,1.72,2026-11-17
+2026-2027,11,Relegation,Man City,1.9,2026-11-17
+2026-2027,11,Relegation,Crystal Palace,2.35,2026-11-17
+2026-2027,11,Relegation,Ipswich Town,2.75,2026-11-17
+2026-2027,11,Relegation,Sunderland,3.5,2026-11-17
+2026-2027,11,Relegation,Fulham,6.0,2026-11-17
+2026-2027,11,Relegation,Nott'm Forest,9.0,2026-11-17
+2026-2027,11,Relegation,Newcastle,11.0,2026-11-17
+2026-2027,11,Relegation,Man Utd,13.0,2026-11-17
+2026-2027,11,Relegation,Everton,21.0,2026-11-17
+2026-2027,11,Relegation,Bournemouth,26.0,2026-11-17
+2026-2027,11,Relegation,Leeds,26.0,2026-11-17
+2026-2027,11,Relegation,Spurs,26.0,2026-11-17
+2026-2027,11,Relegation,Aston Villa,67.0,2026-11-17
+2026-2027,11,Relegation,Brentford,100.0,2026-11-17
+2026-2027,11,Relegation,Chelsea,500.0,2026-11-17
+2026-2027,11,Relegation,Arsenal,1000.0,2026-11-17
+2026-2027,11,Relegation,Brighton,1000.0,2026-11-17
+2026-2027,11,Relegation,Liverpool,1000.0,2026-11-17
+2026-2027,11,Top 4,Arsenal,1.005,2026-11-17
+2026-2027,11,Top 4,Brighton,1.44,2026-11-17
+2026-2027,11,Top 4,Liverpool,1.44,2026-11-17
+2026-2027,11,Top 4,Chelsea,1.83,2026-11-17
+2026-2027,11,Top 4,Man City,1.9,2026-11-17
+2026-2027,11,Top 4,Aston Villa,7.0,2026-11-17
+2026-2027,11,Top 4,Brentford,7.0,2026-11-17
+2026-2027,11,Top 4,Spurs,7.0,2026-11-17
+2026-2027,11,Top 4,Man Utd,8.0,2026-11-17
+2026-2027,11,Top 4,Bournemouth,10.0,2026-11-17
+2026-2027,11,Top 4,Everton,11.0,2026-11-17
+2026-2027,11,Top 4,Leeds,11.0,2026-11-17
+2026-2027,11,Top 4,Newcastle,21.0,2026-11-17
+2026-2027,11,Top 4,Nott'm Forest,34.0,2026-11-17
+2026-2027,11,Top 4,Fulham,81.0,2026-11-17
+2026-2027,11,Top 4,Crystal Palace,150.0,2026-11-17
+2026-2027,11,Top 4,Sunderland,150.0,2026-11-17
+2026-2027,11,Top 4,Ipswich Town,200.0,2026-11-17
+2026-2027,11,Top 4,Coventry City,250.0,2026-11-17
+2026-2027,11,Top 4,Hull City,250.0,2026-11-17
+2026-2027,11,Top 2,Arsenal,1.07,2026-11-17
+2026-2027,11,Top 2,Brighton,2.75,2026-11-17
+2026-2027,11,Top 2,Liverpool,2.75,2026-11-17
+2026-2027,11,Top 2,Man City,4.5,2026-11-17
+2026-2027,11,Top 2,Chelsea,5.5,2026-11-17
+2026-2027,11,Top 2,Brentford,34.0,2026-11-17
+2026-2027,11,Top 2,Aston Villa,41.0,2026-11-17
+2026-2027,11,Top 2,Spurs,41.0,2026-11-17
+2026-2027,11,Top 2,Man Utd,67.0,2026-11-17
+2026-2027,11,Top 2,Bournemouth,81.0,2026-11-17
+2026-2027,11,Top 2,Leeds,81.0,2026-11-17
+2026-2027,11,Top 2,Everton,100.0,2026-11-17
+2026-2027,11,Top 2,Newcastle,200.0,2026-11-17
+2026-2027,11,Top 2,Nott'm Forest,250.0,2026-11-17
+2026-2027,11,Top 2,Fulham,500.0,2026-11-17
+2026-2027,11,Top 2,Sunderland,750.0,2026-11-17
+2026-2027,11,Top 2,Coventry City,1000.0,2026-11-17
+2026-2027,11,Top 2,Crystal Palace,1000.0,2026-11-17
+2026-2027,11,Top 2,Hull City,1000.0,2026-11-17
+2026-2027,11,Top 2,Ipswich Town,1000.0,2026-11-17
+2026-2027,11,Top 6,Arsenal,1.002,2026-11-17
+2026-2027,11,Top 6,Liverpool,1.14,2026-11-17
+2026-2027,11,Top 6,Brighton,1.16,2026-11-17
+2026-2027,11,Top 6,Chelsea,1.33,2026-11-17
+2026-2027,11,Top 6,Man City,1.66,2026-11-17
+2026-2027,11,Top 6,Brentford,2.35,2026-11-17
+2026-2027,11,Top 6,Spurs,2.75,2026-11-17
+2026-2027,11,Top 6,Aston Villa,3.0,2026-11-17
+2026-2027,11,Top 6,Bournemouth,4.0,2026-11-17
+2026-2027,11,Top 6,Man Utd,4.0,2026-11-17
+2026-2027,11,Top 6,Leeds,4.3,2026-11-17
+2026-2027,11,Top 6,Everton,4.5,2026-11-17
+2026-2027,11,Top 6,Newcastle,9.0,2026-11-17
+2026-2027,11,Top 6,Nott'm Forest,13.0,2026-11-17
+2026-2027,11,Top 6,Fulham,21.0,2026-11-17
+2026-2027,11,Top 6,Sunderland,26.0,2026-11-17
+2026-2027,11,Top 6,Crystal Palace,34.0,2026-11-17
+2026-2027,11,Top 6,Ipswich Town,41.0,2026-11-17
+2026-2027,11,Top 6,Hull City,67.0,2026-11-17
+2026-2027,11,Top 6,Coventry City,100.0,2026-11-17
+2026-2027,11,To Finish In Top Half,Arsenal,1.001,2026-11-17
+2026-2027,11,To Finish In Top Half,Brighton,1.02,2026-11-17
+2026-2027,11,To Finish In Top Half,Liverpool,1.02,2026-11-17
+2026-2027,11,To Finish In Top Half,Chelsea,1.05,2026-11-17
+2026-2027,11,To Finish In Top Half,Brentford,1.33,2026-11-17
+2026-2027,11,To Finish In Top Half,Spurs,1.4,2026-11-17
+2026-2027,11,To Finish In Top Half,Aston Villa,1.44,2026-11-17
+2026-2027,11,To Finish In Top Half,Bournemouth,1.5,2026-11-17
+2026-2027,11,To Finish In Top Half,Man City,1.57,2026-11-17
+2026-2027,11,To Finish In Top Half,Man Utd,1.57,2026-11-17
+2026-2027,11,To Finish In Top Half,Leeds,1.66,2026-11-17
+2026-2027,11,To Finish In Top Half,Everton,1.9,2026-11-17
+2026-2027,11,To Finish In Top Half,Newcastle,2.5,2026-11-17
+2026-2027,11,To Finish In Top Half,Nott'm Forest,3.0,2026-11-17
+2026-2027,11,To Finish In Top Half,Fulham,5.5,2026-11-17
+2026-2027,11,To Finish In Top Half,Sunderland,8.0,2026-11-17
+2026-2027,11,To Finish In Top Half,Crystal Palace,9.0,2026-11-17
+2026-2027,11,To Finish In Top Half,Ipswich Town,9.0,2026-11-17
+2026-2027,11,To Finish In Top Half,Coventry City,17.0,2026-11-17
+2026-2027,11,To Finish In Top Half,Hull City,17.0,2026-11-17
+2026-2027,11,Top 5,Arsenal,1.005,2026-11-17
+2026-2027,11,Top 5,Brighton,1.25,2026-11-17
+2026-2027,11,Top 5,Liverpool,1.25,2026-11-17
+2026-2027,11,Top 5,Chelsea,1.5,2026-11-17
+2026-2027,11,Top 5,Man City,1.72,2026-11-17
+2026-2027,11,Top 5,Brentford,4.0,2026-11-17
+2026-2027,11,Top 5,Spurs,4.0,2026-11-17
+2026-2027,11,Top 5,Aston Villa,4.5,2026-11-17
+2026-2027,11,Top 5,Man Utd,5.0,2026-11-17
+2026-2027,11,Top 5,Bournemouth,6.0,2026-11-17
+2026-2027,11,Top 5,Leeds,6.0,2026-11-17
+2026-2027,11,Top 5,Everton,7.0,2026-11-17
+2026-2027,11,Top 5,Newcastle,13.0,2026-11-17
+2026-2027,11,Top 5,Nott'm Forest,17.0,2026-11-17
+2026-2027,11,Top 5,Fulham,41.0,2026-11-17
+2026-2027,11,Top 5,Sunderland,41.0,2026-11-17
+2026-2027,11,Top 5,Crystal Palace,67.0,2026-11-17
+2026-2027,11,Top 5,Ipswich Town,67.0,2026-11-17
+2026-2027,11,Top 5,Coventry City,100.0,2026-11-17
+2026-2027,11,Top 5,Hull City,200.0,2026-11-17

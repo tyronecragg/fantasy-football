@@ -30,12 +30,13 @@ def sell_price(purchase, current):
 _LAST_SELL_MSG = None
 
 
-def apply_sell_prices(df, current_team_names, purchase_csv=PURCHASE_PRICES_CSV):
+def apply_sell_prices(df, current_team_names, purchase_csv=PURCHASE_PRICES_CSV, quiet=False):
     """Replace the Cost of currently-owned players with their SELL price, in place.
 
     Downstream this makes the optimiser exactly right: total resources = sum of owned
     players' sell prices (+ bank), keeping a player consumes his sell price, and buying
-    anyone else costs market price."""
+    anyone else costs market price. quiet=True drops the "sell prices applied" echo
+    (missing-data notes still print)."""
     if not os.path.exists(purchase_csv):
         print(f"  note: {os.path.basename(purchase_csv)} missing - owned players valued at market price")
         return df
@@ -56,7 +57,7 @@ def apply_sell_prices(df, current_team_names, purchase_csv=PURCHASE_PRICES_CSV):
         if abs(sp - market) > 1e-9:
             df.loc[rows[0], "Cost"] = sp
             adjustments.append(f"{name} {market:.1f}->{sp:.1f}")
-    if adjustments:
+    if adjustments and not quiet:
         msg = f"  sell prices applied: {', '.join(adjustments)}"
         # Several callers run per optimiser invocation (main optimise + timing plan); print the
         # identical line once, but reprint if the adjustments actually change.

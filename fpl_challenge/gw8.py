@@ -17,7 +17,8 @@ import challenge_core as cc
 LEGENDS_CSV = os.path.join(cc.INPUTS, "fpl_challenge_legends.csv")
 
 
-def main(confirmed_not_starting=None, confirmed_starting=None):
+def main(confirmed_not_starting=None, confirmed_starting=None, archive_gw=None,
+         snapshot_gw=None, current_team=None, captain=None, now=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-stack", dest="stack", action="store_false")
     ap.add_argument("--max-per-club", type=int, default=1)
@@ -25,11 +26,14 @@ def main(confirmed_not_starting=None, confirmed_starting=None):
                     dest="cns", help="players confirmed benched/out — removed from the pool")
     ap.add_argument("--confirmed-starting", nargs="*", default=[], metavar="NAME",
                     dest="cs", help="players confirmed in the XI — start set to 1.0")
+    ap.add_argument("--archive-gw", type=int, default=None,
+                    help="read this gameweek from the archive instead of the live master")
     args = ap.parse_args()
 
-    df = cc.load_players()
+    df = cc.load_players(archive_gw if archive_gw is not None else args.archive_gw, snapshot_gw, gw=8)
     df = cc.confirm_not_starting(df, list(confirmed_not_starting or []) + list(args.cns))
     df = cc.confirm_starting(df, list(confirmed_starting or []) + list(args.cs))
+    cc.set_live(df, current_team, captain, now)   # mid-week: lock what's already been played
     legends, missed = cc.match_names(df, pd.read_csv(LEGENDS_CSV)["Player"].dropna().astype(str))
     df["boosted"] = df["Player Name"].isin(legends)
     df["eff_xp"] = df[cc.XP_COL] * df["boosted"].map({True: 2.0, False: 1.0})
@@ -48,4 +52,9 @@ def main(confirmed_not_starting=None, confirmed_starting=None):
 if __name__ == "__main__":
     # As lineups are confirmed, list players here (or pass --confirmed-* on the command
     # line). Multi-word names are fine; matching is accent/case-insensitive.
-    main(confirmed_not_starting=[], confirmed_starting=[])
+    # snapshots/gw8.csv is used automatically when it exists (archive stays untouched).
+    # current_team / captain: your six as they stand now — anyone whose match has kicked off is
+    # locked in, and the armband can't move onto a match that's already started.
+    main(confirmed_not_starting=['Phil Foden', 'Bruno Fernandes', 'Marcus Rashford', 'Ryan Christie', 'David Brooks'],
+         confirmed_starting=['Jacob Murphy', 'Joelinton', 'Joe Willock', 'Lewis Cook', 'Amad Diallo'],
+         snapshot_gw=8, current_team=['Gabriel Magalhaes', 'Antonee Robinson', 'Erling Haaland'], captain=None)

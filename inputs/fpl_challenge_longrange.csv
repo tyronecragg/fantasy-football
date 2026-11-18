@@ -1,0 +1,764 @@
+understat_id,player,team,season,minutes,obox_shots,obox_sot,obox_goals,obox_xg
+8260,Erling Haaland,Manchester City,2026,711.0,1,0,0,0.048
+8260,Erling Haaland,Manchester City,2025,2979.0,13,3,1,0.863
+5232,Alexander Isak,Liverpool,2026,586.0,1,0,0,0.029
+5232,Alexander Isak,Liverpool,2025,717.0,2,0,0,0.084
+8272,João Pedro,Chelsea,2026,524.0,4,0,0,0.1
+8272,João Pedro,Chelsea,2025,2698.0,12,1,0,0.531
+10741,Marcus Tavernier,Bournemouth,2026,683.0,7,3,0,0.334
+10741,Marcus Tavernier,Bournemouth,2025,2779.0,39,12,2,1.382
+6552,Bryan Mbeumo,Manchester United,2026,720.0,6,3,2,0.554
+6552,Bryan Mbeumo,Manchester United,2025,2676.0,17,5,0,0.65
+8094,Mathis Cherki,Manchester City,2026,450.0,6,2,1,0.317
+8094,Mathis Cherki,Manchester City,2025,1792.0,20,4,2,0.899
+10048,Nicolas Jackson,Aston Villa,2026,561.0,4,0,0,0.199
+12412,Morgan Rogers,Chelsea,2026,710.0,10,3,2,0.411
+12412,Morgan Rogers,Chelsea,2025,3301.0,36,15,3,1.201
+239,Pascal Groß,Brighton,2026,703.0,7,1,1,0.149
+239,Pascal Groß,Brighton,2025,1635.0,11,5,0,0.488
+1228,Bruno Fernandes,Manchester United,2026,630.0,13,3,0,0.341
+1228,Bruno Fernandes,Manchester United,2025,3082.0,48,10,1,1.858
+5555,Dominic Calvert-Lewin,Leeds,2026,690.0,1,0,0,0.016
+5555,Dominic Calvert-Lewin,Leeds,2025,2732.0,5,1,0,0.099
+6382,Pedro Neto,Chelsea,2026,606.0,2,1,0,0.065
+6382,Pedro Neto,Chelsea,2025,2667.0,17,1,1,0.745
+7322,Bukayo Saka,Arsenal,2026,602.0,6,2,0,0.574
+7322,Bukayo Saka,Arsenal,2025,2239.0,23,5,1,0.709
+9156,Kevin Schade,Brentford,2026,605.0,2,1,1,0.208
+9156,Kevin Schade,Brentford,2025,2781.0,1,0,0,0.436
+9789,Brian Brobbey,Sunderland,2026,470.0,2,2,0,0.09
+9789,Brian Brobbey,Sunderland,2025,1943.0,2,0,0,0.081
+11269,Jack Hinshelwood,Brighton,2026,127.0,0,0,0,0.0
+11269,Jack Hinshelwood,Brighton,2025,1773.0,11,3,1,0.654
+12916,Thierno Barry,Everton,2026,695.0,1,0,0,0.032
+12916,Thierno Barry,Everton,2025,1921.0,3,2,0,0.077
+12963,Evanilson,Bournemouth,2026,694.0,5,2,1,0.602
+12963,Evanilson,Bournemouth,2025,2810.0,8,2,0,0.296
+14118,Charalampos Kostoulas,Brighton,2026,580.0,8,2,1,0.409
+14118,Charalampos Kostoulas,Brighton,2025,309.0,3,1,0,0.101
+14760,Mohamed Belloumi,Hull,2026,607.0,12,3,1,0.419
+605,Jordan Henderson,Chelsea,2026,360.0,5,3,2,0.228
+605,Jordan Henderson,Chelsea,2025,1935.0,4,0,0,0.101
+2517,Martin Odegaard,Arsenal,2026,661.0,7,1,0,0.296
+2517,Martin Odegaard,Arsenal,2025,1347.0,13,8,1,0.476
+5220,Kai Havertz,Arsenal,2026,598.0,2,2,1,0.07
+5220,Kai Havertz,Arsenal,2025,582.0,3,0,0,0.184
+6630,Joe Willock,Newcastle United,2026,489.0,7,2,1,0.263
+6630,Joe Willock,Newcastle United,2025,979.0,7,1,0,0.221
+6681,Harvey Barnes,Newcastle United,2026,708.0,8,1,0,0.34
+6681,Harvey Barnes,Newcastle United,2025,1947.0,21,4,1,0.987
+8214,Tyrick Mitchell,Crystal Palace,2026,700.0,3,1,0,0.042
+8214,Tyrick Mitchell,Crystal Palace,2025,3258.0,7,3,0,0.143
+8327,Bruno Guimarães,Arsenal,2026,236.0,2,2,2,0.09
+8327,Bruno Guimarães,Arsenal,2025,2467.0,22,8,3,0.754
+8497,Cole Palmer,Chelsea,2026,705.0,10,3,1,0.304
+8497,Cole Palmer,Chelsea,2025,2007.0,32,12,1,1.699
+8662,Dan Ndoye,Nottingham Forest,2026,558.0,2,0,0,0.069
+8662,Dan Ndoye,Nottingham Forest,2025,1184.0,6,1,0,0.193
+8919,Leif Davis,Ipswich,2026,720.0,1,0,0,0.054
+9205,Jayden Bogle,Leeds,2026,645.0,2,0,0,0.069
+9205,Jayden Bogle,Leeds,2025,2822.0,7,2,0,0.194
+9524,Anthony Elanga,Newcastle United,2026,253.0,1,1,0,0.024
+9524,Anthony Elanga,Newcastle United,2025,1289.0,5,3,0,0.171
+9680,Vitaly Janelt,Brentford,2026,630.0,1,0,0,0.012
+9680,Vitaly Janelt,Brentford,2025,1421.0,6,1,0,0.219
+9739,Kiernan Dewsbury-Hall,Everton,2026,718.0,11,2,0,0.715
+9739,Kiernan Dewsbury-Hall,Everton,2025,2649.0,15,4,1,0.559
+10809,Keane Lewis-Potter,Brentford,2026,657.0,3,0,0,0.061
+10809,Keane Lewis-Potter,Brentford,2025,1949.0,12,2,0,0.542
+11363,Antoine Semenyo,Manchester City,2026,551.0,1,0,0,0.019
+11363,Antoine Semenyo,Manchester City,2025,3220.0,23,11,4,1.022
+11385,Yasin Ayari,Brighton,2026,590.0,11,2,1,0.441
+11385,Yasin Ayari,Brighton,2025,1918.0,26,6,1,0.991
+12410,Joshua King,Fulham,2026,667.0,5,3,0,0.149
+12410,Joshua King,Fulham,2025,1306.0,8,2,0,0.393
+13102,Johan Manzambi,Aston Villa,2026,334.0,8,1,0,0.42
+13279,Víctor Muñoz,Liverpool,2026,440.0,3,2,0,0.058
+13711,Maxim De Cuyper,Brighton,2026,681.0,5,0,0,0.18
+13711,Maxim De Cuyper,Brighton,2025,1412.0,8,3,0,0.294
+13729,Zian Flemming,Ipswich,2026,108.0,2,2,0,0.068
+13729,Zian Flemming,Ipswich,2025,1795.0,11,5,2,0.313
+14082,Emersonn,Ipswich,2026,548.0,2,1,0,0.025
+14747,Jack Rudoni,Coventry,2026,569.0,3,0,0,0.167
+14856,Malick Yalcouyé,Brighton,2026,297.0,1,0,0,0.034
+500,Alex Iwobi,Fulham,2026,670.0,3,1,1,0.089
+500,Alex Iwobi,Fulham,2025,2473.0,21,8,2,0.559
+660,Ben Davies,Tottenham,2026,19.0,1,1,1,0.07
+660,Ben Davies,Tottenham,2025,137.0,0,0,0,0.0
+782,Ben Chilwell,Crystal Palace,2026,20.0,0,0,0,0.0
+1665,James Tarkowski,Everton,2026,720.0,1,0,0,0.016
+1665,James Tarkowski,Everton,2025,3330.0,0,0,0,0.0
+1679,Dominic Solanke,Tottenham,2026,384.0,3,0,0,0.169
+1679,Dominic Solanke,Tottenham,2025,989.0,1,1,0,0.096
+1736,Oliver McBurnie,Hull,2026,712.0,1,0,0,0.032
+1750,Ainsley Maitland-Niles,Everton,2026,317.0,2,1,1,0.046
+1790,Chuba Akpom,Ipswich,2026,102.0,0,0,0,0.0
+2182,Jefferson Lerma,Crystal Palace,2026,157.0,0,0,0,0.0
+2182,Jefferson Lerma,Crystal Palace,2025,1693.0,10,1,0,0.264
+2203,Emiliano Buendía,Aston Villa,2026,579.0,7,1,1,0.272
+2203,Emiliano Buendía,Aston Villa,2025,1778.0,33,8,3,1.433
+4490,Semi Ajayi,Hull,2026,696.0,0,0,0,0.0
+5613,Gabriel,Arsenal,2026,720.0,2,0,0,0.044
+5613,Gabriel,Arsenal,2025,2748.0,5,1,0,0.092
+5786,Yoane Wissa,Newcastle United,2026,625.0,5,1,0,0.136
+5786,Yoane Wissa,Newcastle United,2025,492.0,1,0,0,0.057
+6048,Lewis Dunk,Brighton,2026,568.0,1,1,1,0.02
+6048,Lewis Dunk,Brighton,2025,2831.0,3,0,0,0.098
+6055,Phil Foden,Manchester City,2026,341.0,4,0,0,0.159
+6055,Phil Foden,Manchester City,2025,2083.0,25,8,2,0.838
+6145,Daichi Kamada,Crystal Palace,2026,712.0,2,0,0,0.101
+6145,Daichi Kamada,Crystal Palace,2025,1924.0,8,2,0,0.228
+6818,James Maddison,Tottenham,2026,187.0,2,2,1,0.088
+6818,James Maddison,Tottenham,2025,25.0,1,0,0,0.059
+6837,Ryan Sessegnon,Fulham,2026,144.0,3,1,1,0.095
+6837,Ryan Sessegnon,Fulham,2025,1830.0,3,0,0,0.058
+6857,Morgan Gibbs-White,Nottingham Forest,2026,630.0,4,0,0,0.168
+6857,Morgan Gibbs-White,Nottingham Forest,2025,3142.0,29,11,2,1.121
+6963,Justin Kluivert,Bournemouth,2026,398.0,5,3,1,0.18
+6963,Justin Kluivert,Bournemouth,2025,934.0,11,2,1,0.468
+7080,Matheus Cunha,Manchester United,2026,553.0,9,2,1,0.211
+7080,Matheus Cunha,Manchester United,2025,2506.0,47,15,2,1.467
+7148,Wilson Isidor,Sunderland,2026,190.0,3,1,0,0.129
+7148,Wilson Isidor,Sunderland,2025,1142.0,5,2,0,0.113
+7603,Marc Guehi,Manchester City,2026,677.0,0,0,0,0.0
+7603,Marc Guehi,Manchester City,2025,3150.0,2,0,0,0.035
+7723,John McGinn,Aston Villa,2026,646.0,3,0,0,0.092
+7723,John McGinn,Aston Villa,2025,2221.0,15,6,4,0.861
+7726,Ezri Konsa Ngoyo,Arsenal,2026,550.0,0,0,0,0.0
+7726,Ezri Konsa Ngoyo,Arsenal,2025,3036.0,0,0,0,0.0
+7753,James Justin,Leeds,2026,712.0,3,1,0,0.054
+7753,James Justin,Leeds,2025,1895.0,9,2,0,0.157
+8129,Riccardo Calafiori,Arsenal,2026,619.0,2,0,0,0.169
+8129,Riccardo Calafiori,Arsenal,2025,1755.0,12,1,0,0.504
+8204,Neco Williams,Nottingham Forest,2026,716.0,6,1,0,0.217
+8204,Neco Williams,Nottingham Forest,2025,3203.0,31,12,1,0.774
+8393,Omar Marmoush,Tottenham,2026,523.0,8,1,1,0.637
+8393,Omar Marmoush,Tottenham,2025,693.0,9,1,0,0.576
+8582,Ellis Simms,Coventry,2026,115.0,0,0,0,0.0
+8635,Sven Botman,Newcastle United,2026,630.0,2,1,1,0.036
+8635,Sven Botman,Newcastle United,2025,1842.0,2,0,0,0.029
+8651,Enzo Le Fée,Sunderland,2026,695.0,8,0,0,0.181
+8651,Enzo Le Fée,Sunderland,2025,2953.0,18,3,0,0.591
+8685,Mohamed Ali-Cho,Hull,2026,85.0,0,0,0,0.0
+8756,Dara O'Shea,Ipswich,2026,720.0,0,0,0,0.0
+8868,Liam Delap,Nottingham Forest,2026,534.0,9,2,1,0.332
+8868,Liam Delap,Nottingham Forest,2025,1064.0,5,3,0,0.186
+8941,Jacob Ramsey,Newcastle United,2026,76.0,0,0,0,0.0
+8941,Jacob Ramsey,Newcastle United,2025,1421.0,6,2,1,0.257
+8981,Jéremy Doku,Manchester City,2026,212.0,2,1,1,0.157
+8981,Jéremy Doku,Manchester City,2025,1783.0,13,3,3,0.418
+9024,Yeremi Pino,Crystal Palace,2026,550.0,6,1,0,0.286
+9024,Yeremi Pino,Crystal Palace,2025,2134.0,20,5,1,0.989
+9040,Conor Gallagher,Tottenham,2026,264.0,2,0,0,0.028
+9040,Conor Gallagher,Tottenham,2025,1229.0,3,1,1,0.076
+9339,Joe Gelhardt,Hull,2026,94.0,3,0,0,0.071
+9501,Fabio Carvalho,Brentford,2026,2.0,0,0,0,0.0
+9501,Fabio Carvalho,Brentford,2025,97.0,1,0,0,0.041
+9556,William Osula,Newcastle United,2026,177.0,3,0,0,0.105
+9556,William Osula,Newcastle United,2025,777.0,6,2,1,0.706
+9662,Dango Ouattara,Brentford,2026,334.0,4,0,0,0.082
+9662,Dango Ouattara,Brentford,2025,2303.0,13,4,0,1.026
+9677,Kristoffer Ajer,Brentford,2026,720.0,0,0,0,0.0
+9677,Kristoffer Ajer,Brentford,2025,1809.0,2,0,0,0.042
+9780,Mathys Tel,Tottenham,2026,349.0,5,1,1,0.216
+9780,Mathys Tel,Tottenham,2025,1324.0,13,3,1,0.365
+9788,Dominik Szoboszlai,Liverpool,2026,472.0,13,4,0,0.561
+9788,Dominik Szoboszlai,Liverpool,2025,3236.0,52,18,4,1.915
+9790,Josko Gvardiol,Manchester City,2026,576.0,1,0,0,0.015
+9790,Josko Gvardiol,Manchester City,2025,1374.0,3,0,0,0.052
+9910,Anton Stach,Leeds,2026,653.0,5,1,1,0.204
+9910,Anton Stach,Leeds,2025,2394.0,36,10,4,1.198
+10004,Romeo Lavia,Chelsea,2026,290.0,0,0,0,0.0
+10004,Romeo Lavia,Chelsea,2025,366.0,2,0,0,0.048
+10216,Lewis Hall,Newcastle United,2026,720.0,3,2,0,0.063
+10216,Lewis Hall,Newcastle United,2025,2164.0,17,4,1,0.543
+10485,Guemissongui Ouattara,Ipswich,2026,394.0,2,2,1,0.021
+10746,Jaidon Anthony,Brentford,2026,473.0,5,0,0,0.119
+10746,Jaidon Anthony,Brentford,2025,2777.0,19,7,0,0.586
+10807,Jan Paul van Hecke,Tottenham,2026,720.0,0,0,0,0.0
+10807,Jan Paul van Hecke,Tottenham,2025,3214.0,7,1,0,0.194
+11058,Julio Enciso,Ipswich,2026,658.0,17,5,1,0.824
+11070,Jørgen Strand Larsen,Crystal Palace,2026,451.0,2,2,0,0.071
+11070,Jørgen Strand Larsen,Crystal Palace,2025,2353.0,8,1,0,0.267
+11281,Michael Kayode,Brentford,2026,574.0,2,0,0,0.04
+11281,Michael Kayode,Brentford,2025,3281.0,4,0,0,0.157
+11296,Cody Gakpo,Liverpool,2026,463.0,7,1,1,0.241
+11296,Cody Gakpo,Liverpool,2025,2758.0,29,4,0,0.907
+11344,Jaouen Hadjam,Brighton,2026,8.0,0,0,0,0.0
+11356,Enzo Fernández,"Chelsea,Manchester City",2026,483.0,5,3,1,0.273
+11356,Enzo Fernández,"Chelsea,Manchester City",2025,3149.0,34,13,2,1.607
+11357,Noni Madueke,Arsenal,2026,241.0,3,0,0,0.158
+11357,Noni Madueke,Arsenal,2025,1246.0,4,2,0,0.147
+11772,Yehor Yarmolyuk,Brentford,2026,336.0,3,1,0,0.068
+11772,Yehor Yarmolyuk,Brentford,2025,2679.0,10,2,0,0.31
+11903,Oscar Bobb,Fulham,2026,595.0,2,1,0,0.085
+11903,Oscar Bobb,Fulham,2025,1046.0,0,0,0,0.0
+11966,Noah Okafor,Leeds,2026,482.0,2,0,0,0.073
+11966,Noah Okafor,Leeds,2025,1592.0,8,3,1,0.218
+11974,Benjamin Sesko,Manchester United,2026,67.0,1,0,0,0.039
+11974,Benjamin Sesko,Manchester United,2025,1636.0,8,5,0,0.279
+12035,Gonzalo García,Fulham,2026,678.0,3,0,0,0.136
+12149,Alex Scott,Bournemouth,2026,449.0,6,1,1,0.32
+12149,Alex Scott,Bournemouth,2025,2915.0,30,8,1,1.085
+12286,Nobel Mendy,Hull,2026,350.0,3,2,0,0.034
+12573,Tyrique George,Everton,2026,461.0,6,1,0,0.121
+12573,Tyrique George,Everton,2025,328.0,3,1,0,0.102
+12847,Sidiki Chérif,Coventry,2026,241.0,3,1,1,0.102
+13019,Jack Clarke,Ipswich,2026,228.0,3,0,0,0.129
+13078,Chema Andres,Brighton,2026,347.0,2,0,0,0.019
+13222,Thiago,Brentford,2026,714.0,1,0,0,0.022
+13222,Thiago,Brentford,2025,3292.0,5,1,0,0.305
+13364,Diego Gómez,Brighton,2026,712.0,11,3,1,0.498
+13364,Diego Gómez,Brighton,2025,2186.0,16,3,0,0.569
+13427,Bazoumana Touré,Newcastle United,2026,104.0,1,1,0,0.01
+13725,Luka Vuskovic,Brighton,2026,709.0,5,0,0,0.138
+13778,Igor Jesus,Nottingham Forest,2026,251.0,0,0,0,0.0
+13778,Igor Jesus,Nottingham Forest,2025,2379.0,11,1,1,0.896
+14054,Stephen Mfuni,Coventry,2026,123.0,0,0,0,0.0
+14352,César Palacios,Fulham,2026,256.0,2,0,0,0.069
+14395,Rayan,Bournemouth,2026,716.0,6,1,0,0.158
+14395,Rayan,Bournemouth,2025,1146.0,15,3,1,0.519
+14424,Nilson Angulo,Sunderland,2026,490.0,3,3,1,0.159
+14424,Nilson Angulo,Sunderland,2025,415.0,2,2,0,0.04
+14446,Alysson Edward,Aston Villa,2026,184.0,0,0,0,0.0
+14446,Alysson Edward,Aston Villa,2025,34.0,0,0,0,0.0
+14743,Jay Dasilva,Coventry,2026,716.0,1,0,0,0.017
+14764,Liam Millar,Hull,2026,46.0,3,1,1,0.358
+14770,Anan Khalaili,Crystal Palace,2026,647.0,2,0,0,0.027
+14772,Daizen Maeda,Ipswich,2026,432.0,0,0,0,0.0
+76,Fabian Schär,Newcastle United,2026,110.0,0,0,0,0.0
+76,Fabian Schär,Newcastle United,2025,1096.0,10,2,0,0.265
+87,Joelinton,Newcastle United,2026,205.0,0,0,0,0.0
+87,Joelinton,Newcastle United,2025,1958.0,10,2,0,0.331
+181,Bernd Leno,Fulham,2026,720.0,0,0,0,0.0
+181,Bernd Leno,Fulham,2025,3420.0,1,0,0,0.0
+204,Granit Xhaka,Sunderland,2026,720.0,4,1,0,0.144
+204,Granit Xhaka,Sunderland,2025,2896.0,17,4,1,0.563
+212,Nico Elvedi,Leeds,2026,506.0,0,0,0,0.0
+335,Leon Goretzka,Aston Villa,2026,23.0,1,0,0,0.05
+468,Callum Wilson,Brentford,2026,19.0,0,0,0,0.0
+468,Callum Wilson,Brentford,2025,1229.0,6,4,2,0.539
+501,Danny Welbeck,Chelsea,2026,91.0,0,0,0,0.0
+501,Danny Welbeck,Chelsea,2025,2286.0,11,4,2,0.458
+556,Marcus Rashford,Manchester United,2026,360.0,5,1,0,0.127
+559,Paddy McNair,Hull,2026,24.0,0,0,0,0.0
+592,Ross Barkley,Aston Villa,2026,356.0,4,2,0,0.167
+592,Ross Barkley,Aston Villa,2025,818.0,9,3,0,0.224
+675,Jack Grealish,"Everton,Manchester City",2026,308.0,2,1,0,0.044
+675,Jack Grealish,"Everton,Manchester City",2025,1645.0,7,2,1,0.211
+702,Tammy Abraham,Aston Villa,2026,63.0,0,0,0,0.0
+702,Tammy Abraham,Aston Villa,2025,253.0,1,0,0,0.01
+725,Ola Aina,Nottingham Forest,2026,404.0,3,1,0,0.059
+725,Ola Aina,Nottingham Forest,2025,1595.0,8,1,0,0.179
+741,Jordan Pickford,Everton,2026,720.0,0,0,0,0.0
+741,Jordan Pickford,Everton,2025,3420.0,0,0,0,0.0
+825,Adam Smith,Bournemouth,2026,689.0,1,0,0,0.019
+825,Adam Smith,Bournemouth,2025,1079.0,0,0,0,0.0
+833,Virgil van Dijk,Liverpool,2026,720.0,0,0,0,0.0
+833,Virgil van Dijk,Liverpool,2025,3420.0,3,0,0,0.11
+884,Matt Targett,Hull,2026,3.0,0,0,0,0.0
+987,Joseph Gomez,Liverpool,2026,2.0,0,0,0,0.0
+987,Joseph Gomez,Liverpool,2025,577.0,1,0,0,0.013
+1006,Luke Shaw,Manchester United,2026,429.0,2,0,0,0.053
+1006,Luke Shaw,Manchester United,2025,3269.0,4,1,0,0.141
+1024,Tyrone Mings,Aston Villa,2026,437.0,1,0,0,0.016
+1024,Tyrone Mings,Aston Villa,2025,1314.0,0,0,0,0.0
+1045,Matt Grimes,Coventry,2026,710.0,5,0,0,0.118
+1116,Gianluigi Donnarumma,Manchester City,2026,720.0,1,0,0,0.0
+1116,Gianluigi Donnarumma,Manchester City,2025,3060.0,0,0,0,0.0
+1257,Alisson,Liverpool,2026,720.0,0,0,0,0.0
+1257,Alisson,Liverpool,2025,2340.0,0,0,0,0.0
+1433,Federico Chiesa,Liverpool,2026,1.0,0,0,0,0.0
+1433,Federico Chiesa,Liverpool,2025,247.0,4,1,0,0.193
+1537,Sasa Lukic,Ipswich,2026,501.0,1,0,0,0.038
+1537,Sasa Lukic,Ipswich,2025,1731.0,8,2,0,0.27
+1653,Michael Keane,Everton,2026,90.0,0,0,0,0.0
+1653,Michael Keane,Everton,2025,2586.0,3,1,0,0.108
+1687,Harry Maguire,Manchester United,2026,720.0,4,2,0,0.066
+1687,Harry Maguire,Manchester United,2025,1666.0,0,0,0,0.0
+1688,Andrew Robertson,Tottenham,2026,504.0,1,0,0,0.027
+1688,Andrew Robertson,Tottenham,2025,1160.0,4,0,0,0.135
+1789,Lewis Cook,Bournemouth,2026,337.0,1,0,0,0.092
+1789,Lewis Cook,Bournemouth,2025,841.0,3,0,0,0.06
+2254,Mateo Kovacic,Manchester City,2026,91.0,0,0,0,0.0
+2254,Mateo Kovacic,Manchester City,2025,120.0,2,0,0,0.092
+3203,Issa Diop,Ipswich,2026,720.0,0,0,0,0.0
+3203,Issa Diop,Ipswich,2025,810.0,0,0,0,0.0
+3645,Olivier Boscagli,Brighton,2026,641.0,4,1,0,0.101
+3645,Olivier Boscagli,Brighton,2025,801.0,0,0,0,0.0
+4391,Darnell Furlong,Ipswich,2026,15.0,0,0,0,0.0
+4401,Emiliano Martinez,Chelsea,2026,528.0,0,0,0,0.0
+4401,Emiliano Martinez,Chelsea,2025,2837.0,0,0,0,0.0
+4456,Chris Wood,Nottingham Forest,2026,72.0,1,0,0,0.059
+4456,Chris Wood,Nottingham Forest,2025,913.0,1,1,0,0.066
+5261,Kevin Danso,Sunderland,2026,376.0,0,0,0,0.0
+5261,Kevin Danso,Sunderland,2025,1489.0,0,0,0,0.0
+5304,Mikel Merino,Arsenal,2026,163.0,4,1,0,0.207
+5304,Mikel Merino,Arsenal,2025,1002.0,4,2,0,0.146
+5553,Declan Rice,Arsenal,2026,680.0,5,0,0,0.117
+5553,Declan Rice,Arsenal,2025,3111.0,27,7,1,0.898
+5584,Aaron Wan-Bissaka,Aston Villa,2026,277.0,0,0,0,0.0
+5584,Aaron Wan-Bissaka,Aston Villa,2025,2093.0,0,0,0,0.0
+5590,Tosin Adarabioyo,Tottenham,2026,77.0,0,0,0,0.0
+5590,Tosin Adarabioyo,Tottenham,2025,791.0,0,0,0,0.0
+5595,Daniel James,Leeds,2026,46.0,4,0,0,0.146
+5595,Daniel James,Leeds,2025,538.0,9,1,0,0.196
+5596,Harry Wilson,Leeds,2026,224.0,1,0,0,0.013
+5596,Harry Wilson,Leeds,2025,2751.0,39,14,4,1.641
+5652,Walter Benítez,Crystal Palace,2026,450.0,0,0,0,0.0
+5652,Walter Benítez,Crystal Palace,2025,90.0,0,0,0,0.0
+5659,Nordi Mukiele,Sunderland,2026,593.0,5,1,0,0.086
+5659,Nordi Mukiele,Sunderland,2025,2793.0,9,1,1,0.195
+5675,Ismaila Sarr,Crystal Palace,2026,8.0,0,0,0,0.0
+5675,Ismaila Sarr,Crystal Palace,2025,2181.0,10,4,0,0.367
+5680,Thomas Meunier,Sunderland,2026,446.0,4,2,0,0.11
+5722,Ibrahim Sangare,Nottingham Forest,2026,130.0,2,0,0,0.023
+5722,Ibrahim Sangare,Nottingham Forest,2025,2111.0,12,3,1,0.304
+5735,Jean-Philippe Mateta,Crystal Palace,2026,157.0,1,0,0,0.141
+5735,Jean-Philippe Mateta,Crystal Palace,2025,2225.0,13,5,0,1.182
+5789,Boubacar Kamara,Aston Villa,2026,720.0,0,0,0,0.0
+5789,Boubacar Kamara,Aston Villa,2025,1434.0,2,2,1,0.077
+5956,Youri Tielemans,Manchester United,2026,601.0,6,2,0,0.133
+5956,Youri Tielemans,Manchester United,2025,1861.0,16,6,0,0.383
+5973,Kenny Tete,Fulham,2026,123.0,0,0,0,0.0
+5973,Kenny Tete,Fulham,2025,1805.0,7,2,1,0.149
+6026,Richarlison,Tottenham,2026,69.0,0,0,0,0.0
+6026,Richarlison,Tottenham,2025,1926.0,5,2,1,0.147
+6063,Jacob Murphy,Newcastle United,2026,329.0,3,0,0,0.053
+6063,Jacob Murphy,Newcastle United,2025,1630.0,22,5,1,0.679
+6080,Victor Lindelöf,Aston Villa,2026,720.0,1,0,0,0.0
+6080,Victor Lindelöf,Aston Villa,2025,938.0,0,0,0,0.0
+6104,Will Hughes,Crystal Palace,2026,27.0,0,0,0,0.0
+6104,Will Hughes,Crystal Palace,2025,1567.0,10,0,0,0.493
+6108,Rodrigo Bentancur,Tottenham,2026,390.0,0,0,0,0.0
+6108,Rodrigo Bentancur,Tottenham,2025,1931.0,6,0,0,0.17
+6157,Timothy Castagne,Fulham,2026,592.0,1,0,0,0.039
+6157,Timothy Castagne,Fulham,2025,1849.0,0,0,0,0.0
+6174,Nikola Milenkovic,Nottingham Forest,2026,360.0,0,0,0,0.0
+6174,Nikola Milenkovic,Nottingham Forest,2025,3360.0,4,0,0,0.04
+6221,Pau Torres,Aston Villa,2026,294.0,0,0,0,0.0
+6221,Pau Torres,Aston Villa,2025,1679.0,1,0,0,0.0
+6314,Joachim Andersen,Fulham,2026,190.0,0,0,0,0.0
+6314,Joachim Andersen,Fulham,2025,2882.0,4,2,0,0.052
+6369,Ethan Ampadu,Leeds,2026,720.0,3,1,0,0.054
+6369,Ethan Ampadu,Leeds,2025,3130.0,16,3,0,0.474
+6377,Joe Rodon,Leeds,2026,123.0,0,0,0,0.0
+6377,Joe Rodon,Leeds,2025,2954.0,0,0,0,0.0
+6456,Callum Hudson-Odoi,Nottingham Forest,2026,33.0,0,0,0,0.0
+6456,Callum Hudson-Odoi,Nottingham Forest,2025,1857.0,12,2,1,0.295
+6482,Eddie Nketiah,Crystal Palace,2026,241.0,0,0,0,0.0
+6482,Eddie Nketiah,Crystal Palace,2025,396.0,2,1,0,0.119
+6544,Lukas Nmecha,Leeds,2026,83.0,0,0,0,0.0
+6544,Lukas Nmecha,Leeds,2025,1076.0,1,1,0,0.016
+6691,Dejan Kulusevski,Tottenham,2026,2.0,0,0,0,0.0
+6756,Dwight McNeil,Crystal Palace,2026,195.0,1,0,0,0.025
+6756,Dwight McNeil,Crystal Palace,2025,1184.0,13,4,0,0.464
+6807,Jaka Bijol,Leeds,2026,258.0,0,0,0,0.0
+6807,Jaka Bijol,Leeds,2025,1895.0,0,0,0,0.0
+6820,David Brooks,Bournemouth,2026,82.0,0,0,0,0.0
+6820,David Brooks,Bournemouth,2025,1191.0,15,3,0,0.75
+6835,Tom Cairney,Fulham,2026,18.0,1,1,0,0.07
+6835,Tom Cairney,Fulham,2025,747.0,13,2,2,0.542
+6885,Axel Disasi,Crystal Palace,2026,228.0,1,0,0,0.016
+6885,Axel Disasi,Crystal Palace,2025,1258.0,2,1,0,0.013
+6903,Matz Sels,Nottingham Forest,2026,720.0,0,0,0,0.0
+6903,Matz Sels,Nottingham Forest,2025,2672.0,0,0,0,0.0
+6912,Pedro Porro,Tottenham,2026,223.0,6,0,0,0.135
+6912,Pedro Porro,Tottenham,2025,2815.0,19,3,0,0.509
+6937,Georginio Rutter,Brighton,2026,133.0,2,1,0,0.051
+6937,Georginio Rutter,Brighton,2025,1784.0,17,7,0,0.555
+7078,Sean Longstaff,Leeds,2026,15.0,1,1,0,0.024
+7078,Sean Longstaff,Leeds,2025,999.0,7,1,0,0.267
+7083,Christian Nørgaard,Everton,2026,2.0,0,0,0,0.0
+7083,Christian Nørgaard,Everton,2025,93.0,2,1,0,0.069
+7166,Mathias Jensen,Brentford,2026,232.0,2,1,0,0.087
+7166,Mathias Jensen,Brentford,2025,2258.0,21,5,2,0.653
+7230,Emile Smith-Rowe,Fulham,2026,33.0,0,0,0,0.0
+7230,Emile Smith-Rowe,Fulham,2025,1933.0,8,2,0,0.32
+7254,Viktor Gyokeres,Arsenal,2026,138.0,0,0,0,0.0
+7254,Viktor Gyokeres,Arsenal,2025,2255.0,5,2,1,0.31
+7268,Bafode Diakite,Bournemouth,2026,2.0,0,0,0,0.0
+7268,Bafode Diakite,Bournemouth,2025,1276.0,0,0,0,0.0
+7277,Ryan John Giles,Hull,2026,603.0,1,0,0,0.03
+7281,Diogo Dalot,Manchester United,2026,562.0,4,0,0,0.081
+7281,Diogo Dalot,Manchester United,2025,2614.0,10,2,0,0.236
+7298,Ben White,Arsenal,2026,543.0,0,0,0,0.0
+7298,Ben White,Arsenal,2025,703.0,2,0,0,0.031
+7352,Tyler Adams,Bournemouth,2026,556.0,1,1,0,0.016
+7352,Tyler Adams,Bournemouth,2025,1805.0,7,3,1,0.206
+7382,Dan Burn,Newcastle United,2026,92.0,0,0,0,0.0
+7382,Dan Burn,Newcastle United,2025,2205.0,1,0,0,0.024
+7432,Reinildo,Sunderland,2026,615.0,0,0,0,0.0
+7432,Reinildo,Sunderland,2025,1974.0,2,0,0,0.094
+7438,James Garner,Everton,2026,601.0,5,2,0,0.204
+7438,James Garner,Everton,2025,3417.0,31,8,1,0.909
+7526,Martín Zubimendi,Arsenal,2026,88.0,0,0,0,0.0
+7526,Martín Zubimendi,Arsenal,2025,3040.0,8,3,2,0.319
+7589,Wesley Fofana,Chelsea,2026,320.0,0,0,0,0.0
+7589,Wesley Fofana,Chelsea,2025,1745.0,0,0,0,0.0
+7702,Dean Henderson,Crystal Palace,2026,270.0,0,0,0,0.0
+7702,Dean Henderson,Crystal Palace,2025,3330.0,0,0,0,0.0
+7703,John Egan,Hull,2026,713.0,1,1,0,0.005
+7768,Mason Mount,Manchester United,2026,114.0,3,1,0,0.078
+7768,Mason Mount,Manchester United,2025,1021.0,7,2,1,0.213
+7783,Xaver Schlager,Nottingham Forest,2026,626.0,6,0,0,0.148
+7814,Taiwo Awoniyi,Coventry,2026,282.0,1,0,0,0.294
+7814,Taiwo Awoniyi,Coventry,2025,441.0,1,0,0,0.051
+7904,Caoimhin Kelleher,Brentford,2026,720.0,0,0,0,0.0
+7904,Caoimhin Kelleher,Brentford,2025,3330.0,0,0,0,0.0
+7931,Takehiro Tomiyasu,Crystal Palace,2026,189.0,0,0,0,0.0
+7958,Sandro Tonali,Tottenham,2026,706.0,10,1,0,0.265
+7958,Sandro Tonali,Tottenham,2025,2586.0,29,4,0,0.688
+8006,Evann Guessand,Crystal Palace,2026,49.0,1,1,0,0.04
+8006,Evann Guessand,Crystal Palace,2025,920.0,0,0,0,0.0
+8044,Joshua Zirkzee,Manchester United,2026,65.0,1,0,0,0.033
+8044,Joshua Zirkzee,Manchester United,2025,573.0,4,2,1,0.26
+8056,Arnaud Kalimuendo Muinga,Nottingham Forest,2026,15.0,0,0,0,0.0
+8056,Arnaud Kalimuendo Muinga,Nottingham Forest,2025,75.0,1,0,0,0.019
+8067,Reece James,Chelsea,2026,290.0,8,4,0,0.251
+8067,Reece James,Chelsea,2025,1927.0,19,6,1,0.66
+8091,Ronald Araújo,Liverpool,2026,504.0,0,0,0,0.0
+8117,Nick Woltemade,Newcastle United,2026,18.0,0,0,0,0.0
+8117,Nick Woltemade,Newcastle United,2025,1953.0,3,1,0,0.355
+8127,Amad Diallo Traore,Manchester United,2026,229.0,3,0,0,0.064
+8127,Amad Diallo Traore,Manchester United,2025,2341.0,17,9,1,0.658
+8190,Melvin Bard,Leeds,2026,15.0,0,0,0,0.0
+8211,Amine Adli,Bournemouth,2026,6.0,0,0,0,0.0
+8211,Amine Adli,Bournemouth,2025,1036.0,7,3,0,0.218
+8252,Nicolás Domínguez,Nottingham Forest,2026,79.0,0,0,0,0.0
+8252,Nicolás Domínguez,Nottingham Forest,2025,1210.0,10,2,0,0.284
+8285,Sander Berge,Fulham,2026,555.0,3,1,0,0.141
+8285,Sander Berge,Fulham,2025,2935.0,8,2,0,0.256
+8325,Exequiel Palacios,Ipswich,2026,484.0,0,0,0,0.0
+8372,Lucas Gourna Douath,Hull,2026,132.0,1,0,0,0.011
+8378,Malick Thiaw,Newcastle United,2026,631.0,1,0,0,0.0
+8378,Malick Thiaw,Newcastle United,2025,2968.0,2,1,0,0.048
+8379,Alexis Mac Allister,Liverpool,2026,581.0,8,2,0,0.324
+8379,Alexis Mac Allister,Liverpool,2025,2683.0,23,5,0,0.793
+8397,Florian Wirtz,Liverpool,2026,630.0,5,1,0,0.3
+8397,Florian Wirtz,Liverpool,2025,2426.0,17,2,0,0.672
+8401,Luca Netz,Nottingham Forest,2026,25.0,0,0,0,0.0
+8401,Luca Netz,Nottingham Forest,2025,348.0,0,0,0,0.0
+8409,Juanlu Sanchez,Bournemouth,2026,16.0,0,0,0,0.0
+8430,Chris Richards,Crystal Palace,2026,720.0,1,1,0,0.034
+8430,Chris Richards,Crystal Palace,2025,2819.0,0,0,0,0.0
+8476,Jarrad Branthwaite,Everton,2026,630.0,0,0,0,0.0
+8476,Jarrad Branthwaite,Everton,2025,682.0,1,0,0,0.024
+8483,Bobby Thomas,Coventry,2026,682.0,2,0,0,0.017
+8489,Jorge Cuenca,Fulham,2026,90.0,0,0,0,0.0
+8489,Jorge Cuenca,Fulham,2025,949.0,0,0,0,0.0
+8640,Adrien Truffert,Bournemouth,2026,716.0,4,1,0,0.087
+8640,Adrien Truffert,Bournemouth,2025,3391.0,9,3,0,0.219
+8706,Eberechi Eze,Arsenal,2026,211.0,2,0,0,0.062
+8706,Eberechi Eze,Arsenal,2025,1928.0,32,7,2,0.984
+8717,Pascal Struijk,Brighton,2026,158.0,0,0,0,0.0
+8717,Pascal Struijk,Brighton,2025,2940.0,2,0,0,0.067
+8831,Iyenoma Destiny Udogie,Tottenham,2026,160.0,0,0,0,0.0
+8831,Iyenoma Destiny Udogie,Tottenham,2025,1342.0,0,0,0,0.0
+8852,Konstantinos Tsimikas,Liverpool,2026,64.0,1,1,0,0.044
+8853,Maxence Lacroix,Chelsea,2026,632.0,0,0,0,0.0
+8853,Maxence Lacroix,Chelsea,2025,3094.0,2,0,0,0.021
+8859,Mikkel Damsgaard,Brentford,2026,316.0,1,0,0,0.021
+8859,Mikkel Damsgaard,Brentford,2025,2085.0,14,4,0,0.894
+8864,Matthew Cash,Aston Villa,2026,561.0,1,0,0,0.018
+8864,Matthew Cash,Aston Villa,2025,3040.0,22,6,2,0.475
+8872,Matteo Ruggeri,Aston Villa,2026,158.0,1,0,0,0.025
+8940,Antonee Robinson,Fulham,2026,617.0,3,0,0,0.28
+8940,Antonee Robinson,Fulham,2025,1484.0,3,0,0,0.054
+8942,Aaron Hickey,Brentford,2026,259.0,1,1,0,0.02
+8942,Aaron Hickey,Brentford,2025,668.0,3,0,0,0.063
+8961,Rúben Dias,Manchester City,2026,720.0,2,2,0,0.038
+8961,Rúben Dias,Manchester City,2025,2142.0,4,1,1,0.098
+8969,Florentino Luís,Ipswich,2026,248.0,0,0,0,0.0
+8969,Florentino Luís,Ipswich,2025,2146.0,11,1,0,0.26
+8986,Omar Alderete,Sunderland,2026,123.0,0,0,0,0.0
+8986,Omar Alderete,Sunderland,2025,2808.0,7,3,0,0.161
+9011,Óscar Mingueza,Crystal Palace,2026,15.0,0,0,0,0.0
+9017,Malo Gusto,Chelsea,2026,275.0,2,0,0,0.063
+9017,Malo Gusto,Chelsea,2025,2306.0,6,1,0,0.118
+9077,James Trafford,Leeds,2026,720.0,0,0,0,0.0
+9077,James Trafford,Leeds,2025,360.0,0,0,0,0.0
+9098,Robert Sánchez,Chelsea,2026,90.0,0,0,0,0.0
+9098,Robert Sánchez,Chelsea,2025,3054.0,0,0,0,0.0
+9154,Elliot Anderson,Manchester City,2026,609.0,5,1,0,0.108
+9154,Elliot Anderson,Manchester City,2025,3329.0,27,5,1,0.717
+9251,Christian Walton,Ipswich,2026,360.0,0,0,0,0.0
+9307,Iliman Ndiaye,"Everton,Manchester City",2026,607.0,5,2,0,0.167
+9307,Iliman Ndiaye,"Everton,Manchester City",2025,2805.0,15,7,1,0.75
+9328,Jeremie Frimpong,Liverpool,2026,201.0,1,0,0,0.013
+9328,Jeremie Frimpong,Liverpool,2025,1027.0,3,0,0,0.086
+9409,Kaine Hayden,Coventry,2026,1.0,0,0,0,0.0
+9415,Jaden Philogene-Bidace,Ipswich,2026,173.0,2,1,0,0.029
+9453,Moisés Caicedo,Chelsea,2026,268.0,0,0,0,0.0
+9453,Moisés Caicedo,Chelsea,2025,2811.0,20,4,2,0.552
+9499,Cody Drameh,Hull,2026,60.0,1,0,0,0.041
+9509,Daniel Jebbison,Bournemouth,2026,29.0,0,0,0,0.0
+9512,Valentino Livramento,Newcastle United,2026,31.0,0,0,0,0.0
+9512,Valentino Livramento,Newcastle United,2025,1323.0,2,0,0,0.062
+9554,Tim Iroegbunam,"Everton,Hull",2026,197.0,1,0,0,0.02
+9554,Tim Iroegbunam,"Everton,Hull",2025,1496.0,7,0,0,0.253
+9614,Marco Bizot,Aston Villa,2026,90.0,0,0,0,0.0
+9614,Marco Bizot,Aston Villa,2025,583.0,0,0,0,0.0
+9676,David Raya,Arsenal,2026,720.0,0,0,0,0.0
+9676,David Raya,Arsenal,2025,3330.0,0,0,0,0.0
+9678,Ethan Pinnock,Coventry,2026,550.0,0,0,0,0.0
+9678,Ethan Pinnock,Coventry,2025,330.0,1,0,0,0.0
+9679,Rico Henry,Brentford,2026,1.0,0,0,0,0.0
+9679,Rico Henry,Brentford,2025,1315.0,4,0,0,0.058
+9681,Frank Onyeka,Coventry,2026,376.0,1,0,0,0.035
+9681,Frank Onyeka,Coventry,2025,68.0,0,0,0,0.0
+9733,Nathan Collins,Brentford,2026,196.0,0,0,0,0.0
+9733,Nathan Collins,Brentford,2025,2966.0,2,0,0,0.033
+9746,Christos Tzolis,Arsenal,2026,371.0,2,1,0,0.107
+9767,Habib Diarra,Sunderland,2026,61.0,1,0,0,0.015
+9767,Habib Diarra,Sunderland,2025,1414.0,9,0,0,0.311
+9802,Nico González,Newcastle United,2026,440.0,2,0,0,0.036
+9802,Nico González,Newcastle United,2025,1576.0,11,2,1,0.383
+9887,Michael Svoboda,Brighton,2026,4.0,0,0,0,0.0
+9911,Piero Hincapié,Arsenal,2026,31.0,0,0,0,0.0
+9911,Piero Hincapié,Arsenal,2025,1786.0,3,1,0,0.029
+9944,Gabriel Gudmundsson,Leeds,2026,525.0,1,0,0,0.01
+9944,Gabriel Gudmundsson,Leeds,2025,2657.0,8,0,0,0.125
+9960,Kjell Scherpen,Ipswich,2026,360.0,0,0,0,0.0
+9977,Loum Tchaouna,Coventry,2026,214.0,4,0,0,0.084
+9977,Loum Tchaouna,Coventry,2025,1268.0,14,5,1,0.387
+9978,Azor Matusiwa,Ipswich,2026,20.0,0,0,0,0.0
+9983,Beto,Everton,2026,25.0,2,0,0,0.11
+9983,Beto,Everton,2025,1552.0,1,0,0,0.013
+10016,Bradley Barcola,Liverpool,2026,428.0,4,0,0,0.606
+10024,Cristhian Mosquera,Arsenal,2026,170.0,0,0,0,0.0
+10024,Cristhian Mosquera,Arsenal,2025,976.0,0,0,0,0.0
+10025,Lamare Bogarde,Aston Villa,2026,11.0,0,0,0,0.0
+10025,Lamare Bogarde,Aston Villa,2025,1011.0,0,0,0,0.0
+10050,Micky van de Ven,Tottenham,2026,556.0,0,0,0,0.0
+10050,Micky van de Ven,Tottenham,2025,3049.0,2,0,0,0.059
+10126,James McAtee,Nottingham Forest,2026,695.0,12,4,0,0.358
+10126,James McAtee,Nottingham Forest,2025,263.0,1,0,0,0.013
+10166,Kasey McAteer,Ipswich,2026,36.0,1,1,0,0.022
+10184,Archie Gray,Tottenham,2026,585.0,1,0,0,0.012
+10184,Archie Gray,Tottenham,2025,1497.0,3,0,0,0.116
+10291,Vitalii Mykolenko,Everton,2026,616.0,0,0,0,0.0
+10291,Vitalii Mykolenko,Everton,2025,2963.0,9,2,0,0.155
+10527,Carlos Baleba,Manchester United,2026,181.0,3,0,0,0.068
+10527,Carlos Baleba,Manchester United,2025,1692.0,18,1,0,0.425
+10552,Alejandro Garnacho,Aston Villa,2026,26.0,0,0,0,0.0
+10552,Alejandro Garnacho,Aston Villa,2025,1285.0,9,0,0,0.297
+10564,Leny Yoro,Manchester United,2026,256.0,0,0,0,0.0
+10564,Leny Yoro,Manchester United,2025,1736.0,0,0,0,0.0
+10586,Tyler Dibling,Everton,2026,40.0,1,1,0,0.061
+10586,Tyler Dibling,Everton,2025,337.0,1,0,0,0.021
+10696,Noussair Mazraoui,Manchester United,2026,140.0,0,0,0,0.0
+10696,Noussair Mazraoui,Manchester United,2025,990.0,4,0,0,0.134
+10697,Ryan Gravenberch,Liverpool,2026,342.0,5,2,0,0.106
+10697,Ryan Gravenberch,Liverpool,2025,3008.0,30,10,3,0.877
+10717,Rodrigo Muniz,Fulham,2026,58.0,2,1,0,0.025
+10717,Rodrigo Muniz,Fulham,2025,1001.0,5,0,0,0.243
+10721,Sepp van den Berg,Brentford,2026,171.0,0,0,0,0.0
+10721,Sepp van den Berg,Brentford,2025,2758.0,1,0,0,0.013
+10744,Ryan Christie,Bournemouth,2026,273.0,2,1,0,0.038
+10744,Ryan Christie,Bournemouth,2025,942.0,17,2,0,0.474
+10747,James Hill,Bournemouth,2026,720.0,2,0,0,0.051
+10747,James Hill,Bournemouth,2025,2100.0,5,0,0,0.041
+10751,Brenden Aaronson,Leeds,2026,280.0,1,1,0,0.019
+10751,Brenden Aaronson,Leeds,2025,2517.0,21,4,1,1.005
+10760,Brennan Johnson,Everton,2026,387.0,0,0,0,0.0
+10760,Brennan Johnson,Everton,2025,1709.0,8,0,0,0.325
+10802,Lisandro Martínez,Manchester United,2026,521.0,7,3,0,0.13
+10802,Lisandro Martínez,Manchester United,2025,1217.0,5,0,0,0.054
+10805,Levi Colwill,Chelsea,2026,614.0,0,0,0,0.0
+10805,Levi Colwill,Chelsea,2025,210.0,0,0,0,0.0
+10830,Jean Négoce,Leeds,2026,2.0,0,0,0,0.0
+10847,Rico Lewis,Manchester City,2026,102.0,0,0,0,0.0
+10847,Rico Lewis,Manchester City,2025,389.0,2,0,0,0.08
+10864,Marcos Senesi,Tottenham,2026,179.0,0,0,0,0.0
+10864,Marcos Senesi,Tottenham,2025,3298.0,7,2,0,0.152
+11000,Matheus Nunes,Manchester City,2026,379.0,0,0,0,0.0
+11000,Matheus Nunes,Manchester City,2025,2865.0,5,0,0,0.082
+11087,Pep Chavarría,Chelsea,2026,287.0,0,0,0,0.0
+11167,Chadi Riad,Crystal Palace,2026,77.0,0,0,0,0.0
+11167,Chadi Riad,Crystal Palace,2025,562.0,0,0,0,0.0
+11174,Kobbie Mainoo,Manchester United,2026,450.0,5,0,0,0.166
+11174,Kobbie Mainoo,Manchester United,2025,1623.0,11,3,1,0.285
+11186,Alvaro Rodríguez,Bournemouth,2026,28.0,1,0,0,0.033
+11231,Ben Doak,Bournemouth,2026,74.0,2,0,0,0.121
+11231,Ben Doak,Bournemouth,2025,82.0,1,0,0,0.023
+11297,Carlos Alcaraz,Everton,2026,5.0,1,0,0,0.015
+11297,Carlos Alcaraz,Everton,2025,681.0,7,0,0,0.22
+11305,Mykhailo Mudryk,Tottenham,2026,15.0,0,0,0,0.0
+11331,Merlin Röhl,Everton,2026,437.0,0,0,0,0.0
+11331,Merlin Röhl,Everton,2025,650.0,6,1,1,0.26
+11384,João Gomes,Aston Villa,2026,376.0,0,0,0,0.0
+11384,João Gomes,Aston Villa,2025,2845.0,11,4,0,0.462
+11386,Lewis Miley,Newcastle United,2026,556.0,2,0,0,0.05
+11386,Lewis Miley,Newcastle United,2025,1470.0,4,1,0,0.159
+11461,Romaine Mundle,Sunderland,2026,1.0,0,0,0,0.0
+11461,Romaine Mundle,Sunderland,2025,370.0,2,1,0,0.062
+11504,Eli Junior Kroupi,Bournemouth,2026,1.0,0,0,0,0.0
+11504,Eli Junior Kroupi,Bournemouth,2025,1708.0,20,6,3,0.761
+11545,Jérémy Jacquet,Liverpool,2026,690.0,1,0,0,0.018
+11551,Marco Palestra,Chelsea,2026,42.0,0,0,0,0.0
+11592,Nico O'Reilly,Manchester City,2026,292.0,1,0,0,0.01
+11592,Nico O'Reilly,Manchester City,2025,2646.0,9,2,1,0.354
+11594,Shea Charles,Fulham,2026,557.0,3,0,0,0.088
+11707,Jurriën Timber,Arsenal,2026,148.0,0,0,0,0.0
+11707,Jurriën Timber,Arsenal,2025,2475.0,1,0,0,0.018
+11709,Milos Kerkez,Liverpool,2026,657.0,3,1,0,0.08
+11709,Milos Kerkez,Liverpool,2025,2271.0,3,0,0,0.094
+11711,Bart Verbruggen,Brighton,2026,720.0,0,0,0,0.0
+11711,Bart Verbruggen,Brighton,2025,3420.0,1,0,0,0.0
+11728,Calvin Bassey,Fulham,2026,720.0,2,0,0,0.037
+11728,Calvin Bassey,Fulham,2025,2523.0,3,0,0,0.078
+11735,Sávio,Tottenham,2026,332.0,1,1,0,0.023
+11735,Sávio,Tottenham,2025,792.0,0,0,0,0.0
+11763,Abduqodir Khusanov,Manchester City,2026,372.0,1,1,0,0.022
+11763,Abduqodir Khusanov,Manchester City,2025,1421.0,4,0,0,0.06
+11807,Ian Maatsen,Aston Villa,2026,433.0,1,0,0,0.025
+11807,Ian Maatsen,Aston Villa,2025,1587.0,8,1,0,0.25
+11808,Andrey Santos,Manchester United,2026,260.0,0,0,0,0.0
+11808,Andrey Santos,Manchester United,2025,1217.0,2,0,0,0.107
+11839,Gustavo Hamer,Coventry,2026,38.0,0,0,0,0.0
+11911,Hugo Larsson,Fulham,2026,99.0,0,0,0,0.0
+11944,Patrick Dorgu,Manchester United,2026,169.0,0,0,0,0.0
+11944,Patrick Dorgu,Manchester United,2025,1436.0,9,3,2,0.353
+12014,Jake O'Brien,Everton,2026,112.0,0,0,0,0.0
+12014,Jake O'Brien,Everton,2025,3146.0,1,0,0,0.059
+12027,Mohammed Kudus,Tottenham,2026,355.0,3,0,0,0.093
+12027,Mohammed Kudus,Tottenham,2025,1577.0,12,3,1,0.442
+12032,Djordje Petrovic,Bournemouth,2026,720.0,0,0,0,0.0
+12032,Djordje Petrovic,Bournemouth,2025,3420.0,1,0,0,0.0
+12123,Murillo,Nottingham Forest,2026,720.0,3,0,0,0.111
+12123,Murillo,Nottingham Forest,2025,2132.0,8,2,0,0.2
+12162,Ayyoub Bouaddi,Manchester City,2026,119.0,1,0,0,0.025
+12203,Treymaurice Nyoni,Liverpool,2026,137.0,1,0,0,0.018
+12203,Treymaurice Nyoni,Liverpool,2025,13.0,0,0,0,0.0
+12272,Myles Lewis-Skelly,Arsenal,2026,416.0,2,0,0,0.071
+12272,Myles Lewis-Skelly,Arsenal,2025,666.0,0,0,0,0.0
+12336,Malick Fofana,Sunderland,2026,103.0,0,0,0,0.0
+12408,Daniel Muñoz,"Crystal Palace,Nottingham Forest",2026,533.0,1,0,0,0.032
+12408,Daniel Muñoz,"Crystal Palace,Nottingham Forest",2025,2417.0,3,1,1,0.044
+12409,Adam Wharton,Crystal Palace,2026,712.0,5,2,0,0.119
+12409,Adam Wharton,Crystal Palace,2025,2596.0,24,3,1,0.72
+12434,Lewis Koumas,Liverpool,2026,108.0,1,1,0,0.052
+12498,Valentín Barco,Chelsea,2026,112.0,1,0,0,0.055
+12535,Josh Acheampong,Chelsea,2026,488.0,0,0,0,0.0
+12535,Josh Acheampong,Chelsea,2025,657.0,1,0,0,0.017
+12603,Mikey Moore,Tottenham,2026,90.0,1,0,0,0.017
+12733,Ibrahim Mbaye,Aston Villa,2026,91.0,1,0,0,0.047
+12745,Jacob Greaves,Ipswich,2026,450.0,1,0,0,0.0
+12757,Harrison Armstrong,Everton,2026,709.0,4,1,0,0.171
+12757,Harrison Armstrong,Everton,2025,520.0,0,0,0,0.0
+12758,Mats Wieffer,Brighton,2026,165.0,1,0,0,0.081
+12758,Mats Wieffer,Brighton,2025,1922.0,6,2,1,0.219
+12760,Carl Rushworth,Coventry,2026,720.0,0,0,0,0.0
+12779,Honest Ahanor,Crystal Palace,2026,157.0,0,0,0,0.0
+12781,Zion Suzuki,Aston Villa,2026,630.0,0,0,0,0.0
+12841,Dayann Methalie,Sunderland,2026,105.0,1,0,0,0.015
+12843,Sorba Thomas,Hull,2026,281.0,3,0,0,0.061
+12911,Abdul Fatawu,Ipswich,2026,461.0,3,0,0,0.044
+12912,Lucas Bergvall,Tottenham,2026,139.0,2,1,0,0.075
+12912,Lucas Bergvall,Tottenham,2025,956.0,3,1,0,0.087
+12948,Mateus Fernandes,Tottenham,2026,364.0,5,2,0,0.114
+12948,Mateus Fernandes,Tottenham,2025,3044.0,20,4,1,0.472
+12955,Aurèle Amenda,Coventry,2026,360.0,1,0,0,0.011
+13051,Matias Fernandez-Pardo,Newcastle United,2026,310.0,0,0,0,0.0
+13066,Ferdi Kadioglu,Brighton,2026,521.0,3,1,0,0.059
+13066,Ferdi Kadioglu,Brighton,2025,3145.0,15,6,0,0.408
+13080,Ayden Heaven,Manchester United,2026,158.0,0,0,0,0.0
+13080,Ayden Heaven,Manchester United,2025,923.0,1,0,0,0.0
+13091,Jaydee Canvot,Crystal Palace,2026,630.0,1,0,0,0.0
+13091,Jaydee Canvot,Crystal Palace,2025,1334.0,2,0,0,0.034
+13136,Brooke Norton-Cuffy,Hull,2026,123.0,0,0,0,0.0
+13206,Matt O'Riley,Brighton,2026,8.0,0,0,0,0.0
+13206,Matt O'Riley,Brighton,2025,195.0,1,0,0,0.014
+13214,Aladji Bamba,Newcastle United,2026,22.0,0,0,0,0.0
+13330,Robinio Vaz,Hull,2026,37.0,0,0,0,0.0
+13348,Antonín Kinsky,Tottenham,2026,720.0,0,0,0,0.0
+13348,Antonín Kinsky,Tottenham,2025,630.0,0,0,0,0.0
+13380,Vitor Reis,Manchester City,2026,1.0,0,0,0,0.0
+13456,Amar Dedic,Newcastle United,2026,449.0,2,0,0,0.064
+13474,Julio Soler,Bournemouth,2026,4.0,0,0,0,0.0
+13474,Julio Soler,Bournemouth,2025,27.0,0,0,0,0.0
+13692,Rio Ngumoha,Liverpool,2026,149.0,0,0,0,0.0
+13692,Rio Ngumoha,Liverpool,2025,515.0,6,2,0,0.23
+13712,Robin Roefs,Sunderland,2026,720.0,0,0,0,0.0
+13712,Robin Roefs,Sunderland,2025,3150.0,0,0,0,0.0
+13713,Trai Hume,Sunderland,2026,466.0,1,0,0,0.02
+13713,Trai Hume,Sunderland,2025,3041.0,17,1,0,0.396
+13715,Dan Ballard,Sunderland,2026,450.0,0,0,0,0.0
+13715,Dan Ballard,Sunderland,2025,2143.0,1,0,0,0.007
+13716,Noah Sadiki,Sunderland,2026,695.0,4,0,0,0.135
+13716,Noah Sadiki,Sunderland,2025,2914.0,9,4,0,0.801
+13717,Chemsdine Talbi,Sunderland,2026,39.0,1,0,0,0.062
+13717,Chemsdine Talbi,Sunderland,2025,1556.0,10,5,2,0.261
+13719,Chris Rigg,Sunderland,2026,175.0,1,0,0,0.034
+13719,Chris Rigg,Sunderland,2025,780.0,4,0,0,0.195
+13723,El Hadji Malick Diouf,Brentford,2026,135.0,1,0,0,0.016
+13723,El Hadji Malick Diouf,Brentford,2025,2711.0,10,0,0,0.214
+13775,Estêvão,Chelsea,2026,36.0,0,0,0,0.0
+13775,Estêvão,Chelsea,2025,854.0,5,2,0,0.218
+13776,Jorrel Hato,Chelsea,2026,424.0,0,0,0,0.0
+13776,Jorrel Hato,Chelsea,2025,1131.0,1,0,0,0.071
+13779,Jair,Nottingham Forest,2026,539.0,2,0,0,0.037
+13779,Jair,Nottingham Forest,2025,536.0,0,0,0,0.0
+13792,Ibrahim Osman,Brighton,2026,32.0,0,0,0,0.0
+13810,Brian Madjo,Aston Villa,2026,7.0,0,0,0,0.0
+13816,Mike Penders,Chelsea,2026,102.0,1,0,0,0.0
+13834,Ao Tanaka,Leeds,2026,504.0,6,3,0,0.21
+13834,Ao Tanaka,Leeds,2025,1330.0,12,3,1,0.442
+13837,David Affengruber,Fulham,2026,450.0,0,0,0,0.0
+13872,Max Dowman,Arsenal,2026,16.0,0,0,0,0.0
+13872,Max Dowman,Arsenal,2025,142.0,2,0,0,0.093
+13879,Tarik Muharemovic,Leeds,2026,720.0,0,0,0,0.0
+13917,Mamadou Sangaré,Brentford,2026,488.0,1,0,0,0.017
+14030,Kevin,Fulham,2026,70.0,1,0,0,0.029
+14030,Kevin,Fulham,2025,1002.0,14,7,1,0.503
+14056,Senne Lammens,Manchester United,2026,720.0,0,0,0,0.0
+14056,Senne Lammens,Manchester United,2025,2880.0,0,0,0,0.0
+14097,Ryan McAidoo,Manchester City,2026,29.0,1,0,0,0.181
+14099,Luke O'Nien,Sunderland,2026,184.0,1,0,0,0.021
+14099,Luke O'Nien,Sunderland,2025,556.0,0,0,0,0.0
+14193,George Hemmings,Aston Villa,2026,298.0,0,0,0,0.0
+14193,George Hemmings,Aston Villa,2025,19.0,1,0,0,0.019
+14198,Shea Lacey,Manchester United,2026,18.0,2,0,0,0.044
+14198,Shea Lacey,Manchester United,2025,31.0,4,1,0,0.082
+14277,Tymur Tutierov,Sunderland,2026,89.0,0,0,0,0.0
+14374,Alex Tóth,Bournemouth,2026,15.0,0,0,0,0.0
+14374,Alex Tóth,Bournemouth,2025,136.0,1,0,0,0.082
+14376,Quinten Timber,Crystal Palace,2026,396.0,3,0,0,0.133
+14460,Djiamgone Jocelin Ta Bi,Sunderland,2026,15.0,0,0,0,0.0
+14460,Djiamgone Jocelin Ta Bi,Sunderland,2025,38.0,0,0,0,0.0
+14502,Manuel Ángel,Fulham,2026,18.0,0,0,0,0.0
+14742,Milan van Ewijk,Coventry,2026,630.0,1,0,0,0.011
+14744,Caleb Yirenkyi,Coventry,2026,481.0,0,0,0,0.0
+14745,Brandon Thomas-Asante,Coventry,2026,466.0,4,2,0,0.116
+14746,Victor Torp,Coventry,2026,53.0,0,0,0,0.0
+14748,Joel Latibeaudiere,Coventry,2026,1.0,0,0,0,0.0
+14749,Tatsuhiro Sakamoto,Coventry,2026,225.0,1,0,0,0.028
+14758,Konstantinos Tzolakis,Hull,2026,720.0,0,0,0,0.0
+14759,Lewie Coyle,Hull,2026,606.0,1,0,0,0.034
+14761,Matt Crooks,Hull,2026,350.0,0,0,0,0.0
+14762,Regan Slater,Hull,2026,688.0,6,2,0,0.129
+14763,Elliot Stroud,Hull,2026,372.0,2,0,0,0.033
+14765,Lucas Herrington,Hull,2026,327.0,0,0,0,0.0
+14767,Jens Hjertø-Dahl,Hull,2026,7.0,0,0,0,0.0
+14769,Hayden Hackney,Everton,2026,157.0,1,1,0,0.009
+14771,Marcelino Núñez,Ipswich,2026,146.0,0,0,0,0.0
+14773,Sindre Egeli,Ipswich,2026,16.0,0,0,0,0.0
+14775,Ousmane Diomande,Nottingham Forest,2026,345.0,0,0,0,0.0
+14788,Jannik Schuster,Brentford,2026,305.0,0,0,0,0.0
+14854,Costinha,Brighton,2026,163.0,2,0,0,0.085
+14855,Zadok Yohanna,Brighton,2026,7.0,0,0,0,0.0
+14857,Promise David,Brighton,2026,20.0,0,0,0,0.0
+14859,António Silva,Bournemouth,2026,720.0,0,0,0,0.0
+14874,Lukás Hornícek,Newcastle United,2026,720.0,0,0,0,0.0
+14875,Sean Steur,Newcastle United,2026,232.0,0,0,0,0.0
+14923,Geovany Quenda,Chelsea,2026,97.0,1,0,0,0.032
+14934,Zavier Gozo,Crystal Palace,2026,22.0,0,0,0,0.0
+14935,Kaden Braithwaite,Manchester City,2026,1.0,0,0,0,0.0
+14981,Ephron Mason-Clark,Coventry,2026,333.0,1,0,0,0.011
+14982,Hidemasa Morita,Hull,2026,89.0,0,0,0,0.0
+14998,Jules Ahoka,Sunderland,2026,19.0,0,0,0,0.0
+15045,Darío Osorio,Crystal Palace,2026,27.0,3,1,0,0.161
+15081,Allan,Manchester City,2026,9.0,0,0,0,0.0
+15091,Mahdi Nicoll-Jazuli,Chelsea,2026,2.0,0,0,0,0.0
+15111,Juan Angulo,Sunderland,2026,7.0,0,0,0,0.0

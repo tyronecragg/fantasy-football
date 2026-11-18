@@ -38,16 +38,20 @@ hands a prepared table to the shared engine, which does the actual optimisation.
 | `gw6.py` | Matchwinner | Winning goals worth an extra **10** | 1 | add `10 × P(win) × goal-share` |
 | `gw7.py` | Away Days | Players in **away** matches score **×2** | 1 | double players whose fixture is away |
 | `gw8.py` | Legends | ≥5 years at club score **×2** | 1 | double players on the Legends list |
-| `gw9.py` | Trick or Treat | **+3** per successful dribble, **−1** per dispossession | 1 | add `start × (3·dribbles/90 − dispossessed/90)` |
+| `gw9.py` | Trick or Treat | **+3** per successful dribble, **−1** each time tackled | 1 | add `start × (3·dribbles/90 − tackled/90)` |
+| `gw10.py` | Spectacular | **+1** per outside-box shot on target, **+5** per outside-box goal | 1 | add `start × (1·obox SoT/90 + 5·obox xG/90)` |
+| `gw11.py` | Make the Call | substitutes score **×3** | 1 | add `3 × P(comes on) × pts per sub appearance` |
+| `gw12.py` | Wonderkids | aged ≤23 at the final GW12 deadline score **×2** | 1 | double players not yet 24 on 29 Nov 2026 |
+| `gw13.py` | Dribbling: 20 | **+1** per dribble, **+5** once for 3+ | 1 | add `start × (λ + 5·P(3+))`, Poisson λ = dribbles/90 × 85/90 |
 
 Three kinds of twist:
 
-- **"Double these players" (GW1, GW2, GW4, GW7, GW8).** A set of players gets ×2. The captain
+- **"Double these players" (GW1, GW2, GW4, GW7, GW8, GW12).** A set of players gets ×2. The captain
   stacks on top, so a captained doubled player scores **×4**. If a week does *not* stack the
   two doublers, pass `--no-stack` and a captained doubled player counts ×3 instead.
 - **"Change the points" (GW3, GW5).** The scoring itself changes for everyone — the effective
   points are recomputed and the captain then doubles that boosted total.
-- **"Add a bespoke term" (GW6, GW9).** A per-player expected-points term is added on top of
+- **"Add a bespoke term" (GW6, GW9, GW10, GW11, GW13).** A per-player expected-points term is added on top of
   normal XP (winning-goal value; dribble/dispossession value), then captain-doubled.
 
 ---
@@ -92,20 +96,13 @@ Each `gw*.py` builds these on the player table before calling the engine:
   qualify — last season's signings score single points. Names are matched
   accent/case-insensitively with a last-name fallback; unmatched names are printed so
   typos and departed players surface.
-- **`../inputs/fpl_challenge_dribbles.csv`** (GW9 only) — this-season successful-dribbles
-  per 90, one `Player` per row, matched to FPL names. **Sourced from FotMob** (the per-90
-  dribble leaderboard); **refresh it closer to GW9** by re-pasting an updated FotMob list, as
-  the current values are an early-season snapshot. Values are raw per-90 (unshrunk small
-  samples early on), so treat outliers with care until minutes build.
-
----
-
-## Modelling the twists
-
-GW3/GW5 rebuild points from the projection's components; the reconstruction was checked
-against the pipeline's own `F1 XP Pre` and matches to within ~0.001, so they stay consistent
-with `fpl_pipeline/model.py`:
-
+- **`../inputs/fpl_challenge_dribbles.csv`** (GW9 only) — this-season successful dribbles per 90 **and
+  success %**, one `Player` per row, matched to FPL names. **Sourced from FotMob**
+  (<https://www.fotmob.com/leagues/47/stats/season/36781/players/won_contest> — season id 36781 =
+  2026/27); **refresh it closer to GW9**. The success % drives the failed-dribble penalty, so keep it.
+  To refresh: save the leaderboard to `raw/fotmob_dribbles.txt` (one `Name;success_pct;per90` per line)
+  and run `python build_dribbles.py` — it matches names to the master, with an `ALIASES` table for
+  FotMob spellings that don't resolve, and prints anything unmatched loudly.
 - **GW3** adds `start × (goal_points + assist_points)`, where goal points use the FPL
   per-position values (GK 10, DEF 6, MID 5, FWD 4) times `P(score 1+/2+/3+)`, and assists
   are `3 × P(assist)`. Appearance, clean sheets, saves, cards, DefCon and bonus are left
@@ -119,11 +116,37 @@ GW6/GW9 add a bespoke expected-points term:
 - **GW6** adds `10 × P(team wins) × goal_share`, where `goal_share` = the player's expected
   goals ÷ the team's expected goals (from goalscorer odds). Shares within a team sum to 1, so
   exactly one winning goal is spread across the winning side. `P(win)` is `F1 Win`.
-- **GW9** adds `start × (3 × dribbles/90 − 1 × dispossessed/90)`. Dribbles/90 come from
-  `fpl_challenge_dribbles.csv` (this season, pasted leaderboard); dispossessed/90 from this
-  season's FPL-Core-Insights match stats, shrunk by 270 pseudo-minutes. Note: this season's
-  feed leaves `successful_dribbles` empty, which is why dribbles come from the pasted file
-  rather than being read directly.
+- **GW9** adds `start × (3 × dribbles/90 − tackled/90)`. There is no "was tackled" stat, so
+  **tackled = dispossessed + failed dribbles**: a player is tackled either while holding the ball
+  or while trying to beat a man. Dribbles/90 and success % come from `fpl_challenge_dribbles.csv`
+  (FotMob); failed dribbles/90 = dribbles/90 × (100 / success% − 1). Dispossessed/90 comes from this
+  season's FPL-Core-Insights match stats (shrunk by 270 pseudo-minutes), matched on **player_id** —
+  the feed's full names often differ from the master's. This season's feed leaves
+  `successful_dribbles` empty, which is why dribbles come from FotMob.
+  **Two-season blend:** every rate mixes this season with last season at **half weight, by minutes** —
+  `(this-season total + ½ × last-season total) ÷ (this-season mins + ½ × last-season mins)` — so
+  regular starters stay close to this season while small samples lean on last season. Last season's
+  FotMob list lives in `fpl_challenge_dribbles_last.csv`; minutes and dispossessed for both seasons come
+  from FPL-Core-Insights (last season linked by full name, as player ids change each season). A season
+  only counts toward a player's dribbles if FotMob lists him that season. `LAST_WEIGHT` in `gw9.py`.
+- **GW10** adds `start × (1 × outside-box shots on target/90 + 5 × outside-box xG/90)`, from Understat
+  shot data (`build_longrange.py`): every shot has a pitch position, so outside-the-box is exact (box edge
+  at X ≈ 0.843, confirmed by the step in shot volume there; penalties always inside). Premier League shots
+  only — a player's Understat history includes other leagues, which would inflate rates against
+  Premier League minutes. Goals use outside-box **xG**, not actual goals (rare and swingy). Same
+  two-season blend as GW9 (last season at half weight, by minutes), shrunk by 270 pseudo-minutes.
+  Refresh with `python build_longrange.py` (cached; `--refresh` re-fetches everyone).
+- **GW11** adds `3 × P(comes on) × points per sub appearance`, where P = available (FPL status flag) ×
+  (1 − start) × sub-on rate when not starting. Rates from FPL per-gameweek data (`build_subs.py`: a sub
+  appearance = minutes > 0 with no start), two seasons with last at half weight, steadied toward position
+  averages. `confirmed_bench` keeps benched players in the pool at 0% start; the watchlist and
+  contingency sections are switched off (`show_watchlist` / `show_contingency` in `solve_and_report`),
+  since starting can be worth less than coming off the bench.
+- **GW12** doubles players not yet 24 on the last GW12 kickoff (strictest reading of "final deadline").
+  Birth dates from FPL's API (`build_ages.py` → `fpl_challenge_birthdates.csv`); 24th birthdays near the
+  window are printed to check in-game; no birth date = not eligible.
+- **GW13** adds `start × (λ + 5 × chance of 3+ dribbles)`, dribbles per match as a Poisson around GW9's
+  blended dribbles/90 over 85 minutes. Refresh the FotMob paste and `build_dribbles.py` first.
 
 ---
 
@@ -188,23 +211,36 @@ them as a candidate swap.
 - **Value if they start** = the full-match projection (pre-bonus scaled by `1/start`, bonus
   kept), carrying the week's boost. This is exact for the ×2 weeks and a close approximation for
   the add-on weeks.
-- **Grouped by the club whose lineup you'd watch**, most valuable club first, under that club's
-  provisional picks. Each club header shows its **kickoff in SAST (UTC+2)**.
-- **Only swaps you can actually make in time are shown.** Each is tagged:
-  - `same match` — incoming and outgoing kick off together; you see the whole XI at once. Always safe.
-  - `actionable` — cross-club, but the incoming player's news (~1h pre-kickoff) lands before the
-    outgoing player kicks off.
-  - `TOO LATE` swaps are **hidden** (you'd already be locked into the outgoing player), as are
-    clubs with no swappable upgrade; both are rolled into a one-line footer count.
-  - `timing?` — shown only if there's no kickoff data (see below); the swap can't be checked.
+- **One line per swap, in kickoff order** — the same style as "If a pick doesn't start", e.g.
+  `Sun 16:00 Amad Diallo (Man Utd, start 80%): OUT Jacob Murphy | captain -> Amad Diallo  [+0.72]`.
+  The gain in brackets is the projected improvement if he's confirmed starting.
+- **Only swaps you can actually make are listed.** While re-picking, any pick whose match kicks off
+  before the candidate's team news (~1h pre-kickoff) is locked in, and so is a captain who is locked —
+  so the swap never relies on dropping someone who has already played. A swap with no legal version
+  is counted in the footer as "too late to swap"; one with no kickoff data is marked `(timing unknown)`.
 - Tunable in `highlight_if_start`: `min_gain` (default **0.1** — hide upgrades worth less than
   this) and `max_candidates` (default 40).
+
+**If a pick doesn't start** (printed after the watchlist): for each selected player, in kickoff
+order, the changes to make if their lineup drops and they're out, e.g.
+`Sat 16:00 Antonee Robinson (Fulham): OUT Alisson Becker | IN Jordan Pickford, Virgil van Dijk`.
+The missing player is always removed, so `OUT` lists only the *other* picks to drop; any armband
+move is shown as `captain -> …`. **The armband can only move to a player whose match hasn't kicked
+off** (same kickoff time or later) — you can't hand it to someone who has already played. At that moment, picks whose match
+kicks off **earlier** are locked in (and keep the armband if they have it); only players whose
+match is at that kickoff time **or later** can come in, valued at their normal XP since later
+lineups aren't known yet. A tiny preference for keeping current picks stops tied options from
+causing needless reshuffles. Players you've listed in **`confirmed_starting` are skipped** — there's
+no "if he's out" case to plan for — and named in a one-line footer instead. Needs
+`fixture_kickoffs.csv`. Lives in the shared engine, so it runs for every gameweek script.
 
 **Kickoff times** come from `../outputs/fixture_kickoffs.csv`, written by the weekly Betway
 scrape (`tools/betway.py`) from Betway's `expectedStartEpoch`. It stores UTC (canonical); the
 watchlist displays SAST. Timing comparisons run in UTC, so the display offset never affects which
 swaps are judged actionable. Without the file, headers show `kickoff ?` and swaps fall back to
-`timing?` (the old, timing-blind behaviour).
+`timing?` (the old, timing-blind behaviour). **In archive mode** (`archive_gw=N`) kickoffs come instead
+from the official FPL fixtures for that gameweek (FPL-Core-Insights `fixtures.csv`, Premier League
+rows only), because a fresh Betway scrape overwrites the kickoff file with the *current* weeks.
 
 ---
 
@@ -224,8 +260,55 @@ If you'd prefer them to take a `--gw N` argument and read the matching `Fn` colu
 | File | Purpose |
 |---|---|
 | `challenge_core.py` | shared engine: player loading, name matching, confirmed-lineup handling, formation ILP, reporting, the goal/assist/DefCon helpers, and the "bring in if they start" watchlist |
-| `gw1.py` … `gw9.py` | one week each; each builds `eff_xp` / `cap_bonus` / `boosted` and calls the engine |
+| `gw1.py` … `gw13.py` | one week each; each builds `eff_xp` / `cap_bonus` / `boosted` and calls the engine |
 | `../inputs/fpl_challenge_new_signings.csv` | GW1 double-points list |
 | `../inputs/fpl_challenge_legends.csv` | GW8 Legends list (5+ years at club), from the in-game filter |
 | `../inputs/fpl_challenge_dribbles.csv` | GW9 this-season dribbles per 90 |
+| `../inputs/fpl_challenge_longrange.csv` | GW10 outside-box shots / goals / xG per player-season, from Understat |
+| `../inputs/fpl_challenge_subs.csv` | GW11 starts / sub appearances / sub points per player-season (`build_subs.py`) |
+| `../inputs/fpl_challenge_birthdates.csv` | GW12 birth dates from the FPL API (`build_ages.py`) |
 | `../outputs/fixture_kickoffs.csv` | per-fixture UTC kickoffs for the watchlist's timing; written by `tools/betway.py` |
+
+---
+
+## Mid-week: snapshots, odds refresh and live locking
+
+**Snapshot (not the archive).** Once the pipeline rolls on, run a Challenge week from a refreshable copy:
+`cc.make_snapshot(8)` copies GW8's archive rows to `snapshots/gw8.csv`, and `main(..., snapshot_gw=8)` reads
+it — or just let `load_players(gw=8)` find it automatically. The archive stays the untouched decision record; the snapshot is yours to update. Kickoffs then come
+from the official FPL fixtures for that gameweek.
+
+**Odds refresh.** `python refresh_snapshot.py 8` fetches fresh Betway prices (read-only — it never runs the
+scraper's write step) for the snapshot's still-to-play matches, and scales each goal / assist / clean-sheet
+/ win probability by how far its raw price has moved since that gameweek's run (`inputs/raw_odds/…/GWnn/`).
+XP changes by the resulting change in points only, so the pipeline's other adjustments carry through.
+Cards, saves, concede ladders and DefCon aren't refreshed.
+
+**Live locking.** Pass `current_team=[your six]` and `captain=...`. Using the current time (UTC, shown in
+SAST), anyone whose match has kicked off is locked: your played picks stay in, played non-picks can't be
+added, and the armband can't move onto a match that's already started (a played captain keeps it).
+Players in `confirmed_not_starting` are dropped without a warning; other unmatched names get a banner.
+
+---
+
+## Adding a new week
+
+Copy the closest existing script (a "double these players" week → `gw8.py`; a bespoke term → `gw9.py`) and
+change only the twist: how `boosted`, `eff_xp` and `cap_bonus` are built. Keep the standard `main()` so
+every week has the same controls:
+
+```python
+def main(confirmed_not_starting=None, confirmed_starting=None,
+         current_team=None, captain=None, now=None):
+    ...
+    df = cc.load_players(gw=N)   # snapshots/gwN.csv if it exists, else the live master
+    df = cc.confirm_not_starting(df, ...)
+    df = cc.confirm_starting(df, ...)
+    cc.set_live(df, current_team, captain, now)   # time-locking once matches start
+    ... build boosted / eff_xp / cap_bonus ...
+    cc.solve_and_report(df, max_per_club, title, boost_tag)
+```
+
+The watchlist, "if a pick doesn't start" plan, live locking and SAST kickoffs all come from the shared
+engine — nothing extra to wire. Passing `gw=N` is all it takes to pick up a snapshot: if `snapshots/gwN.csv` exists it is used, otherwise the
+live master. `archive_gw` remains for reading the frozen archive directly.

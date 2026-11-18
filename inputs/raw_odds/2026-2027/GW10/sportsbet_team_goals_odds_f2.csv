@@ -1,0 +1,21 @@
+Match,Date,Team,Opponent,Team_Over_1.5,Team_Under_1.5,Team_Over_3.5,Team_Under_3.5,Opponent_Concedes_Over_1.5,Opponent_Concedes_Under_1.5,Opponent_Concedes_Over_3.5,Opponent_Concedes_Under_3.5
+Manchester City vs. Fulham FC,2026-11-21T12:30:00,Man City,Fulham,1.38,2.65,3.75,1.2,1.38,2.65,3.75,1.2
+Manchester City vs. Fulham FC,2026-11-21T12:30:00,Fulham,Man City,3.2,1.27,,,3.2,1.27,,
+Aston Villa vs. Sunderland AFC,2026-11-21T15:00:00,Aston Villa,Sunderland,1.69,1.96,,,1.69,1.96,,
+Aston Villa vs. Sunderland AFC,2026-11-21T15:00:00,Sunderland,Aston Villa,3.0,1.3,,,3.0,1.3,,
+AFC Bournemouth vs. Nottingham Forest,2026-11-21T15:00:00,Bournemouth,Nott'm Forest,1.88,1.76,,,1.88,1.76,,
+AFC Bournemouth vs. Nottingham Forest,2026-11-21T15:00:00,Nott'm Forest,Bournemouth,2.65,1.39,,,2.65,1.39,,
+Chelsea vs. Leeds United,2026-11-21T15:00:00,Chelsea,Leeds,1.71,1.94,,,1.71,1.94,,
+Chelsea vs. Leeds United,2026-11-21T15:00:00,Leeds,Chelsea,2.85,1.34,,,2.85,1.34,,
+Coventry City vs. Crystal Palace,2026-11-21T15:00:00,Coventry City,Crystal Palace,1.98,1.68,,,1.98,1.68,,
+Coventry City vs. Crystal Palace,2026-11-21T15:00:00,Crystal Palace,Coventry City,2.22,1.54,,,2.22,1.54,,
+Tottenham vs. Ipswich Town,2026-11-21T15:00:00,Spurs,Ipswich Town,1.46,2.41,4.3,1.15,1.46,2.41,4.3,1.15
+Tottenham vs. Ipswich Town,2026-11-21T15:00:00,Ipswich Town,Spurs,3.35,1.25,,,3.35,1.25,,
+Newcastle United vs. Arsenal,2026-11-21T17:30:00,Newcastle,Arsenal,3.3,1.25,,,3.3,1.25,,
+Newcastle United vs. Arsenal,2026-11-21T17:30:00,Arsenal,Newcastle,1.58,2.13,,,1.58,2.13,,
+Hull City vs. Brighton,2026-11-22T14:00:00,Hull City,Brighton,3.35,1.25,,,3.35,1.25,,
+Hull City vs. Brighton,2026-11-22T14:00:00,Brighton,Hull City,1.53,2.25,,,1.53,2.25,,
+Liverpool FC vs. Manchester United,2026-11-22T16:30:00,Liverpool,Man Utd,1.61,2.08,,,1.61,2.08,,
+Liverpool FC vs. Manchester United,2026-11-22T16:30:00,Man Utd,Liverpool,2.5,1.43,,,2.5,1.43,,
+Brentford FC vs. Everton FC,2026-11-23T20:00:00,Brentford,Everton,1.78,1.86,,,1.78,1.86,,
+Brentford FC vs. Everton FC,2026-11-23T20:00:00,Everton,Brentford,2.65,1.39,,,2.65,1.39,,

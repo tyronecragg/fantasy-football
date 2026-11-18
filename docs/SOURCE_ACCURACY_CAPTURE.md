@@ -53,7 +53,29 @@ Prints each source's hit rate (of the 11 it predicted per team, how many actuall
 derives actual starters from `player_gameweek_stats.csv` `starts==1` (the current FPL-Core-Insights
 dumps ship no `lineups.csv`).
 
+## How much to trust each source (after GW8, 2026-10-28)
+Season hit rates (GW1–8, scored weeks only):
+
+| Source | GW1 | GW2 | GW3 | GW4 | GW5 | GW6 | GW7 | GW8 |
+|---|---|---|---|---|---|---|---|---|
+| Curated | 88.6 | 87.7 | 90.9 | – | 90.9 | 85.9 | 85.9 | 86.4 |
+| FFS | 89.5 | 90.0 | 90.5 | 89.1 | 90.5 | 84.5 | 84.1 | 87.7 |
+| RotoWire | – | – | 89.1 | 88.2 | 90.0 | 84.1 | 84.5 | 85.0 |
+| FFP | – | 85.5 | 89.1 | – | – | 85.9 | 82.7 | 81.8 |
+
+- **Head to head (weeks both captured):** Curated ≈ FFS (88.0 vs 88.1, 4–3 in weeks). Curated beat
+  RotoWire 5–0 and FFP 4–0. FFS beat RotoWire 5–1. One point ≈ 2 players a week across 220, so the
+  gaps are small.
+- **Agreement matters more than any one source (GW3–8):** a player picked by both FFS and RotoWire
+  started 90% of the time (1,233 picks). When they disagreed, FFS's pick started 55% of the time
+  (87) and RotoWire's 41% (87). With FFP too: all three agree 91%; FFS + RotoWire but not FFP 67%;
+  any two including FFP 61%; only one of three 31%.
+- **Use:** if FFS and RotoWire agree, ~0.9. When they split, lean towards FFS (about 55/45, not a
+  verdict). FFP is a tie-breaker that lags slightly (bottom in GW7 and GW8). A lone source's pick is
+  about 30%.
+
 ## History
+- **GW3 scored** (from the ledger): Curated 90.9%, FFS 90.5%, RotoWire 89.1%, FFP 89.1%.
 - **GW1** scored (2026-09-03): FFS 89.5%, Curated 88.6%, All About FPL 85.9%.
 - **GW2** scored (2026-09-03, FFS + FFP captured retroactively off their still-live GW2 pages):
   FFS 90.0%, Curated 87.7%, Fantasy Football Pundit 85.5%. AAF GW2 page no longer reachable, so not back-filled.
@@ -84,3 +106,6 @@ See memory `agent-sweep-evidence-not-verdicts`.
 - **GW6 scored (2026-10-13):** **Curated 85.9% (189/220)**, FFP 85.9% (189), FFS 84.5% (186), RotoWire 84.1% (185). A rotation-heavy week after the break (GW5 was ~90% for all). **Nobody predicted 17 of the 31 players who started against our XI** (White, Madueke, Cash, Brooks, Diouf, Struijk, Acheampong, Cherif, Keane, Tete, Gelhardt, Maeda, Florentino, O'Reilly, Amad, Yoro, Bergvall, Senesi). 11 of our flat-1.0 players didn't start (Cook, Sangaré, Mfuni, Belloumi, Palacios, Clarke, Szoboszlai, Gvardiol, Dalot, van de Ven, Marmoush). Coin-flips: right on Konsa, João Pedro, Walton, N.Williams; wrong on Bruno G. (Lewis-Skelly), Wan-Bissaka (Cash), Mykolenko, Robinson, Dedić, Jair (Aina), Ngumoha (Gravenberch/Koumas). **Calibration flag:** our 0.8–0.99 band started only 68% (13/19; avg belief 0.89) — Eze, Timber, Gyökeres, Dunk, Ahanor, Onyeka were all too high. Worst teams: Arsenal 7/11 (every source 6–8), Spurs 8/11 (sources 6–8).
 - **GW7 scored (2026-10-23):** **Curated 85.9%**, RotoWire 84.5%, FFS 84.1%, FFP 82.7%.
 - **GW8 captured (2026-10-23, pre-deadline):** Curated + RotoWire + FFS + FFP (`inputs/source_history/gw8_external.csv`). Alias added: Will Osula (NEW). Score after GW8 plays.
+- **GW8 scored (2026-10-28):** **FFS 87.7%**, Curated 86.4%, RotoWire 85.0%, FFP 81.8%.
+- **GW9 scored (2026-11-10, late):** **FFS 90.0% (198/220)**, RotoWire 89.5% (197), Curated 88.6% (195), FFP 85.9% (189).
+- **GW10 scored (2026-11-10):** **Curated 90.5% (199/220)**, FFP 90.0% (198), RotoWire 89.1% (196), FFS 87.3% (192). Frozen after three deadline-day passes; best week of the season for us.

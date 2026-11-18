@@ -1,0 +1,21 @@
+home_team,away_team,home_win_odds,away_win_odds,draw_odds
+Chelsea,Man Utd,2.05,3.25,3.65
+Bournemouth,Leeds,2.0,3.65,3.35
+Brentford,Nott'm Forest,2.06,3.25,3.6
+Coventry City,Sunderland,3.05,2.3,3.25
+Hull City,Ipswich Town,2.7,2.5,3.35
+Man City,Brighton,1.65,4.4,4.2
+Spurs,Crystal Palace,1.64,4.7,4.0
+Aston Villa,Fulham,2.05,3.3,3.55
+Liverpool,Arsenal,2.75,2.4,3.35
+Newcastle,Everton,2.26,2.85,3.4
+Everton,Coventry City,1.68,4.3,3.8
+Leeds,Spurs,2.5,2.6,3.25
+Arsenal,Hull City,1.16,13.0,6.6
+Fulham,Newcastle,2.18,2.95,3.4
+Nott'm Forest,Man City,4.6,1.62,3.9
+Brighton,Brentford,1.89,3.5,3.65
+Crystal Palace,Liverpool,4.1,1.69,3.9
+Ipswich Town,Bournemouth,3.55,1.91,3.55
+Sunderland,Chelsea,3.25,2.05,3.4
+Man Utd,Aston Villa,2.2,2.85,3.55

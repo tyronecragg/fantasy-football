@@ -1,0 +1,441 @@
+Source,Team,Raw,Player,Pct
+RotoWire,Chelsea,Mike Penders,Mike Penders,
+RotoWire,Chelsea,J. Acheampong,Josh Acheampong,
+RotoWire,Chelsea,Levi Colwill,Levi Samuels Colwill,
+RotoWire,Chelsea,M. Lacroix,Maxence Lacroix,
+RotoWire,Chelsea,M. Palestra,Marco Palestra,
+RotoWire,Chelsea,M. Caicedo,Moises Caicedo,
+RotoWire,Chelsea,J. Henderson,Jordan Henderson,
+RotoWire,Chelsea,Pedro Neto,Pedro Neto,
+RotoWire,Chelsea,Cole Palmer,Cole Palmer,
+RotoWire,Chelsea,G. Quenda,Geovany Quenda,
+RotoWire,Chelsea,M. Rogers,Morgan Rogers,
+RotoWire,Man Utd,S. Lammens,Senne Lammens,
+RotoWire,Man Utd,Diogo Dalot,Diogo Dalot,
+RotoWire,Man Utd,H. Maguire,Harry Maguire,
+RotoWire,Man Utd,L. Martinez,Lisandro Martinez,
+RotoWire,Man Utd,Leny Yoro,Leny Yoro,
+RotoWire,Man Utd,Carlos Baleba,Carlos Baleba,
+RotoWire,Man Utd,Y. Tielemans,Youri Tielemans,
+RotoWire,Man Utd,Matheus Cunha,Matheus Cunha,
+RotoWire,Man Utd,Bruno Fernandes,Bruno Fernandes,
+RotoWire,Man Utd,Amad Diallo,Amad Diallo,
+RotoWire,Man Utd,Bryan Mbeumo,Bryan Mbeumo,
+RotoWire,Man City,G. Donnarumma,Gianluigi Donnarumma,
+RotoWire,Man City,J. Gvardiol,Josko Gvardiol,
+RotoWire,Man City,Ruben Dias,Ruben Dias,
+RotoWire,Man City,A. Khusanov,Abduqodir Khusanov,
+RotoWire,Man City,Matheus Nunes,Matheus Nunes,
+RotoWire,Man City,E. Fernandez,Enzo Fernandez,
+RotoWire,Man City,E. Anderson,Elliot Anderson,
+RotoWire,Man City,Jeremy Doku,Jeremy Doku,
+RotoWire,Man City,Phil Foden,Phil Foden,
+RotoWire,Man City,I. Ndiaye,Iliman Ndiaye,
+RotoWire,Man City,E. Haaland,Erling Haaland,
+RotoWire,Brighton,B. Verbruggen,Bart Verbruggen,
+RotoWire,Brighton,O. Boscagli,Olivier Boscagli,
+RotoWire,Brighton,Lewis Dunk,Lewis Dunk,
+RotoWire,Brighton,L. Vuskovic,Luka Vušković,
+RotoWire,Brighton,Costinha,Costinha,
+RotoWire,Brighton,Yasin Ayari,Yasin Ayari,
+RotoWire,Brighton,Pascal Gross,Pascal Gross,
+RotoWire,Brighton,M. De Cuyper,Maxim De Cuyper,
+RotoWire,Brighton,J. Hinshelwood,Jack Hinshelwood,
+RotoWire,Brighton,Diego Gomez,Diego Gomez,
+RotoWire,Brighton,C. Kostoulas,Charalampos Kostoulas,
+RotoWire,Hull City,K. Tzolakis,Konstantinos Tzolakis,
+RotoWire,Hull City,Ryan Giles,Ryan Giles,
+RotoWire,Hull City,Semi Ajayi,Semi Ajayi,
+RotoWire,Hull City,John Egan,John Egan,
+RotoWire,Hull City,L. Herrington,Lucas Herrington,
+RotoWire,Hull City,Lewie Coyle,Lewie Coyle,
+RotoWire,Hull City,E. Stroud,Elliot Stroud,
+RotoWire,Hull City,T. Iroegbunam,Tim Iroegbunam,
+RotoWire,Hull City,Regan Slater,Regan Slater,
+RotoWire,Hull City,M. Belloumi,Mohamed Belloumi,
+RotoWire,Hull City,O. McBurnie,Oli McBurnie,
+RotoWire,Ipswich Town,C. Walton,Christian Walton,
+RotoWire,Ipswich Town,Leif Davis,Leif Davis,
+RotoWire,Ipswich Town,Dara O'Shea,Dara O'Shea,
+RotoWire,Ipswich Town,Issa Diop,Issa Diop,
+RotoWire,Ipswich Town,A. Ouattara,Abdoul Ouattara,
+RotoWire,Ipswich Town,E. Palacios,Exequiel Palacios,
+RotoWire,Ipswich Town,Florentino Luis,Florentino,
+RotoWire,Ipswich Town,J. Philogene,Jaden Philogene,
+RotoWire,Ipswich Town,Julio Enciso,Julio Enciso,
+RotoWire,Ipswich Town,Abdul Fatawu,Abdul Fatawu,
+RotoWire,Ipswich Town,Emersonn,Emersonn Correia da Silva,
+RotoWire,Coventry City,C. Rushworth,Carl Rushworth,
+RotoWire,Coventry City,Jay Dasilva,Jay Dasilva,
+RotoWire,Coventry City,E. Pinnock,Ethan Pinnock,
+RotoWire,Coventry City,Bobby Thomas,Bobby Thomas,
+RotoWire,Coventry City,M. van Ewijk,Milan van Ewijk,
+RotoWire,Coventry City,C. Yirenkyi,Caleb Yirenkyi,
+RotoWire,Coventry City,Matt Grimes,Matt Grimes,
+RotoWire,Coventry City,B. Thomas-Asante,Brandon Thomas-Asante,
+RotoWire,Coventry City,Jack Rudoni,Jack Rudoni,
+RotoWire,Coventry City,T. Sakamoto,Tatsuhiro Sakamoto,
+RotoWire,Coventry City,S. Cherif,Sidiki Cherif,
+RotoWire,Sunderland,Robin Roefs,Robin Roefs,
+RotoWire,Sunderland,Reinildo,Reinildo Mandava,
+RotoWire,Sunderland,N. Mukiele,Nordi Mukiele,
+RotoWire,Sunderland,Luke O'Nien,Luke O'Nien,
+RotoWire,Sunderland,Trai Hume,Trai Hume,
+RotoWire,Sunderland,Noah Sadiki,Noah Sadiki,
+RotoWire,Sunderland,Granit Xhaka,Granit Xhaka,
+RotoWire,Sunderland,Nilson Angulo,Nilson Angulo,
+RotoWire,Sunderland,Enzo Le Fee,Enzo Le Fee,
+RotoWire,Sunderland,Chris Rigg,Chris Rigg,
+RotoWire,Sunderland,B. Brobbey,Brian Brobbey,
+RotoWire,Brentford,C. Kelleher,Caoimhin Kelleher,
+RotoWire,Brentford,K. Lewis-Potter,Keane Lewis-Potter,
+RotoWire,Brentford,S. van den Berg,Sepp van den Berg,
+RotoWire,Brentford,K. Ajer,Kristoffer Ajer,
+RotoWire,Brentford,M. Kayode,Michael Kayode,
+RotoWire,Brentford,M. Sangare,Mamadou Sangaré,
+RotoWire,Brentford,V. Janelt,Vitaly Janelt,
+RotoWire,Brentford,Kevin Schade,Kevin Schade,
+RotoWire,Brentford,M. Jensen,Mathias Jensen,
+RotoWire,Brentford,D. Ouattara,Dango Ouattara,
+RotoWire,Brentford,Igor Thiago,Igor Thiago,
+RotoWire,Nott'm Forest,Matz Sels,Matz Sels,
+RotoWire,Nott'm Forest,N. Milenkovic,Nikola Milenkovic,
+RotoWire,Nott'm Forest,Murillo,Murillo dos Santos,
+RotoWire,Nott'm Forest,Jair Cunha,Jair Paula da Cunha Filho,
+RotoWire,Nott'm Forest,N. Williams,Neco Williams,
+RotoWire,Nott'm Forest,X. Schlager,Xaver Schlager,
+RotoWire,Nott'm Forest,James McAtee,James McAtee,
+RotoWire,Nott'm Forest,Daniel Munoz,Daniel Munoz,
+RotoWire,Nott'm Forest,Dan Ndoye,Dan Ndoye,
+RotoWire,Nott'm Forest,M. Gibbs-White,Morgan Gibbs-White,
+RotoWire,Nott'm Forest,Liam Delap,Liam Delap,
+RotoWire,Bournemouth,D. Petrovic,Djordje Petrovic,
+RotoWire,Bournemouth,A. Truffert,Adrien Truffert,
+RotoWire,Bournemouth,Antonio Silva,António João Pereira de Albuquerque Tavares da Silva,
+RotoWire,Bournemouth,James Hill,James Hill,
+RotoWire,Bournemouth,Adam Smith,Adam Smith,
+RotoWire,Bournemouth,Tyler Adams,Tyler Adams,
+RotoWire,Bournemouth,R. Christie,Ryan Christie,
+RotoWire,Bournemouth,M. Tavernier,Marcus Tavernier,
+RotoWire,Bournemouth,J. Kluivert,Justin Kluivert,
+RotoWire,Bournemouth,Rayan,Rayan,
+RotoWire,Bournemouth,Evanilson,Evanilson,
+RotoWire,Leeds,J. Trafford,James Trafford,
+RotoWire,Leeds,James Justin,James Justin,
+RotoWire,Leeds,Jaka Bijol,Jaka Bijol,
+RotoWire,Leeds,T. Muharemovic,Tarik Muharemović,
+RotoWire,Leeds,G. Gudmundsson,Gabriel Gudmundsson,
+RotoWire,Leeds,Ethan Ampadu,Ethan Ampadu,
+RotoWire,Leeds,Ao Tanaka,Ao Tanaka,
+RotoWire,Leeds,Jayden Bogle,Jayden Bogle,
+RotoWire,Leeds,Anton Stach,Anton Stach,
+RotoWire,Leeds,Noah Okafor,Noah Okafor,
+RotoWire,Leeds,D. Calvert-Lewin,Dominic Calvert-Lewin,
+RotoWire,Spurs,A. Kinsky,Antonín Kinský,
+RotoWire,Spurs,A. Robertson,Andrew Robertson,
+RotoWire,Spurs,J. van Hecke,Jan Paul van Hecke,
+RotoWire,Spurs,M. van de Ven,Micky van de Ven,
+RotoWire,Spurs,Pedro Porro,Pedro Porro,
+RotoWire,Spurs,S. Tonali,Sandro Tonali,
+RotoWire,Spurs,Mateus Fernandes,Mateus Fernandes,
+RotoWire,Spurs,O. Marmoush,Omar Marmoush,
+RotoWire,Spurs,C. Gallagher,Conor Gallagher,
+RotoWire,Spurs,M. Kudus,Mohammed Kudus,
+RotoWire,Spurs,D. Solanke,Dominic Solanke,
+RotoWire,Crystal Palace,D. Henderson,Dean Henderson,
+RotoWire,Crystal Palace,Axel Disasi,Axel Disasi,
+RotoWire,Crystal Palace,C. Richards,Chris Richards,
+RotoWire,Crystal Palace,J. Canvot,Jaydee Canvot,
+RotoWire,Crystal Palace,T. Mitchell,Tyrick Mitchell,
+RotoWire,Crystal Palace,D. Kamada,Daichi Kamada,
+RotoWire,Crystal Palace,Adam Wharton,Adam Wharton,
+RotoWire,Crystal Palace,A. Khalaili,Anan Khalaili,
+RotoWire,Crystal Palace,D. McNeil,Dwight McNeil,
+RotoWire,Crystal Palace,Yeremy Pino,Yeremy Pino,
+RotoWire,Crystal Palace,J. Mateta,Jean-Philippe Mateta,
+RotoWire,Aston Villa,Zion Suzuki,Zion Suzuki,
+RotoWire,Aston Villa,Ian Maatsen,Ian Maatsen,
+RotoWire,Aston Villa,V. Lindelof,Victor Lindelof,
+RotoWire,Aston Villa,Pau Torres,Pau Torres,
+RotoWire,Aston Villa,Matty Cash,Matty Cash,
+RotoWire,Aston Villa,B. Kamara,Boubacar Kamara,
+RotoWire,Aston Villa,Joao Gomes,Joao Gomes,
+RotoWire,Aston Villa,J. Manzambi,Johan Manzambi,
+RotoWire,Aston Villa,E. Buendia,Emiliano Buendia,
+RotoWire,Aston Villa,John McGinn,John McGinn,
+RotoWire,Aston Villa,N. Jackson,Nicolas Jackson,
+RotoWire,Fulham,Bernd Leno,Bernd Leno,
+RotoWire,Fulham,A. Robinson,Antonee Robinson,
+RotoWire,Fulham,C. Bassey,Calvin Bassey,
+RotoWire,Fulham,D. Affengruber,David Affengruber,
+RotoWire,Fulham,T. Castagne,Timothy Castagne,
+RotoWire,Fulham,Sander Berge,Sander Berge,
+RotoWire,Fulham,Shea Charles,Shea Charles,
+RotoWire,Fulham,Alex Iwobi,Alex Iwobi,
+RotoWire,Fulham,Josh King,Josh King,
+RotoWire,Fulham,Oscar Bobb,Oscar Bobb,
+RotoWire,Fulham,Gonzalo Garcia,Gonzalo García,
+RotoWire,Liverpool,Alisson,Alisson Becker,
+RotoWire,Liverpool,Milos Kerkez,Milos Kerkez,
+RotoWire,Liverpool,J. Jacquet,Jeremy Jacquet,
+RotoWire,Liverpool,V. van Dijk,Virgil van Dijk,
+RotoWire,Liverpool,R. Araujo,Ronald Araujo,
+RotoWire,Liverpool,R. Gravenberch,Ryan Gravenberch,
+RotoWire,Liverpool,A. Mac Allister,Alexis Mac Allister,
+RotoWire,Liverpool,Cody Gakpo,Cody Gakpo,
+RotoWire,Liverpool,F. Wirtz,Florian Wirtz,
+RotoWire,Liverpool,B. Barcola,Bradley Barcola,
+RotoWire,Liverpool,A. Isak,Alexander Isak,
+RotoWire,Arsenal,David Raya,David Raya,
+RotoWire,Arsenal,M. Lewis-Skelly,Myles Lewis-Skelly,
+RotoWire,Arsenal,Ezri Konsa,Ezri Konsa,
+RotoWire,Arsenal,Gabriel,Gabriel Magalhaes,
+RotoWire,Arsenal,J. Timber,Jurrien Timber,
+RotoWire,Arsenal,Declan Rice,Declan Rice,
+RotoWire,Arsenal,Bruno Guimaraes,Bruno Guimaraes,
+RotoWire,Arsenal,Eberechi Eze,Eberechi Eze,
+RotoWire,Arsenal,M. Odegaard,Martin Odegaard,
+RotoWire,Arsenal,Noni Madueke,Noni Madueke,
+RotoWire,Arsenal,Kai Havertz,Kai Havertz,
+RotoWire,Newcastle,L. Hornicek,Lukás Hornícek,
+RotoWire,Newcastle,Lewis Hall,Lewis Hall,
+RotoWire,Newcastle,Fabian Schar,Fabian Schar,
+RotoWire,Newcastle,Dan Burn,Dan Burn,
+RotoWire,Newcastle,Amar Dedic,Amar Dedic,
+RotoWire,Newcastle,Joelinton,Joelinton,
+RotoWire,Newcastle,Nico Gonzalez,Nico Gonzalez,
+RotoWire,Newcastle,H. Barnes,Harvey Barnes,
+RotoWire,Newcastle,Joe Willock,Joe Willock,
+RotoWire,Newcastle,Jacob Murphy,Jacob Murphy,
+RotoWire,Newcastle,Will Osula,William Osula,
+RotoWire,Everton,J. Pickford,Jordan Pickford,
+RotoWire,Everton,James Garner,James Garner,
+RotoWire,Everton,J. Tarkowski,James Tarkowski,
+RotoWire,Everton,J. Branthwaite,Jarrad Branthwaite,
+RotoWire,Everton,Merlin Rohl,Merlin Röhl,
+RotoWire,Everton,H. Armstrong,Harrison Armstrong,
+RotoWire,Everton,H. Hackney,Hayden Hackney,
+RotoWire,Everton,J. Grealish,Jack Grealish,
+RotoWire,Everton,K. Dewsbury-Hall,Kiernan Dewsbury-Hall,
+RotoWire,Everton,B. Johnson,Brennan Johnson,
+RotoWire,Everton,T. Barry,Thierno Barry,
+FFP,Arsenal,David Raya,David Raya,95.0
+FFP,Arsenal,Jurriën Timber,Jurrien Timber,50.0
+FFP,Arsenal,Riccardo Calafiori,Riccardo Calafiori,60.0
+FFP,Arsenal,Gabriel,Gabriel Magalhaes,90.0
+FFP,Arsenal,Ezri Konsa,Ezri Konsa,90.0
+FFP,Arsenal,Bruno G.,Bruno Guimaraes,70.0
+FFP,Arsenal,Declan Rice,Declan Rice,90.0
+FFP,Arsenal,Martin Ødegaard,Martin Odegaard,90.0
+FFP,Arsenal,Noni Madueke,Noni Madueke,80.0
+FFP,Arsenal,Eberechi Eze,Eberechi Eze,70.0
+FFP,Arsenal,Kai Havertz,Kai Havertz,60.0
+FFP,Aston Villa,Zion Suzuki,Zion Suzuki,95.0
+FFP,Aston Villa,Matty Cash,Matty Cash,90.0
+FFP,Aston Villa,Ian Maatsen,Ian Maatsen,90.0
+FFP,Aston Villa,Pau,Pau Torres,70.0
+FFP,Aston Villa,Victor Lindelöf,Victor Lindelof,90.0
+FFP,Aston Villa,Joao Gomes,Joao Gomes,80.0
+FFP,Aston Villa,Boubacar Kamara,Boubacar Kamara,80.0
+FFP,Aston Villa,Johan Manzambi,Johan Manzambi,70.0
+FFP,Aston Villa,Alysson,Alysson Edward Franco da Rocha dos Santos,70.0
+FFP,Aston Villa,John McGinn,John McGinn,90.0
+FFP,Aston Villa,Nicolas Jackson,Nicolas Jackson,90.0
+FFP,Bournemouth,Đorđe Petrović,Djordje Petrovic,90.0
+FFP,Bournemouth,Adam Smith,Adam Smith,80.0
+FFP,Bournemouth,Adrien Truffert,Adrien Truffert,90.0
+FFP,Bournemouth,António João Silva,,90.0
+FFP,Bournemouth,James Hill,James Hill,90.0
+FFP,Bournemouth,Tyler Adams,Tyler Adams,90.0
+FFP,Bournemouth,Lewis Cook,Lewis Cook,60.0
+FFP,Bournemouth,Justin Kluivert,Justin Kluivert,60.0
+FFP,Bournemouth,Rayan,Rayan,90.0
+FFP,Bournemouth,Marcus Tavernier,Marcus Tavernier,90.0
+FFP,Bournemouth,Evanilson,Evanilson,90.0
+FFP,Brentford,Caoimhín Kelleher,Caoimhin Kelleher,95.0
+FFP,Brentford,Michael Kayode,Michael Kayode,70.0
+FFP,Brentford,Keane Lewis-Potter,Keane Lewis-Potter,90.0
+FFP,Brentford,Jannik Schuster,Jannik Schuster,60.0
+FFP,Brentford,Kristoffer Ajer,Kristoffer Ajer,90.0
+FFP,Brentford,Mamadou Sangaré,Mamadou Sangaré,70.0
+FFP,Brentford,Vitaly Janelt,Vitaly Janelt,80.0
+FFP,Brentford,Mathias Jensen,Mathias Jensen,70.0
+FFP,Brentford,O. Dango,Dango Ouattara,60.0
+FFP,Brentford,Kevin Schade,Kevin Schade,80.0
+FFP,Brentford,Thiago,Igor Thiago,90.0
+FFP,Brighton,Bart Verbruggen,Bart Verbruggen,95.0
+FFP,Brighton,Ferdi Kadıoğlu,Ferdi Kadioglu,60.0
+FFP,Brighton,Olivier Boscagli,Olivier Boscagli,70.0
+FFP,Brighton,Lewis Dunk,Lewis Dunk,90.0
+FFP,Brighton,Luka Vuskovic,Luka Vušković,90.0
+FFP,Brighton,José María Andrés,José María Andrés Baixauli,60.0
+FFP,Brighton,Pascal Groß,Pascal Gross,90.0
+FFP,Brighton,Yasin Ayari,Yasin Ayari,80.0
+FFP,Brighton,Diego Gomez,Diego Gomez,90.0
+FFP,Brighton,Maxim De Cuyper,Maxim De Cuyper,90.0
+FFP,Brighton,Charalampos Kostoulas,Charalampos Kostoulas,80.0
+FFP,Chelsea,Mike Penders,Mike Penders,95.0
+FFP,Chelsea,Pedro Neto,Pedro Neto,90.0
+FFP,Chelsea,Pep Chavarria,Pep Chavarría,50.0
+FFP,Chelsea,Levi Colwill,Levi Samuels Colwill,90.0
+FFP,Chelsea,Maxence Lacroix,Maxence Lacroix,90.0
+FFP,Chelsea,Josh Acheampong,Josh Acheampong,80.0
+FFP,Chelsea,Moisés Caicedo,Moises Caicedo,80.0
+FFP,Chelsea,Jordan Henderson,Jordan Henderson,70.0
+FFP,Chelsea,Cole Palmer,Cole Palmer,90.0
+FFP,Chelsea,Morgan Rogers,Morgan Rogers,90.0
+FFP,Chelsea,João Pedro,Joao Pedro,50.0
+FFP,Coventry City,Carl Rushworth,Carl Rushworth,95.0
+FFP,Coventry City,Milan van Ewijk,Milan van Ewijk,90.0
+FFP,Coventry City,Jay Dasilva,Jay Dasilva,90.0
+FFP,Coventry City,Ethan Pinnock,Ethan Pinnock,90.0
+FFP,Coventry City,Bobby Thomas,Bobby Thomas,70.0
+FFP,Coventry City,Caleb Yirenkyi,Caleb Yirenkyi,70.0
+FFP,Coventry City,Matt Grimes,Matt Grimes,80.0
+FFP,Coventry City,Jack Rudoni,Jack Rudoni,90.0
+FFP,Coventry City,Tatsuhiro Sakamoto,Tatsuhiro Sakamoto,70.0
+FFP,Coventry City,Brandon Thomas-Asante,Brandon Thomas-Asante,80.0
+FFP,Coventry City,Sidiki Cherif,Sidiki Cherif,50.0
+FFP,Crystal Palace,Walter Benitez,Walter Benítez,95.0
+FFP,Crystal Palace,Anan Khalaili,Anan Khalaili,80.0
+FFP,Crystal Palace,Tyrick Mitchell,Tyrick Mitchell,80.0
+FFP,Crystal Palace,Chris Richards,Chris Richards,80.0
+FFP,Crystal Palace,Axel Disasi,Axel Disasi,80.0
+FFP,Crystal Palace,Jaydee Canvot,Jaydee Canvot,80.0
+FFP,Crystal Palace,Quinten Timber,Quinten Timber,60.0
+FFP,Crystal Palace,Adam Wharton,Adam Wharton,90.0
+FFP,Crystal Palace,Daichi Kamada,Daichi Kamada,70.0
+FFP,Crystal Palace,Yéremy,Yeremy Pino,60.0
+FFP,Crystal Palace,Jørgen Strand Larsen,Jorgen Strand Larsen,50.0
+FFP,Everton,Jordan Pickford,Jordan Pickford,95.0
+FFP,Everton,Merlin Röhl,Merlin Röhl,60.0
+FFP,Everton,Vitalii Mykolenko,Vitalii Mykolenko,70.0
+FFP,Everton,Jarrad Branthwaite,Jarrad Branthwaite,60.0
+FFP,Everton,James Tarkowski,James Tarkowski,90.0
+FFP,Everton,Harrison Armstrong,Harrison Armstrong,80.0
+FFP,Everton,James Garner,James Garner,90.0
+FFP,Everton,Kiernan Dewsbury-Hall,Kiernan Dewsbury-Hall,90.0
+FFP,Everton,Tyrique George,Tyrique George,70.0
+FFP,Everton,Jack Grealish,Jack Grealish,60.0
+FFP,Everton,Thierno Barry,Thierno Barry,90.0
+FFP,Fulham,Bernd Leno,Bernd Leno,95.0
+FFP,Fulham,Timothy Castagne,Timothy Castagne,80.0
+FFP,Fulham,Antonee Robinson,Antonee Robinson,90.0
+FFP,Fulham,Calvin Bassey,Calvin Bassey,90.0
+FFP,Fulham,David Affengruber,David Affengruber,90.0
+FFP,Fulham,Hugo Larsson,Hugo Larsson,50.0
+FFP,Fulham,Shea Charles,Shea Charles,80.0
+FFP,Fulham,Josh King,Josh King,90.0
+FFP,Fulham,Oscar Bobb,Oscar Bobb,80.0
+FFP,Fulham,Alex Iwobi,Alex Iwobi,90.0
+FFP,Fulham,Gonzalo,Gonzalo García,90.0
+FFP,Hull City,Konstantinos Tzolakis,Konstantinos Tzolakis,95.0
+FFP,Hull City,Lewie Coyle,Lewie Coyle,90.0
+FFP,Hull City,Ryan Giles,Ryan Giles,60.0
+FFP,Hull City,Lucas Herrington,Lucas Herrington,90.0
+FFP,Hull City,John Egan,John Egan,90.0
+FFP,Hull City,Semi Ajayi,Semi Ajayi,90.0
+FFP,Hull City,Regan Slater,Regan Slater,90.0
+FFP,Hull City,Tim Iroegbunam,Tim Iroegbunam,60.0
+FFP,Hull City,Mohamed Belloumi,Mohamed Belloumi,80.0
+FFP,Hull City,Elliot Stroud,Elliot Stroud,60.0
+FFP,Hull City,Oli McBurnie,Oli McBurnie,90.0
+FFP,Ipswich Town,Christian Walton,Christian Walton,90.0
+FFP,Ipswich Town,Abdoul Ouattara,Abdoul Ouattara,90.0
+FFP,Ipswich Town,Leif Davis,Leif Davis,90.0
+FFP,Ipswich Town,Dara O'Shea,Dara O'Shea,90.0
+FFP,Ipswich Town,Issa Diop,Issa Diop,90.0
+FFP,Ipswich Town,Florentino,Florentino,90.0
+FFP,Ipswich Town,Exequiel Palacios,Exequiel Palacios,90.0
+FFP,Ipswich Town,Julio Enciso,Julio Enciso,80.0
+FFP,Ipswich Town,Abdul Fatawu,Abdul Fatawu,60.0
+FFP,Ipswich Town,Daizen Maeda,Daizen Maeda,60.0
+FFP,Ipswich Town,Emersonn,Emersonn Correia da Silva,80.0
+FFP,Leeds,James Trafford,James Trafford,95.0
+FFP,Leeds,Jayden Bogle,Jayden Bogle,90.0
+FFP,Leeds,Gabriel Gudmundsson,Gabriel Gudmundsson,90.0
+FFP,Leeds,Tarik Muharemović,Tarik Muharemović,90.0
+FFP,Leeds,Jaka Bijol,Jaka Bijol,60.0
+FFP,Leeds,James Justin,James Justin,90.0
+FFP,Leeds,Ethan Ampadu,Ethan Ampadu,90.0
+FFP,Leeds,Tanaka,Ao Tanaka,70.0
+FFP,Leeds,Anton Stach,Anton Stach,70.0
+FFP,Leeds,Noah Okafor,Noah Okafor,70.0
+FFP,Leeds,Dominic Calvert-Lewin,Dominic Calvert-Lewin,90.0
+FFP,Liverpool,Alisson Becker,Alisson Becker,95.0
+FFP,Liverpool,Ronald Araujo,Ronald Araujo,80.0
+FFP,Liverpool,Milos Kerkez,Milos Kerkez,70.0
+FFP,Liverpool,Virgil,Virgil van Dijk,90.0
+FFP,Liverpool,Jeremy Jacquet,Jeremy Jacquet,90.0
+FFP,Liverpool,Alexis Mac Allister,Alexis Mac Allister,90.0
+FFP,Liverpool,Ryan Gravenberch,Ryan Gravenberch,90.0
+FFP,Liverpool,Florian Wirtz,Florian Wirtz,70.0
+FFP,Liverpool,Cody Gakpo,Cody Gakpo,70.0
+FFP,Liverpool,Bradley Barcola,Bradley Barcola,90.0
+FFP,Liverpool,Alexander Isak,Alexander Isak,90.0
+FFP,Man City,Gianluigi Donnarumma,Gianluigi Donnarumma,95.0
+FFP,Man City,Matheus N.,Matheus Nunes,70.0
+FFP,Man City,Joško Gvardiol,Josko Gvardiol,70.0
+FFP,Man City,Rúben,Ruben Dias,80.0
+FFP,Man City,Marc Guéhi,Marc Guehi,70.0
+FFP,Man City,Elliot Anderson,Elliot Anderson,90.0
+FFP,Man City,Enzo,Enzo Fernandez,90.0
+FFP,Man City,Phil Foden,Phil Foden,50.0
+FFP,Man City,Iliman Ndiaye,Iliman Ndiaye,90.0
+FFP,Man City,Jérémy Doku,Jeremy Doku,90.0
+FFP,Man City,Erling Haaland,Erling Haaland,90.0
+FFP,Man Utd,Senne Lammens,Senne Lammens,95.0
+FFP,Man Utd,Leny Yoro,Leny Yoro,70.0
+FFP,Man Utd,Diogo Dalot,Diogo Dalot,90.0
+FFP,Man Utd,Lisandro Martínez,Lisandro Martinez,60.0
+FFP,Man Utd,Harry Maguire,Harry Maguire,70.0
+FFP,Man Utd,Youri Tielemans,Youri Tielemans,70.0
+FFP,Man Utd,Carlos Baleba,Carlos Baleba,50.0
+FFP,Man Utd,Bruno Fernandes,Bruno Fernandes,60.0
+FFP,Man Utd,Bryan Mbeumo,Bryan Mbeumo,80.0
+FFP,Man Utd,Marcus Rashford,Marcus Rashford,50.0
+FFP,Man Utd,Matheus Cunha,Matheus Cunha,80.0
+FFP,Newcastle,Lukáš Horníček,Lukás Hornícek,95.0
+FFP,Newcastle,Amar Dedić,Amar Dedic,80.0
+FFP,Newcastle,Lewis Hall,Lewis Hall,90.0
+FFP,Newcastle,Dan Burn,Dan Burn,80.0
+FFP,Newcastle,Malick Thiaw,Malick Thiaw,90.0
+FFP,Newcastle,Nico González,Nico Gonzalez,90.0
+FFP,Newcastle,Joelinton,Joelinton,80.0
+FFP,Newcastle,Joe Willock,Joe Willock,70.0
+FFP,Newcastle,Jacob Murphy,Jacob Murphy,70.0
+FFP,Newcastle,Harvey Barnes,Harvey Barnes,90.0
+FFP,Newcastle,William Osula,William Osula,80.0
+FFP,Nott'm Forest,Matz Sels,Matz Sels,95.0
+FFP,Nott'm Forest,Daniel Muñoz,Daniel Munoz,90.0
+FFP,Nott'm Forest,Neco Williams,Neco Williams,90.0
+FFP,Nott'm Forest,Murillo,Murillo dos Santos,90.0
+FFP,Nott'm Forest,Nikola Milenković,Nikola Milenkovic,70.0
+FFP,Nott'm Forest,Jair Cunha,Jair Paula da Cunha Filho,60.0
+FFP,Nott'm Forest,James McAtee,James McAtee,70.0
+FFP,Nott'm Forest,Xaver Schlager,Xaver Schlager,80.0
+FFP,Nott'm Forest,Dan Ndoye,Dan Ndoye,80.0
+FFP,Nott'm Forest,Morgan Gibbs-White,Morgan Gibbs-White,90.0
+FFP,Nott'm Forest,Liam Delap,Liam Delap,90.0
+FFP,Sunderland,Robin Roefs,Robin Roefs,95.0
+FFP,Sunderland,Trai Hume,Trai Hume,80.0
+FFP,Sunderland,Reinildo,Reinildo Mandava,90.0
+FFP,Sunderland,Kevin Danso,Kevin Danso,60.0
+FFP,Sunderland,Nordi Mukiele,Nordi Mukiele,80.0
+FFP,Sunderland,Granit Xhaka,Granit Xhaka,90.0
+FFP,Sunderland,Noah Sadiki,Noah Sadiki,90.0
+FFP,Sunderland,Enzo Le Fée,Enzo Le Fee,90.0
+FFP,Sunderland,Chris Rigg,Chris Rigg,50.0
+FFP,Sunderland,Nilson Angulo,Nilson Angulo,70.0
+FFP,Sunderland,Brian Brobbey,Brian Brobbey,80.0
+FFP,Spurs,Antonín Kinský,Antonín Kinský,95.0
+FFP,Spurs,Archie Gray,Archie Gray,60.0
+FFP,Spurs,Andrew Robertson,Andrew Robertson,90.0
+FFP,Spurs,Micky van de Ven,Micky van de Ven,90.0
+FFP,Spurs,Jan Paul van Hecke,Jan Paul van Hecke,90.0
+FFP,Spurs,Sandro Tonali,Sandro Tonali,90.0
+FFP,Spurs,Mateus Fernandes,Mateus Fernandes,80.0
+FFP,Spurs,James Maddison,James Maddison,70.0
+FFP,Spurs,Mohammed Kudus,Mohammed Kudus,80.0
+FFP,Spurs,Mathys Tel,Mathys Tel,80.0
+FFP,Spurs,Omar Marmoush,Omar Marmoush,70.0

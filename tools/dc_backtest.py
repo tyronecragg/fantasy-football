@@ -12,7 +12,7 @@ import tempfile
 import numpy as np
 import pandas as pd
 
-ROOT = r"C:\Users\Tyrone\Documents\fantasy_premier_league"
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT); sys.path.insert(0, ROOT)
 from fpl_pipeline import config, ingest, model, players, rating  # noqa: E402
 

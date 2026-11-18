@@ -1,0 +1,21 @@
+match_name,date,team_name,clean_sheet_yes,clean_sheet_no
+Manchester City vs. Fulham FC,2026-11-21T12:30:00,Man City,2.35,1.48
+Manchester City vs. Fulham FC,2026-11-21T12:30:00,Fulham,6.4,1.06
+Aston Villa vs. Sunderland AFC,2026-11-21T15:00:00,Aston Villa,2.48,1.44
+Aston Villa vs. Sunderland AFC,2026-11-21T15:00:00,Sunderland,4.6,1.14
+AFC Bournemouth vs. Nottingham Forest,2026-11-21T15:00:00,Bournemouth,2.8,1.35
+AFC Bournemouth vs. Nottingham Forest,2026-11-21T15:00:00,Nott'm Forest,3.95,1.18
+Chelsea vs. Leeds United,2026-11-21T15:00:00,Chelsea,2.6,1.4
+Chelsea vs. Leeds United,2026-11-21T15:00:00,Leeds,4.5,1.14
+Coventry City vs. Crystal Palace,2026-11-21T15:00:00,Coventry City,3.3,1.26
+Coventry City vs. Crystal Palace,2026-11-21T15:00:00,Crystal Palace,3.7,1.2
+Tottenham vs. Ipswich Town,2026-11-21T15:00:00,Spurs,2.28,1.51
+Tottenham vs. Ipswich Town,2026-11-21T15:00:00,Ipswich Town,5.6,1.08
+Newcastle United vs. Arsenal,2026-11-21T17:30:00,Newcastle,5.0,1.11
+Newcastle United vs. Arsenal,2026-11-21T17:30:00,Arsenal,2.29,1.51
+Hull City vs. Brighton,2026-11-22T14:00:00,Hull City,5.4,1.1
+Hull City vs. Brighton,2026-11-22T14:00:00,Brighton,2.29,1.51
+Liverpool FC vs. Manchester United,2026-11-22T16:30:00,Liverpool,2.9,1.32
+Liverpool FC vs. Manchester United,2026-11-22T16:30:00,Man Utd,4.9,1.12
+Brentford FC vs. Everton FC,2026-11-23T20:00:00,Brentford,2.8,1.35
+Brentford FC vs. Everton FC,2026-11-23T20:00:00,Everton,4.3,1.15

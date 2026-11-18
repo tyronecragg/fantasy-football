@@ -5,6 +5,8 @@ joins it to our own XP projection (outputs/players_master.csv) so you see not ju
 Haaland" but whether our model rates the chase. Two lists:
   - RIVALS' TEMPLATE YOU'RE MISSING : high league-ownership players you do NOT own (the threats)
   - YOUR DIFFERENTIALS              : your players with LOW league ownership (your edge)
+Both modes end with the top 10 most-owned players among the league's top 25 (by rank) and among all
+sampled managers; the --xp table also shows "Same", the % of your 15 each manager also owns.
 
     python tools/league_differentials.py                              # lists YOUR leagues + ids to pick from
     python tools/league_differentials.py --league 19669               # your entry defaults to Tyrone's
@@ -330,6 +332,38 @@ def main():
     src = "cached" if (ent_cached and not args.refresh) else "live"
     print(f"\nLeague: {name}  |  {scope}  |  picks GW{gw}  |  entries: {src}\n")
 
+    mine = squad_of(args.entry)
+
+    def print_top_owned(k=10, top_n=25):
+        """Top-k most-owned players among the league's top_n managers by rank, then among all sampled."""
+        xp = _our_xp()
+        squads = []                                              # (rank, squad) for every fetchable manager
+        for eid, _, rank in entries:
+            try:
+                squads.append((rank, squad_of(eid)))
+            except requests.RequestException:
+                continue
+        _cache_save(sq_path, sq_cache)
+        top = [sq for rank, sq in sorted(squads, key=lambda t: t[0])[:top_n]]
+        for group, label in ((top, f"top {len(top)} by league rank"), ([sq for _, sq in squads], f"all {len(squads)} sampled")):
+            if not group:
+                continue
+            counts = {}
+            for sq in group:
+                for pid in sq:
+                    counts[pid] = counts.get(pid, 0) + 1
+            print(f"=== Top {k} most-owned: {label} ===")
+            print(f"  {'player':<16}{'pos':<4}{'team':<5}{'£':>5}{'own%':>6}{'glob%':>6}{'F1xp':>6}{'TotXP':>7}")
+            for pid, c in sorted(counts.items(), key=lambda t: -t[1])[:k]:
+                p = players.get(pid, {"name": f"id{pid}", "pos": "?", "team": "?", "cost": 0, "global_own": 0})
+                f1, tot = xp.get(pid, (None, None))
+                f1s = f"{f1:.2f}" if pd.notna(f1) else " - "
+                ts = f"{tot:.1f}" if pd.notna(tot) else " - "
+                mark = "  <- yours" if pid in mine else ""
+                print(f"  {p['name'][:15]:<16}{p['pos']:<4}{p['team']:<5}{p['cost']:>5.1f}"
+                      f"{100.0 * c / len(group):>5.0f}%{p['global_own']:>5.0f}%{f1s:>6}{ts:>7}{mark}")
+            print()
+
     if args.xp:                                                  # tabulate each team's projected XP
         hz, fcols = _our_horizon(args.horizon)
         if hz is None or not fcols:
@@ -339,9 +373,11 @@ def main():
         teams = []
         for eid, ename, rank in entries:
             try:
-                sub = hz.reindex(list(squad_of(eid))).dropna(subset=["Position"])
+                sq = squad_of(eid)
             except requests.RequestException:
                 continue
+            sub = hz.reindex(list(sq)).dropna(subset=["Position"])
+            same = 100.0 * len(sq & mine) / max(len(mine), 1)                # % of your 15 they also own
             xi_b = [_fixture_value(sub, c) for c in fcols]                    # [(xi+cap, bench), ...]
             per = [v[0] for v in xi_b]
             wtot = sum(fw[k] * per[k] for k in range(len(fcols)))             # ownership x reliability weighted
@@ -352,7 +388,7 @@ def main():
                     meta = meta_of(eid)
                 except requests.RequestException:
                     meta = None
-            teams.append((eid, ename, per, sum(per), wtot, wben, meta, rank))
+            teams.append((eid, ename, per, sum(per), wtot, wben, meta, rank, same))
         _cache_save(sq_path, sq_cache)
         if args.meta:
             _cache_save(meta_path, meta_cache)
@@ -366,24 +402,25 @@ def main():
         sort_lbl = {"f1": "F1", "total": "TOTAL", "wtotal": "wTOT", "wbench": "wTOT+B"}[args.sort]
         meta_hdr = f"{'Value':>7}{'Bank':>6}{'FT':>4}  chips" if args.meta else ""
         print(f"Team projected XP (best XI + optimal captain per fixture), sorted by {sort_lbl}:\n")
-        header = f"  {'#':>3}{'Pos':>5}  {'manager':<24}{hdr}{'TOTAL':>8}{'wTOT':>8}{'wTOT+B':>9}{meta_hdr}"
+        header = f"  {'#':>3}{'Pos':>5}  {'manager':<24}{hdr}{'TOTAL':>8}{'wTOT':>8}{'wTOT+B':>9}{'Same':>6}{meta_hdr}"
         rows = []                                                # (body-without-mark, mark) to size the rule
-        for i, (eid, ename, per, tot, wtot, wben, m, rank) in enumerate(teams, 1):
+        for i, (eid, ename, per, tot, wtot, wben, m, rank, same) in enumerate(teams, 1):
             meta_str = ""
             if args.meta:
                 meta_str = (f"{m['team']:>6.1f}m{m['bank']:>5.1f}m{m.get('ft', '-'):>4}  {m['chips']}"
                             if m else f"{'-':>7}{'-':>6}{'-':>4}  -")
             body = (f"  {i:>3}{rank:>5}  {ename[:24]:<24}" + "".join(f"{v:>7.1f}" for v in per)
-                    + f"{tot:>8.1f}{wtot:>8.1f}{wben:>9.1f}{meta_str}")
+                    + f"{tot:>8.1f}{wtot:>8.1f}{wben:>9.1f}{same:>5.0f}%{meta_str}")
             rows.append((body, "  <- you" if eid == args.entry else ""))
         width = max([len(header)] + [len(b) for b, _ in rows])   # rule spans the widest line (3-chip case)
         print(header)
         print("  " + "-" * (width - 2))
         for body, mark in rows:
             print(body + mark)
+        print()
+        print_top_owned()
         return
 
-    mine = squad_of(args.entry)
     counts = {}
     ok = 0
     for eid, ename, rank in entries:
@@ -422,6 +459,9 @@ def main():
     # 2) YOUR differentials (own, low league ownership)
     diffs = sorted((row(pid) for pid in mine), key=lambda r: r[4])
     show(diffs[:15], "YOUR players, least-owned in the league first (your differentials)")
+
+    # 3) most-owned players: top 25 managers vs everyone sampled
+    print_top_owned()
 
 
 if __name__ == "__main__":

@@ -121,15 +121,10 @@ def collapse_fungible_bench(df, current_team_names, fixture_columns):
             drop.extend(i for i in non_owned if i != rep)
     if drop:
         df = df.drop(index=drop)
-        print("  Collapsed interchangeable 0-XP bench fillers"
-              + (f" ({', '.join(generics.values())})" if generics else " (owned incumbents kept)")
-              + f"; dropped {len(drop)} redundant duplicates")
     return df, generics
 
 
 def load_current_team(excel_file, sheet_name='GW Teams'):
-    print("Loading current team from GW Teams sheet...")
-
     # Read the GW Teams sheet
     df_teams = load_sheet(excel_file, sheet_name)
 
@@ -140,9 +135,6 @@ def load_current_team(excel_file, sheet_name='GW Teams'):
 
     current_gw_column = df_teams.columns[last_col_idx]
     current_team_names = df_teams.iloc[:, last_col_idx].dropna().tolist()
-
-    print(f"Found current team for {current_gw_column}: {len(current_team_names)} players "
-          f"({', '.join(current_team_names)})")
 
     return current_team_names, current_gw_column
 
@@ -180,7 +172,7 @@ def calculate_current_team_value(excel_file, current_team_names, players_sheet='
     df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
     apply_dgw_adjustment(df)  # TEMPORARY
-    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file), quiet=True)
 
     total_value = 0
     player_values = {}
@@ -221,7 +213,7 @@ def analyse_current_team(excel_file, current_team_names, num_fixtures=6, fixture
     df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
     apply_dgw_adjustment(df)  # TEMPORARY
-    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file), quiet=True)
 
     # Define fixture columns
     all_fixture_columns = ['F1 XP', 'F2 XP', 'F3 XP', 'F4 XP', 'F5 XP', 'F6 XP', 'F7 XP', 'F8 XP']
@@ -401,14 +393,20 @@ def _tc_best_squad(d, budget, obj, current_idx, max_transfers):
 
 
 def _tc_best_squad_rich(d, budget, fcols, w, g, current_idx, max_transfers,
-                        bench_slot_weights, gk_bench_weights, max_def_per_team=2, pool_per_pos=40):
+                        bench_slot_weights, gk_bench_weights, max_def_per_team=2, pool_per_pos=40,
+                        gate=None, _values=False):
     """Best 15-squad (<= max_transfers from current_idx) maximising the WEIGHTED per-fixture value
     over fixtures g..N-1 WITH per-fixture captaincy (the top starter doubles each fixture) and
     bench-slot weights — the SAME objective gw_xp and the main optimiser use, so timing SELECTION
     and SCORING agree (the flat-column _tc_best_squad was captaincy/bench-blind and picked players
     the scoring then graded differently). Pre-filters to the current squad + the top `pool_per_pos`
     per position on the flat weighted column so the per-fixture ILP stays tractable. Returns the
-    15-set or None."""
+    15-set or None.
+
+    `gate` = (min_f1_gain, min_total_gain, min_remaining_gain): the main run's min-gain gate, applied
+    to THIS step's move against the squad it starts from — raw XI+captain at fixture g, weighted total
+    incl bench over g..N-1, weighted XI+captain over g+1..N-1. A move that fails it (e.g. a signing who
+    would only sit on the bench this week) is not allowed; returns None when no move clears it."""
     N = len(w)
     rem = list(range(g, N))
     objcol = f"_obj{g}"
@@ -450,6 +448,26 @@ def _tc_best_squad_rich(d, budget, fcols, w, g, current_idx, max_transfers,
     if max_transfers < 15:
         prob += pulp.lpSum(sq[i] for i in idx if i in cur) >= max(0, 15 - max_transfers)
 
+    f1_expr = pulp.lpSum(d.loc[i, fcols[g]] * (st[g][i] + cap[g][i]) for i in idx)       # raw, fixture g
+    tail_expr = pulp.lpSum(w[f] * d.loc[i, fcols[f]] * (st[f][i] + cap[f][i]) for f in rem[1:] for i in idx)
+    if gate and any(gate) and max_transfers > 0:
+        base = _tc_best_squad_rich(d, budget, fcols, w, g, current_idx, 0, bench_slot_weights,
+                                   gk_bench_weights, max_def_per_team, pool_per_pos, _values=True)
+        if base is not None:
+            min_f1, min_total, min_rem = gate
+            base_total, base_f1, base_tail = base
+            made = pulp.LpVariable("tc_gate_made", cat="Binary")
+            n_in = pulp.lpSum(sq[i] for i in idx if i not in cur)
+            prob += n_in >= made
+            prob += n_in <= max_transfers * made
+            bigM = 1e4
+            if min_f1:
+                prob += f1_expr - base_f1 >= min_f1 - bigM * (1 - made)
+            if min_total:
+                prob += pulp.lpSum(obj) - base_total >= min_total - bigM * (1 - made)
+            if min_rem and len(rem) > 1:
+                prob += tail_expr - base_tail >= min_rem - bigM * (1 - made)
+
     for f in rem:                                                    # per fixture: XI + captain + bench
         prob += pulp.lpSum(st[f].values()) == 11
         prob += pulp.lpSum(bn[f].values()) == 4
@@ -468,13 +486,19 @@ def _tc_best_squad_rich(d, budget, fcols, w, g, current_idx, max_transfers,
     prob.solve(pulp.PULP_CBC_CMD(msg=0))
     if pulp.LpStatus[prob.status] != "Optimal":
         return None
-    return {i for i in idx if sq[i].value() == 1}
+    if _values:                                     # (weighted total incl bench, raw fixture-g XI+cap, weighted tail)
+        return pulp.value(prob.objective), pulp.value(f1_expr), pulp.value(tail_expr)
+    chosen = {i for i in idx if sq[i].value() > 0.5}
+    if gate and any(gate) and chosen == cur:        # the gate held: no move clears it this step
+        return None
+    return chosen
 
 
 def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additional_budget=0.0,
-                          free_transfers=1, max_per_gw=2, max_ft=5,
+                          free_transfers=1, max_per_gw=3, max_ft=5,
                           bench_slot_weights=None, gk_bench_weights=None, max_def_per_team=2,
-                          num_fixtures=None, ownership_weights=None, reliability_weights=None):
+                          num_fixtures=None, ownership_weights=None, reliability_weights=None,
+                          min_f1_gain=0.0, min_total_gain=0.0, min_remaining_gain=0.0):
     """Transfer PLAN valued over the FULL 8-fixture horizon, where `lookahead_gws` only bounds WHEN
     transfers may be made (the timing window), NOT the evaluation window. It decides how many transfers
     to make each GW in F1..F{lookahead_gws} (0..max_per_gw, free-transfer accrual +1/GW capped at
@@ -487,7 +511,11 @@ def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additio
     Squad SELECTION and SCORING both use the main optimiser's realistic per-fixture objective —
     best XI, captain doubled, bench-slot weights (via _tc_best_squad_rich) — so the plan can't pick
     a player its own scoring grades differently (the old flat-column selector was captaincy/bench-
-    blind). Rolling — re-run each week, robust to forced (injury) transfers."""
+    blind). Rolling — re-run each week, robust to forced (injury) transfers.
+
+    The main run's min-gain gate (min_f1_gain / min_total_gain / min_remaining_gain) applies to every
+    step's move, measured against the squad that step starts from — so the plan can't bring a player
+    in this week only for him to sit on the bench (that move waits for the week he'd start)."""
     K = int(lookahead_gws)
     if K < 2:
         return                                                          # =1 (or less) -> off
@@ -500,12 +528,13 @@ def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additio
     gkbw += [gkbw[-1] if gkbw else 0.10] * (N - len(gkbw))              # pad short lists
     fcols = [f"F{f} XP" for f in range(1, N + 1)]
     df = pd.read_csv(excel_file)
-    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file), quiet=True)
     d = df[["Player Name", "Position", "Team", "Cost"] + fcols].copy()
     for c in fcols:
         d[c] = pd.to_numeric(d[c], errors="coerce").fillna(0.0)
     for g in range(K):                                                  # a GW-g move is kept for F{g+1}..F8
         d[f"_obj{g}"] = sum(w[i] * d[fcols[i]] for i in range(g, N))
+    gate = (min_f1_gain, min_total_gain, min_remaining_gain)
     owned = {n.strip() for n in current_team_names}
     cur = frozenset(d.index[d["Player Name"].isin(owned)].tolist())
     budget = float(d.loc[list(cur), "Cost"].sum()) + additional_budget
@@ -533,7 +562,8 @@ def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additio
             if t == 0:
                 sq_t, mv = squad, ([], [])
             else:                                                       # captaincy+bench-aware squad, <= t transfers
-                sq = _tc_best_squad_rich(d, budget, fcols, w, g, list(squad), t, bsw, gkbw, max_def_per_team)
+                sq = _tc_best_squad_rich(d, budget, fcols, w, g, list(squad), t, bsw, gkbw, max_def_per_team,
+                                         gate=gate)
                 if sq is None:
                     continue
                 sq_t, mv = frozenset(sq), moves(frozenset(sq), squad)
@@ -553,15 +583,18 @@ def transfer_timing_check(excel_file, current_team_names, lookahead_gws, additio
     hr1 = gw_xp(cur, 1)[0] if N > 1 else 0.0
     print(f"\n{'=' * 66}\nTransfer-timing plan — value over FULL F1..F{N}, transfers within F1..F{K} "
           f"(start {free_transfers} FT, <= {max_per_gw}/GW, cap {max_ft}):")
+    if any(gate):
+        print(f"  (each move must clear the min-gain gate: GW XI +{min_f1_gain}, tail +{min_remaining_gain}, "
+              f"total +{min_total_gain})")
     print(f"  {'HOLD ALL (0/0)':<16} F1 XP {hr0:6.2f}   F2 XP {hr1:6.2f}   "
-          f"8-fixture value {hold_all:7.2f}   (no transfers anywhere in F1..F{K})")
+          f"{N}-fixture value {hold_all:7.2f}   (no transfers anywhere in F1..F{K})")
     for t0 in sorted(best_by_t0):
         rec = best_by_t0[t0]
         raw = rec["raw"]
         label = "BANK (hold now)" if t0 == 0 else f"MOVE ({t0} now)"
         star = "  <-- best" if t0 == best_t0 else ""
         print(f"  {label:<16} F1 XP {raw[0]:6.2f}   F2 XP {raw[1]:6.2f}   "
-              f"8-fixture value {rec['wtotal']:7.2f}{star}")
+              f"{N}-fixture value {rec['wtotal']:7.2f}{star}")
         for g, (t, (out, inn)) in enumerate(rec["plan"]):
             if t and (out or inn):                     # skip a spent-but-empty transfer slot (no players moved)
                 tag = "now" if g == 0 else f"GW+{g}"
@@ -904,16 +937,12 @@ def optimise_transfers_multi(excel_file, current_team_names, max_transfers=2, nu
         print(f"Force EXCLUDE (must NOT be in squad): {force_exclude_players}")
     if force_include_players:
         print(f"Force INCLUDE (must be in squad): {force_include_players}")
-    if min_f1_gain or min_total_gain or min_remaining_gain:
-        print(f"Min-gain gate: only transfer if F1 XI improves >= +{min_f1_gain} AND F2-onward "
-              f"(tail, weighted XI) improves >= +{min_remaining_gain} AND total (weighted, incl bench) "
-              f"improves >= +{min_total_gain}; else hold")
 
     # Load player data
     df = load_sheet(excel_file, players_sheet)
     df.columns = df.columns.str.strip()
     apply_dgw_adjustment(df)  # TEMPORARY
-    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file))
+    apply_sell_prices(df, current_team_names, _purchase_csv(excel_file), quiet=True)
 
     # Define fixture columns and fixtures
     fixtures = [f'F{i + 1}' for i in range(num_fixtures)]
@@ -2056,9 +2085,6 @@ def display_horizon_table(all_solutions, df, hold_solution=None):
         print(row + f"{s['final_points']:>11.2f}")
 
     print("-" * 112)
-    print("  XI includes the captain bonus; Bench is the plain sum of all four subs, so the")
-    print("  bench column doubles as what a Bench Boost on that band would be worth.")
-    print("  'Weighted' is the optimiser's actual objective — the ranking column.")
 
 
 def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_detailed_f1=False,
@@ -2079,14 +2105,13 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
 
         print(f"\nOPTION {solution['solution_number']}:")
         print(
-            f"  Total Starting Points: {solution['total_starting_points']:.2f} pts")
+            f"  Starting XI over horizon (weighted): {solution['total_starting_points']:.2f}")
         print(
-            f"  Total Squad Improvement (with Bench): {squad_improvement_sign}{solution['points_improvement']:.2f} pts")
+            f"  Squad gain over horizon, incl bench (weighted): {squad_improvement_sign}{solution['points_improvement']:.2f}")
         print(
-            f"  Total Starting XI Improvement: {starting_improvement_sign}{solution['starting_xi_improvement']:.2f} pts")
-        print(f"  Next GW Squad Improvement: {f1_squad_sign}{solution['f1_squad_improvement']:.2f} pts")
-        print(f"  Next GW Starting XI Improvement: {f1_starting_sign}{solution['f1_starting_improvement']:.2f} pts")
-        print(f"  Transfers: {solution['num_transfers']} | Budget Remaining: £{solution['budget_remaining']:.1f}m")
+            f"  Starting XI gain over horizon (weighted): {starting_improvement_sign}{solution['starting_xi_improvement']:.2f}")
+        print(f"  Next GW squad gain (raw pts): {f1_squad_sign}{solution['f1_squad_improvement']:.2f}")
+        print(f"  Next GW starting XI gain (raw pts): {f1_starting_sign}{solution['f1_starting_improvement']:.2f}")
 
         f1_gw = _f1_gameweek_from_fixtures()           # F1's real GW from the fixture window (not gw_teams)
         def _wk(fix):                                  # 'F2' -> 'GW4 (F2)' when F1 = GW3
@@ -2104,13 +2129,36 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
             bb = solution['bench_boost_plan']
             print(f"  Bench Boost: play in {_wk(bb['fixture'])} (+{bb['value']:.2f} raw bench pts)")
 
+        # Show F1 breakdown if requested
+        if show_f1_breakdown and 'f1_breakdown' in solution:
+            breakdown = solution['f1_breakdown']
+            print(f"\n  F1 Starting XI Breakdown:")
+            print(f"    Current starting XI (raw pts): {breakdown['current_f1_starting_xi']:.2f}")
+            print(f"    New starting XI (raw pts): {breakdown['f1_starting_xi_points']:.2f}")
+
+        # Show detailed F1 comparison if requested
+        if show_detailed_f1 and df is not None and current_team_indices is not None:
+            transfers_out_indices = solution['transfers_out'].index.tolist() if len(
+                solution['transfers_out']) > 0 else []
+            display_f1_starting_xi_comparison(solution, df, current_team_indices, transfers_out_indices)
+
+
+def display_transfer_recap(all_solutions):
+    """This week's transfers per option (out/in with F1-F3 + weighted total, money left, and the
+    RENT / MARGINAL / F1 BENCH flags) — printed at the very bottom so the moves are the last thing read."""
+    print("\n" + "=" * 100)
+    print("THIS WEEK'S TRANSFERS")
+    print("=" * 100)
+    for solution in all_solutions:
+        print(f"\nOPTION {solution['solution_number']}:")
+        print(f"  Transfers: {solution['num_transfers']} | Budget Remaining: £{solution['budget_remaining']:.1f}m")
         if len(solution['transfers_out']) > 0:
             print(f"  Transfers Out:")
             for _, player in solution['transfers_out'].iterrows():
                 print(
                     f"    - {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, "
                     f"F1: {player['F1 XP']:.1f}, F2: {player['F2 XP']:.1f}, F3: {player['F3 XP']:.1f}, "
-                    f"Total: {player['Weighted_Total_XP']:.1f} pts)")
+                    f"weighted total: {player['Weighted_Total_XP']:.1f})")
 
         if len(solution['transfers_in']) > 0:
             print(f"  Transfers In:")
@@ -2118,7 +2166,7 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
                 print(
                     f"    + {player['Player Name']:<25} ({player['Team']}, £{player['Cost']:.1f}m, "
                     f"F1: {player['F1 XP']:.1f}, F2: {player['F2 XP']:.1f}, F3: {player['F3 XP']:.1f}, "
-                    f"Total: {player['Weighted_Total_XP']:.1f} pts)")
+                    f"weighted total: {player['Weighted_Total_XP']:.1f})")
 
         # Rental flag: does this transfer batch GAIN in F1 but LOSE over the tail (F2..)? That's the
         # rent-and-revert shape the ownership-weighted objective quietly favours (F6 badness is
@@ -2150,24 +2198,12 @@ def display_multi_solution_summary(all_solutions, show_f1_breakdown=True, show_d
             xi_imp = solution.get('starting_xi_improvement', 0.0)
             if xi_imp < MARGINAL_XI:
                 extra = f" ({', '.join(benched_in)} doesn't even start F1)" if benched_in else ""
-                print(f"    [MARGINAL - consider banking] horizon XI gain only +{xi_imp:.2f} pts{extra} "
+                print(f"    [MARGINAL - consider banking] weighted horizon XI gain only +{xi_imp:.2f}{extra} "
                       f"- little point spending the free transfer this week")
             elif benched_in:
                 print(f"    [F1 BENCH] {', '.join(benched_in)} start on the bench in F1 - no immediate "
                       f"impact; the value is in later fixtures / autosub / price, not this week")
 
-        # Show F1 breakdown if requested
-        if show_f1_breakdown and 'f1_breakdown' in solution:
-            breakdown = solution['f1_breakdown']
-            print(f"\n  F1 Starting XI Breakdown:")
-            print(f"    Current Starting XI Total: {breakdown['current_f1_starting_xi']:.2f} pts")
-            print(f"    New Starting XI Total: {breakdown['f1_starting_xi_points']:.2f} pts")
-
-        # Show detailed F1 comparison if requested
-        if show_detailed_f1 and df is not None and current_team_indices is not None:
-            transfers_out_indices = solution['transfers_out'].index.tolist() if len(
-                solution['transfers_out']) > 0 else []
-            display_f1_starting_xi_comparison(solution, df, current_team_indices, transfers_out_indices)
 
 
 def display_solution_detail(solution, excel_file, current_team_names):
@@ -2175,22 +2211,11 @@ def display_solution_detail(solution, excel_file, current_team_names):
     print(f"DETAILED VIEW - OPTION {solution['solution_number']}")
     print("=" * 100)
 
-    # Show complete final squad
-    print(f"\nFINAL SQUAD:")
-    print("-" * 80)
     final_squad_sorted = solution['final_squad'].sort_values(['Position', 'Weighted_Total_XP'],
                                                              ascending=[True, False])
 
-    for pos in ['GK', 'DEF', 'MID', 'FWD']:
-        pos_players = final_squad_sorted[final_squad_sorted['Position'] == pos]
-        if len(pos_players) > 0:
-            print(f"\n{pos} ({len(pos_players)}):")
-            for _, player in pos_players.iterrows():
-                print(f"  {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  "
-                      f"{player['Weighted_Total_XP']:.2f} pts")
-
     # Per-fixture XP spread across the optimised horizon (RAW per-player XP - pre-captaincy,
-    # pre-bench; the objective weights these into the Weighted_Total_XP shown above). F1 = next GW.
+    # pre-bench; the objective weights these into Weighted_Total_XP). F1 = next GW.
     fx = solution.get('fixtures') or []
     xp_cols = [f'{f} XP' for f in fx if f'{f} XP' in final_squad_sorted.columns]
     if xp_cols:
@@ -2201,46 +2226,6 @@ def display_solution_detail(solution, excel_file, current_team_names):
             for _, player in final_squad_sorted[final_squad_sorted['Position'] == pos].iterrows():
                 print(f"  {player['Player Name']:<25}"
                       + "".join(f"{player[c]:>7.2f}" for c in xp_cols))
-
-    # Weekly XI + bench totals across the horizon: for each fixture, the starting XI points (INCL the
-    # captain doubling) and the bench total (plain sum of the 4 subs = the Bench Boost value that week).
-    # Uses the solution's per-fixture optimal lineups, so it matches the FIXTURE 1 SUMMARY / horizon table.
-    sl = solution.get('starting_lineups') or {}
-    if fx and sl:
-        fs = solution['final_squad']
-        caps = solution.get('captains') or {}
-        bp = solution.get('bench_players') or {}
-        print(f"\nWEEKLY XI + BENCH TOTALS (raw; XI incl captain doubling, Bench = all 4 subs):")
-        print(f"  {'Fixture':<9}{'XI':>9}{'Bench':>9}   Captain")
-        tot_xi = tot_bn = 0.0
-        for f in fx:
-            col = f'{f} XP'
-            xi, bench, cap = list(sl.get(f, [])), list(bp.get(f, [])), caps.get(f)
-            xi_pts = float(pd.to_numeric(fs.loc[xi, col], errors='coerce').fillna(0).sum())
-            bn_pts = float(pd.to_numeric(fs.loc[bench, col], errors='coerce').fillna(0).sum())
-            cap_add = pd.to_numeric(fs.loc[cap, col], errors='coerce') if cap in fs.index else 0
-            cap_add = float(cap_add) if pd.notna(cap_add) else 0.0
-            capname = fs.loc[cap, 'Player Name'] if cap in fs.index else '-'
-            xi_pts += cap_add
-            tot_xi += xi_pts
-            tot_bn += bn_pts
-            print(f"  {f:<9}{xi_pts:>9.2f}{bn_pts:>9.2f}   {capname}")
-        print(f"  {'TOTAL':<9}{tot_xi:>9.2f}{tot_bn:>9.2f}")
-
-    # Show transfers
-    if len(solution['transfers_out']) > 0:
-        print(f"\nTRANSFERS OUT ({len(solution['transfers_out'])}):")
-        print("-" * 80)
-        for _, player in solution['transfers_out'].iterrows():
-            print(f"  OUT: {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  "
-                  f"{player['Weighted_Total_XP']:.2f} pts")
-
-    if len(solution['transfers_in']) > 0:
-        print(f"\nTRANSFERS IN ({len(solution['transfers_in'])}):")
-        print("-" * 80)
-        for _, player in solution['transfers_in'].iterrows():
-            print(f"  IN:  {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  "
-                  f"{player['Weighted_Total_XP']:.2f} pts")
 
     # Show starting XI for next fixture
     display_starting_lineup_from_solution(solution, fixture_num=1)
@@ -2259,10 +2244,6 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
 
     final_squad = solution['final_squad']
 
-    print(f"\n" + "=" * 80)
-    print(f"OPTIMAL STARTING XI - FIXTURE {fixture_num} ({fixture})")
-    print("=" * 80)
-
     starting_players = final_squad[final_squad.index.isin(starting_lineup)].copy()
     bench_players_data = final_squad[final_squad.index.isin(bench)].copy()
 
@@ -2272,68 +2253,14 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
     vice_captain_idx = non_captain[lineup_col(non_captain, fixture)].idxmax() if len(non_captain) else None
 
     starting_sorted = starting_players.sort_values(['Position', f'{fixture} XP'], ascending=[True, False])
-
-    formation_count = {
-        'GK': len(starting_sorted[starting_sorted['Position'] == 'GK']),
-        'DEF': len(starting_sorted[starting_sorted['Position'] == 'DEF']),
-        'MID': len(starting_sorted[starting_sorted['Position'] == 'MID']),
-        'FWD': len(starting_sorted[starting_sorted['Position'] == 'FWD'])
-    }
-
-    formation = f"{formation_count['GK']}-{formation_count['DEF']}-{formation_count['MID']}-{formation_count['FWD']}"
-    print(f"Formation: {formation}")
-    print()
-
-    total_starting_points = 0
-    captain_bonus = 0
-
-    for pos in ['GK', 'DEF', 'MID', 'FWD']:
-        pos_players = starting_sorted[starting_sorted['Position'] == pos]
-        if len(pos_players) > 0:
-            print(f"{pos}:")
-            for idx, player in pos_players.iterrows():
-                points = player[f'{fixture} XP']
-                cost = player['Cost']
-                team = player['Team']
-                captain_mark = " (C)" if player['Is_Captain'] else (" (VC)" if idx == vice_captain_idx else "")
-                start_prob = f" ({player[f'{fixture} Start']:.0%})" if f'{fixture} Start' in player else ""
-                total_starting_points += points
-                if player['Is_Captain']:
-                    captain_bonus += points
-
-                print(f"  {player['Player Name']:<25} {team:<8} £{cost:.1f}m  {points:.2f} pts{start_prob}{captain_mark}")
-            print()
-
-    print("BENCH:")
     gk_bench = bench_players_data[bench_players_data['Position'] == 'GK']
     outfield_bench = bench_players_data[bench_players_data['Position'] != 'GK'] \
         .sort_values(f'{fixture} XP', ascending=False)
-    total_bench_value = 0
-
-    for _, player in gk_bench.iterrows():
-        points = player[f'{fixture} XP']
-        total_bench_value += points
-        start_prob = f" ({player[f'{fixture} Start']:.0%})" if f'{fixture} Start' in player else ""
-        print(f"  GK  {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  {points:.2f} pts{start_prob}")
-    for slot, (_, player) in enumerate(outfield_bench.iterrows(), start=1):
-        points = player[f'{fixture} XP']
-        total_bench_value += points
-        start_prob = f" ({player[f'{fixture} Start']:.0%})" if f'{fixture} Start' in player else ""
-        print(f"  {slot}.  {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  {points:.2f} pts{start_prob}")
-
-    print(f"\nFIXTURE {fixture_num} SUMMARY:")
-    print(f"  Starting XI Points: {total_starting_points + captain_bonus:.2f}")
-    print(f"  Bench Points: {total_bench_value:.2f}")
-
-    # Chip watch: what the chips would add if played on this fixture
-    captain_name = (starting_players.loc[captain_idx, 'Player Name']
-                    if captain_idx in starting_players.index else "?")
-    print(f"  Chip watch: Bench Boost +{total_bench_value:.2f} pts | "
-          f"Triple Captain +{captain_bonus:.2f} pts ({captain_name})")
 
     # Key probabilities for this fixture (%): goals, assists, clean sheet, defensive
     # contribution. DefCon is position-gated (the DEF/MID column that applies); a 0 or
     # missing value shows as '-'. XI (grouped by position) first, then the four bench.
+    # Printed BEFORE the lineup so the XI you actually enter sits nearer the bottom.
     _pcols = [("1 Goal", f"{fixture} Score 1+"), ("2 Goals", f"{fixture} Score 2+"),
               ("1 Asst", f"{fixture} Assist"), ("2 Asst", f"{fixture} Assist 2+"),
               ("CleanSh", f"{fixture} Clean Sheet")]
@@ -2350,7 +2277,7 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
                             for v in vals)
             print(f"    {str(player['Player Name'])[:24]:<25}{pos:<5}{cells}")
 
-        print(f"\n  Key probabilities - {fixture} (%):")
+        print(f"\nKEY PROBABILITIES - {fixture} (%):")
         print("    " + f"{'Player':<25}{'Pos':<5}"
               + "".join(f"{lab:>8}" for lab, _ in _pcols) + f"{'DefCon':>8}")
         for _, player in starting_sorted.iterrows():
@@ -2359,6 +2286,93 @@ def display_starting_lineup_from_solution(solution, fixture_num=1):
             print("    ---- Bench ----")
             for _, player in pd.concat([gk_bench, outfield_bench]).iterrows():
                 _prob_row(player)
+
+    print(f"\n" + "=" * 80)
+    print(f"OPTIMAL STARTING XI - FIXTURE {fixture_num} ({fixture})")
+    print("=" * 80)
+
+    formation_count = {
+        'GK': len(starting_sorted[starting_sorted['Position'] == 'GK']),
+        'DEF': len(starting_sorted[starting_sorted['Position'] == 'DEF']),
+        'MID': len(starting_sorted[starting_sorted['Position'] == 'MID']),
+        'FWD': len(starting_sorted[starting_sorted['Position'] == 'FWD'])
+    }
+
+    formation = f"{formation_count['GK']}-{formation_count['DEF']}-{formation_count['MID']}-{formation_count['FWD']}"
+    print(f"Formation: {formation}")
+    print()
+
+    def _if_starts(player, points):
+        """Not nailed: also show XP if he DOES start (XP scales linearly with start prob)."""
+        sp = player.get(f'{fixture} Start')
+        return f" ({points / sp:.2f} if starts)" if pd.notna(sp) and 0 < sp < 0.995 else ""
+
+    total_starting_points = 0
+    captain_bonus = 0
+
+    for pos in ['GK', 'DEF', 'MID', 'FWD']:
+        pos_players = starting_sorted[starting_sorted['Position'] == pos]
+        if len(pos_players) > 0:
+            print(f"{pos}:")
+            for idx, player in pos_players.iterrows():
+                points = player[f'{fixture} XP']
+                cost = player['Cost']
+                team = player['Team']
+                captain_mark = " (C)" if player['Is_Captain'] else (" (VC)" if idx == vice_captain_idx else "")
+                start_prob = f" ({player[f'{fixture} Start']:.0%})" if f'{fixture} Start' in player else ""
+                if_starts = _if_starts(player, points)
+                total_starting_points += points
+                if player['Is_Captain']:
+                    captain_bonus += points
+
+                print(f"  {player['Player Name']:<25} {team:<8} £{cost:.1f}m  {points:.2f} pts{start_prob}{captain_mark}{if_starts}")
+            print()
+
+    print("BENCH:")
+    total_bench_value = 0
+
+    for _, player in gk_bench.iterrows():
+        points = player[f'{fixture} XP']
+        total_bench_value += points
+        start_prob = f" ({player[f'{fixture} Start']:.0%})" if f'{fixture} Start' in player else ""
+        print(f"  GK  {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  {points:.2f} pts{start_prob}{_if_starts(player, points)}")
+    for slot, (_, player) in enumerate(outfield_bench.iterrows(), start=1):
+        points = player[f'{fixture} XP']
+        total_bench_value += points
+        start_prob = f" ({player[f'{fixture} Start']:.0%})" if f'{fixture} Start' in player else ""
+        print(f"  {slot}.  {player['Player Name']:<25} {player['Team']:<8} £{player['Cost']:.1f}m  {points:.2f} pts{start_prob}{_if_starts(player, points)}")
+
+    print(f"\nFIXTURE {fixture_num} SUMMARY:")
+    print(f"  Starting XI Points: {total_starting_points + captain_bonus:.2f}")
+    print(f"  Bench Points: {total_bench_value:.2f}")
+
+    # Chip watch: what the chips would add if played on this fixture
+    captain_name = (starting_players.loc[captain_idx, 'Player Name']
+                    if captain_idx in starting_players.index else "?")
+    print(f"  Chip watch: Bench Boost +{total_bench_value:.2f} pts | "
+          f"Triple Captain +{captain_bonus:.2f} pts ({captain_name})")
+
+
+def display_outgoing_start_warning(solutions, n_fixtures=3):
+    """Loud flag when a player an option SELLS is under 100% to start any of F1..F{n_fixtures} —
+    part of why the move scores well, and worth knowing before you click. Silent when every
+    outgoing player is nailed (or the start columns are missing)."""
+    rows = []
+    for sol in solutions:
+        out = sol['transfers_out']
+        cols = [f"F{k} Start" for k in range(1, n_fixtures + 1) if f"F{k} Start" in out.columns]
+        if not cols:
+            continue
+        for _, p in out.iterrows():
+            probs = [float(p[c]) for c in cols]
+            if any(pd.notna(v) and v < 0.995 for v in probs):
+                cells = ", ".join(f"{c.split()[0]} {v:.0%}" for c, v in zip(cols, probs))
+                rows.append(f"    Option {sol['solution_number']}: {p['Player Name']} ({p['Team']}) - {cells}")
+    if rows:
+        print("\n" + "!" * 78)
+        print(f"  NOTE: you'd be SELLING a player who is NOT certain to start F1-F{n_fixtures}")
+        print("\n".join(rows))
+        print("!" * 78)
 
 
 def main_multi_transfer_optimiser(excel_file="outputs/players_master.csv", max_transfers=2, num_fixtures=5,
@@ -2380,10 +2394,6 @@ def main_multi_transfer_optimiser(excel_file="outputs/players_master.csv", max_t
     derived = combine_fixture_weights(ownership_weights, reliability_weights, num_fixtures)
     if fixture_weights is None:
         fixture_weights = derived
-        print(f"Fixture weights derived from ownership x reliability:")
-        print(f"  ownership   {[f'{w:.2f}' for w in (ownership_weights or OWNERSHIP_WEIGHTS)[:num_fixtures]]}")
-        print(f"  reliability {[f'{w:.2f}' for w in (reliability_weights or RELIABILITY_WEIGHTS)[:num_fixtures]]}")
-        print(f"  combined    {[f'{w:.2f}' for w in derived]}")
 
     if bench_slot_weights is None:
         bench_slot_weights = BENCH_SLOT_WEIGHTS
@@ -2393,16 +2403,6 @@ def main_multi_transfer_optimiser(excel_file="outputs/players_master.csv", max_t
 
     weights = fixture_weights[:num_fixtures]
     gk_bench_weights_used = gk_bench_weights[:num_fixtures]
-
-    print(f"FPL MULTI-TRANSFER OPTIMISER")
-    print(f"Max Transfers: {max_transfers}")
-    print(f"Fixtures: {num_fixtures}")
-    print(f"Computing {compute_solutions} solutions, displaying top {num_solutions_display}")
-    print(f"Weights: {[f'{w:.2f}' for w in weights]}")
-    print(f"Additional Budget: £{additional_budget:.1f}m")
-    print(f"Bench Slot Weights (sub order 1/2/3): {bench_slot_weights}")
-    print(f"GK Bench Weights: {[f'{w:.2f}' for w in gk_bench_weights_used]}")
-    print(f"Max Defensive Players (GK+DEF) per Team: {max_defensive_players_per_team}")
 
     try:
         # Load current team
@@ -2506,7 +2506,13 @@ def main_multi_transfer_optimiser(excel_file="outputs/players_master.csv", max_t
                                   gk_bench_weights=gk_bench_weights_used,
                                   max_def_per_team=max_defensive_players_per_team,
                                   num_fixtures=num_fixtures, ownership_weights=ownership_weights,
-                                  reliability_weights=reliability_weights)
+                                  reliability_weights=reliability_weights,
+                                  min_f1_gain=min_f1_gain, min_total_gain=min_total_gain,
+                                  min_remaining_gain=min_remaining_gain)
+
+        # This week's moves last, then the loud flag on any outgoing player under 100% to start F1-F3
+        display_transfer_recap(solutions_to_display)
+        display_outgoing_start_warning(solutions_to_display)
 
         return all_solutions
 
@@ -2523,10 +2529,10 @@ def main_multi_transfer_optimiser(excel_file="outputs/players_master.csv", max_t
 result = main_multi_transfer_optimiser(
     excel_file="outputs/players_master.csv",
     max_transfers=0,
-    additional_budget=2.6,
+    additional_budget=3.6,
     num_fixtures=10,
     compute_solutions=1,
-    # bank_lookahead_gws=2,
+    # bank_lookahead_gws=4,
     # Weighted-XP charged per £1.0m of squad value: prefers cheaper squads/transfers, trading XP for
     # bank at this rate. 0.0 = pure XP (off). e.g. 1.0 -> accept 0.5 lower weighted XP to save £0.5m.
     # value_weight=1.0,
@@ -2544,7 +2550,7 @@ result = main_multi_transfer_optimiser(
     # gk_bench_weights=[0.001]*15,
     gk_bench_weights=[0.05]*15,
     # gk_bench_weights=[1.0] + [0.01]*14,
-    max_defensive_players_per_team=2,
+    max_defensive_players_per_team=3,
     num_solutions_display=1,
     show_all_details=False,
     show_detailed_f1=False,

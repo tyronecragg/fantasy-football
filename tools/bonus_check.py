@@ -45,6 +45,7 @@ def main():
         a[c] = pd.to_numeric(a[c], errors="coerce")
     a = a.dropna(subset=["Gameweek", "player_id", "F1 XP Pre", "F1 Win"])
     act = load_actual()
+    a = a[a["Gameweek"].isin(act["Gameweek"].unique())]     # archived-but-unplayed GWs would score as 0 bonus
     d = a.merge(act, on=["player_id", "Gameweek"], how="left")
     d["bonus"] = d["bonus"].fillna(0.0)
     d = d[d["F1 Start"] > 0].copy()

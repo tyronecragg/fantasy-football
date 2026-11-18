@@ -1,0 +1,50 @@
+{
+  "sportsbet_clean_sheet_odds.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "20 priced",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_clean_sheet_odds_f2.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "20 priced (F2 / next gameweek)",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_goalscorer_odds.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "404 priced",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_team_goals_odds.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "20 priced",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_team_goals_odds_f2.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "20 priced (F2 / next gameweek)",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_win_draw_win_odds.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "20 priced",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_assist_odds.csv": {
+    "state": "real",
+    "source": "betway",
+    "detail": "278 priced, 114 synthetic kept",
+    "ts": "2026-11-17T16:50:13"
+  },
+  "sportsbet_booking_odds.csv": {
+    "state": "real",
+    "source": "ladbrokes",
+    "detail": "672 players over 10 priced matches (game-max fill)",
+    "ts": "2026-11-18T12:00:25"
+  }
+}

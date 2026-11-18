@@ -82,6 +82,7 @@ ALIASES = {
     ("Arsenal", "Gabriel"): "Gabriel Magalhaes",   # not Martinelli / Jesus
     ("Leeds", "DCL"): "Dominic Calvert-Lewin",
     ("Newcastle", "Will Osula"): "William Osula",     # RotoWire short first name
+    ("Brentford", "Y. Yarmolyuk"): "Yehor Yarmoliuk",  # RotoWire spelling
     ("Man City", "Nunes"): "Matheus Nunes",         # not Vitor Nunes
     ("Man Utd", "Tielemens"): "Youri Tielemans",    # source misspelling
     ("Sunderland", "O'Nein"): "Luke O'Nien",        # source misspelling

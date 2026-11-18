@@ -36,10 +36,14 @@ and it stores **raw beliefs**; the pipeline normalises at consumption time.
 > 2. **Reconcile the file against the LIVE roster, as its own step.** Diff every club's `outputs/fpl_players.csv` squad vs the file: **ADD** starter-level new signings the file is missing (they belong in the roster now and carry a real F1), and drop players who left. *(Caught: Sávio — a £50m signing both RotoWire & All About FPL named in the XI — was entirely ABSENT from the file while the youth Mikey Moore sat at 0.42.)*
 > Then check `groupby('Team')['F1'].sum() == 11` and that no cell > 1.0.
 
-- **Sum rule.** `F1` must sum to **exactly 11** per team (the GW1 XI is a known 11). `F2`+ may sit
-  **below 11 but never above.** A below-11 column is *correct* when the missing minutes belong to a
-  player who isn't in the FPL roster yet (a new signing) — **never pad the gap onto another player**
-  to force 11. Check `groupby('Team')['F1'].sum()` after every pass.
+- **Sum rule (revised 2026-10-30, Tyrone).** `F1` must sum to **exactly 11** per team. `F2`–`F8`
+  must be **11 or a little above (~11.0–11.1), never below.** Why: `normalize_start_probs` trims an
+  over-11 column out of the *uncertain* players only (1.0s are untouched), but it fills an under-11
+  column by inflating *every* non-1.0 player evenly, which hands minutes to unrelated players. So when
+  a player drops out of a later week (injury, ban, losing his place), give his share to the **same-position**
+  rivals who actually replace him; don't leave a gap. (The old "below 11 is fine for a new signing not
+  yet in the roster" case only applied while the transfer window was open.) Check
+  `groupby('Team')[F].sum()` after every pass.
 - **F1 models SELECTION, not survival — declare hard.** If every current source starts a player,
   set `F1 = 1.0`. **Injury *chance* is never a reason to shade F1** — a late knock means reality
   diverged, not that the estimate was wrong. Discount F1 only for genuine *selection* uncertainty:
