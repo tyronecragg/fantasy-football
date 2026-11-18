@@ -74,9 +74,9 @@ Marcus Tavernier,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 Rayan,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 Tyler Adams,Bournemouth,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 Justin Kluivert,Bournemouth,0.68,0.6,0.6,0.6,0.6,0.6,0.6,0.6
-Ryan Christie,Bournemouth,0.5214,0.5281,0.3933,0.334,0.334,0.334,0.334,0.334
+Ryan Christie,Bournemouth,0.5214,0.51,0.379,0.32,0.32,0.32,0.32,0.32
 Alex Scott,Bournemouth,0.4,0.45,0.65,0.74,0.74,0.74,0.74,0.74
-Lewis Cook,Bournemouth,0.2654,0.265,0.1967,0.167,0.167,0.167,0.167,0.167
+Lewis Cook,Bournemouth,0.2654,0.256,0.189,0.16,0.16,0.16,0.16,0.16
 David Brooks,Bournemouth,0.0384,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Alex Tóth,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Amine Adli,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -88,7 +88,7 @@ Fraser Forster,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Juanlu Sánchez,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Julian Araujo,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Julio Soler Barreto,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-Junior Kroupi,Bournemouth,0.0948,0.2418,0.241,0.24,0.24,0.24,0.24,0.24
+Junior Kroupi,Bournemouth,0.0948,0.234,0.232,0.23,0.23,0.23,0.23,0.23
 Michele Di Gregorio,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Veljko Milosavljevic,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Will Dennis,Bournemouth,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -278,14 +278,14 @@ Jarrad Branthwaite,Everton,1.0,0.95,0.95,0.95,0.95,0.95,0.95,0.95
 Vitalii Mykolenko,Everton,1.0,0.95,0.95,0.95,0.95,0.95,0.95,0.95
 Harrison Armstrong,Everton,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 Tyrique George,Everton,0.85,0.336,0.336,0.336,0.336,0.336,0.336,0.336
-Brennan Johnson,Everton,0.1826,0.1932,0.1932,0.1932,0.1932,0.1932,0.1932,0.1932
-Jack Grealish,Everton,0.1826,1.0,1.0,1.0,1.0,1.0,1.0,1.0
-Jake O'Brien,Everton,0.2834,0.45,0.45,0.45,0.45,0.45,0.45,0.45
-Hayden Hackney,Everton,0.2171,0.1926,0.1926,0.1926,0.1926,0.1926,0.1926,0.1926
+Brennan Johnson,Everton,0.1428,0.1932,0.1932,0.1932,0.1932,0.1932,0.1932,0.1932
+Jack Grealish,Everton,0.1428,1.0,1.0,1.0,1.0,1.0,1.0,1.0
+Jake O'Brien,Everton,0.45,0.45,0.45,0.45,0.45,0.45,0.45,0.45
+Hayden Hackney,Everton,0.1698,0.1926,0.1926,0.1926,0.1926,0.1926,0.1926,0.1926
 Ainsley Maitland-Niles,Everton,0.0766,0.01,0.01,0.01,0.01,0.01,0.01,0.01
 Michael Keane,Everton,0.0684,0.009,0.009,0.009,0.009,0.009,0.009,0.009
 Christian Norgaard,Everton,0.0651,0.0578,0.0578,0.0578,0.0578,0.0578,0.0578,0.0578
-Tyler Dibling,Everton,0.1826,0.0514,0.0514,0.0514,0.0514,0.0514,0.0514,0.0514
+Tyler Dibling,Everton,0.1428,0.0514,0.0514,0.0514,0.0514,0.0514,0.0514,0.0514
 Adam Aznou,Everton,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Beto,Everton,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Braiden Graham,Everton,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
@@ -408,12 +408,12 @@ James Trafford,Leeds,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 Jayden Bogle,Leeds,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 Tarik Muharemović,Leeds,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
 James Justin,Leeds,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0
-Nico Elvedi,Leeds,0.75,0.8,0.75,0.75,0.75,0.75,0.75,0.75
+Nico Elvedi,Leeds,0.75,0.7,0.65,0.65,0.65,0.65,0.65,0.65
 Noah Okafor,Leeds,0.85,0.85,0.85,0.85,0.85,0.85,0.85,0.85
 Anton Stach,Leeds,0.35,0.85,0.85,0.85,0.85,0.85,0.85,0.85
 Harry Wilson,Leeds,0.15,0.233,0.233,0.233,0.233,0.233,0.233,0.233
 Daniel James,Leeds,0.07,0.117,0.117,0.117,0.117,0.117,0.117,0.117
-Joe Rodon,Leeds,0.3077,0.2,0.25,0.25,0.25,0.25,0.25,0.25
+Joe Rodon,Leeds,0.3077,0.3,0.35,0.35,0.35,0.35,0.35,0.35
 Brenden Aaronson,Leeds,0.03,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Alex Cairns,Leeds,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
 Alfie Cresswell,Leeds,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
